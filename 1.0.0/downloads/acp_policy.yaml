@@ -1,0 +1,28 @@
+version: 1
+description: Explicit ACP text-agent example; deterministic checks, no model dependency.
+privacy:
+  enabled: true
+  input: redact
+  output: redact
+signatures_enabled: true
+semantic:
+  provider: disabled
+tools:
+  acp.uppercase:
+    roles: [analyst]
+    timeout_ms: 30000
+    cost_microusd: 1
+models: {}
+budgets:
+  analyst:
+    calls: 1000
+    tokens: 1000000
+    cost_microusd: 1000000
+    compute_ms: 1000000
+    concurrent: 2
+text_rules:
+  - id: forbidden-example-input
+    operator: contains
+    value: forbidden
+    direction: input
+    target: tool

@@ -1,0 +1,31 @@
+# FastFence
+
+> Local security policy enforcement for AI agents, models and tools.
+
+FastFence is installed as a Python 3.12 package with pip install fastfence uv, followed by fastfence init --anonymization. Initialization prepares the configured Laya assessor; fastfence init --config-only explicitly skips component and model downloads. No FastFence checkout is required. Runnable example source and its ZIP archive are available under /downloads/. Policies and identities are local configuration; budgets and audit are process-local. Laya authoring produces a reviewed proposal, never implicit activation.
+
+## Documentation
+
+- [Agent Communication Protocol](https://fastfence.dev/1.0.0/examples/acp/): Protect real synchronous agent-to-agent ACP calls with shared input/output policies.
+- [Custom Python text detectors](https://fastfence.dev/1.0.0/examples/custom-detectors/): Add trusted literal and regex detect-secrets plugins at startup.
+- [Public/private-key anonymization](https://fastfence.dev/1.0.0/examples/asymmetric-anonymization/): Generate RSA keys and run authenticated stateless recovery envelopes.
+- [Model upstreams](https://fastfence.dev/1.0.0/examples/openai-upstream/): Connect Ollama or an OpenAI-compatible model server.
+- [Getting started](https://fastfence.dev/1.0.0/getting-started/): Install and start a local gateway.
+- [Learn](https://fastfence.dev/1.0.0/learn/): Follow small, runnable integration tasks.
+- [Protected request example](https://fastfence.dev/1.0.0/examples/protected-request/): Complete executable Python source for a protected model call.
+- [Named Laya rule example](https://fastfence.dev/1.0.0/examples/semantic-policy/): Version-aware actual-model preview and explicit activation.
+- [MCP client example](https://fastfence.dev/1.0.0/examples/mcp-client/): Authenticate and call a protected model through MCP.
+- [FastMCP server example](https://fastfence.dev/1.0.0/examples/fastmcp-server/): Register an actual FastMCP tool behind the control layer.
+- [OpenAI client example](https://fastfence.dev/1.0.0/examples/openai-client/): Use the standard SDK with the protected compatibility endpoint.
+- [Policies](https://fastfence.dev/1.0.0/policies/): Configure controls and publish reviewed changes.
+- [Integrations](https://fastfence.dev/1.0.0/integrations/): Connect Laya, REST, MCP and models.
+- [Integration reference](https://fastfence.dev/1.0.0/integration-reference/): Choose protocols, credentials and request paths.
+- [HTTP API](https://fastfence.dev/1.0.0/reference/http-api/): Endpoint inventory generated from Python source.
+- [Settings](https://fastfence.dev/1.0.0/settings/): Environment settings and defaults.
+- [Architecture](https://fastfence.dev/1.0.0/architecture/): Module boundaries, trust and runtime behavior.
+- [Manual verification](https://fastfence.dev/1.0.0/manual-testing/): Verify behavior on your own local installation.
+
+## Complete text
+
+- [Full documentation](https://fastfence.dev/1.0.0/llms-full.txt): Curated pages in one text response.
+- [Source repository](https://github.com/llama-lovers/HackYeah2026-challenge-second): Apache-2.0 source, tests and specifications.

@@ -1,0 +1,1856 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Fast, local policy enforcement for AI agents, tools and models.">
+      
+      
+      
+        <link rel="canonical" href="https://fastfence.dev/1.0.0/examples/acp/">
+      
+      
+        <link rel="prev" href="../../integrations/">
+      
+      
+        <link rel="next" href="../custom-detectors/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Agent Communication Protocol - FastFence</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/branding.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#protect-agent-to-agent-calls-with-acp" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="FastFence" class="md-header__button md-logo" aria-label="FastFence" data-md-component="logo">
+      
+  <img src="../../assets/fastfence-header.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FastFence
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Agent Communication Protocol
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/llama-lovers/HackYeah2026-challenge-second" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    llama-lovers/FastFence
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Get started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../policies/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../integration-reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="FastFence" class="md-nav__button md-logo" aria-label="FastFence" data-md-component="logo">
+      
+  <img src="../../assets/fastfence-header.svg" alt="logo">
+
+    </a>
+    FastFence
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/llama-lovers/HackYeah2026-challenge-second" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    llama-lovers/FastFence
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn by task
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manual-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verify your installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies and controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Connect agents and models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Communication Protocol
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Communication Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#run-a-real-peer-agent-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run a real peer agent locally
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connect-your-existing-acp-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connect your existing ACP agent
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-content-and-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported content and execution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-example-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete example sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete example sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#official-sdk-peer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Official SDK peer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway registration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#official-sdk-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Official SDK client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#isolated-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Isolated policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-detectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Python detectors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../protected-request/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Protected model request
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Named Laya rule
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fastmcp-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openai-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI SDK client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openai-upstream/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI-compatible upstream
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../asymmetric-anonymization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public/private-key anonymization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration contracts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/http-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP API from source
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime settings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#run-a-real-peer-agent-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run a real peer agent locally
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connect-your-existing-acp-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connect your existing ACP agent
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-content-and-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported content and execution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-example-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete example sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete example sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#official-sdk-peer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Official SDK peer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway registration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#official-sdk-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Official SDK client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#isolated-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Isolated policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="protect-agent-to-agent-calls-with-acp">Protect agent-to-agent calls with ACP<a class="headerlink" href="#protect-agent-to-agent-calls-with-acp" title="Permanent link">&para;</a></h1>
+<p>FastFence accepts <strong>Agent Communication Protocol</strong> requests and forwards them to
+a configured peer agent through the existing tool policy engine:</p>
+<pre><code class="language-text">ACP client → FastFence /acp/runs → input controls → trusted ACP peer
+                                                     ↓
+ACP response ← output controls ← completed peer response
+</code></pre>
+<p>This is the IBM/BeeAI REST protocol, separate from Agent Client Protocol for
+editors. Its <a href="https://github.com/i-am-bee/acp">official repository</a> is archived and
+<a href="https://agentcommunicationprotocol.dev/introduction/welcome">the project moved into A2A</a>.
+FastFence implements a bounded compatibility profile: synchronous, stateless,
+inline plain-text runs and authenticated agent discovery. It does not claim full
+ACP or A2A conformance.</p>
+<h2 id="run-a-real-peer-agent-locally">Run a real peer agent locally<a class="headerlink" href="#run-a-real-peer-agent-locally" title="Permanent link">&para;</a></h2>
+<p>Install FastFence <strong>1.0.0 or later</strong> using <a href="../../getting-started/">Getting started</a>,
+then extract the <a href="../../downloads/fastfence-examples.zip">complete examples archive</a>
+into <code>examples/</code>. Run all commands from the installation directory. Keep the
+gateway in your FastFence Python 3.12 environment. Create a separate environment
+for the archived SDK peer and client; its Uvicorn pin does not change your gateway.
+The SDK also imports <code>requests</code> without declaring that dependency, so install it
+explicitly in this separate environment:</p>
+<pre><code class="language-sh">python -m venv .acp-venv
+.acp-venv/bin/python -m pip install 'acp-sdk==1.0.3' 'uvicorn==0.35.0' 'requests==2.34.2'
+.acp-venv/bin/python examples/acp_server.py
+</code></pre>
+<p>The official ACP SDK serves an actual uppercase operation on loopback port 8020.
+It generates a separate private backend credential in
+<code>state/examples/acp-upstream-token.txt</code>. All backend endpoints require that
+credential. The file's contents are never printed.</p>
+<p>In a second terminal, activate your FastFence environment:</p>
+<pre><code class="language-sh">python examples/acp_gateway.py
+</code></pre>
+<p>This starts an isolated FastFence instance on port 8030 and registers the
+<code>uppercase</code> peer as policy tool <code>acp.uppercase</code>. Its configuration and gateway
+credentials live under <code>state/examples/acp-gateway/</code>. It preserves existing
+configuration on restart and does not edit your main installation. The explicit
+example policy uses deterministic checks so no model is needed; the default
+product policy still requires Laya.</p>
+<p>In a third terminal, use the <strong>official ACP SDK client</strong>:</p>
+<pre><code class="language-sh">.acp-venv/bin/python examples/acp_client.py --prompt 'hello'
+.acp-venv/bin/python examples/acp_client.py --prompt 'forbidden'
+.acp-venv/bin/python examples/acp_client.py --prompt 'email@example.org'
+</code></pre>
+<p>Expected: <code>hello</code> completes with <code>HELLO</code>; <code>forbidden</code> returns a failed run before
+the peer executes and the script exits 1; the email is redacted before forwarding.
+HTTP 200 can contain a failed run: check <code>status</code>, <code>error.data.reason</code> and
+<code>error.data.upstream_executed</code>. Successful output is returned only after output
+controls pass. Use <strong>Activity</strong> at <a href="http://127.0.0.1:8030">http://127.0.0.1:8030</a> to inspect the decision.
+The ACP run UUID corresponds to the audit request ID without UUID hyphens.</p>
+<p>Server and gateway accept <code>--port</code>; the gateway also accepts <code>--upstream-url</code>.
+The client accepts <code>--url</code>, <code>--agent</code> and <code>--credentials</code>. Its default credential
+is the isolated example's <code>local-agent</code>; management credentials cannot invoke ACP.</p>
+<h2 id="connect-your-existing-acp-agent">Connect your existing ACP agent<a class="headerlink" href="#connect-your-existing-acp-agent" title="Permanent link">&para;</a></h2>
+<p>Configure trusted startup settings in the gateway's environment or private <code>.env</code>:</p>
+<pre><code class="language-sh">export FASTFENCE_ACP_AGENTS='{&quot;assistant&quot;:{&quot;base_url&quot;:&quot;https://peer.example.org&quot;,&quot;agent_name&quot;:&quot;assistant&quot;}}'
+</code></pre>
+<p>Replace the example URL and agent name with your own peer. Add <code>api_key</code> inside
+that trusted configuration if the peer requires bearer authentication. This is
+the backend credential, separate from callers' FastFence tokens. It is not
+returned by discovery or policy APIs. Remote peers require HTTPS; HTTP is accepted
+only for loopback. Caller input cannot choose upstream URLs or credentials.</p>
+<p>Add the corresponding tool to <code>config/policy.yaml</code>, preserving other settings and
+incrementing the active policy version:</p>
+<pre><code class="language-yaml">tools:
+  acp.assistant:
+    roles: [analyst]
+    timeout_ms: 30000
+    cost_microusd: 1
+</code></pre>
+<p>Restart after changing startup settings. Policy changes still hot-reload. With
+your normal gateway running on port 8000:</p>
+<pre><code class="language-sh">.acp-venv/bin/python examples/acp_client.py --url http://127.0.0.1:8000 \
+  --credentials state/credentials.json --agent assistant --prompt 'Hello'
+</code></pre>
+<p><code>GET /acp/agents</code> exposes only registered, configured, role-allowed agents.
+<code>POST /acp/runs</code> accepts the same bearer identity used by REST/MCP; all these
+transports share that subject's policy and in-memory budget. Peer costs are the
+configured tool cost and bounded text resource accounting, not provider billing
+token measurements. Direct backend access must remain restricted to trusted
+gateway credentials or network boundaries.
+These controls cover messages crossing FastFence. They do not inspect a remote
+agent's internal model/tool calls unless those calls also pass through FastFence;
+hidden internal token usage is not measured by this adapter.</p>
+<h2 id="supported-content-and-execution">Supported content and execution<a class="headerlink" href="#supported-content-and-execution" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Only <code>mode: sync</code>, inline <code>text/plain</code>, and <code>content_encoding: plain</code> are
+  accepted. Binary/base64 parts, remote content URLs, non-null metadata, caller-selected sessions,
+  asynchronous jobs, streaming, polling, resume and remote cancellation are
+  rejected explicitly. The gateway does not fetch attachments or persist runs.</li>
+<li>Input bodies are bounded to 65,536 bytes; message and part counts and text
+  lengths are bounded separately. Unsupported fields are rejected before execution.</li>
+<li>Role labels and valid SDK timestamps are transport metadata. Named roles such
+  as <code>agent/researcher</code> normalize to <code>agent</code>; timestamps are discarded. Only text
+  and numeric role markers enter tool controls, so a forbidden letter in
+  <code>text/plain</code> cannot accidentally block unrelated text. Claimed roles never
+  authenticate a caller.</li>
+<li>The whole peer response is buffered within a size limit and checked before
+  delivery. A failed output check cannot undo work already performed by the peer.
+  Timeouts fail closed and consume conservative reserved resources; ending the
+  local request cannot guarantee that a remote agent stops its own work.</li>
+<li>Stateless clients should send any necessary conversation text explicitly on
+  each run. FastFence maintains no ACP conversation or result store. The example
+  SDK backend creates its own session even when none is requested. FastFence validates and discards the returned UUID: it never returns, retains or reuses that session identifier. The peer may retain its own state independently of the stateless gateway.</li>
+</ul>
+<p>The raw protected tool representation, also available through REST/MCP, is
+<code>{"tool":"acp.assistant","arguments":{"input":[{"role":0,"parts":["Hello"]}]}}</code>.
+Role <code>0</code> means user and <code>1</code> means agent. This internal text projection differs from
+the native ACP wire schema. Literal and semantic rules use target <strong>Tools</strong>.</p>
+<p>The <a href="https://github.com/i-am-bee/acp/blob/main/docs/spec/openapi.yaml">official OpenAPI</a>
+and <a href="https://github.com/i-am-bee/acp/blob/main/python/src/acp_sdk/client/client.py">SDK client</a>
+define the wire messages and <code>run_sync</code> behavior used by these examples.</p>
+<h2 id="complete-example-sources">Complete example sources<a class="headerlink" href="#complete-example-sources" title="Permanent link">&para;</a></h2>
+<h3 id="official-sdk-peer">Official SDK peer<a class="headerlink" href="#official-sdk-peer" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">&quot;&quot;&quot;Actual ACP SDK text agent on loopback, protected by a separate private token.&quot;&quot;&quot;
+
+import argparse
+import hmac
+import os
+import secrets
+from pathlib import Path
+
+import uvicorn
+from acp_sdk.models import Message, MessagePart
+from acp_sdk.server import Server
+from acp_sdk.server.app import create_app
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+TOKEN_FILE = Path(&quot;state/examples/acp-upstream-token.txt&quot;)
+server = Server()
+
+
+@server.agent(
+    name=&quot;uppercase&quot;,
+    input_content_types=[&quot;text/plain&quot;],
+    output_content_types=[&quot;text/plain&quot;],
+)
+async def uppercase(input: list[Message]):
+    &quot;&quot;&quot;Uppercase actual incoming text; no model or simulated business result.&quot;&quot;&quot;
+    for message in input:
+        yield Message(
+            role=&quot;agent/uppercase&quot;,
+            parts=[
+                MessagePart(
+                    content=part.content.upper(), content_type=&quot;text/plain&quot;
+                )
+                for part in message.parts
+            ],
+        )
+
+
+def private_token() -&gt; str:
+    TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    try:
+        descriptor = os.open(
+            TOKEN_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600
+        )
+    except FileExistsError:
+        return TOKEN_FILE.read_text().strip()
+    with os.fdopen(descriptor, &quot;w&quot;) as stream:
+        stream.write(secrets.token_urlsafe(32) + &quot;\n&quot;)
+    return TOKEN_FILE.read_text().strip()
+
+
+def main() -&gt; None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(&quot;--port&quot;, type=int, default=8020)
+    args = parser.parse_args()
+    token = private_token()
+    if len(token) &lt; 32:
+        raise SystemExit(&quot;Invalid private ACP example credential&quot;)
+    app = create_app(*server.agents, enable_playground_cors=False)
+
+    @app.middleware(&quot;http&quot;)
+    async def authenticate(request: Request, call_next):
+        supplied = request.headers.get(&quot;authorization&quot;, &quot;&quot;)
+        if not hmac.compare_digest(
+            supplied.encode(), (&quot;Bearer &quot; + token).encode()
+        ):
+            return JSONResponse(
+                {&quot;code&quot;: &quot;invalid_input&quot;, &quot;message&quot;: &quot;Authentication required&quot;},
+                status_code=401,
+            )
+        return await call_next(request)
+
+    uvicorn.run(app, host=&quot;127.0.0.1&quot;, port=args.port, access_log=False)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<p><a href="https://fastfence.dev/downloads/acp_server.py">Download acp_server.py</a> · <a href="https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/examples/docs/acp_server.py">View source</a></p>
+<h3 id="gateway-registration">Gateway registration<a class="headerlink" href="#gateway-registration" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">&quot;&quot;&quot;Separate example gateway: real ACP forwarding through installed FastFence.&quot;&quot;&quot;
+
+import argparse
+import shutil
+from pathlib import Path
+
+import uvicorn
+
+from fastfence.app.factory import create_app
+from fastfence.app.interfaces.cli.initialize import initialize
+from fastfence.shared.acp import ACPAgentSettings
+from fastfence.shared.settings.app_settings import AppSettings
+
+
+def build_example(upstream_url: str = &quot;http://127.0.0.1:8020&quot;):
+    token_file = Path(&quot;state/examples/acp-upstream-token.txt&quot;)
+    if not token_file.is_file():
+        raise SystemExit(&quot;Start the ACP example server first&quot;)
+    root = Path(&quot;state/examples/acp-gateway&quot;).resolve()
+    config = root / &quot;config&quot;
+    config.mkdir(parents=True, exist_ok=True)
+    for source, target in (
+        (&quot;acp_policy.yaml&quot;, &quot;policy.yaml&quot;),
+        (&quot;signatures.json&quot;, &quot;signatures.json&quot;),
+    ):
+        destination = config / target
+        if not destination.exists():
+            shutil.copyfile(Path(__file__).with_name(source), destination)
+    initialize(root / &quot;state&quot;)
+    return create_app(
+        AppSettings(
+            root=root,
+            state=root / &quot;state&quot;,
+            acp_agents={
+                &quot;uppercase&quot;: ACPAgentSettings(
+                    base_url=upstream_url,
+                    agent_name=&quot;uppercase&quot;,
+                    api_key=token_file.read_text().strip(),
+                )
+            },
+        )
+    )
+
+
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(&quot;--port&quot;, type=int, default=8030)
+    parser.add_argument(&quot;--upstream-url&quot;, default=&quot;http://127.0.0.1:8020&quot;)
+    args = parser.parse_args()
+    uvicorn.run(
+        build_example(args.upstream_url), host=&quot;127.0.0.1&quot;, port=args.port
+    )
+</code></pre>
+<p><a href="https://fastfence.dev/downloads/acp_gateway.py">Download acp_gateway.py</a> · <a href="https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/examples/docs/acp_gateway.py">View source</a></p>
+<h3 id="official-sdk-client">Official SDK client<a class="headerlink" href="#official-sdk-client" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">&quot;&quot;&quot;Call a protected peer agent using the official Agent Communication SDK.&quot;&quot;&quot;
+
+import argparse
+import asyncio
+import json
+import os
+from pathlib import Path
+
+from acp_sdk.client import Client
+from acp_sdk.models import Message, MessagePart
+
+
+async def run(args):
+    token = os.environ.get(&quot;FASTFENCE_AGENT_TOKEN&quot;)
+    if not token:
+        values = json.loads(args.credentials.read_text())
+        token = values.get(&quot;local-agent&quot;) or values[&quot;analyst-blue&quot;]
+    async with Client(
+        base_url=args.url.rstrip(&quot;/&quot;) + &quot;/acp&quot;,
+        headers={&quot;Authorization&quot;: &quot;Bearer &quot; + token},
+        timeout=120,
+        trust_env=False,
+    ) as client:
+        agents = [agent.name async for agent in client.agents()]
+        print(json.dumps({&quot;available_agents&quot;: agents}))
+        result = await client.run_sync(
+            agent=args.agent,
+            input=[
+                Message(role=&quot;user&quot;, parts=[MessagePart(content=args.prompt)])
+            ],
+        )
+        print(result.model_dump_json(indent=2))
+        return result.status.value == &quot;completed&quot;
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(&quot;--url&quot;, default=&quot;http://127.0.0.1:8030&quot;)
+    parser.add_argument(&quot;--agent&quot;, default=&quot;uppercase&quot;)
+    parser.add_argument(&quot;--prompt&quot;, default=&quot;hello&quot;)
+    parser.add_argument(
+        &quot;--credentials&quot;,
+        type=Path,
+        default=Path(&quot;state/examples/acp-gateway/state/credentials.json&quot;),
+    )
+    if not asyncio.run(run(parser.parse_args())):
+        raise SystemExit(1)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<p><a href="https://fastfence.dev/downloads/acp_client.py">Download acp_client.py</a> · <a href="https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/examples/docs/acp_client.py">View source</a></p>
+<h3 id="isolated-policy">Isolated policy<a class="headerlink" href="#isolated-policy" title="Permanent link">&para;</a></h3>
+<pre><code class="language-yaml">version: 1
+description: Explicit ACP text-agent example; deterministic checks, no model dependency.
+privacy:
+  enabled: true
+  input: redact
+  output: redact
+signatures_enabled: true
+semantic:
+  provider: disabled
+tools:
+  acp.uppercase:
+    roles: [analyst]
+    timeout_ms: 30000
+    cost_microusd: 1
+models: {}
+budgets:
+  analyst:
+    calls: 1000
+    tokens: 1000000
+    cost_microusd: 1000000
+    compute_ms: 1000000
+    concurrent: 2
+text_rules:
+  - id: forbidden-example-input
+    operator: contains
+    value: forbidden
+    direction: input
+    target: tool
+</code></pre>
+<p><a href="https://fastfence.dev/downloads/acp_policy.yaml">Download acp_policy.yaml</a> · <a href="https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/examples/docs/acp_policy.yaml">View source</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../integrations/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Connect agents and models">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Connect agents and models
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../custom-detectors/" class="md-footer__link md-footer__link--next" aria-label="Next: Custom Python detectors">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Custom Python detectors
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 FastFence contributors · Apache-2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mermaid.mjs" type="module"></script>
+      
+    
+  </body>
+</html>
