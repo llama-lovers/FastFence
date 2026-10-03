@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "signatures": [
+    {"id": "python_pickle_rce", "pattern": "pickle.loads(", "description": "Unsafe Python pickle deserialization instruction; literal signature only"},
+    {"id": "torch_unsafe_loader", "pattern": "weights_only=False", "description": "Unsafe model checkpoint loader option; literal signature only"},
+    {"id": "shell_remote_execution", "pattern": "curl | sh", "description": "Known remote shell execution pattern; literal signature only"},
+    {"id": "instruction_override", "pattern": "ignore all previous instructions", "description": "Common prompt-injection phrase; literal signature only"},
+    {"id": "pickle_reduce_payload", "pattern": "__reduce__", "description": "Pickle reducer payload marker; literal signature only"}
+  ]
+}
