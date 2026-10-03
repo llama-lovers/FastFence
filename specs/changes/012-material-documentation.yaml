@@ -1,6 +1,6 @@
 id: FF-012
 title: Material documentation and GitHub Pages publishing
-status: implemented
+status: verified
 problem: The project needs public, navigable documentation at fastfence.dev with repeatable publishing from main.
 scope:
   - Add MkDocs Material, tested usage guides, architecture and honest feature status.
@@ -31,6 +31,10 @@ validation:
   - command: uv run pre-commit run --all-files
     expected: All repository quality gates pass.
 evidence:
+  - command: GitHub Pages configuration and Actions run 37124932409
+    result: After the user enabled public hosting, switched legacy main/docs publishing to workflow; preserved fastfence.dev; remote build and deployment succeeded.
+  - command: HTTPS GET https://fastfence.dev/ and https://fastfence.dev/policies/
+    result: Both returned HTTP 200 with Material HTML and correct page titles; public site now serves generated documentation.
   - command: GitHub Actions documentation run 37121967495
     result: Remote build and artifact upload succeeded; deployment failed because Pages is not enabled; API enablement is blocked by the private repository plan.
   - command: HTTP GET http://127.0.0.1:8001
