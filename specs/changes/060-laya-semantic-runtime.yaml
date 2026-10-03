@@ -1,0 +1,53 @@
+id: FF-060
+title: Actual Laya semantic inspection of protected input and output
+status: implemented
+problem: Laya drafted deterministic policies but protected content was not itself evaluated by Laya, and policy authors could not express semantic runtime instructions.
+scope:
+  - Add semantic.provider=laya using the pinned upstream Laya llm_call in a persistent isolated worker and real local model inference.
+  - Evaluate protected input and configured output using the existing severity rubric plus explicit bounded natural-language policy instructions.
+  - Expose semantic provider, model, instructions, threshold, output scanning and deadline in the policy editor and show active protection in the inventory.
+  - Report per-direction semantic status as not_run, passed, blocked or error in verdicts and sanitized audit.
+  - Account instruction bytes in per-scan usage reservations and preserve existing fail-closed enforcement and sanitised audit.
+constraints:
+  - Do not label a direct Qwen request as Laya; execute the actual pinned Laya model client.
+  - No SQLite, conversation history, raw payload file, or persistent request storage in the semantic path.
+  - Replace only upstream application audit and budget bookkeeping hooks because FastFence already owns those responsibilities; do not replace model inference.
+  - Permit one bounded in-flight worker exchange; reject concurrent work without an unbounded queue.
+  - Timeout, cancellation, malformed output or worker exit kills and reaps the worker before another request; no stale protocol reply reuse.
+  - Treat classifier text as untrusted; enforce a strict categorical output contract, token limits, exact upstream revision and loopback-only model endpoint.
+  - Semantic severity is ordinal and model-dependent, not a calibrated security probability or guarantee.
+change_paths:
+  - integrations/laya/semantic_worker.py
+  - src/fastfence/modules/control/persistence/laya_semantic.py
+  - src/fastfence/modules/control/persistence/models.py
+  - src/fastfence/modules/control/domain/models.py
+  - src/fastfence/modules/control/application/facade.py
+  - src/fastfence/modules/control/application/services/inspection.py
+  - src/fastfence/modules/control/application/services/execution.py
+  - src/fastfence/modules/control/application/services/engine.py
+  - src/fastfence/modules/control/application/use_cases/content.py
+  - src/fastfence/app/factory.py
+  - src/fastfence/app/interfaces/http/web/policy-manager.js
+  - src/fastfence/app/interfaces/http/web/policy-studio.js
+  - src/fastfence/app/interfaces/http/web/rules.js
+  - tests/unit/test_laya_semantic_runtime.py
+  - tests/integration/test_policy_management_ui.py
+  - tests/integration/test_gateway.py
+  - evaluation/results/laya-semantic-runtime.json
+acceptance:
+  - Actual Laya and a measured local model classify benign, malicious and custom-policy cases, with evidence reporting the exact model and observed outcomes.
+  - The existing protected input and output pipeline applies these assessments and blocks over-threshold scores; unavailable dependencies fail closed.
+  - Concurrent requests, timeouts and cancellation cannot leak content or cross-contaminate responses.
+  - Product policy management shows whether semantic evaluation is active and lets users explicitly change and review its configuration.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_laya_semantic_runtime.py tests/integration/test_policy_management_ui.py
+    expected: Worker transport, resource accounting and review safeguards pass.
+  - command: uv run pre-commit run --all-files
+    expected: Required repository gates pass.
+evidence:
+  - command: Actual pinned Laya llm_call with qwen3:4b through persistent worker and protected runtime, recorded in evaluation/results/laya-semantic-runtime.json
+    result: Benign content and explanatory quoted attack are benign; exact user attack is malicious and blocked before upstream, and malicious fixture tool output is blocked after upstream. Custom financial-advice prohibition blocks recommendation while permitting a definition. Letter-a semantic case remains a measured miss and is documented as requiring deterministic text rules. No SQLite database was created; no model verdict was repaired.
+  - command: uv run pytest --no-cov -q tests/unit/test_laya_semantic_runtime.py tests/integration/test_policy_management_ui.py tests/unit/test_semantic_severity.py
+    result: Thirty-seven focused checks passed before final per-direction status additions; final integrated gates run by the coordinating agent.
+  - command: uv run basedpyright src; uv run lint-imports
+    result: Zero typing errors and all sixteen architecture contracts pass.

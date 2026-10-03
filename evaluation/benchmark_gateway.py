@@ -31,7 +31,11 @@ from fastfence.modules.control.persistence.models import (
 )
 from fastfence.modules.control.persistence.policy import PolicyStore
 from fastfence.modules.control.persistence.secrets import OfflineSecrets
-from fastfence.modules.control.persistence.tools import DemoTools
+
+if __package__:
+    from evaluation.business_fixture import DemoTools
+else:
+    from business_fixture import DemoTools
 
 
 class Workload(BaseModel):
@@ -101,7 +105,9 @@ def hardware() -> dict:
 def prepare_configuration(
     root: Path, samples: int, warmup: int, concurrency: int
 ) -> None:
-    policy = yaml.safe_load(Path("config/policy.offline.yaml").read_text())
+    policy = yaml.safe_load(
+        Path("examples/business_tools/policy.yaml").read_text()
+    )
     if policy["semantic"]["provider"] != "disabled":
         raise ValueError(
             "Benchmark requires explicitly disabled semantic inference"

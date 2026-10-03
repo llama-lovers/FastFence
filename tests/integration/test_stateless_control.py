@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
+from examples.business_tools.tools import DemoTools
 from fastfence.app.factory import create_app
 from fastfence.shared.settings.app_settings import AppSettings
 from tests.fixtures.auth import headers
@@ -25,7 +26,8 @@ def stateless(project, monkeypatch):
                 )
             ),
             anonymization_key_id="test",
-        )
+        ),
+        tools=DemoTools(),
     )
     calls = []
 

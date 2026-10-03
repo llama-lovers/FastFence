@@ -17,8 +17,12 @@ from tempfile import TemporaryDirectory
 import httpx
 import yaml
 
-from fastfence.app.interfaces.cli.main import initialize
 from fastfence.modules.control.domain.text_rules import TextRule
+
+if __package__:
+    from evaluation.business_fixture import initialize
+else:
+    from business_fixture import initialize
 
 
 def available_port() -> int:
@@ -189,7 +193,9 @@ def run() -> dict:
         root = Path(temporary)
         (root / "config").mkdir()
         shutil.copy("config/signatures.json", root / "config/signatures.json")
-        policy = yaml.safe_load(Path("config/policy.offline.yaml").read_text())
+        policy = yaml.safe_load(
+            Path("examples/business_tools/policy.yaml").read_text()
+        )
         (root / "config/policy.yaml").write_text(yaml.safe_dump(policy))
         initialize(root / "state")
         tokens = json.loads((root / "state/demo-tokens.json").read_text())
@@ -208,7 +214,7 @@ def run() -> dict:
                 sys.executable,
                 "-m",
                 "uvicorn",
-                "fastfence.app.factory:create_app",
+                "evaluation.business_fixture:create_app",
                 "--factory",
                 "--host",
                 "127.0.0.1",

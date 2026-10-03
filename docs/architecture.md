@@ -1,6 +1,6 @@
 # Architecture
 
-FastFence is a gateway between an authenticated agent and an allowlisted business tool, tenant resource, or local model. The enforcement pipeline is shared by the REST, OpenAI-compatible and MCP adapters. Business tools use simulated data; identity verification, policy enforcement, filtering, budgets and audit are implemented controls.
+FastFence is a gateway between an authenticated agent and an allowlisted business tool, tenant resource, or local model. The enforcement pipeline is shared by the REST, OpenAI-compatible and MCP adapters. Business implementations are supplied through the tool port; the default product starts without business handlers. Runnable examples are separate from the runtime.
 
 ## Invocation pipeline
 
@@ -11,10 +11,10 @@ flowchart TD
     Rules --> Input[Input signatures, privacy and size checks]
     Input --> Tenant[Validated arguments and tenant resource checks]
     Tenant --> Reserve[Atomic memory budget reservation]
-    Reserve --> Semantic[Optional real semantic input scan]
-    Semantic --> Upstream[Allowed business tool or Ollama model]
+    Reserve --> Semantic[Laya semantic input scan when enabled]
+    Semantic --> Upstream[Registered tool or configured model provider]
     Upstream --> Output[Output signatures, privacy and size checks]
-    Output --> OutputModel[Optional real semantic output scan]
+    Output --> OutputModel[Laya semantic output scan when enabled]
     OutputModel --> Result[Filtered result]
     OutputModel --> Accounting[Settlement and sanitized audit]
     Policy[Immutable versioned policy and feed] --> Rules
@@ -36,10 +36,10 @@ The top-level dependency direction is `app → workflows → modules → shared`
 | Layer | Responsibility |
 | --- | --- |
 | `app` | Application factory, HTTP/CLI transports and lifecycle |
-| `workflows` | Reserved for future cross-feature orchestration |
+| `workflows` | Cross-feature orchestration for stateless anonymization and model content |
 | `modules/control/interfaces` | Authenticated MCP tool and resource transport |
 | `modules/control/application` | Invocation services, management use cases and composition facade |
-| `modules/control/persistence` | Concrete memory accounting, identity/configuration, model, secret-detector and demo-tool adapters |
+| `modules/control/persistence` | Concrete memory accounting, identity/configuration, model, secret-detector and tool adapters |
 | `modules/control/contracts` | Narrow ports used by the application services |
 | `modules/control/domain` | Pydantic policy models, limits, privacy rules and signature checks |
 | `shared` | Common Pydantic model and environment-backed settings |

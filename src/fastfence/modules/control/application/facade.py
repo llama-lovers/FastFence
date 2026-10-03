@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import Any
+from typing import Any, Literal
 
 from fastfence.modules.control.application.services.engine import Engine
 from fastfence.modules.control.application.use_cases.content import (
@@ -9,11 +9,15 @@ from fastfence.modules.control.application.use_cases.content import (
 from fastfence.modules.control.application.use_cases.management import (
     ManagementUseCases,
 )
+from fastfence.modules.control.application.use_cases.semantic_preview import (
+    preview_semantic,
+)
 from fastfence.modules.control.contracts.ports import (
     AnonymizationPort,
     IdentityPort,
     LedgerPort,
     PolicyPort,
+    ToolsPort,
 )
 from fastfence.modules.control.domain.models import (
     Identity,
@@ -23,15 +27,17 @@ from fastfence.modules.control.domain.models import (
     ToolCall,
     Verdict,
 )
+from fastfence.modules.control.domain.semantic_rules import SemanticRule
 from fastfence.modules.control.persistence.identity import IdentityStore
 from fastfence.modules.control.persistence.ledger import Ledger
 from fastfence.modules.control.persistence.models import (
     OllamaModels,
     SemanticScanner,
 )
+from fastfence.modules.control.persistence.openai_models import OpenAIModels
 from fastfence.modules.control.persistence.policy import PolicyStore
 from fastfence.modules.control.persistence.secrets import OfflineSecrets
-from fastfence.modules.control.persistence.tools import DemoTools
+from fastfence.modules.control.persistence.tools import UnconfiguredTools
 from fastfence.shared.settings.app_settings import AppSettings
 
 
@@ -83,8 +89,32 @@ class ControlRuntime:
             identity, markdown, model, max_output_tokens, restore_originals
         )
 
+    async def preview_semantic_rule(
+        self,
+        rule: SemanticRule,
+        text: str,
+        direction: Literal["input", "output"],
+        target: Literal["model", "tool"],
+        base_version: int,
+    ) -> dict[str, Any]:
+        return await preview_semantic(
+            self.engine, rule, text, direction, target, base_version
+        )
+
     def status(self) -> dict[str, Any]:
-        return self.management.status()
+        status = self.management.status()
+        configured = list(self.snapshot().policy.tools)
+        connected = [
+            name for name in configured if self.engine.tools.supports(name)
+        ]
+        status["tools"] = {
+            "connected": connected,
+            "unavailable": sorted(set(configured) - set(connected)),
+        }
+        status["business_backend"] = (
+            "connected" if connected else "not_configured"
+        )
+        return status
 
     async def refresh_config(self) -> bool:
         return await self.policies.refresh()
@@ -113,6 +143,12 @@ class ControlRuntime:
     def audit(self, limit: int = 200) -> list[dict[str, Any]]:
         return self.ledger.audit(limit)
 
+    async def aclose(self) -> None:
+        close = getattr(self.engine.scanner, "aclose", None)
+        if close is not None:
+            await close()
+        self.close()
+
     def close(self) -> None:
         self.ledger.close()
         if self.engine.anonymization is not None:
@@ -120,7 +156,10 @@ class ControlRuntime:
 
 
 def build_runtime(
-    settings: AppSettings, *, anonymization: AnonymizationPort | None = None
+    settings: AppSettings,
+    *,
+    anonymization: AnonymizationPort | None = None,
+    tools: ToolsPort | None = None,
 ) -> ControlRuntime:
     identities = (
         IdentityStore(records=json.loads(settings.identity_config_json))
@@ -145,9 +184,15 @@ def build_runtime(
     engine = Engine(
         policies=policies,
         ledger=ledger,
-        tools=DemoTools(),
-        scanner=SemanticScanner(settings.ollama_url, settings.kev_url),
-        models=OllamaModels(settings.ollama_url),
+        tools=tools if tools is not None else UnconfiguredTools(),
+        scanner=SemanticScanner(
+            settings.ollama_url,
+            settings.kev_url,
+            settings.authoring_root or settings.root,
+        ),
+        models=OpenAIModels(settings.openai_base_url, settings.openai_api_key)
+        if settings.model_provider == "openai"
+        else OllamaModels(settings.ollama_url),
         secrets=OfflineSecrets(),
         anonymization=anonymization,
     )

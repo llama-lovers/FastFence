@@ -11,6 +11,9 @@ from fastfence.app.interfaces.http.policy_authoring import (
 from fastfence.app.interfaces.http.rule_authoring import (
     configure_rule_authoring,
 )
+from fastfence.app.interfaces.http.semantic_preview import (
+    configure_semantic_preview,
+)
 from fastfence.modules.control.application.facade import ControlRuntime
 from fastfence.modules.control.contracts.dto import (
     Identity,
@@ -27,6 +30,7 @@ def configure_http(app: FastAPI, runtime: ControlRuntime) -> None:
     _configure_public(app, runtime, actor)
     _configure_management(app, runtime, admin)
     configure_rule_authoring(app, admin)
+    configure_semantic_preview(app, runtime, admin)
     configure_policy_authoring(app, runtime, admin)
 
 
@@ -85,17 +89,28 @@ def _configure_public(
 
     @app.get("/assets/{script_name}")
     def dashboard_script(script_name: str) -> FileResponse:
-        if script_name not in {
+        assets = {
             "rules.js",
             "playground.js",
             "policy-studio.js",
             "audit.js",
             "documents.js",
-        }:
+            "console.js",
+            "policy-manager.js",
+            "console.css",
+            "logo.svg",
+        }
+        if script_name not in assets:
             raise HTTPException(404, "Unknown asset")
         return FileResponse(
             Path(__file__).parent / "web" / script_name,
-            media_type="text/javascript",
+            media_type=(
+                "text/css"
+                if script_name.endswith(".css")
+                else "image/svg+xml"
+                if script_name.endswith(".svg")
+                else "text/javascript"
+            ),
         )
 
     @app.get("/health")

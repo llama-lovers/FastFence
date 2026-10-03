@@ -1,0 +1,29 @@
+id: FF-069
+title: Publish executable FastMCP, FastAPI and OpenAI SDK integrations
+status: implemented
+problem: Endpoint inventories do not show developers how to connect real framework code and verify enforcement.
+scope:
+  - Publish a complete private FastMCP backend registered through the FastFence tool port in a FastAPI application.
+  - Publish an OpenAI SDK client targeting the protected gateway with no provider bypass or automatic retry.
+  - Embed exact runnable source in documentation with setup, policy and positive and negative outcomes.
+constraints:
+  - Example state is isolated and operator configuration is never overwritten.
+  - Credentials remain private and examples must not expose an unprotected business endpoint.
+change_paths:
+  - docs/architecture.md
+  - docs/index.md
+  - examples/docs/fastmcp_server.py
+  - examples/docs/openai_client.py
+  - examples/docs/policy.yaml
+  - examples/docs/signatures.json
+  - docs/examples/fastmcp-server.md
+  - docs/examples/openai-client.md
+  - tests/integration/test_framework_examples.py
+acceptance:
+  - An allowed REST invocation executes the real FastMCP operation and delivers its result.
+  - An input block prevents backend execution and an output block withholds the backend result.
+  - Missing identity cannot invoke the protected tool.
+validation:
+  - command: uv run pytest --no-cov tests/integration/test_framework_examples.py
+    expected: Actual framework integration exercises allowed, blocked and unauthorized paths.
+evidence: []

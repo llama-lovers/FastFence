@@ -10,6 +10,7 @@ from fastfence.modules.control.domain.frozen import (
     Roles,
 )
 from fastfence.modules.control.domain.privacy import Privacy
+from fastfence.modules.control.domain.semantic_rules import SemanticRule
 from fastfence.modules.control.domain.text_rules import TextRule
 from fastfence.shared.anonymization import AnonymizationConfig
 from fastfence.shared.models import StrictModel
@@ -37,11 +38,57 @@ class ToolPolicy(FrozenControlModel):
 
 
 class SemanticConfig(FrozenControlModel):
-    provider: Literal["disabled", "ollama", "kev"] = "disabled"
+    provider: Literal["disabled", "ollama", "kev", "laya"] = "disabled"
     model: str = "qwen3:0.6b"
     threshold: float = Field(default=0.7, ge=0, le=1)
     timeout_ms: int = Field(default=5000, ge=100, le=60_000)
     scan_output: bool = True
+    instructions: str = Field(default="", max_length=4096)
+    rules: tuple[SemanticRule, ...] = Field(default=(), max_length=8)
+
+    @property
+    def policy_text(self) -> str:
+        return "\n".join(
+            [self.instructions]
+            + [f"RULE {rule.id}: {rule.instruction}" for rule in self.rules]
+        ).strip()
+
+    def scoped(
+        self,
+        direction: Literal["input", "output"],
+        target: Literal["model", "tool"],
+    ) -> Self:
+        return self.model_copy(
+            update={
+                "rules": tuple(
+                    rule
+                    for rule in self.rules
+                    if rule.applies_to(direction, target)
+                )
+            }
+        )
+
+    @property
+    def token_allowance(self) -> int:
+        return 2048 + len(self.policy_text.encode())
+
+    @model_validator(mode="after")
+    def instructions_require_laya(self) -> Self:
+        if (
+            self.instructions.strip() or self.rules
+        ) and self.provider != "laya":
+            raise ValueError(
+                "Natural-language semantic instructions require Laya"
+            )
+        if len({rule.id for rule in self.rules}) != len(self.rules):
+            raise ValueError("Semantic rule IDs must be unique")
+        if len(self.policy_text.encode()) > 8192:
+            raise ValueError("Semantic policy exceeds 8192 UTF-8 bytes")
+        if not self.scan_output and any(
+            rule.direction != "input" for rule in self.rules
+        ):
+            raise ValueError("Output semantic rules require output scanning")
+        return self
 
 
 class ModelPolicy(FrozenControlModel):
@@ -170,6 +217,12 @@ class Verdict(StrictModel):
     output: Any = None
     semantic_provider: str
     semantic_score: float | None = None
+    semantic_input_status: Literal["not_run", "passed", "blocked", "error"] = (
+        "not_run"
+    )
+    semantic_output_status: Literal["not_run", "passed", "blocked", "error"] = (
+        "not_run"
+    )
     tokens: int = 0
     cost_microusd: int = 0
     upstream_executed: bool = False

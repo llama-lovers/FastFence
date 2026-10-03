@@ -1,0 +1,32 @@
+id: FF-056
+title: Reviewable policy management for the local product console
+status: implemented
+problem: Policy editing was exposed primarily as raw JSON without a clear update path, and generated policies mixed example presets with production management.
+scope:
+  - Provide structured privacy and recovery settings with automatic policy version increments and a before-after review before activation.
+  - List current text and anonymization rules with edit and removal actions; keep complete JSON configuration as an explicit advanced mode.
+  - Present natural-language authoring as describe, review, test and activate with structured generated-case editing.
+  - Require tested text rules and explicit review before adding or editing them.
+constraints:
+  - Never insert sample rules or preset instructions in production forms.
+  - Preserve source read-only checks, exact base-version conflict checks, management identity ownership, and review invalidation after editing.
+  - Preserve generated test expectations until a user explicitly edits them; failed regression tests cannot activate.
+  - Settings review is accurately labeled as configuration review, not a claim that runtime requests or regression tests have been executed.
+change_paths:
+  - src/fastfence/app/interfaces/http/web/policy-manager.js
+  - src/fastfence/app/interfaces/http/web/policy-studio.js
+  - src/fastfence/app/interfaces/http/web/rules.js
+  - tests/integration/test_policy_management_ui.py
+acceptance:
+  - Users can find existing rules, change privacy settings, inspect the exact before-after diff and activate a version without manually incrementing JSON.
+  - A change in management identity or active base policy prevents publishing a stale rule or policy.
+  - Failed activation leaves entered settings available for correction and requires renewed review.
+  - Natural-language generated cases are editable through labeled fields, with advanced JSON available separately.
+validation:
+  - command: uv run pytest --no-cov tests/integration/test_policy_management_ui.py tests/integration/test_anonymization_authoring_ui.py
+    expected: Executed browser code preserves preview, review, identity and conflict safeguards.
+  - command: uv run pre-commit run --all-files
+    expected: Required repository gates pass.
+evidence:
+  - command: uv run pytest --no-cov -q tests/integration/test_policy_management_ui.py
+    result: Executed JavaScript prevents stale policy writes and identity-crossing activation, enforces explicit review, manages version increments, preserves failed edits and invalidates text-rule preview after identity changes.

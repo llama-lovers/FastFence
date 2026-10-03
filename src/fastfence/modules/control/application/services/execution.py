@@ -52,9 +52,13 @@ class Executor:
         allocation: int,
         direction: Literal["input", "output"],
     ) -> None:
-        config = state.snapshot.policy.semantic
+        config = state.snapshot.policy.semantic.scoped(
+            direction, "tool" if isinstance(state.call, ToolCall) else "model"
+        )
         state.tokens += allocation
         self.ledger.record_semantic_call()
+        status_field = f"semantic_{direction}_status"
+        setattr(state.verdict, status_field, "error")
         assessment = await asyncio.wait_for(
             self.scanner.assess(text, config), config.timeout_ms / 1000
         )
@@ -65,9 +69,11 @@ class Executor:
             state.verdict.semantic_score or 0, assessment.score
         )
         if assessment.score >= config.threshold:
+            setattr(state.verdict, status_field, "blocked")
             raise RejectedError(
                 f"semantic_{direction}_risk", ["semantic_injection"]
             )
+        setattr(state.verdict, status_field, "passed")
 
     async def call(
         self, state: InvocationState, prepared: PreparedInvocation
@@ -133,7 +139,7 @@ class Executor:
             await self.scan(
                 state,
                 encode(output),
-                state.snapshot.policy.max_output_bytes + 2048,
+                state.snapshot.policy.max_output_bytes + config.token_allowance,
                 "output",
             )
         if state.call.restore_originals:

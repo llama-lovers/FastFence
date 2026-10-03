@@ -30,6 +30,8 @@ function studioMessage(text, failed = false) {
   $('policyStudioMessage').className = 'message ' + (failed ? 'red' : 'green');
 }
 function updateStudioActivation() {
+  const step = studioProposal ? (studioPreviewed && studioTestsPassed ? 4 : 2) : 1;
+  if ($('policyStudioStep')) $('policyStudioStep').textContent = studioBusy ? 'Working… Your active policy is unchanged.' : 'Step ' + step + ' of 4 · ' + ({1:'Describe the change',2:'Review and test the draft',4:'Confirm and activate'}[step]);
   $('activatePolicyDraft').disabled = studioBusy || !studioProposal || !studioPreviewed || !studioTestsPassed || !$('policyReviewed').checked;
 }
 function invalidateStudioPreview() {
@@ -55,12 +57,12 @@ function studioLock(locked) {
   updateStudioActivation();
 }
 function showStudio() {
-  if (!admin) { $('connectDialog').showModal(); return; }
+  if (!admin) { openConnection(); return; }
   if (!studioBusy) { invalidateStudioProposal(); studioMessage(''); }
   $('policyStudioDialog').showModal();
 }
 $('policyStudioBtn').onclick = showStudio;
-$('policyStudioHero').onclick = showStudio;
+if ($('policyStudioHero')) $('policyStudioHero').onclick = showStudio;
 $('closePolicyStudio').onclick = () => $('policyStudioDialog').close();
 $('policyStudioDialog').addEventListener('cancel', (event) => {
   if (studioBusy) event.preventDefault();
@@ -70,24 +72,6 @@ $('policyInstruction').addEventListener('input', invalidateStudioProposal);
   $(name).addEventListener('input', invalidateStudioPreview);
 });
 $('policyReviewed').onchange = updateStudioActivation;
-const policyExamples = {
-  letters: ['Blokuj każde słowo zawierające literę a w wejściu i wyjściu modeli, bez rozróżniania wielkości liter.', 'Hello\nCat', 'input', 'model'],
-  emails: ['Redaguj adresy e-mail w danych wejściowych i wyjściowych.', 'Contact us\nanna@example.org', 'input', 'model'],
-  secrets: ['Blokuj dane osobowe i sekrety w danych wejściowych i wyjściowych.', 'Public report\nanna@example.org', 'output', 'tool'],
-  aliases: ['Anonimizuj adresy e-mail jako EMAIL w wejściu i wyjściu modeli i narzędzi. Pozwól przywrócić oryginały tylko na wyraźne żądanie użytkownika.', 'Contact us\nanna@example.org\nanna@example.org', 'input', 'model'],
-  roles: ['Ogranicz narzędzie knowledge.search wyłącznie do istniejącej roli operator.', 'Quarterly report', 'input', 'tool'],
-};
-document.querySelectorAll('[data-policy-example]').forEach((button) => {
-  button.onclick = () => {
-    invalidateStudioProposal();
-    const [instruction, samples, direction, target] = policyExamples[button.dataset.policyExample];
-    $('policyInstruction').value = instruction;
-    $('policySamples').value = samples;
-    $('policySampleDirection').value = direction;
-    $('policySampleTarget').value = target;
-    studioMessage('Describe the intended change, then draft it with Laya.');
-  };
-});
 function policyEffect(operation) {
   const directions = {input: 'inputs', output: 'outputs', both: 'inputs and outputs'};
   const targets = {model: 'model', tool: 'tool', all: 'model and tool'};
@@ -125,11 +109,12 @@ function policyEffect(operation) {
 function showProposal(proposal) {
   studioProposal = proposal;
   $('policyDraftSection').classList.remove('hidden');
-  $('policyDraftMeta').textContent = 'Based on policy v' + proposal.base_version + ' · ' + proposal.model +
+  $('policyDraftMeta').textContent = 'Active v' + proposal.base_version + ' → proposed v' + (proposal.base_version + 1) + ' · ' + proposal.model +
     ' · drafted in ' + (proposal.inference_ms / 1000).toFixed(2) + ' s · expires ' +
     new Date(proposal.expires_at).toLocaleTimeString();
   $('policyOperations').textContent = JSON.stringify(proposal.operations, null, 2);
   $('policyGeneratedTests').value = JSON.stringify(proposal.tests || [], null, 2);
+  renderGeneratedCases(proposal.tests || []);
   $('policyYamlDiff').textContent = proposal.yaml_diff || 'No YAML diff supplied.';
   $('policyEffects').replaceChildren(...proposal.operations.map((operation) => el('li', policyEffect(operation))));
   $('policyRolePreviewNote').classList.toggle('hidden', !proposal.operations.some((operation) => operation.type === 'restrict_tool_roles'));
@@ -145,6 +130,7 @@ function showProposal(proposal) {
   }));
   $('policyDraftWarnings').textContent = proposal.warnings.map((warning) => warning === 'privacy_was_disabled_enabling_existing_detectors' ? 'Privacy checks were disabled. This proposal also enables the existing privacy detectors; inspect the full diff below.' : warning).join(' ');
   $('policyDraftWarnings').classList.toggle('hidden', !proposal.warnings.length);
+  updateStudioActivation();
 }
 $('draftPolicy').onclick = async () => {
   invalidateStudioProposal();
@@ -178,7 +164,7 @@ $('previewPolicy').onclick = async () => {
   const revision = studioRevision;
   const proposal = studioProposal;
   const token = admin;
-  const samples = $('policySamples').value.split('\n').map((text) => ({
+  const samples = ($('policySamples').value.trim() ? $('policySamples').value.split('\n') : []).map((text) => ({
     text, target: $('policySampleTarget').value, direction: $('policySampleDirection').value,
   }));
   studioLock(true);
@@ -211,14 +197,17 @@ $('previewPolicy').onclick = async () => {
 $('activatePolicyDraft').onclick = async () => {
   if (!studioProposal || !studioPreviewed || !studioTestsPassed || !$('policyReviewed').checked || studioBusy) return;
   const proposal = studioProposal;
+  const owner = admin;
   studioLock(true);
   studioMessage('Activating the exact reviewed proposal…');
   try {
-    const result = await api('/api/admin/policies/activate', admin, {
+    const result = await api('/api/admin/policies/activate', owner, {
       proposal_id: proposal.proposal_id, base_version: proposal.base_version,
     });
+    if (admin !== owner) return;
     invalidateStudioProposal();
     await refresh();
+    if (admin !== owner) return;
     studioMessage('Policy v' + result.policy_version + ' is active. ' +
       (result.tests_saved ? 'Reviewed cases saved to config/policy-tests.yaml. ' : '') +
       'No model was called during activation.');
@@ -228,3 +217,35 @@ $('activatePolicyDraft').onclick = async () => {
   } catch (error) { invalidateStudioPreview(); studioMessage(error.message, true); }
   finally { studioLock(false); }
 };
+
+function renderGeneratedCases(tests) {
+  const container = $('policyTestCases');
+  if (!container) return;
+  container.replaceChildren(...tests.map((test, index) => {
+    const row = el('div', '', 'rule-card');
+    row.append(el('strong', 'Case ' + (index + 1) + ': ' + test.label));
+    for (const [key, title, options] of [
+      ['text', 'Sample content', null],
+      ['direction', 'Direction', ['input','output']],
+      ['target', 'Target', ['model','tool']],
+      ['expected_decision', 'Expected local result', ['no_local_match','blocked','redacted']],
+    ]) {
+      const label = el('label', title);
+      const field = document.createElement(options ? 'select' : 'textarea');
+      if (options) options.forEach(value => { const option = el('option', value.replaceAll('_', ' ')); option.value = value; field.append(option); });
+      field.value = test[key];
+      field.oninput = () => {
+        const updated = JSON.parse($('policyGeneratedTests').value);
+        updated[index][key] = field.value;
+        $('policyGeneratedTests').value = JSON.stringify(updated, null, 2);
+        invalidateStudioPreview();
+      };
+      label.append(field); row.append(label);
+    }
+    return row;
+  }));
+}
+$('policyGeneratedTests').addEventListener('input', () => {
+  try { const tests = JSON.parse($('policyGeneratedTests').value); if (Array.isArray(tests)) renderGeneratedCases(tests); }
+  catch { $('policyTestCases').replaceChildren(el('p', 'Fix the advanced test JSON to return to the form.', 'red')); }
+});

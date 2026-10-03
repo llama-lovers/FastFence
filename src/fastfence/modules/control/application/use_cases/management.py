@@ -48,7 +48,6 @@ class ManagementUseCases:
             "metrics": self.ledger.stats(),
             "budgets": budgets,
             "audit": self.ledger.audit(),
-            "business_backend": "simulated",
             "budget_window": "UTC day; per instance and trusted subject",
             "runtime": self.ledger.scope(),
             "configuration": self.policies.diagnostics(),

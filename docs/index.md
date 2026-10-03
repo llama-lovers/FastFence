@@ -1,37 +1,59 @@
-![FastFence logo](assets/fastfence-logo.svg){ .fastfence-landing-logo width="196" height="198" }
+![FastFence logo](assets/fastfence-logo.svg){ .fastfence-landing-logo width="120" height="121" }
 
 # FastFence
 
-**Fast agents. Clear boundaries.**
+**Security policies for agents. Local enforcement for every call.**
 
-FastFence is an AI Control Layer built for the Goldman Sachs challenge at HackYeah 2026. Place it between an agent and its business tools, tenant memory, or allowlisted local model. Each invocation verifies identity, applies policy, reserves a budget, inspects the upstream result, and records a sanitized decision.
+FastFence checks AI requests and responses against your access, privacy, text and resource policies. Connect through REST, an OpenAI-compatible endpoint or MCP. Describe a rule with Laya, review its changes and tests, then activate it without restarting the gateway.
 
-Start with the [quickstart](getting-started.md), then choose an [integration](integrations.md) and configure your [policies](policies.md).
+[Get started](getting-started.md){ .md-button .md-button--primary }
+[Follow a tutorial](learn.md){ .md-button }
+[HTTP API reference](reference/http-api.md){ .md-button }
 
-## What works today
+## Start locally
 
-| Capability | Delivered behavior |
+Python 3.12 and [uv](https://docs.astral.sh/uv/) are required. Install from the repository:
+
+```sh
+git clone https://github.com/llama-lovers/HackYeah2026-challenge-second.git
+cd HackYeah2026-challenge-second
+uv sync --locked
+uv run fastfence init --anonymization
+sh integrations/laya/setup.sh
+ollama pull qwen3:4b
+ollama pull qwen3:0.6b
+uv run fastfence doctor
+uv run fastfence serve
+```
+
+Install and start [Ollama](https://ollama.com/) before running the model commands above. Open **http://127.0.0.1:8000**. Connect a management identity to inspect and change policies, and an agent identity to send protected requests. Initialization creates your private local credentials; the [quickstart](getting-started.md) explains where to find them. Document recognition has a separate OCR installation step.
+
+## Choose your task
+
+| I want to… | Start here |
 | --- | --- |
-| Authentication and permissions | Provisioned bearer identities, role allowlists, separate management access, and tenant-scoped memory. |
-| Deterministic guardrails | Authored text restrictions, versioned literal attack signatures, privacy heuristics, and offline detect-secrets credential detectors. |
-| Hybrid checks | Optional real Ollama or Kev semantic analysis; configured provider failures fail closed. |
-| Resource limits | Atomic process-local budgets for calls, conservative token units, estimated cost, runtime, and concurrency. |
-| Central configuration | Local files or a trusted HTTP bundle, background reload, immutable snapshots, and last-valid retention. |
-| Reporting | Interactive dashboard, bounded sanitized audit, JSONL export, decision counts, resource usage, and configuration health. |
-| Integration | REST, bounded OpenAI-compatible chat, authenticated MCP tools/resources, and a real Laya demonstration. |
+| Run a protected model request | [Learn: your first request](learn.md#1-send-a-protected-model-request) |
+| Describe a rule and understand how it changes behavior | [Policies and review](policies.md) |
+| Connect an existing agent or MCP client | [Integration contract](integration-reference.md) |
+| Configure privacy, anonymization or budgets | [Policy configuration](policies.md) |
+| Find an endpoint or request schema | [Source-backed HTTP reference](reference/http-api.md) |
+| Configure a local installation | [Environment settings](settings.md) |
+| Verify the system myself | [Manual verification](manual-testing.md) |
+| Run framework integration code | [Executable examples](examples/fastmcp-server.md) · [OpenAI SDK](examples/openai-client.md) |
+| Give an LLM the documentation | [llms.txt](llms.txt) · [llms-full.txt](llms-full.txt) |
 
-The default policy uses deterministic checks and needs no running model. The business handlers return simulated data; they do not execute real payments or connect external accounts. Protected model completion and hybrid checks use an actual separately hosted model when configured.
+## How it works
 
-## Current boundaries
+An authenticated request passes through access checks, input controls and budget reservation before the upstream operation runs. FastFence then checks the response and records a sanitized decision. Fast deterministic checks run locally. The default product configuration also uses Laya for semantic input and output inspection of content that reaches that stage; unavailable analysis fails closed.
 
-The MCP server exposes controlled business-tool invocation and tenant memory. Qwen completion uses REST or the OpenAI-compatible endpoint; a model-completion MCP tool is not implemented.
+Laya has two separate roles. On the management path it drafts bounded rules that become fast local checks after review. On the runtime path it assesses content against security guidance and your natural-language semantic policy. Compiled text matching itself needs no model call, while enabled semantic inspection does. The explicit offline profile disables semantic analysis for deterministic-only operation.
 
-Use [Describe a policy](policies.md#describe-a-policy-in-the-dashboard) to draft text restrictions, selective privacy actions and tool-role restrictions with actual Laya. Inspect the exact changes, test examples and explicitly activate the same proposal without another model call. Local enforcement remains fast. The CLI also supports saved text-rule proposals; arbitrary legal or compliance interpretation is outside the supported catalog.
+Policies can reload from local files or a trusted HTTP configuration source. Invalid updates keep the last valid configuration. A proposed change is separate from an active policy: inspect the diff, verify expectations and explicitly publish it.
 
-Budgets and audit live in memory and reset on restart. Independent instances have independent allowances; there is no global spending coordinator. A blocked output cannot undo upstream actions that already ran.
+## Runtime boundaries
 
-Read the [architecture](architecture.md), [validation evidence](testing.md), [challenge readiness assessment](challenge-readiness.md), and [deployment guidance](deployment.md) before extending the demo.
+The local product starts without simulated business tools. Runnable business-tool examples are separate from the default runtime. Model execution requires an allowlisted model on the configured Ollama or OpenAI-compatible upstream. OCR converts supported documents into policy-checked Markdown; it does not edit images or PDFs.
 
-## Open source
+Budgets and bounded audit logs are process-local and reset on restart. Reversible anonymization uses authenticated tokens and local keys, with explicit permission to restore originals. An output denial cannot undo an upstream operation that has already run. See [architecture](architecture.md) for the trust and deployment boundaries.
 
-FastFence is licensed under Apache-2.0. Source, license notices, specifications, and reproducible reports are available in the [project repository](https://github.com/llama-lovers/HackYeah2026-challenge-second). Third-party integrations retain their own licenses and notices.
+FastFence is Apache-2.0 licensed. [Source and specifications](https://github.com/llama-lovers/HackYeah2026-challenge-second) are public. Historical challenge assessments and measurements are preserved under [validation evidence](testing.md).

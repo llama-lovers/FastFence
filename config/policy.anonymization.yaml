@@ -13,30 +13,7 @@ semantic:
   threshold: 0.7
   timeout_ms: 10000
   scan_output: true
-tools:
-  knowledge.search:
-    roles:
-    - analyst
-    - operator
-    timeout_ms: 1000
-    cost_microusd: 100
-  memory.read:
-    roles:
-    - analyst
-    - operator
-    timeout_ms: 1000
-    cost_microusd: 100
-  report.contact:
-    roles:
-    - analyst
-    - operator
-    timeout_ms: 1000
-    cost_microusd: 100
-  payments.prepare:
-    roles:
-    - operator
-    timeout_ms: 1000
-    cost_microusd: 500
+tools: {}
 models:
   qwen3:0.6b:
     roles:

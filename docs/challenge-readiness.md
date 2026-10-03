@@ -1,5 +1,7 @@
 # Challenge readiness
 
+This page preserves an earlier implementation and measurement checkpoint. Use the [current requirements matrix](requirements.md) for the present feature-to-code mapping, including named Laya rules and outstanding public/private-key recovery work. Historical model results below are not scores for the current default Laya configuration.
+
 FastFence implements all six formal requirement areas in the Goldman Sachs **AI Control Layer** brief within the supported model and tool paths. The latest verified integration checkpoint and its coverage are recorded in the [testing guide](testing.md). Actual Laya drafts text restrictions, selective privacy controls and tool-role restrictions in the dashboard; the gateway previews and activates the exact reviewed candidate, then enforces it locally without authoring-model calls.
 
 This page maps delivered behavior to evidence and identifies the remaining validation work. It replaces the obsolete pre-authoring numerical assessment. Requirement coverage is not a prediction of the jury score: robustness, performance and usability still depend on the scenarios evaluated.

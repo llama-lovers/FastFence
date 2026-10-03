@@ -164,7 +164,7 @@ def save_proposal(path: Path, rule: dict[str, Any]) -> None:
 
 async def author(args: argparse.Namespace) -> AuthoringReport:
     tokens = json.loads(args.credentials.read_text(encoding="utf-8"))
-    token = tokens.get("security-admin")
+    token = tokens.get("local-admin") or tokens.get("security-admin")
     if not isinstance(token, str) or not token:
         raise AuthoringError("management_credential_missing")
     async with httpx.AsyncClient(
@@ -266,7 +266,11 @@ def arguments() -> argparse.Namespace:
         "--source", type=Path, default=Path("state/laya/upstream")
     )
     parser.add_argument(
-        "--credentials", type=Path, default=Path("state/demo-tokens.json")
+        "--credentials",
+        type=Path,
+        default=Path("state/credentials.json")
+        if Path("state/credentials.json").exists()
+        else Path("state/demo-tokens.json"),
     )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()

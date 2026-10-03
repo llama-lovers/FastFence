@@ -1,0 +1,26 @@
+id: FF-062
+title: Preserve external policy edits during generic management updates
+status: implemented
+problem: A generic policy PUT could overwrite a newer policy already on disk when the background poller had not yet observed the external edit.
+scope:
+  - Pin the active policy as the implicit expected base for all policy mutations under the existing refresh lock.
+  - Validate the current persisted source against that base before substituting and saving the proposed policy.
+constraints:
+  - Preserve explicit reviewed authoring bases, source version validation, read-only remote sources and ordinary configuration reloads.
+  - Reject conflicts without changing the active snapshot, overwriting the file or recording a successful management update.
+  - This guards already-visible source changes and in-process refresh races; external writers must still coordinate writes during the filesystem read-to-replace interval.
+change_paths:
+  - tests/integration/test_policy_authoring_api.py
+  - src/fastfence/modules/control/persistence/policy.py
+  - tests/integration/test_policy_source_conflict.py
+acceptance:
+  - A disk v2 change unseen by a runtime holding v1 survives a stale generic PUT of another v2 policy and the API returns 409.
+  - An explicit reload exposes the external version; a newly reviewed higher version can then be saved while preserving the external setting.
+validation:
+  - command: uv run pytest --no-cov tests/integration/test_policy_source_conflict.py tests/unit/test_policy_persistence_bounds.py tests/integration/test_policy_regression_diff.py
+    expected: Source conflict prevention, bounded persistence and explicit authoring activation all pass.
+evidence:
+  - command: uv run pytest --no-cov -q tests/integration/test_policy_source_conflict.py tests/unit/test_policy_persistence_bounds.py tests/integration/test_policy_regression_diff.py tests/integration/test_gateway.py
+    result: Thirty-three tests pass, including the reproduced unpolled disk-policy conflict, successful explicit reload and reviewed subsequent update, existing authoring activation and payload-free audit export.
+  - command: uv run basedpyright src; uv run lint-imports
+    result: Zero type errors; all sixteen architecture contracts pass.

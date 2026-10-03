@@ -20,8 +20,12 @@ import httpx
 import yaml
 from pydantic import BaseModel, Field
 
-from fastfence.app.interfaces.cli.main import initialize
 from fastfence.modules.control.domain.models import Policy
+
+if __package__:
+    from evaluation.business_fixture import initialize
+else:
+    from business_fixture import initialize
 
 
 class Gateway(BaseModel):
@@ -31,7 +35,9 @@ class Gateway(BaseModel):
 
 
 def configuration(root: Path, rules: int) -> None:
-    policy = yaml.safe_load(Path("config/policy.offline.yaml").read_text())
+    policy = yaml.safe_load(
+        Path("examples/business_tools/policy.yaml").read_text()
+    )
     assert policy["semantic"]["provider"] == "disabled"
     policy["text_rules"] = [
         {
@@ -88,7 +94,7 @@ def isolated_gateway(rules: int) -> Iterator[Gateway]:
                 sys.executable,
                 "-m",
                 "uvicorn",
-                "fastfence.app.factory:create_app",
+                "evaluation.business_fixture:create_app",
                 "--factory",
                 "--host",
                 "127.0.0.1",

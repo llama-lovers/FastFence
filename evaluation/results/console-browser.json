@@ -1,0 +1,30 @@
+{
+  "created_at": "2026-10-03T20:29:08.599912+00:00",
+  "all_passed": true,
+  "mode": "real_chromium_synthetic_api_fixtures_no_inference",
+  "checks": [
+    "navigation",
+    "atomic_identity_connection",
+    "memory_only_credentials",
+    "model_first_no_demo_presets",
+    "visible_refresh_failure",
+    "authored_request_survives_refresh_failure",
+    "mobile_no_page_overflow",
+    "settings_review_before_publish",
+    "settings_edit_invalidates_review",
+    "failed_publish_preserves_authored_settings",
+    "active_version_updates",
+    "failed_regressions_block_activation",
+    "generated_case_edit_invalidates_review",
+    "exact_reviewed_proposal_activation",
+    "read_only_remote_source",
+    "disconnect_and_reload_clear_identity",
+    "named_rule_provider_failure_preserves_draft",
+    "named_rule_preview_scope_and_nonmutation",
+    "named_rule_scope_edits_invalidate_preview",
+    "named_rule_review_without_raw_json",
+    "named_rule_explicit_activation_preserves_instruction",
+    "named_rule_edit_requires_new_test"
+  ],
+  "actual_model_calls": 0
+}

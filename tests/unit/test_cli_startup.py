@@ -37,7 +37,7 @@ def test_repeat_init_preserves_credentials_and_keys(tmp_path, capsys):
     assert before == {file.name: file.read_bytes() for file in state.iterdir()}
     assert all(file.stat().st_mode & 0o777 == 0o600 for file in state.iterdir())
     output = capsys.readouterr().out
-    for token in json.loads(before["demo-tokens.json"]).values():
+    for token in json.loads(before["credentials.json"]).values():
         assert token not in output
     for key in json.loads(before["anonymization-keys.json"]).values():
         assert key not in output
@@ -50,13 +50,13 @@ def test_partial_or_corrupt_init_preserves_files(tmp_path, kind):
     state = tmp_path / "state"
     initialize(state)
     if kind == "identities":
-        (state / "demo-tokens.json").unlink()
+        (state / "credentials.json").unlink()
     elif kind == "tokens":
         (state / "identities.json").unlink()
     elif kind == "corrupt":
         (state / "identities.json").write_text("[]")
     else:
-        (state / "demo-tokens.json").write_text('{"someone": "mismatch"}')
+        (state / "credentials.json").write_text('{"someone": "mismatch"}')
     before = {path.name: path.read_bytes() for path in state.iterdir()}
     with pytest.raises(SystemExit, match="preserved"):
         initialize(state)
@@ -190,7 +190,7 @@ def test_existing_invalid_identity_schema_or_duplicate_hash_is_rejected(
     state = tmp_path / "state"
     initialize(state)
     records = json.loads((state / "identities.json").read_text())
-    tokens = json.loads((state / "demo-tokens.json").read_text())
+    tokens = json.loads((state / "credentials.json").read_text())
     if mutation == "subject":
         previous = records[0]["identity"]["subject"]
         records[0]["identity"]["subject"] = "invalid subject"
@@ -203,7 +203,7 @@ def test_existing_invalid_identity_schema_or_duplicate_hash_is_rejected(
             records[0]["identity"]["subject"]
         ]
     (state / "identities.json").write_text(json.dumps(records))
-    (state / "demo-tokens.json").write_text(json.dumps(tokens))
+    (state / "credentials.json").write_text(json.dumps(tokens))
     before = {p.name: p.read_bytes() for p in state.iterdir()}
     with pytest.raises(SystemExit, match="preserved"):
         initialize(state)

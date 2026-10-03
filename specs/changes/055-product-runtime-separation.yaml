@@ -1,0 +1,79 @@
+id: FF-055
+title: Separate local product startup from simulated business examples
+status: verified
+problem: The default gateway silently registered simulated business handlers, provisioned synthetic tenants and advertised demo commands as the main user workflow. A real installation needs explicit integrations and honest status.
+scope:
+  - Default runtime has no connected business tools and denies unsupported calls even when a legacy policy allowlists them.
+  - Inject ToolsPort through create_app and build_runtime for explicit business integrations.
+  - Move simulated handlers, legacy example identities and CLI scenario runner to examples/business_tools with isolated configuration and state.
+  - New local initialization provisions local-agent and local-admin in private credentials.json; valid existing legacy credentials are preserved.
+  - Product profiles contain no simulated tool allowlists and the product CLI offers init, doctor and serve only.
+  - Update first-run, upgrade and manual testing instructions to use actual protected models and versioned policy updates.
+  - Fresh-install acceptance exercises product auth, absent-tool denial, input guards, local preview, policy activation and actual MCP; full mode retains actual Laya/Qwen/OCR.
+constraints:
+  - Never rotate or overwrite valid existing credentials, keys or private configuration during upgrade.
+  - Do not silently install demo tools or convert a policy allowlist into an executable backend.
+  - Keep tests with explicit fake business handlers separate from actual model inference claims.
+change_paths:
+  - src/fastfence/app/factory.py
+  - src/fastfence/app/interfaces/cli/initialize.py
+  - src/fastfence/app/interfaces/cli/main.py
+  - src/fastfence/modules/control/application/facade.py
+  - src/fastfence/modules/control/application/use_cases/management.py
+  - src/fastfence/modules/control/persistence/tools.py
+  - src/fastfence/shared/defaults/policy.yaml
+  - config/policy.yaml
+  - config/policy.offline.yaml
+  - config/policy.hybrid.yaml
+  - config/policy.anonymization.yaml
+  - examples/business_tools/**
+  - tests/conftest.py
+  - tests/fixtures/configuration.py
+  - tests/integration/test_stateless_control.py
+  - tests/unit/test_boot_configuration.py
+  - tests/unit/test_cli_demo.py
+  - tests/unit/test_cli_startup.py
+  - tests/unit/test_control_boundary.py
+  - tests/unit/test_product_runtime.py
+  - integrations/laya/author_rule.py
+  - scripts/smoke_clean_install.py
+  - evaluation/business_fixture.py
+  - evaluation/benchmark_gateway.py
+  - evaluation/transport_harness.py
+  - evaluation/soak_harness.py
+  - evaluation/smoke_hybrid.py
+  - evaluation/smoke_policy_operations.py
+  - evaluation/smoke_authored_rules.py
+  - evaluation/smoke_semantic_strictness.py
+  - pyproject.toml
+  - README.md
+  - docs/getting-started.md
+  - docs/manual-testing.md
+acceptance:
+  - A new installation creates no synthetic blue/green tenants and no demo-tokens.json.
+  - Existing valid legacy initialization remains byte-for-byte unchanged.
+  - The default backend reports not_configured and cannot execute knowledge.search even when allowlisted.
+  - Examples explicitly register their simulated handlers in a separate server and use separate private state.
+  - Existing security tests retain explicit example adapters and continue passing.
+validation:
+  - command: uv run pytest -q --no-cov
+    expected: Existing security suite and new product runtime regressions pass.
+  - command: uv run basedpyright src && uv run lint-imports && uv run python scripts/check_architecture.py
+    expected: Types and architecture boundaries pass.
+evidence:
+  - command: uv run pytest -q --no-cov
+    result: 664 tests pass, including default fail-closed runtime, local initialization, legacy preservation and explicit example adapters.
+  - command: uv run basedpyright src
+    result: Zero errors and warnings.
+  - command: uv run lint-imports
+    result: All sixteen architecture contracts pass.
+  - command: uv run python scripts/check_architecture.py
+    result: Architecture AST checks pass for 197 source files.
+  - command: Isolated source snapshot with new virtual environment and private state, using scripts/smoke_clean_install.py start_and_check
+    result: All ten actual HTTP/MCP core scenarios pass, including absent backend denial, trusted local identity, model input blocks, preview and hot reload. This was a source snapshot run before commit, not a claim about a new Git clone.
+  - command: uv run --group docs mkdocs build --strict
+    result: Documentation builds successfully.
+  - command: uv run pyscn check --select complexity,deadcode,deps src
+    result: Complexity, dead-code and dependency checks pass.
+  - command: Isolated evaluation migration smoke checks
+    result: Six benchmark workload/mode combinations, actual HTTP fixture transport, HTTP-bundle soak transport and all five authored-rule enforcement cases pass using the explicit example factory. Historical reports were not rewritten.

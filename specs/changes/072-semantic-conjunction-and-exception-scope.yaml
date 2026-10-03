@@ -1,0 +1,30 @@
+id: FF-072
+title: Preserve combinations and explicit exceptions in semantic rules
+status: verified
+problem: Actual Laya preview of a rule prohibiting a full given-name plus surname combination incorrectly blocked a surname alone despite the rule explicitly permitting each component separately.
+scope:
+  - Explain the general semantics of combinations, conjunctions and explicit exceptions in the trusted semantic policy prompt.
+  - Require all components of a prohibited combination to be present together rather than inventing absent attributes.
+  - Keep transport field names separate from the user content evaluated by a rule.
+  - Preserve base security inspection after additional-rule requirements are satisfied.
+constraints:
+  - No hardcoded names, name regexes, alternate classifier or fabricated semantic score.
+  - Continue using the actual pinned Laya client and Qwen3:4b.
+  - Do not edit the active operator policy while evaluating the correction.
+  - Report measured outcomes and remaining model uncertainty without claiming deterministic recognition.
+change_paths:
+  - src/fastfence/modules/control/persistence/laya_semantic.py
+  - evaluation/results/laya-semantic-combination-scope.json
+acceptance:
+  - The reported full name is blocked and its given name and surname are individually permitted in actual Laya preview semantics.
+  - A second synthetic full-name combination and its separate components have the intended outcomes.
+  - The original secret-exfiltration instruction remains blocked.
+  - A surname inside the actual JSON prompt envelope is not turned into a full-name violation by its field name.
+validation:
+  - command: Actual SemanticScanner with the named Polish rule and local Laya/Qwen3:4b
+    expected: Record all eight classifications without rewriting outputs or changing active policy.
+  - command: uv run pytest -q --no-cov tests/unit/test_laya_semantic_runtime.py tests/unit/test_named_semantic_rules.py tests/integration/test_semantic_rule_preview.py
+    expected: Existing transport, resource accounting, scope and preview contracts continue passing.
+evidence:
+  - command: Actual pinned Laya/Qwen3:4b semantic scan of eight synthetic cases
+    result: All eight match the independently specified expectation. Both full-name combinations score 1.0, four separate components score 0.0, the exfiltration instruction scores 1.0 and the surname inside a JSON prompt envelope scores 0.0. Cold start takes 2243ms and subsequent cases take 349-408ms. These observations are not a universal accuracy guarantee.

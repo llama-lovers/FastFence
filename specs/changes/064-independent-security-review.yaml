@@ -1,0 +1,34 @@
+id: FF-064
+title: Record independent pre-push security review and verified remediation
+status: implemented
+problem: The product and semantic runtime changes need an independent adversarial review with reproducible findings and explicit limits before publication.
+scope:
+  - Review management authorization, transactional browser identities, policy conflicts, rendering and token handling.
+  - Review the actual pinned Laya worker transport, provider completion validation, environment isolation, lifecycle and fail-closed behavior.
+  - Document confirmed findings, independently retested remediation and remaining trust assumptions.
+  - Independently review the later FF-065 scoped semantic rules and FF-066 management preview endpoint.
+constraints:
+  - Do not read or modify private deployment credentials or policy during audit reproductions.
+  - Use temporary configurations and explicitly synthetic provider and browser fixtures.
+  - Distinguish protocol testing from real inference and model evidence from universal attack coverage.
+  - Do not claim an operating-system-wide isolation audit or security certification.
+change_paths:
+  - docs/security-review.md
+acceptance:
+  - The report records all three confirmed P2 findings and the FF-062 and FF-063 fixes.
+  - Independent retesting rejects malformed completions and unpolled policy overwrites while retaining valid behavior.
+  - Remaining model, provider resource, external-writer and per-instance accounting limits are explicit.
+validation:
+  - command: uv run pytest --no-cov -q tests/integration/test_policy_source_conflict.py tests/unit/test_policy_persistence_bounds.py tests/integration/test_policy_regression_diff.py tests/unit/test_laya_semantic_runtime.py tests/unit/test_laya_provider_validation.py
+    expected: Focused conflict, provider and worker regression tests pass.
+evidence:
+  - command: Independent post-fix focused regression run
+    result: 59 tests passed; earlier overlapping focused groups passed 71 and 118 tests.
+  - command: Actual installed worker and pinned Laya client against independent synthetic HTTP fixtures
+    result: Seven malformed completions rejected and one valid completion accepted; eight provider calls, no files created in temporary HOME or working directory, and no synthetic private input marker in captured output.
+  - command: Independent Chromium synthetic identity, HTML injection, storage and review-invalidation probes
+    result: Transactional identity replacement, literal untrusted text rendering, no token storage and review invalidation all passed.
+  - command: Installed LiteLLM initialization with synthetic dotenv fixture
+    result: The original environment isolation bypass reproduced; deployed production and dotenv-disable flags prevented the marker from entering the child environment.
+  - command: FF-065 and FF-066 focused tests and independent asynchronous browser/application probes
+    result: Forty-nine tests passed; pending edits and identity changes, wrong-scope and wrong-version replies, and stale final review cannot bypass review. Preview uses its captured snapshot and reports the tested version without mutating policy. No new confirmed security blocker found.

@@ -105,7 +105,7 @@ def isolated_soak(audit_capacity: int = 128):
                     sys.executable,
                     "-m",
                     "uvicorn",
-                    "fastfence.app.factory:create_app",
+                    "evaluation.business_fixture:create_app",
                     "--factory",
                     "--host",
                     "127.0.0.1",

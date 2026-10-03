@@ -17,6 +17,8 @@ function auditDetails(record) {
     ['Identity / tenant', record.subject + ' / ' + record.tenant],
     ['Instance', record.instance_id],
     ['Event kind', record.event_kind],
+    ['Input text analysis', record.semantic_input_status || 'Not recorded by this version'],
+    ['Output text analysis', record.semantic_output_status || 'Not recorded by this version'],
     ['Semantic severity', record.semantic_score == null ? 'Not evaluated' : record.semantic_score + ' (ordinal, not probability)'],
     ['Accounted token units', record.tokens],
   ];
@@ -87,6 +89,7 @@ function renderAudit(rows) {
   renderAuditRows();
 }
 function focusAudit(requestId) {
+  navigate('activity');
   $('auditSearch').value = requestId;
   $('auditDecision').value = '';
   if (auditRows.some((row) => row.request_id === requestId)) expandedAudit.add(requestId);

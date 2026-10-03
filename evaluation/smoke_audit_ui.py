@@ -71,6 +71,7 @@ def run(root):
         page.locator("#adminToken").fill("fixture-admin")
         page.locator("#saveConnect").click()
         expect(page.locator("#connectDialog")).not_to_be_visible()
+        page.locator('nav [data-nav="activity"]').click()
         expect(page.locator("#auditWindow")).to_contain_text("Showing 3 of 3")
         page.locator("#auditDecision").select_option("allowed")
         expect(page.locator("#events button")).to_have_count(1)
@@ -120,7 +121,8 @@ def run(root):
             "record => renderVerdict({...record, output:null})",
             status["audit"][0],
         )
-        page.get_by_role("button", name="View this decision in audit").click()
+        page.locator('nav [data-nav="requests"]').click()
+        page.get_by_role("button", name="Inspect in Activity →").click()
         expect(page.locator("#auditSearch")).to_have_value("request-blocked")
         expect(page.locator("#auditDecision")).to_have_value("")
         expect(page.locator("#audit-detail-0")).to_be_visible()

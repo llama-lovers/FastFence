@@ -13,9 +13,12 @@ from pathlib import Path
 import yaml
 from fastapi.testclient import TestClient
 
-from fastfence.app.factory import create_app
-from fastfence.app.interfaces.cli.main import initialize
 from fastfence.shared.settings.app_settings import AppSettings
+
+if __package__:
+    from evaluation.business_fixture import create_app, initialize
+else:
+    from business_fixture import create_app, initialize
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -41,7 +44,7 @@ def smoke(args: argparse.Namespace) -> dict:
             ROOT / "config/signatures.json", root / "config/signatures.json"
         )
         policy = yaml.safe_load(
-            (ROOT / "config/policy.offline.yaml").read_text()
+            (ROOT / "examples/business_tools/policy.yaml").read_text()
         )
         policy["semantic"].update(
             provider="ollama",

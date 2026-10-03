@@ -1,0 +1,39 @@
+id: FF-058
+title: Replace the demonstration dashboard with a task-oriented local console
+status: implemented
+problem: The dashboard mixes onboarding, demonstrations, configuration and request testing on one crowded page, obscuring how to operate and update the product.
+scope:
+  - Separate overview, policy management, request testing, documents, activity and connections with persistent navigation.
+  - Show explicit disconnected, connected, stale and failed states without fabricated readiness.
+  - Validate connection credentials transactionally and keep them only in page memory.
+  - Remove demonstration presets and competition branding from the product console.
+  - Give document processing independent model settings and results.
+  - Explain active configuration, refresh behavior, policy versions and next actions in place.
+constraints:
+  - Preserve authentication, management separation, audit sanitation and policy review gates.
+  - Never reset operator policy or private state to make the interface look populated.
+  - Render API content as text, never untrusted HTML; no external fonts, scripts or analytics.
+  - Surface API failures and retain unsaved form values during background refresh.
+change_paths:
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/app/interfaces/http/web/console.js
+  - src/fastfence/app/interfaces/http/web/console.css
+  - src/fastfence/app/interfaces/http/web/playground.js
+  - src/fastfence/app/interfaces/http/web/documents.js
+  - src/fastfence/app/interfaces/http/web/audit.js
+  - src/fastfence/app/interfaces/http/web/logo.svg
+  - src/fastfence/app/interfaces/http/routes.py
+  - tests/integration/test_policy_studio_ui.py
+acceptance:
+  - A disconnected operator sees a clear first action and can identify what management and agent credentials enable.
+  - Each navigation destination displays only its own task, supports hash navigation and works on mobile.
+  - A failed combined credential submission changes neither active identity.
+  - Model calls, document processing and audit navigation work without simulated business tools.
+  - Refresh failures are visible and successful refresh clears the stale state.
+  - Policy updates expose review, explicit activation and the resulting active version.
+validation:
+  - command: uv run --with playwright python evaluation/smoke_console.py
+    expected: Browser navigation, connection, update and mobile checks pass.
+  - command: uv run pytest -q
+    expected: Backend and asset regressions pass.
+evidence: []

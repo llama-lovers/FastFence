@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The clean-installation and explicit policy-scope checkpoint passes **659 tests**, with **91.40%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The earlier clean-installation checkpoint passed **659 tests** with **91.40%** coverage. The current console, named-rule and model-upstream checkpoint passes **778 tests** with **91.90%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -170,6 +170,19 @@ The [v2 six-case strictness smoke](https://github.com/llama-lovers/HackYeah2026-
 ### Historical severity-v1 checkpoint
 
 The [original 60-case report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-severity-holdout.json) had 46 exact categories, zero provider errors and all 20 clearly malicious cases detected; 12 suspicious cases were classified benign. It remains unchanged. Because the v2 blind corpus is different, 46/60 versus 54/60 is not a controlled before/after accuracy comparison. The earlier [v1 strictness smoke](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-strictness-live.json) is retained separately.
+
+## Management console browser acceptance
+
+Every push runs real Chromium against the delivered HTML, CSS and JavaScript with synthetic API fixtures. These checks cover navigation, atomic identity connection, credentials held only in page memory, settings review and stale-review invalidation, failed saves, explicit proposal activation, remote read-only sources, audit investigation and mobile layout. They make no model calls and do not modify a running gateway.
+
+```sh
+uv run --with playwright==1.63.0 python -m playwright install chromium
+uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output state/private/console-browser.json
+uv run --with playwright==1.63.0 python evaluation/smoke_playground_models.py --output state/private/model-browser.json
+uv run --with playwright==1.63.0 python evaluation/smoke_audit_ui.py --output state/private/audit-browser.json
+```
+
+The [console report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/console-browser.json) records 16 passing browser checks. The separate model-selection and audit suites cover seven and nine additional interaction contracts. To verify actual inference and your own environment, use [manual verification](manual-testing.md); fixture results are not inference evidence.
 
 ## Policy studio and selective controls
 

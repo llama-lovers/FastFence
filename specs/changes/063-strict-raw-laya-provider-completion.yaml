@@ -1,0 +1,37 @@
+id: FF-063
+title: Reject incomplete semantic provider responses before upstream normalization
+status: verified
+problem: The pinned LiteLLM and Laya clients normalize a missing or null finish_reason into stop. A classifier response could therefore appear complete and produce an allow decision without an explicit successful provider completion.
+scope:
+  - Serialize secret scanning so baseline line-number updates cannot race between hook batches.
+  - Guard the actual pinned OpenAI provider completion seam before LiteLLM response conversion and Laya normalization.
+  - Require exactly one explicit stop choice, text containing strict severity JSON and no tool calls, function calls, refusal or truncation.
+  - Preserve the actual provider HTTP call and original result without repairing classifier content.
+  - Disable LiteLLM development dotenv loading in the isolated worker so deployment secrets cannot be reintroduced after environment filtering.
+  - Exercise the actual pinned worker against a local fake HTTP provider with malformed and valid completion states.
+constraints:
+  - Execute the real Laya llm_call and original provider transport; no inference substitution or fabricated result.
+  - Failure responses expose only the stable unavailable code without input or provider payloads.
+  - No database or temporary payload files are introduced.
+change_paths:
+  - .pre-commit-config.yaml
+  - .secrets.baseline
+  - integrations/laya/semantic_worker.py
+  - integrations/laya/semantic_response.py
+  - src/fastfence/modules/control/persistence/laya_semantic.py
+  - tests/unit/test_laya_provider_validation.py
+  - tests/integration/test_laya_raw_provider.py
+acceptance:
+  - Actual worker rejects missing, null and length finish reasons, and rejects tool calls even with explicit stop.
+  - Actual worker accepts a single valid explicit stop severity response.
+  - Guard returns the exact original provider result and forwards transport arguments unchanged.
+  - Think-block stripping, fallback reasoning and duplicate severity fields cannot turn invalid raw content into a security decision.
+  - Worker process forces production LiteLLM mode and disables dotenv reloading independently of inherited environment.
+validation:
+  - command: uv run pytest -q --no-cov tests/unit/test_laya_provider_validation.py tests/integration/test_laya_raw_provider.py tests/unit/test_laya_semantic_runtime.py
+    expected: Strict provider and lifecycle regressions pass; the actual-worker test requires the explicit pinned Laya installation and is skipped when absent in offline CI.
+evidence:
+  - command: Actual pinned semantic worker against an isolated local fake HTTP provider
+    result: Missing/null/length completion states and stop with tool calls return only laya_semantic_unavailable. Explicit valid stop returns the original benign severity and usage. Exactly five provider calls occurred; no files were created in isolated HOME, TMPDIR or cwd, and the synthetic private input was absent from stdout and stderr.
+  - command: Pure raw-response and transport-guard tests
+    result: Tests reject missing stop, malformed choices, raw think-block content, duplicate/extra JSON fields, reasoning fallback, tool/function calls and refusal; valid transport results and arguments remain unchanged.

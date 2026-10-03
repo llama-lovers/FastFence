@@ -1,0 +1,38 @@
+id: FF-068
+title: Runnable developer examples for Qwen, named semantic policies and FastMCP
+status: verified
+problem: Documentation listed capabilities but lacked complete executable client code showing how to call protected models, preview actual text against a named rule and activate it deliberately.
+scope:
+  - Provide tracked complete REST, named semantic-policy and FastMCP client programs outside the installed product package.
+  - Show actual named-rule preview through the management HTTP API and require an explicit activation flag with successful expected previews and unchanged base policy.
+  - Exercise actual model and tool MCP calls without imaginary middleware or simulated default business handlers.
+  - Embed tracked program source into documentation pages rather than maintaining divergent copies.
+constraints:
+  - Never print bearer credentials; load local private files or environment-provided tokens.
+  - Preserve existing policy controls and fail on stale versions, preview failures or unexpected model classifications.
+  - Label test doubles and the opt-in business adapter explicitly; public examples call actual APIs.
+change_paths:
+  - examples/docs/__init__.py
+  - examples/docs/protected_request.py
+  - examples/docs/semantic_policy.py
+  - examples/docs/mcp_client.py
+  - docs/examples/protected-request.md
+  - docs/examples/semantic-policy.md
+  - docs/examples/mcp-client.md
+  - tests/integration/test_documentation_examples.py
+acceptance:
+  - REST example checks a real gateway verdict rather than treating HTTP 200 as allowance.
+  - Named-rule preview uses the actual text-assessment endpoint without changing active policy.
+  - Activation preserves unrelated controls and requires passing expectations plus an unchanged base.
+  - Real FastMCP client authenticates over HTTP and receives actual complete/invoke verdicts.
+  - Docs show exact setup, commands, source and expected outcomes with model-dependent limits.
+validation:
+  - command: uv run pytest -q --no-cov tests/integration/test_documentation_examples.py
+    expected: Actual gateway routes, unchanged preview state, explicit activation and real MCP transport pass with clearly isolated inference fixtures.
+  - command: Independent actual local Laya/Qwen execution of the example clients
+    expected: Record observed named-rule previews and protected completion outcomes without modifying user policy.
+evidence:
+  - command: uv run pytest -q --no-cov tests/integration/test_documentation_examples.py
+    result: Five tests pass against actual FastAPI routes and real authenticated FastMCP HTTP transport. Inference doubles are confined to tests, and tool calls explicitly use the opt-in example adapter.
+  - command: Actual documentation functions against an isolated gateway with real Laya/Qwen
+    result: Named financial-rule preview classified the forbidden recommendation as blocked (score 1.0, 4693ms including cold start) and the general definition as no_semantic_block (score 0.0, 435ms). Preview retained policy version 1; explicit activation wrote temporary version 2. The protected recommendation was blocked and an actual Qwen greeting was allowed. User policy and credentials were unchanged.

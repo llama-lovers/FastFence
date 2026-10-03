@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -11,6 +12,7 @@ from fastfence.modules.control.domain.models import (
     ModelMessage,
     SemanticConfig,
 )
+from fastfence.modules.control.persistence.laya_semantic import LayaSemantic
 from fastfence.modules.control.persistence.semantic_severity import (
     OLLAMA_SYSTEM,
     SEVERITY_SCHEMA,
@@ -33,12 +35,29 @@ def validated_score(risk: Any) -> float:
 
 
 class SemanticScanner:
-    def __init__(self, ollama_url: str, kev_url: str) -> None:
+    def __init__(
+        self, ollama_url: str, kev_url: str, laya_root: Path | None = None
+    ) -> None:
         self.ollama_url = ollama_url.rstrip("/")
         self.kev_url = kev_url.rstrip("/")
+        self.laya = LayaSemantic(laya_root or Path.cwd(), ollama_url)
+
+    async def aclose(self) -> None:
+        await self.laya.aclose()
 
     async def assess(self, text: str, config: SemanticConfig) -> Assessment:
         try:
+            if config.provider == "laya":
+                score, tokens = await self.laya.assess(text, config)
+                return Assessment(
+                    score=score,
+                    tokens=max(
+                        tokens,
+                        len(text.encode())
+                        + 1024
+                        + len(config.policy_text.encode()),
+                    ),
+                )
             async with httpx.AsyncClient(
                 timeout=config.timeout_ms / 1000, trust_env=False
             ) as client:
@@ -49,7 +68,13 @@ class SemanticScanner:
                 else:
                     raise ModelUnavailableError("Semantic scanning disabled")
             return Assessment(
-                score=score, tokens=max(tokens, len(text.encode()) + 1024)
+                score=score,
+                tokens=max(
+                    tokens,
+                    len(text.encode())
+                    + 1024
+                    + len(config.policy_text.encode()),
+                ),
             )
         except Exception:
             raise ModelUnavailableError(

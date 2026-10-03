@@ -27,6 +27,7 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
   features:
+    - navigation.tabs
     - navigation.sections
     - navigation.top
     - navigation.footer
@@ -36,6 +37,9 @@ theme:
 
 plugins:
   - search
+
+hooks:
+  - scripts/docs_reference.py
 
 markdown_extensions:
   - admonition
@@ -56,15 +60,30 @@ extra_javascript:
 
 nav:
   - Overview: index.md
-  - Get started: getting-started.md
-  - Guides:
+  - Get started:
+      - Installation: getting-started.md
+      - Learn by task: learn.md
+      - Verify your installation: manual-testing.md
+  - Learn:
       - Policies and controls: policies.md
       - Laya, MCP and models: integrations.md
-      - Manual acceptance test: manual-testing.md
-      - Testing and evidence: testing.md
-      - Challenge readiness: challenge-readiness.md
+  - Examples:
+      - Protected model request: examples/protected-request.md
+      - Named Laya rule: examples/semantic-policy.md
+      - MCP client: examples/mcp-client.md
+      - FastMCP server: examples/fastmcp-server.md
+      - OpenAI SDK client: examples/openai-client.md
+      - OpenAI-compatible upstream: examples/openai-upstream.md
   - Reference:
-      - Architecture: architecture.md
-      - Stateless anonymization and OCR plan: anonymization-plan.md
+      - Integration contracts: integration-reference.md
+      - HTTP API from source: reference/http-api.md
       - Runtime settings: settings.md
+      - Architecture: architecture.md
+  - Operations:
+      - Testing and evidence: testing.md
+      - Independent security review: security-review.md
       - Documentation deployment: deployment.md
+  - Project:
+      - Requirements and evidence: requirements.md
+      - Challenge readiness: challenge-readiness.md
+      - Stateless anonymization and OCR plan: anonymization-plan.md

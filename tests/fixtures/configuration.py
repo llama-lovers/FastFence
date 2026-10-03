@@ -16,7 +16,9 @@ def configuration(tmp_path):
         tmp_path / "policy.yaml",
         tmp_path / "signatures.json",
     )
-    policy_path.write_text(Path("config/policy.offline.yaml").read_text())
+    policy_path.write_text(
+        Path("examples/business_tools/policy.yaml").read_text()
+    )
     feed_path.write_text(Path("config/signatures.json").read_text())
     return policy_path, feed_path
 

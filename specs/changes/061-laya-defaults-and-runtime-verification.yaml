@@ -1,0 +1,47 @@
+id: FF-061
+title: Enable Laya text assessment by default and verify independent runtime behavior
+status: verified
+problem: A default deterministic-only profile can allow unrecognized malicious text without semantic inspection, and existing setup instructions did not require the Laya assessment runtime.
+scope:
+  - Enable real Laya with Qwen3:4b and both input and output assessment in repository and packaged defaults.
+  - Keep the explicitly selected offline profile for deterministic-only development and no-model CI.
+  - Strengthen doctor full checks to import the assessment worker and actual Laya model-client dependencies without inference or bytecode writes.
+  - Test deadline, cancellation, busy capacity, malformed worker responses, trusted guideline separation, UTF8 token allowance and per-direction execution status independently.
+  - Require fresh full acceptance to exercise actual Laya classification of the reported attack and benign input/output; identify offline profile explicitly in CI evidence.
+  - Rewrite first-run and update documentation around the required local Laya setup and concise developer integration examples.
+constraints:
+  - Never silently disable configured semantic inspection or overwrite existing private user configuration.
+  - Semantic outcomes are measured model-dependent behavior, not universal detection or deterministic letter matching.
+  - Preserve in-memory per-instance accounting and explicit example adapters outside the product.
+change_paths:
+  - config/policy.yaml
+  - src/fastfence/shared/defaults/policy.yaml
+  - src/fastfence/app/interfaces/cli/startup.py
+  - tests/unit/test_packaged_bootstrap.py
+  - tests/unit/test_laya_semantic_runtime.py
+  - scripts/smoke_clean_install.py
+  - README.md
+  - docs/getting-started.md
+  - docs/manual-testing.md
+acceptance:
+  - Fresh initialization produces laya/qwen3:4b with output assessment enabled.
+  - The packaged default equals the reviewed repository default, rather than the offline profile.
+  - No-model clean-install CI asserts product defaults before explicitly switching only its isolated checkout to the offline profile.
+  - A missing assessment worker prevents full readiness from reporting success.
+  - Worker timeout and cancellation kill and reap the worker and release its capacity; concurrent work fails immediately.
+  - Private failure bodies cannot escape through scanner error messages.
+  - Real Laya independently classifies the exact reported attack as malicious and a benign greeting as benign.
+validation:
+  - command: uv run pytest -q --no-cov tests/unit/test_laya_semantic_runtime.py tests/unit/test_cli_startup.py tests/unit/test_packaged_bootstrap.py
+    expected: Independent lifecycle, defaults and setup contracts pass.
+  - command: Independent SemanticScanner real Laya/Qwen3:4b probe without modifying active policy
+    expected: Report actual attack, greeting and natural-language policy classifications and timings.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_laya_semantic_runtime.py tests/unit/test_cli_startup.py tests/unit/test_packaged_bootstrap.py
+    result: Fifty-seven tests pass, including timeout, cancellation, busy capacity, malformed responses, trusted instruction separation, UTF8 accounting and per-direction status.
+  - command: Independent actual Laya/Qwen3:4b assessment probe
+    result: Exact reported attack scores 1.0 in 2735ms including cold startup; Hello scores 0.0 in 460ms. A financial recommendation forbidden by the trusted guideline scores 1.0 in 747ms; a permitted general definition scores 0.0 in 410ms. These four observations are not a general accuracy guarantee.
+  - command: Actual installed Laya doctor dependency import check
+    result: The installed isolated interpreter imports semantic_worker, LiteLLM and pinned Laya llm_call successfully without inference.
+  - command: uv run basedpyright src; uv run lint-imports; uv run --group docs mkdocs build --strict
+    result: Zero type errors or warnings, all sixteen import contracts pass, and strict documentation build passes.

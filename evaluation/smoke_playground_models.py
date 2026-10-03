@@ -9,9 +9,13 @@ from urllib.parse import urlsplit
 import yaml
 from playwright.sync_api import expect, sync_playwright
 
+from fastfence.modules.control.domain.models import Policy
+
 
 def fixture_status(root):
-    policy = yaml.safe_load((root / "config/policy.hybrid.yaml").read_text())
+    policy = Policy.model_validate(
+        yaml.safe_load((root / "config/policy.hybrid.yaml").read_text())
+    ).model_dump(mode="json")
     policy["models"] = {"qwen3:4b": {"roles": ["analyst"]}}
     return {
         "policy": policy,
@@ -54,10 +58,22 @@ def install_fixture(page, root, status, calls):
             "rules.js",
             "policy-studio.js",
             "audit.js",
+            "documents.js",
+            "console.js",
+            "console.css",
+            "policy-manager.js",
+            "policy-panels.html",
+            "logo.svg",
         }:
+            suffix = Path(path).suffix
             route.fulfill(
                 body=(web / path.rsplit("/", 1)[1]).read_text(),
-                content_type="text/javascript",
+                content_type={
+                    ".js": "text/javascript",
+                    ".css": "text/css",
+                    ".html": "text/html",
+                    ".svg": "image/svg+xml",
+                }[suffix],
             )
         elif path == "/api/me":
             admin = (
@@ -110,6 +126,7 @@ def run(root):
         page.locator("#adminToken").fill("fixture-admin")
         page.locator("#saveConnect").click()
         expect(page.locator("#connectDialog")).not_to_be_visible()
+        page.locator('nav [data-nav="requests"]').click()
         expect(page.locator("#completionModel")).to_have_value("qwen3:4b")
         page.locator("#playgroundMode").select_option("model")
         expect(page.locator("#completionModel")).to_have_value("qwen3:4b")
@@ -144,7 +161,7 @@ def run(root):
         page.evaluate("refresh()")
         expect(page.locator("#completionModel")).to_have_value("")
         assert page.locator("#allowedModels option").count() == 0
-        assert not failures, "Browser JavaScript errors occurred"
+        assert not failures, failures
         browser.close()
     return {
         "created_at": datetime.now(UTC).isoformat(),

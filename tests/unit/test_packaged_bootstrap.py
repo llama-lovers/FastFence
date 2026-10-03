@@ -13,7 +13,7 @@ from fastfence.app.interfaces.cli.bootstrap_config import (
 from fastfence.modules.control.domain.models import Snapshot
 
 
-def test_empty_root_receives_valid_offline_configuration(
+def test_empty_root_receives_valid_laya_configuration(
     tmp_path: Path,
 ) -> None:
     initialize_config(tmp_path)
@@ -24,7 +24,9 @@ def test_empty_root_receives_valid_offline_configuration(
             "feed": json.loads((config / "signatures.json").read_bytes()),
         }
     )
-    assert snapshot.policy.semantic.provider == "disabled"
+    assert snapshot.policy.semantic.provider == "laya"
+    assert snapshot.policy.semantic.model == "qwen3:4b"
+    assert snapshot.policy.semantic.scan_output
     assert snapshot.policy.privacy.input == "block"
     assert not (tmp_path / "state").exists()
 
@@ -100,7 +102,7 @@ def test_atomic_publication_never_overwrites_existing_file(
 @pytest.mark.parametrize(
     ("resource", "source"),
     [
-        ("policy.yaml", "policy.offline.yaml"),
+        ("policy.yaml", "policy.yaml"),
         ("signatures.json", "signatures.json"),
     ],
 )

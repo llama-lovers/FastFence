@@ -1,0 +1,40 @@
+id: FF-070
+title: Support trusted OpenAI-compatible business model upstreams
+status: implemented
+problem: Protected model calls were tied to Ollama even when operators already served models using another OpenAI-compatible endpoint.
+scope:
+  - Add a configurable text-only OpenAI-compatible Chat Completions model adapter alongside native Ollama.
+  - Keep Laya semantic inference and its Ollama endpoint independent from the business model provider.
+  - Document executable Ollama compatibility, vLLM and llama.cpp upstream configuration.
+constraints:
+  - Upstream credentials are trusted server settings represented as SecretStr, never supplied by gateway callers or returned by status.
+  - Require HTTPS for remote endpoints and permit HTTP only for loopback; reject inline credentials, query strings and fragments.
+  - Disable redirects and environment proxy use; enforce total timeout and bounded response bytes before JSON decoding.
+  - Accept only one assistant text choice with explicit stop or length, no tools or refusal, and strict consistent token usage.
+  - Sanitize provider errors and retain existing input/output policy enforcement and resource accounting.
+change_paths:
+  - .env.example
+  - docs/settings.md
+  - mkdocs.yml
+  - scripts/docs_reference.py
+  - src/fastfence/modules/control/persistence/openai_models.py
+  - src/fastfence/modules/control/application/facade.py
+  - src/fastfence/shared/settings/app_settings.py
+  - src/fastfence/shared/settings/upstream_url.py
+  - tests/unit/test_openai_upstream.py
+  - tests/integration/test_openai_upstream_transport.py
+  - docs/examples/openai-upstream.md
+acceptance:
+  - A configured OpenAI-compatible upstream receives existing protected prompts/messages and returns validated text and usage.
+  - Native Ollama remains the default and semantic configuration remains independent.
+  - Malformed replies, redirects, oversized bodies, invalid usage and deadlines fail closed without private provider diagnostics.
+validation:
+  - command: uv run pytest --no-cov -q tests/unit/test_openai_upstream.py tests/integration/test_openai_upstream_transport.py
+    expected: MockTransport and real loopback HTTP fixtures pass.
+evidence:
+  - command: Focused OpenAI upstream regression suite
+    result: Thirty-three tests passed, including real loopback HTTP, strict accounting, malformed modes, bounded transport and runtime wiring.
+  - command: Actual Ollama /v1 adapter call using qwen3:0.6b with max_tokens 256
+    result: Nonempty text returned with explicit stop and 156 total provider tokens. An earlier 64-token request exhausted reasoning and returned empty text with length; this provider behavior is documented.
+  - command: uv run basedpyright src; uv run lint-imports
+    result: Zero typing errors and all sixteen architecture contracts passed.

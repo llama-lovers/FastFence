@@ -102,6 +102,7 @@ max-complexity = 10
 "src/fastfence/modules/*/interfaces/http/**/*.py" = ["B008"]
 "src/fastfence/app/interfaces/cli/**/*.py" = ["T201"]
 "scripts/*.py" = ["T201"]
+"examples/**/*.py" = ["T201"]
 "evaluation/*.py" = ["T201"]
 "integrations/laya/run_demo.py" = ["T201"]
 "tests/**/*.py" = ["T201"]

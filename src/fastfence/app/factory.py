@@ -12,6 +12,7 @@ from fastfence.modules.control.application.facade import (
     ControlRuntime,
     build_runtime,
 )
+from fastfence.modules.control.contracts.ports import ToolsPort
 from fastfence.modules.control.interfaces.mcp.server import create_mcp
 from fastfence.shared.settings.app_settings import AppSettings
 from fastfence.workflows.anonymization import build_anonymization
@@ -23,10 +24,12 @@ async def watch_config(runtime: ControlRuntime, interval: float) -> None:
         await runtime.refresh_config()
 
 
-def create_app(settings: AppSettings | None = None) -> FastAPI:
+def create_app(
+    settings: AppSettings | None = None, *, tools: ToolsPort | None = None
+) -> FastAPI:
     settings = settings or AppSettings.environment()
     runtime = build_runtime(
-        settings, anonymization=build_anonymization(settings)
+        settings, anonymization=build_anonymization(settings), tools=tools
     )
     mcp = create_mcp(runtime, runtime.identities)
     mcp_app = mcp.http_app(path="/", stateless_http=True, json_response=True)
@@ -44,7 +47,7 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
                 watcher.cancel()
                 with suppress(asyncio.CancelledError):
                     await watcher
-                runtime.close()
+                await runtime.aclose()
 
     app = FastAPI(title="FastFence", version="0.1.0", lifespan=lifespan)
     app.state.engine = runtime.engine

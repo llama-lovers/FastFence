@@ -1,0 +1,31 @@
+id: FF-059
+title: Organize documentation around developer tasks and source-backed references
+status: verified
+problem: The documentation landing page mixes historical challenge claims with integration guidance, contains a stale MCP limitation and provides no concise route for developers or LLM clients.
+scope:
+  - Separate start, learn, integration reference, operations and historical evidence.
+  - Generate an HTTP endpoint inventory from route declarations with source links.
+  - Generate llms.txt and llms-full.txt from the same curated documentation sources.
+constraints:
+  - Do not access runtime credentials, launch models or initialize a gateway during documentation builds.
+  - Do not invent unsupported providers, APIs, published packages or distributed guarantees.
+  - Preserve existing documentation URLs and historical evaluation evidence.
+change_paths:
+  - docs/index.md
+  - docs/learn.md
+  - docs/integration-reference.md
+  - docs/integrations.md
+  - docs/policies.md
+  - mkdocs.yml
+  - scripts/docs_reference.py
+acceptance:
+  - A developer can find installation, a first protected request and its protocol contract from the homepage.
+  - The source-derived endpoint inventory includes model completion, policy authoring and OCR.
+  - Both LLM text files are built without access to local credentials or running services.
+  - Strict MkDocs build succeeds and existing page URLs remain valid.
+validation:
+  - command: uv run --group docs mkdocs build --strict
+    expected: Navigable site, generated endpoint inventory and both LLM text outputs build successfully.
+evidence:
+  - command: uv run --group docs mkdocs build --strict
+    result: Strict build passes with preserved routes, the generated endpoint inventory and both LLM text files. Checked router prefixes and model, document and policy authoring endpoint paths in generated output.

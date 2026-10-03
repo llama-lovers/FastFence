@@ -236,9 +236,10 @@ class InputInspector:
             else policy.max_output_bytes
         )
         enabled = policy.semantic.provider != "disabled"
-        semantic_reserve = input_units + 2048 if enabled else 0
+        allowance = policy.semantic.token_allowance
+        semantic_reserve = input_units + allowance if enabled else 0
         if enabled and policy.semantic.scan_output:
-            semantic_reserve += policy.max_output_bytes + 2048
+            semantic_reserve += policy.max_output_bytes + allowance
         scans = int(enabled) * (2 if policy.semantic.scan_output else 1)
         return PreparedInvocation(
             rule=rule,

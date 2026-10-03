@@ -30,7 +30,7 @@ Polling, timeout, size, identity, and upstream settings are documented in [setti
 | `budgets` | Per-role limits for calls, token units, micro-USD cost, runtime milliseconds, and concurrency. |
 | `privacy` | Enable privacy checks and choose input/output `block` or `redact`. |
 | `signatures_enabled` | Enable literal attack-signature checks on input and output. |
-| `semantic` | Select `disabled`, `ollama`, or `kev`; configure assessor model, threshold, timeout, and output scanning. |
+| `semantic` | Select `laya` (product default), `disabled`, `ollama`, or `kev`; configure assessor model, threshold, timeout, output scanning and optional Laya-only instructions. |
 | `max_input_bytes`, `max_output_bytes` | Bound serialized UTF-8 payload sizes, including sanitized payloads. |
 
 Management writes also validate the exact serialized YAML size against the configuration source byte limit before replacing the file or active snapshot. An oversized candidate leaves the last valid source intact, so refresh and restart can still read it.
@@ -82,9 +82,55 @@ The supplied patterns cover representative pickle/PyTorch loading, remote-shell 
 
 ## Semantic controls
 
-The default policy disables semantic checks. The hybrid profile enables a real separately hosted Ollama assessor. The current `severity-v2` Ollama rubric distinguishes explicit attacks, sensitive actions with unresolved safeguards, and benign explanations or authorized requests. It returns one constrained severity category: `benign` maps to `0`, `suspicious` to `0.6`, and `malicious` to `1`. These are ordinal policy codes, not calibrated probabilities. A threshold of `0.5` blocks suspicious and malicious content; `0.8` blocks malicious content. The supplied hybrid profile uses `0.7`, which also blocks only the malicious category; set `0.5` to block the suspicious category as well. Actual-model threshold behavior is recorded in the testing evidence. Invalid responses, timeouts, or configured provider failures fail closed.
+The product policy uses **Laya with local Qwen3:4b**, a 30-second assessment timeout, threshold `0.7` and output scanning enabled. Requests first run local controls; content that reaches semantic inspection is assessed before forwarding, and generated output is assessed before delivery. Invalid responses, unavailable models, timeouts and provider failures fail closed. The completion model and assessment model are independently configured.
 
-Semantic checks supplement authentication, authorization, signatures, and budgets. They do not replace deterministic enforcement. The completion model and the assessor model are independently configured. See [testing](testing.md) for real-model evidence and its limits.
+In **Policies → Edit configuration → Semantic analysis**, choose the provider and enter an optional natural-language policy in `semantic.instructions`. That field accepts up to 4,096 characters and requires provider `laya`; nonempty instructions with another provider are rejected. Review and activate the configuration change before testing representative allowed and prohibited content.
+
+Use deterministic content rules for exact requirements such as “no word containing the letter a.” Semantic models can miss exact character constraints. Natural-language semantic instructions are suited to meaning-based restrictions; their results still require evaluation on your intended inputs.
+
+Severity categories map `benign` to `0`, `suspicious` to `0.6`, and `malicious` to `1`. These are ordinal policy codes, not probabilities. Threshold `0.5` blocks suspicious and malicious content; `0.7` or `0.8` blocks the malicious category. Semantic inspection supplements authentication, access rules, privacy, signatures and budgets.
+
+The explicit `config/policy.offline.yaml` profile disables semantic inspection. It provides local deterministic checks only; unmatched wording can pass. The `ollama` and `kev` providers remain available for their built-in security assessment. Historical `severity-v2` Ollama measurements in [testing](testing.md) are separate from Laya runtime results and do not establish accuracy for custom semantic instructions.
+
+## Named Laya rules
+
+Use **Policies → Add Laya rule** for meaning-based restrictions written in your own words. Each rule has an ID, instruction, direction and target. The console workflow is **Test with Laya → Review policy change → Review changes → Activate policy**, with an explicit confirmation before publication.
+
+The configuration below is a `semantic` section to merge into a complete policy, preserving its models, tools, budgets and other controls. It is not a standalone policy file:
+
+```yaml
+semantic:
+  provider: laya
+  model: qwen3:4b
+  threshold: 0.7
+  timeout_ms: 30000
+  scan_output: true
+  rules:
+    - id: no-personal-investment-advice
+      instruction: >-
+        Block personalized recommendations to buy or sell a specific investment.
+        Allow general explanations of financial concepts.
+      direction: input
+      target: model
+```
+
+`direction` is `input`, `output` or `both`; `target` is `model`, `tool` or `all`. Only rules applicable to the current stage enter the assessment context. All applicable rules and global `semantic.instructions` share one model assessment per stage, alongside the built-in security rubric. The result is one severity classification; FastFence does not fabricate matched rule IDs from that score.
+
+Limits are eight rules with unique IDs, 2,048 characters per nonblank instruction and 8,192 UTF-8 bytes for the combined rendered policy text. Named rules require provider `laya`. Any rule covering output also requires `scan_output: true`; incompatible configurations are rejected.
+
+The editor tests a candidate against one sample using actual Laya, without saving the policy or executing a protected model/tool call. The displayed scope is input when the rule covers both directions, and model when it covers all targets. To test another combination, use [the management preview API](integration-reference.md#test-a-named-laya-rule). The candidate is assessed alongside current applicable rules; a block cannot be attributed to that rule alone, and a non-block does not test the full gateway pipeline.
+
+After testing, inspect the policy diff and explicitly activate. Editing the rule or sample invalidates its test; stale policy versions and provider failures require a new review. Rule inventory actions support editing and removal. Remote configuration sources remain read-only through local management writes.
+
+### Choose the correct rule editor
+
+| Editor | What is stored | Request-time behavior |
+| --- | --- | --- |
+| **Add Laya rule** | A named natural-language instruction with direction and target | Actual semantic model assessment at applicable stages |
+| **Add content rule** | A literal `contains`, `word_contains` or `equals` predicate | Deterministic local matching without inference |
+| **Describe a fast rule** | A reviewed bounded configuration proposal produced by Laya | The resulting configured controls; generated literal predicates match locally |
+
+Use **Add content rule** for exact words or letters, and **Add Laya rule** for meaning-based restrictions. The model can miss exact character constraints. Laya authoring does not turn arbitrary prose into a guaranteed fast predicate.
 
 ## Budget scope
 
@@ -115,19 +161,19 @@ Choose `input`, `output`, or `both`, and `model`, `tool`, or `all`. Model inputs
 
 At most 64 rules are permitted, each with a unique ID and a nonblank value of at most 128 characters. Literal preparation happens during validation. Matching needs no compiler, model, filesystem, or network call. Input blocks precede execution; output blocks suppress delivery after execution. Findings contain rule IDs, never matched content.
 
-In the dashboard, select **Text rule**, set its scope and samples, then **Preview** and **Activate rule**. Preview evaluates only the candidate predicate: `NO MATCH` is not a promise that all other security controls will allow the request. Activation adds the rule to the current policy with a new version. Duplicate IDs, invalid rules and version conflicts are rejected. A remote configuration source must be updated at that source.
+In **Policies**, select **Add content rule**, set its scope and samples, then preview, review and activate the rule. Preview evaluates only the candidate predicate: `NO MATCH` is not a promise that all other security controls will allow the request. Activation adds the rule to the current policy with a new version. Duplicate IDs, invalid rules and version conflicts are rejected. A remote configuration source must be updated at that source.
 
 Management clients can retrieve `GET /api/admin/rules/schema`, then call `POST /api/admin/rules/preview` with a `rule` object and up to 16 `samples`, each at most 4,096 characters. Preview neither changes policy nor invokes a model. Publish a validated proposal through the existing versioned `PUT /api/admin/policy` endpoint.
 
 ## Describe a policy in the dashboard
 
-Install the pinned Laya engine once with `integrations/laya/setup.sh`, start Ollama with `qwen3:4b` installed, and connect the dashboard with your management identity. Choose **Describe a policy**:
+Install the pinned Laya engine once with `integrations/laya/setup.sh`, start Ollama with `qwen3:4b` installed, and connect the console with your management identity. In **Policies**, choose **Describe a fast rule**:
 
 1. Write a specific instruction in Polish or English and select **Draft with Laya**.
 2. Inspect the before/after changes and exact operations. Drafting does not activate anything.
 3. Enter examples, choose input/output and model/tool scope, and select **Test examples**.
 4. Confirm that you reviewed the changes and results, then select **Activate this proposal**.
-5. Use **Local Qwen model** in the playground to try the policy against a real protected completion, or use a business tool. The result includes the audit request ID and whether upstream execution occurred.
+5. Open **Test requests** to try the policy against a real protected completion. Business-tool calls require separately registered handlers; the default product has no simulated business tools. The result includes the audit request ID and whether upstream execution occurred.
 
 Supported instructions include blocking words containing `a`, redacting email addresses, blocking personal data and secrets, and restricting an existing tool to a subset of its already permitted roles. Selective detectors currently cover email and the eleven-digit Polish identifier heuristic. General compliance statements, new tools, role widening and arbitrary executable rules are rejected rather than silently invented.
 
@@ -135,7 +181,7 @@ For example, selective email redaction changes `privacy.detector_actions.pii_ema
 
 A proposal is bound to its management identity and original policy version, expires after ten minutes, and can be activated once. The server requires a preview before activation. Editing examples invalidates the browser's review state; editing the instruction discards the draft. Activation publishes the exact stored candidate without another model call. Preview checks local content controls only: role authorization, budget limits, semantic assessment and upstream behavior still run on an actual invocation.
 
-The management endpoints are `POST /api/admin/policies/draft`, `/preview` and `/activate`. Inference uses a bounded isolated local Laya process and never runs in the deterministic enforcement path. A deployment with a separate configuration root can point the trusted `FASTFENCE_AUTHORING_ROOT` setting at its Laya-enabled checkout. Paths and model endpoints cannot be supplied by browser users.
+The management endpoints are `POST /api/admin/policies/draft`, `/preview` and `/activate`. Authoring inference uses a bounded isolated local Laya process outside the deterministic rule matcher. Runtime semantic inspection is a separate stage and may call a model on each inspected interaction. A deployment with a separate configuration root can point the trusted `FASTFENCE_AUTHORING_ROOT` setting at its Laya-enabled checkout. Paths and model endpoints cannot be supplied by browser users.
 
 ## Draft a rule in natural language with Laya
 
@@ -167,4 +213,4 @@ Saved-proposal activation revalidates and publishes **the same rule without a se
 
 Compilation connects directly to a separately trusted **loopback Ollama endpoint** using management-side Laya. It is outside the protected agent's quota and policy path so existing content restrictions cannot prevent authorized policy maintenance. Credentials, activation and preview use management-authenticated gateway endpoints. The local-only compiler integration uses isolated Laya settings/storage and a narrow Ollama compatibility adapter; it does not alter your normal Laya configuration.
 
-To remove or change a rule, edit `text_rules` through **Manage policy** with an increased version, or update the configured central source. Changes apply to subsequent invocations.
+To remove or change a rule, use its **Edit rule** or **Remove…** action in **Policies**, review the candidate, and explicitly activate it. Advanced JSON editing is available under **Edit configuration**. Alternatively, update the configured central source with a higher version. Changes apply to subsequent invocations.

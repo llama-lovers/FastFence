@@ -20,6 +20,8 @@ Protected REST writes authenticate before consuming or parsing their body. Invoc
 
 A business-tool request has this shape:
 
+Business handlers are not installed in the default local runtime. The following shape applies when your application registers the named handler, or when you explicitly start the [business-tool example](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/examples/business_tools).
+
 ```json
 {
   "tool": "knowledge.search",
@@ -55,17 +57,11 @@ from fastmcp.client.auth import BearerAuth
 
 
 async def main():
-    credentials = json.loads(Path("state/demo-tokens.json").read_text())
+    credentials = json.loads(Path("state/credentials.json").read_text())
     async with Client(
         "http://127.0.0.1:8000/mcp/",
-        auth=BearerAuth(credentials["analyst-blue"]),
+        auth=BearerAuth(credentials["local-agent"]),
     ) as client:
-        result = await client.call_tool(
-            "invoke",
-            {"tool": "knowledge.search", "arguments": {"query": "Forecast"}},
-        )
-        print(result.data)
-        print(await client.read_resource("memory://blue/forecast"))
         completion = await client.call_tool(
             "complete", {"model": "qwen3:0.6b", "prompt": "Cat", "max_output_tokens": 16}
         )
@@ -75,17 +71,22 @@ async def main():
 asyncio.run(main())
 ```
 
+Existing installations retain their original credential file and identity names. If initialization reports the legacy `state/demo-tokens.json`, use its agent credential instead; do not rotate or overwrite credentials merely to rename them.
+
 Tenant resources must match the verified identity. The policy pipeline runs before FastMCP creates its text and structured result representations, so both contain the filtered output.
 
 ## Actual Laya integration
 
 The repository runs the real upstream [Laya Python engine](https://github.com/aayushch/laya) at a pinned revision. Setup retains upstream license notices and installs hash-verified dependencies into gitignored local state; it does not vendor the engine into FastFence.
 
-With initialized gateway credentials, a running Ollama model and the [hybrid policy](policies.md) active:
+The standalone Laya/business-tool demonstration is an explicit example. Start its isolated backend using the [business-tool example instructions](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/examples/business_tools), then supply that example's base URL and credentials to the runner. It must not be pointed at the default product gateway expecting simulated business handlers.
+
+With the example backend, a running Ollama model and its [hybrid policy](policies.md) active:
 
 ```sh
 integrations/laya/setup.sh
-integrations/laya/run-demo.sh
+integrations/laya/run-demo.sh --url http://127.0.0.1:8001 \
+  --credentials state/examples/business-tools/demo-tokens.json
 ```
 
 The runner invokes Laya's actual `llm_call` through its custom OpenAI-compatible provider, then registers a `fastfence_invoke` handler in Laya's actual tool-dispatch registry. That handler sends business operations to `/api/invoke`.
@@ -108,11 +109,11 @@ The dashboard now provides [natural-language policy drafting](policies.md#descri
 
 The separate `integrations/laya/author-rule.sh` CLI uses actual Laya model inference to draft bounded text restrictions. It validates and previews the result through management endpoints, then optionally saves a private proposal. Activate that exact proposal with `--proposal ... --activate`; the activation step makes no model call.
 
-This is management-side authoring, separate from the protected agent demonstration above. It uses a trusted local Ollama endpoint directly and a process-local compatibility adapter for structured output. Read the [complete natural-language authoring workflow](policies.md#draft-a-rule-in-natural-language-with-laya). Runtime enforcement remains local and model-independent; broader semantic, legal or compliance instructions are outside this DSL.
+This is management-side authoring, separate from the protected agent example above. It uses a trusted local Ollama endpoint and a process-local compatibility adapter for structured output. Read the [complete natural-language authoring workflow](policies.md#draft-a-rule-in-natural-language-with-laya). Compiled text-rule matching is local and model-independent. Semantic inspection is a separate configurable runtime stage and can call a model for each inspected interaction; broad legal or compliance interpretation is outside the authored text-rule DSL.
 
 ## Real business backends
 
-The current knowledge, contact, memory and payment-preparation handlers are simulated. To connect a real backend, implement its validated allowlisted handler behind the tools port and keep backend credentials on the gateway side. Callers cannot select upstream URLs or supply upstream credentials.
+The separate business-tool example simulates knowledge, contact, memory and payment preparation. The default product runtime does not register those handlers. To connect a real backend, implement its validated allowlisted handler behind the tools port and keep backend credentials on the gateway side. Callers cannot select upstream URLs or supply upstream credentials.
 
 Output blocking cannot reverse an executed business operation. Irreversible operations need their own transaction or approval design in addition to gateway policy checks.
 

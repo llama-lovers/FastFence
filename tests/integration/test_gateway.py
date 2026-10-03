@@ -167,10 +167,9 @@ def test_validation_errors_and_audit_do_not_echo_secrets(client, tokens):
         secret not in exported.text
         and tokens["analyst-blue"] not in exported.text
     )
-    assert (
-        "input_sensitive_data" in exported.text
-        and "output" not in exported.text
-    )
+    assert "input_sensitive_data" in exported.text
+    records = [json.loads(line) for line in exported.text.splitlines() if line]
+    assert records and all("output" not in record for record in records)
 
 
 def test_sensitive_keys_and_nested_numeric_pii():

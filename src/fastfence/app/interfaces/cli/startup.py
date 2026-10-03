@@ -69,7 +69,7 @@ def _python_imports(interpreter: Path, modules: str) -> bool:
         return False
     try:
         result = subprocess.run(
-            [str(interpreter), "-c", modules],
+            [str(interpreter), "-B", "-c", modules],
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -103,10 +103,15 @@ def _laya_ready(settings: AppSettings) -> bool:
     root = settings.authoring_root or settings.root
     paths = [
         root / "integrations/laya/draft_policy.py",
+        root / "integrations/laya/semantic_worker.py",
         root / "state/laya/upstream/engine",
     ]
     return all(path.exists() for path in paths) and _python_imports(
-        root / "state/laya/venv/bin/python", "import pydantic, httpx"
+        root / "state/laya/venv/bin/python",
+        "import sys; "
+        f"sys.path[:0] = {[str(root / 'integrations/laya'), str(root / 'state/laya/upstream/engine')]!r}; "
+        "import semantic_worker, litellm; "
+        "from laya.llm import client; assert callable(client.llm_call)",
     )
 
 
@@ -137,7 +142,7 @@ def doctor(settings: AppSettings, *, full: bool = False) -> None:
         return
     checks = [
         (
-            "Laya installation",
+            "Laya authoring and text-assessment installation",
             _laya_ready(settings),
             "bash integrations/laya/setup.sh",
         ),

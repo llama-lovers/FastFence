@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from examples.business_tools.tools import DemoTools
 from fastfence.modules.control.application.services.engine import Engine
 from fastfence.modules.control.domain.exceptions import ModelUnavailableError
 from fastfence.modules.control.domain.models import Identity, ToolCall
@@ -21,7 +22,6 @@ from fastfence.modules.control.persistence.models import (
     SemanticScanner,
 )
 from fastfence.modules.control.persistence.policy import PolicyStore
-from fastfence.modules.control.persistence.tools import DemoTools
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -42,7 +42,9 @@ class RecordingTools(DemoTools):
 def boundary(tmp_path):
     policy_file = tmp_path / "policy.yaml"
     feed_file = tmp_path / "signatures.json"
-    policy_file.write_text((ROOT / "config/policy.offline.yaml").read_text())
+    policy_file.write_text(
+        (ROOT / "examples/business_tools/policy.yaml").read_text()
+    )
     feed_file.write_text((ROOT / "config/signatures.json").read_text())
     tools = RecordingTools()
     store = PolicyStore(policy_file, feed_file)

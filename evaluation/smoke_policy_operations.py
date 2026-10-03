@@ -10,9 +10,12 @@ from typing import Any
 
 from fastapi.testclient import TestClient
 
-from fastfence.app.factory import create_app
-from fastfence.app.interfaces.cli.main import initialize
 from fastfence.shared.settings.app_settings import AppSettings
+
+if __package__:
+    from evaluation.business_fixture import create_app, initialize
+else:
+    from business_fixture import create_app, initialize
 
 
 def run(root: Path) -> dict[str, Any]:
@@ -23,7 +26,7 @@ def run(root: Path) -> dict[str, Any]:
         temporary = Path(directory)
         (temporary / "config").mkdir()
         shutil.copy(
-            root / "config/policy.offline.yaml",
+            root / "examples/business_tools/policy.yaml",
             temporary / "config/policy.yaml",
         )
         shutil.copy(

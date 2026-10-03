@@ -1,7 +1,6 @@
 """Execute the delivered browser code against a minimal DOM/network fixture."""
 
 import json
-import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -17,17 +16,20 @@ let raw=''; for await (const chunk of process.stdin) raw+=chunk;
 const payload=JSON.parse(raw);
 const fields=new Map(); const calls=[];
 function element(id='') {
-  return {value:'',checked:false,textContent:'',children:[],disabled:false,
+  return {value:'',checked:false,textContent:'',children:[],disabled:false,dataset:{},
     classList:{toggle(){},add(){},remove(){}},style:{},
     replaceChildren(...children){this.children=children},append(...children){this.children.push(...children)},prepend(...children){this.children.unshift(...children)},
-    addEventListener(){},querySelectorAll(){return []},showModal(){},close(){}};
+    setAttribute(){},removeAttribute(){},focus(){},
+    addEventListener(){},querySelectorAll(){return []},showModal(){this.open=true},close(){this.open=false}};
 }
 function get(id){if(!fields.has(id))fields.set(id,element(id));return fields.get(id)}
 const storage=new Map();let sequence=0;
 const context=vm.createContext({
   console,JSON,Number,Object,Date,Error,crypto:{randomUUID(){return 'conversation-'+(++sequence)}},
   sessionStorage:{getItem(k){return storage.get(k)},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},
-  document:{getElementById:get,querySelectorAll(){return []},createElement(){return element()}},
+  document:{getElementById:get,querySelectorAll(){return []},createElement(){return element()},addEventListener(){},dispatchEvent(){}},
+  window:{addEventListener(){}},location:{hash:'',origin:'http://fixture.invalid'},history:{replaceState(){}},
+  CustomEvent:class {constructor(type,options){this.type=type;this.detail=options?.detail}},
   setInterval(){},fetch(){throw Error('unexpected real network')}
 });
 vm.runInContext(payload.inline,context);
@@ -62,7 +64,7 @@ await vm.runInContext(`(async()=>{
   let resolve;api=()=>new Promise(done=>resolve=done);
   const pending=get('invokeBtn').onclick();resetPlaygroundConversation();
   resolve({decision:'allowed',reason:'allowed'});await pending;
-  assert.match(get('result').children[0].textContent,/Calls are stateless/);
+  assert.equal(get('result').children[0].textContent,'No request sent for this identity.');
   const effect=policyEffect({type:'upsert_anonymization_rule',rule:{
     operator:'literal',value:'Private project',replacement:'PROJECT',case_sensitive:true,
     target:'all',direction:'both',allow_restore:false
@@ -95,7 +97,7 @@ def test_browser_stateless_calls_require_explicit_restoration_consent():
     if node is None:
         pytest.skip("Browser lifecycle fixture requires Node.js")
     html = (WEB / "index.html").read_text()
-    inline = re.search(r"<script>(.*?)</script>", html, re.DOTALL).group(1)
+    inline = (WEB / "console.js").read_text()
     result = subprocess.run(
         [node, "--input-type=module", "-e", HARNESS],
         input=json.dumps(

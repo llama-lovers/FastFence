@@ -362,7 +362,7 @@ def test_unseen_source_policy_edit_cannot_be_overwritten_by_authoring(
     )
 
 
-def test_invalid_unseen_source_blocks_authoring_but_manual_repair_remains_available(
+def test_invalid_unseen_source_blocks_authoring_and_stale_manual_overwrite(
     client, tokens, app, project, author
 ):
     proposal = draft(client, tokens).json()
@@ -372,6 +372,18 @@ def test_invalid_unseen_source_blocks_authoring_but_manual_repair_remains_availa
     assert activate(client, tokens, proposal).status_code == 409
     candidate = app.state.runtime.snapshot().policy.editable()
     candidate["version"] = 2
+    assert (
+        client.put(
+            "/api/admin/policy",
+            headers=headers(tokens, "security-admin"),
+            json=candidate,
+        ).status_code
+        == 409
+    )
+    assert path.read_text() == "version: 9\nunknown: invalid\n"
+    # Repair the authoritative file explicitly before proposing another update.
+    repaired = app.state.runtime.snapshot().policy.editable()
+    path.write_text(yaml.safe_dump(repaired))
     assert (
         client.put(
             "/api/admin/policy",

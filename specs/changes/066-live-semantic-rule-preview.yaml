@@ -1,0 +1,28 @@
+id: FF-066
+title: Test a written Laya rule on text before reviewing activation
+status: implemented
+problem: Operators need to verify natural-language rules using actual semantic inference instead of a literal matcher or untested settings edit.
+scope:
+  - Add a management-only bounded semantic preview endpoint for one named rule and sample.
+  - Evaluate the candidate alongside existing applicable semantic rules using actual Laya with no business execution or configuration write.
+  - Reject stale base versions, invalid candidate configuration and unavailable analysis explicitly.
+constraints:
+  - Require management authentication before reading or evaluating user input.
+  - Bound input and inference time; reuse the existing single-flight Laya worker capacity.
+  - No semantic match does not guarantee runtime authorization, budget acceptance or deterministic-control acceptance.
+  - Do not claim the score identifies which particular rule matched.
+change_paths:
+  - src/fastfence/app/interfaces/http/semantic_preview.py
+  - src/fastfence/app/interfaces/http/routes.py
+  - src/fastfence/modules/control/application/use_cases/semantic_preview.py
+  - src/fastfence/modules/control/application/facade.py
+  - tests/integration/test_semantic_rule_preview.py
+acceptance:
+  - Missing credentials and agent credentials cannot invoke semantic preview.
+  - Preview receives only rules applicable to the requested direction and target.
+  - Stale requests and failures never activate or rewrite a policy.
+  - Successful responses report actual semantic assessment, provider, model and tested base version.
+validation:
+  - command: uv run pytest --no-cov tests/integration/test_semantic_rule_preview.py
+    expected: Authentication, scope, bounded input, deadline, failure and nonmutation regressions pass.
+evidence: []

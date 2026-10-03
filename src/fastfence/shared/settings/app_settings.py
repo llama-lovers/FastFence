@@ -1,8 +1,10 @@
 from pathlib import Path
-from typing import Self
+from typing import Literal, Self
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from fastfence.shared.settings.upstream_url import validate_openai_base_url
 
 
 class AppSettings(BaseSettings):
@@ -63,6 +65,18 @@ class AppSettings(BaseSettings):
     ollama_url: str = Field(
         default="http://127.0.0.1:11434", description="Trusted Ollama endpoint"
     )
+    model_provider: Literal["ollama", "openai"] = Field(
+        default="ollama", description="Protected business model backend"
+    )
+    openai_base_url: str = Field(
+        default="http://127.0.0.1:11434/v1",
+        description="Trusted OpenAI-compatible base URL including /v1; HTTPS or loopback HTTP",
+    )
+    openai_api_key: SecretStr | None = Field(
+        default=None,
+        description="Server-only upstream bearer credential; independent of gateway caller tokens",
+        repr=False,
+    )
     kev_url: str = Field(
         default="http://127.0.0.1:8009", description="Trusted Kev endpoint"
     )
@@ -114,6 +128,11 @@ class AppSettings(BaseSettings):
         le=160_000_000,
         description="Maximum aggregate pixels per OCR request",
     )
+
+    @field_validator("openai_base_url")
+    @classmethod
+    def validate_model_url(cls, value: str) -> str:
+        return validate_openai_base_url(value)
 
     @model_validator(mode="after")
     def resolve_paths(self) -> Self:

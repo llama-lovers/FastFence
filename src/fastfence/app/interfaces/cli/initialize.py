@@ -35,8 +35,19 @@ def _validate_links(records: list[InitialRecord], tokens: dict) -> None:
 def _validate_existing(state: Path) -> bool:
     identities, credentials = (
         state / "identities.json",
-        state / "demo-tokens.json",
+        state
+        / (
+            "credentials.json"
+            if (state / "credentials.json").exists()
+            else "demo-tokens.json"
+        ),
     )
+    if (state / "credentials.json").exists() and (
+        state / "demo-tokens.json"
+    ).exists():
+        raise SystemExit(
+            "Initialization refused: ambiguous credential files. Existing files were preserved."
+        )
     if not identities.exists() and not credentials.exists():
         return False
     try:
@@ -52,7 +63,7 @@ def _validate_existing(state: Path) -> bool:
         raise SystemExit(
             "Initialization refused: partial or invalid credential state. "
             "Existing files were preserved. Restore the matching identities.json "
-            "and demo-tokens.json backup, or choose a new directory with --state."
+            "and credentials.json (or legacy demo-tokens.json) backup, or choose a new directory with --state."
         ) from None
     return True
 
@@ -72,10 +83,8 @@ def initialize(state: Path) -> None:
     state.chmod(0o700)
     records, tokens = [], {}
     for subject, tenant, roles, admin in [
-        ("analyst-blue", "blue", ["analyst"], False),
-        ("operator-blue", "blue", ["operator"], False),
-        ("analyst-green", "green", ["analyst"], False),
-        ("security-admin", "management", [], True),
+        ("local-agent", "local", ["analyst"], False),
+        ("local-admin", "management", [], True),
     ]:
         token = secrets.token_urlsafe(32)
         tokens[subject] = token
@@ -91,12 +100,12 @@ def initialize(state: Path) -> None:
             }
         )
     _write_private(state / "identities.json", records)
-    _write_private(state / "demo-tokens.json", tokens)
+    _write_private(state / "credentials.json", tokens)
     print(
-        f"Initialized {state}. Credentials: {state / 'demo-tokens.json'} (private, gitignored)."
+        f"Initialized {state}. Credentials: {state / 'credentials.json'} (private, gitignored)."
     )
     print(
-        "Dashboard: copy analyst-blue and security-admin tokens into Connect."
+        "Dashboard: connect local-admin to manage policies; use local-agent to make protected requests."
     )
 
 

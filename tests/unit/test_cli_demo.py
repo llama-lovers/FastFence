@@ -5,7 +5,7 @@ import json
 import httpx
 import pytest
 
-from fastfence.app.interfaces.cli import main as cli
+from examples.business_tools import verify as cli
 
 
 def configure_demo(tmp_path, monkeypatch, mutate=None):

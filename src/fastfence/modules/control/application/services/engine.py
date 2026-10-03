@@ -124,7 +124,8 @@ class Engine:
             await executor.scan(
                 state,
                 encode(prepared.payload),
-                prepared.input_units + 2048,
+                prepared.input_units
+                + state.snapshot.policy.semantic.token_allowance,
                 "input",
             )
         if input_sink is not None:

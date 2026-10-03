@@ -7,6 +7,7 @@ import json
 import sqlite3
 from pathlib import Path
 
+from examples.business_tools.tools import DemoTools
 from fastfence.app.factory import create_app
 from fastfence.modules.control.domain.models import ToolCall
 from fastfence.modules.control.persistence.config_providers import (
@@ -57,7 +58,7 @@ async def test_inline_identities_boot_without_writable_state(
         instance_id="inline",
     )
     prevent_state_writes(monkeypatch)
-    app = create_app(settings)
+    app = create_app(settings, tools=DemoTools())
     try:
         identity = app.state.identities.authenticate(TOKEN)
         assert identity is app.state.identities.authenticate(TOKEN)
@@ -83,7 +84,7 @@ async def test_http_bundle_and_inline_identities_need_no_local_configuration_fil
     )
     forbidden = prevent_state_writes(monkeypatch)
     monkeypatch.setattr(FileConfigProvider, "read", forbidden)
-    app = create_app(settings)
+    app = create_app(settings, tools=DemoTools())
     try:
         assert app.state.runtime.diagnostics()["source_kind"] == "http_bundle"
         result = await app.state.engine.invoke(

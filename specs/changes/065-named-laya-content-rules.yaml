@@ -1,0 +1,37 @@
+id: FF-065
+title: First-class named natural-language Laya content rules
+status: implemented
+problem: Users could only add literal text rules through the obvious rule editor, while semantic policy text was hidden in global settings and lacked named scopes.
+scope:
+  - Add named semantic rules containing an identifier, natural-language instruction, input/output direction and model/tool target.
+  - Apply all applicable rules in one actual Laya assessment per stage, preserving global instructions and the existing security rubric.
+  - Provide a direct plain-language rule editor with actual-model sample testing, edit/remove inventory controls and explicit policy-change review.
+constraints:
+  - Pydantic schemas only; at most eight rules, each instruction at most 2048 characters, aggregate rendered policy context at most 8192 UTF-8 bytes.
+  - Require the Laya provider for nonempty semantic rules and output scanning for any output-scoped rule; never silently ignore configured rules.
+  - Reserve worst-case semantic instruction bytes while filtering runtime instructions to the actual direction and target.
+  - Preserve actual worker raw-output validation, deadlines, one-call concurrency and fail-closed behavior.
+  - Classifier severity evaluates the combined applicable policy; do not invent matched rule identifiers from a single severity output.
+  - Invalidate sample review after identity, sample or rule edits and preserve version conflict checks during activation.
+change_paths:
+  - src/fastfence/modules/control/domain/semantic_rules.py
+  - src/fastfence/modules/control/domain/models.py
+  - src/fastfence/modules/control/application/services/execution.py
+  - src/fastfence/modules/control/persistence/laya_semantic.py
+  - src/fastfence/modules/control/persistence/models.py
+  - src/fastfence/app/interfaces/http/web/policy-manager.js
+  - tests/unit/test_named_semantic_rules.py
+  - tests/integration/test_policy_management_ui.py
+acceptance:
+  - A user can name a rule and write its full instruction in natural language without providing a literal match value.
+  - Model-input-only rules never enter model-output or tool assessment context, and tool-output rules never enter input assessment context.
+  - Rules are grouped into a single assessment rather than invoking a model once per rule.
+  - Tested named-rule changes enter the regular structured policy review with before-after differences and explicit activation confirmation.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_named_semantic_rules.py tests/unit/test_laya_semantic_runtime.py tests/integration/test_policy_management_ui.py
+    expected: Schema bounds, scope isolation, single-call assessment, review invalidation and preserved semantic transport safeguards pass.
+evidence:
+  - command: uv run pytest --no-cov -q tests/unit/test_named_semantic_rules.py tests/unit/test_laya_semantic_runtime.py tests/integration/test_policy_management_ui.py
+    result: Thirty-eight focused tests pass. Coverage includes UTF-8 and count bounds, mandatory Laya and output checks, all direction/target combinations through Executor with exactly one assessment, and executed browser creation/test/review that preserves named rules without enabling raw JSON mode.
+  - command: uv run basedpyright src; uv run lint-imports; uv run ruff check
+    result: Zero typing errors, all sixteen architecture contracts and focused Ruff checks pass.

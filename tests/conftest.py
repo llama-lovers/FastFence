@@ -7,8 +7,9 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from examples.business_tools.credentials import initialize
+from examples.business_tools.tools import DemoTools
 from fastfence.app.factory import create_app
-from fastfence.app.interfaces.cli.main import initialize
 from fastfence.shared.settings.app_settings import AppSettings
 
 pytest_plugins = ["tests.fixtures.configuration"]
@@ -18,7 +19,8 @@ pytest_plugins = ["tests.fixtures.configuration"]
 def project(tmp_path):
     (tmp_path / "config").mkdir()
     shutil.copy(
-        Path("config/policy.offline.yaml"), tmp_path / "config/policy.yaml"
+        Path("examples/business_tools/policy.yaml"),
+        tmp_path / "config/policy.yaml",
     )
     shutil.copy(
         Path("config/signatures.json"), tmp_path / "config/signatures.json"
@@ -40,7 +42,8 @@ def app(project):
             state=project / "state",
             ollama_url="http://127.0.0.1:1",
             kev_url="http://127.0.0.1:1",
-        )
+        ),
+        tools=DemoTools(),
     )
 
     yield instance

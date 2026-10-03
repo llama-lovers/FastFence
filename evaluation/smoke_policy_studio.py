@@ -37,7 +37,11 @@ def gateway():
             listener.bind(("127.0.0.1", 0))
             port = listener.getsockname()[1]
         env = {
-            **os.environ,
+            **{
+                key: value
+                for key, value in os.environ.items()
+                if not key.startswith("FASTFENCE_")
+            },
             "FASTFENCE_ROOT": str(root),
             "FASTFENCE_STATE": str(root / "state"),
             "FASTFENCE_AUTHORING_ROOT": str(repo),
@@ -78,7 +82,7 @@ def gateway():
                     raise RuntimeError("Isolated gateway startup timeout")
                 yield (
                     url,
-                    json.loads((root / "state/demo-tokens.json").read_text()),
+                    json.loads((root / "state/credentials.json").read_text()),
                 )
             finally:
                 process.terminate()
@@ -91,8 +95,8 @@ def gateway():
 
 def connect(page, tokens):
     page.locator("#connectBtn").click()
-    page.locator("#agentToken").fill(tokens["analyst-blue"])
-    page.locator("#adminToken").fill(tokens["security-admin"])
+    page.locator("#agentToken").fill(tokens["local-agent"])
+    page.locator("#adminToken").fill(tokens["local-admin"])
     page.locator("#saveConnect").click()
     expect(page.locator("#connectDialog")).not_to_be_visible()
     expect(page.locator("#version")).to_have_text("Policy v1")
@@ -116,6 +120,7 @@ def fixture_authoring(page):
             }
         ],
         "warnings": [],
+        "tests": [],
     }
     page.route(
         "**/api/admin/policies/draft",
@@ -142,6 +147,9 @@ def fixture_authoring(page):
                         "safe_text": None,
                     },
                 ],
+                "comparisons": [],
+                "test_results": [],
+                "tests_passed": True,
             }
         ),
     )
@@ -150,11 +158,15 @@ def fixture_authoring(page):
 def studio_checks(page, live):
     if not live:
         fixture_authoring(page)
-    page.locator("#policyStudioHero").click()
-    page.locator('[data-policy-example="letters"]').click()
+    page.locator('nav [data-nav="policies"]').click()
+    page.locator("#policyStudioBtn").click()
+    page.locator("#policyInstruction").fill(
+        "Block model inputs containing a word with the letter a, case insensitive."
+    )
     expect(page.locator("#activatePolicyDraft")).to_be_disabled()
     page.locator("#draftPolicy").click()
     expect(page.locator("#policyDraftSection")).to_be_visible(timeout=150_000)
+    page.locator("#policySamples").fill("Hi\nCat")
     expect(page.locator("#activatePolicyDraft")).to_be_disabled()
     assert page.locator("#policyDiff img").count() == 0
     page.locator("#previewPolicy").click()
@@ -197,6 +209,7 @@ def main():
         page.goto(url)
         connect(page, tokens)
         studio_checks(page, args.live)
+        page.locator('nav [data-nav="requests"]').click()
         page.locator("#playgroundMode").select_option("model")
         expect(page.locator("#modelPlayground")).to_be_visible()
         expect(page.locator("#toolPlayground")).not_to_be_visible()
@@ -205,14 +218,14 @@ def main():
             page.locator("#invokeBtn").click()
             expect(page.locator("#result")).to_contain_text("input_text_rule")
             expect(page.locator("#result")).to_contain_text(
-                "upstream not executed"
+                "The upstream was not executed."
             )
             expect(page.locator("#events")).to_contain_text("input_text_rule")
             # Actual MCP transport and one bounded real Qwen completion.
             result = httpx.post(
                 url + "/mcp/",
                 headers={
-                    "Authorization": "Bearer " + tokens["analyst-blue"],
+                    "Authorization": "Bearer " + tokens["local-agent"],
                     "Accept": "application/json, text/event-stream",
                 },
                 json={
@@ -237,6 +250,7 @@ def main():
                 and verdict["upstream_executed"]
             )
             assert verdict["output"]["text"].strip()
+            page.locator('nav [data-nav="activity"]').click()
             page.locator("#refreshBtn").click()
             expect(page.locator("#events")).to_contain_text("controls_passed")
         page.screenshot(

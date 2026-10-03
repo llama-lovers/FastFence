@@ -13,9 +13,12 @@ from tempfile import TemporaryDirectory
 import yaml
 from fastapi.testclient import TestClient
 
-from fastfence.app.factory import create_app
-from fastfence.app.interfaces.cli.main import initialize
 from fastfence.shared.settings.app_settings import AppSettings
+
+if __package__:
+    from evaluation.business_fixture import create_app, initialize
+else:
+    from business_fixture import create_app, initialize
 
 
 def run(model: str, ollama_url: str) -> dict:
@@ -23,6 +26,9 @@ def run(model: str, ollama_url: str) -> dict:
         root = Path(temporary)
         (root / "config").mkdir()
         policy = yaml.safe_load(Path("config/policy.hybrid.yaml").read_text())
+        policy["tools"] = yaml.safe_load(
+            Path("examples/business_tools/policy.yaml").read_text()
+        )["tools"]
         model_rule = next(iter(policy["models"].values()))
         policy["models"] = {model: model_rule}
         policy["semantic"]["model"] = model

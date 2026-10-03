@@ -34,6 +34,13 @@ jobs:
         run: uv run --locked pytest -q --tb=short
       - name: Exercise a fresh clone without private state
         run: uv run --locked python scripts/smoke_clean_install.py
+      - name: Install the browser acceptance runtime
+        run: uv run --locked --with playwright==1.63.0 python -m playwright install --with-deps chromium
+      - name: Exercise the management console in Chromium
+        run: |
+          uv run --locked --with playwright==1.63.0 python evaluation/smoke_console.py --output state/private/console-browser.json
+          uv run --locked --with playwright==1.63.0 python evaluation/smoke_playground_models.py --output state/private/model-browser.json
+          uv run --locked --with playwright==1.63.0 python evaluation/smoke_audit_ui.py --output state/private/audit-browser.json
       - name: Run all configured quality gates
         run: uv run --locked pre-commit run --all-files --show-diff-on-failure
       - name: Reject files rewritten by quality hooks

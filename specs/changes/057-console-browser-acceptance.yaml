@@ -1,0 +1,45 @@
+id: FF-057
+title: Verify the management console in a real browser before deployment
+status: verified
+problem: The dashboard had no browser gate in CI, and older browser fixtures no longer represented the full policy review contract. Navigation and manual update workflows could regress without deployment failing.
+scope:
+  - Exercise management navigation, credentials, policy review and updates in Chromium.
+  - Verify error recovery, read-only configuration sources and narrow-screen layouts.
+  - Keep the existing model selection and sanitized audit regressions current.
+  - Run browser fixture acceptance in GitHub Actions before documentation deployment.
+constraints:
+  - Use synthetic HTTP fixtures, never existing private credentials or policy mutations.
+  - Identify fixture evidence explicitly and never claim live model inference.
+  - Do not store tokens in browser persistent storage or screenshots.
+change_paths:
+  - evaluation/smoke_console.py
+  - evaluation/smoke_playground_models.py
+  - evaluation/smoke_audit_ui.py
+  - evaluation/smoke_policy_studio.py
+  - evaluation/results/console-browser.json
+  - docs/testing.md
+  - tests/integration/test_anonymization_authoring_ui.py
+  - .github/workflows/ci.yml
+acceptance:
+  - Every management view is reachable through named navigation with one current view.
+  - Invalid credentials do not partially replace an existing connection.
+  - Publishing requires explicit review and stale edits invalidate approval.
+  - Failed operations display an actionable error and preserve authored text.
+  - Read-only sources cannot publish through the console.
+  - Mobile layouts have no page-level horizontal overflow.
+validation:
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output evaluation/results/console-browser.json
+    expected: Real Chromium interaction passes with synthetic isolated API responses.
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_playground_models.py --output state/private/model-browser.json
+    expected: Model selection and in-progress text survive refreshes.
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_audit_ui.py --output state/private/audit-browser.json
+    expected: Audit correlation, inert untrusted metadata and local search pass.
+evidence:
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output evaluation/results/console-browser.json
+    result: Sixteen real Chromium checks pass with synthetic API responses, including failed saves and read-only sources. No inference or private state was used.
+  - command: Chromium model-selection and audit fixture suites
+    result: Seven model selection and nine audit interaction checks pass after navigation and fixture schema updates.
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_policy_studio.py --output state/private/policy-studio-browser.json
+    result: Seven policy studio checks pass against an isolated real gateway with synthetic authoring responses. No live inference was requested.
+  - command: uv run pytest tests/integration/test_anonymization_authoring_ui.py -q --no-cov
+    result: Two tests pass, preserving stateless restoration consent and identity-change result invalidation assertions.

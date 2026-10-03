@@ -1,0 +1,49 @@
+id: FF-067
+title: Document and verify the named Laya rule workflow
+status: implemented
+problem: Documentation still routes all natural-language rule creation through the fast-rule compiler, while named semantic rules now have their own actual-model testing and review workflow.
+scope:
+  - Document Add Laya rule, scoped sample testing, exact policy review and explicit activation.
+  - Distinguish named semantic rules, deterministic literal rules and Laya-generated configuration proposals.
+  - Provide a version-aware management preview example and source-derived endpoint reference.
+  - Make the independent security review discoverable in navigation and the generated LLM corpus.
+  - Embed the tracked runnable Python example source into HTML documentation and the LLM corpus from one source marker.
+  - Verify named-rule preview, stale test invalidation and activation in a real browser using isolated API fixtures.
+  - Map the supplied partner-task requirements and submitted product features to code, reproducible checks and remaining boundaries without speculative scores.
+constraints:
+  - Never present synthetic browser responses as actual Laya inference evidence.
+  - Explain the combined assessment scope and the dialog's input/model default for both/all rules.
+  - Keep private credentials and active policy outside all documentation verification.
+change_paths:
+  - docs/learn.md
+  - docs/policies.md
+  - docs/manual-testing.md
+  - docs/integration-reference.md
+  - docs/requirements.md
+  - docs/challenge-readiness.md
+  - mkdocs.yml
+  - scripts/docs_reference.py
+  - evaluation/smoke_console.py
+  - evaluation/results/console-browser.json
+acceptance:
+  - A user can follow the named-rule workflow without entering literal predicates or raw policy JSON.
+  - Example configuration and preview payloads validate against the current Pydantic schemas.
+  - Preview success alone never activates a rule; edits invalidate the preview and review requires explicit confirmation.
+  - Strict documentation build emits the preview endpoint, security review and updated guides in the LLM text files.
+  - Example pages and LLM text contain the exact tracked Python source with no copied code snapshot.
+validation:
+  - command: uv run --group docs mkdocs build --strict
+    expected: Updated navigation, generated reference and LLM text files build without broken links.
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output evaluation/results/console-browser.json
+    expected: Named-rule UI checks and existing console regressions pass without using private state.
+  - command: uv run pytest --no-cov tests/integration/test_semantic_rule_preview.py
+    expected: Management preview transport, scope, nonmutation and failure checks pass with explicit scanner fixtures.
+evidence:
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output evaluation/results/console-browser.json
+    result: Twenty-two Chromium fixture checks pass, including six new named-rule creation, failure, scope, review, activation and edit checks. No live inference or private configuration was used.
+  - command: uv run pytest --no-cov tests/integration/test_semantic_rule_preview.py -q
+    result: Eleven management-preview tests pass with explicit scanner fixtures, covering authorization, scopes, bounded input, errors and nonmutation.
+  - command: Documentation YAML/Python schema verification
+    result: The named semantic YAML section and extracted preview payload validate against SemanticConfig and SemanticPreviewRequest; the complete Python example parses.
+  - command: uv run --group docs mkdocs build --strict and rendered-source comparison
+    result: Strict build passed for the three initial runnable examples, generated preview API and review/requirements links. Six source inclusions across the five expanded framework examples match rendered HTML and llms-full exactly. The subsequent strict build awaits the parallel openai-upstream.md page referenced by the OpenAI client example.

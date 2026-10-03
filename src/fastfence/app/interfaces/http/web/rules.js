@@ -1,90 +1,93 @@
 let previewedRule = null;
-
+let ruleBase = null;
+let ruleOwner = '';
+let ruleOriginalId = '';
+let ruleBusy = false;
 function textRuleDraft() {
-  return {
-    id: $('textRuleId').value,
-    operator: $('textRuleOperator').value,
-    value: $('textRuleValue').value,
-    direction: $('textRuleDirection').value,
-    target: $('textRuleTarget').value,
-    action: 'block',
-    case_sensitive: $('textRuleCase').checked,
-  };
+  return {id:$('textRuleId').value, operator:$('textRuleOperator').value,
+    value:$('textRuleValue').value, direction:$('textRuleDirection').value,
+    target:$('textRuleTarget').value, action:'block', case_sensitive:$('textRuleCase').checked};
 }
-
 function invalidateRulePreview() {
   previewedRule = null;
+  $('textRuleReviewed').checked = false;
   $('activateTextRule').disabled = true;
 }
-
 function ruleMessage(message, failed = false) {
   $('textRuleMessage').textContent = message;
   $('textRuleMessage').className = 'message ' + (failed ? 'red' : 'green');
 }
-
-$('textRuleBtn').onclick = () => {
-  if (!admin) {
-    $('connectDialog').showModal();
-    return;
-  }
+async function openTextRule(existing = null) {
+  if (!admin) { openConnection(); return; }
+  if (ruleBusy) return;
   invalidateRulePreview();
   $('textRuleResults').replaceChildren();
   ruleMessage('');
-  $('textRuleDialog').showModal();
-};
-$('closeTextRule').onclick = () => $('textRuleDialog').close();
-$('textRuleDialog').querySelectorAll('input, select, textarea').forEach((field) => {
-  field.addEventListener('input', invalidateRulePreview);
+  try {
+    const owner = admin;
+    const status = await api('/api/admin/status', owner);
+    if (admin !== owner) throw Error('Management identity changed. Open the rule again.');
+    if (!status.configuration.management_writable) throw Error('This policy is read-only. Publish changes at its remote source.');
+    ruleBase = status.policy; ruleOwner = owner;
+    if (existing) {
+      existing = status.policy.text_rules.find(rule => rule.id === existing.id);
+      if (!existing) throw Error('This rule no longer exists. Refresh the policy.');
+    }
+    ruleOriginalId = existing ? existing.id : '';
+    const rule = existing || {id:'',operator:'contains',value:'',direction:'input',target:'model',case_sensitive:false};
+    for (const [field, key] of [['textRuleId','id'],['textRuleOperator','operator'],['textRuleValue','value'],['textRuleDirection','direction'],['textRuleTarget','target']]) $(field).value = rule[key];
+    $('textRuleCase').checked = rule.case_sensitive;
+    $('textRuleId').disabled = !!existing;
+    $('textRuleSamples').value = '';
+    $('textRuleTitle').textContent = existing ? 'Edit text rule' : 'Add text rule';
+    $('textRuleVersion').textContent = 'Active v' + ruleBase.version + ' → proposed v' + (ruleBase.version + 1);
+    $('textRuleDialog').showModal();
+  } catch (error) { ruleMessage(error.message, true); $('textRuleDialog').showModal(); }
+}
+$('textRuleBtn').onclick = () => openTextRule();
+$('closeTextRule').onclick = () => { if (!ruleBusy) $('textRuleDialog').close(); };
+$('textRuleDialog').querySelectorAll('input, select, textarea').forEach(field => {
+  if (field.id !== 'textRuleReviewed') field.addEventListener('input', invalidateRulePreview);
 });
-
+$('textRuleReviewed').onchange = () => {
+  $('activateTextRule').disabled = !previewedRule || !$('textRuleReviewed').checked || ruleBusy;
+};
 $('previewTextRule').onclick = async () => {
   invalidateRulePreview();
-  $('previewTextRule').disabled = true;
-  const draft = textRuleDraft();
-  const fingerprint = JSON.stringify(draft);
-  const sampleText = $('textRuleSamples').value;
+  if (!ruleBase || admin !== ruleOwner) { ruleMessage('Reopen the rule using your current management identity.', true); return; }
+  const draft = textRuleDraft(), fingerprint = JSON.stringify(draft), sampleText = $('textRuleSamples').value;
+  if (!sampleText.trim()) { ruleMessage('Add at least one sample to test the match before activation.', true); return; }
+  ruleBusy = true; $('previewTextRule').disabled = true;
   try {
-    const result = await api('/api/admin/rules/preview', admin, {
-      rule: draft,
-      samples: sampleText.split('\n'),
-    });
-    if (JSON.stringify(textRuleDraft()) !== fingerprint || $('textRuleSamples').value !== sampleText) {
-      throw Error('The draft changed. Preview it again.');
-    }
+    const owner = ruleOwner;
+    const result = await api('/api/admin/rules/preview', owner, {rule:draft, samples:sampleText.split('\n')});
+    if (admin !== owner || JSON.stringify(textRuleDraft()) !== fingerprint || $('textRuleSamples').value !== sampleText) throw Error('The identity or draft changed. Test it again.');
     previewedRule = result.rule;
-    $('textRuleResults').replaceChildren(...result.matches.map((matches, index) =>
-      el('div', 'Sample ' + (index + 1) + ': ' + (matches ? 'BLOCK' : 'NO MATCH'), matches ? 'red' : 'green')
-    ));
-    $('activateTextRule').disabled = false;
-    ruleMessage('Validated. Preview checks this rule only; other controls still apply.');
-  } catch (error) {
-    ruleMessage(error.message, true);
-  } finally {
-    $('previewTextRule').disabled = false;
-  }
+    $('textRuleResults').replaceChildren(...result.matches.map((matches, index) => el('div', 'Sample ' + (index + 1) + ': ' + (matches ? 'BLOCK' : 'NO MATCH'), matches ? 'red' : 'green')));
+    $('textRuleBefore').textContent = ruleOriginalId ? JSON.stringify(ruleBase.text_rules.find(item => item.id === ruleOriginalId), null, 2) : 'New rule';
+    $('textRuleAfter').textContent = JSON.stringify(result.rule, null, 2);
+    ruleMessage('Test complete. Review the match results and exact change, then confirm. This tests this rule only; other controls still apply.');
+  } catch (error) { ruleMessage(error.message, true); }
+  finally { ruleBusy = false; $('previewTextRule').disabled = false; }
 };
-
 $('activateTextRule').onclick = async () => {
-  if (!previewedRule) return;
-  const rule = previewedRule;
-  invalidateRulePreview();
+  if (!previewedRule || !$('textRuleReviewed').checked || ruleBusy) return;
+  const rule = previewedRule, owner = ruleOwner, base = ruleBase;
+  ruleBusy = true; invalidateRulePreview();
   try {
-    const status = await api('/api/admin/status', admin);
-    if (!status.configuration.management_writable) {
-      throw Error('This instance uses a remote policy source. Publish the rule at that source.');
-    }
-    const rules = status.policy.text_rules || [];
-    if (rules.some((existing) => existing.id === rule.id)) {
-      throw Error('This rule ID already exists. Choose a new ID or edit the existing policy.');
-    }
-    const result = await api('/api/admin/policy', admin, {
-      ...status.policy,
-      version: status.policy.version + 1,
-      text_rules: [...rules, rule],
-    }, 'PUT');
+    if (admin !== owner) throw Error('Management identity changed. Reopen this rule.');
+    const status = await api('/api/admin/status', owner);
+    if (admin !== owner) throw Error('Management identity changed. Reopen this rule.');
+    if (!status.configuration.management_writable) throw Error('Publish this change at the configured remote source.');
+    if (JSON.stringify(status.policy) !== JSON.stringify(base)) throw Error('Policy changed since editing began. Reopen the rule and test against the latest version.');
+    const rules = base.text_rules || [];
+    if (!ruleOriginalId && rules.some(item => item.id === rule.id)) throw Error('This rule ID already exists. Edit it from the policy list.');
+    const next = ruleOriginalId ? rules.map(item => item.id === ruleOriginalId ? rule : item) : [...rules, rule];
+    const result = await api('/api/admin/policy', owner, {...base, version:base.version + 1, text_rules:next}, 'PUT');
+    if (admin !== owner) return;
     await refresh();
-    ruleMessage('Activated ' + rule.id + ' in policy v' + result.policy_version + '. Future matching requests are blocked.');
-  } catch (error) {
-    ruleMessage(error.message, true);
-  }
+    if (admin !== owner) return;
+    ruleMessage('Policy v' + result.policy_version + ' is active. New requests use the updated rule. No restart is needed.');
+  } catch (error) { ruleMessage(error.message, true); }
+  finally { ruleBusy = false; }
 };

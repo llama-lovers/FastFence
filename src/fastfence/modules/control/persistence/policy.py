@@ -160,6 +160,12 @@ class PolicyStore:
     ) -> bool:
         with self._refresh_lock:
             try:
+                # Generic management updates are also compare-and-swap writes.
+                # Pin the active base under the refresh lock and inspect the
+                # actual source before replacing its policy with the candidate.
+                # This catches external edits not yet observed by the poller.
+                if policy is not None and expected_base_policy is None:
+                    expected_base_policy = self._snapshot.policy
                 candidate = self._read(
                     policy, expected_base_policy=expected_base_policy
                 )
