@@ -86,6 +86,10 @@ class ScannerPort(Protocol):
     async def assess(self, text: str, config: SemanticConfig) -> Assessment: ...
 
 
+class SecretsPort(Protocol):
+    def redact(self, value: Any) -> tuple[Any, list[str]]: ...
+
+
 class ModelsPort(Protocol):
     async def complete(
         self,

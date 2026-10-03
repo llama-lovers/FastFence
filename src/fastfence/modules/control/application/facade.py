@@ -26,6 +26,7 @@ from fastfence.modules.control.persistence.models import (
     SemanticScanner,
 )
 from fastfence.modules.control.persistence.policy import PolicyStore
+from fastfence.modules.control.persistence.secrets import OfflineSecrets
 from fastfence.modules.control.persistence.tools import DemoTools
 from fastfence.shared.settings.app_settings import AppSettings
 
@@ -108,6 +109,7 @@ def build_runtime(settings: AppSettings) -> ControlRuntime:
         tools=DemoTools(),
         scanner=SemanticScanner(settings.ollama_url, settings.kev_url),
         models=OllamaModels(settings.ollama_url),
+        secrets=OfflineSecrets(),
     )
     return ControlRuntime(
         identities=identities, policies=policies, ledger=ledger, engine=engine

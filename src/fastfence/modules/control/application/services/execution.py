@@ -11,6 +11,7 @@ from fastfence.modules.control.contracts.ports import (
     LedgerPort,
     ModelsPort,
     ScannerPort,
+    SecretsPort,
     ToolsPort,
 )
 from fastfence.modules.control.domain.exceptions import RejectedError
@@ -29,9 +30,11 @@ class Executor:
         scanner: ScannerPort,
         models: ModelsPort,
         ledger: LedgerPort,
+        secrets: SecretsPort | None = None,
     ) -> None:
         self.tools, self.scanner, self.models = tools, scanner, models
         self.ledger = ledger
+        self.secrets = secrets
 
     async def scan(
         self,
@@ -102,7 +105,9 @@ class Executor:
         return output
 
     async def inspect_output(self, state: InvocationState, output: Any) -> Any:
-        output, findings = inspect_payload(output, state.snapshot, "output")
+        output, findings = inspect_payload(
+            output, state.snapshot, "output", self.secrets
+        )
         state.findings.update(findings)
         config = state.snapshot.policy.semantic
         if config.provider != "disabled" and config.scan_output:

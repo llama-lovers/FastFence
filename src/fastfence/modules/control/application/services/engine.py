@@ -16,6 +16,7 @@ from fastfence.modules.control.contracts.ports import (
     ModelsPort,
     PolicyPort,
     ScannerPort,
+    SecretsPort,
     ToolsPort,
 )
 from fastfence.modules.control.domain.exceptions import (
@@ -41,9 +42,11 @@ class Engine:
         tools: ToolsPort,
         scanner: ScannerPort,
         models: ModelsPort,
+        secrets: SecretsPort | None = None,
     ) -> None:
         self.policies, self.ledger, self.tools = policies, ledger, tools
         self.scanner, self.models = scanner, models
+        self.secrets = secrets
 
     async def invoke(
         self, identity: Identity, call: ToolCall | ModelCall
@@ -79,8 +82,10 @@ class Engine:
         return verdict
 
     async def _run(self, state: InvocationState) -> None:
-        inspector = InputInspector(self.tools)
-        executor = Executor(self.tools, self.scanner, self.models, self.ledger)
+        inspector = InputInspector(self.tools, self.secrets)
+        executor = Executor(
+            self.tools, self.scanner, self.models, self.ledger, self.secrets
+        )
         prepared = inspector.prepare(state)
         self.ledger.reserve(
             state.verdict.request_id,

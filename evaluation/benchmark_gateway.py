@@ -30,6 +30,7 @@ from fastfence.modules.control.persistence.models import (
     SemanticScanner,
 )
 from fastfence.modules.control.persistence.policy import PolicyStore
+from fastfence.modules.control.persistence.secrets import OfflineSecrets
 from fastfence.modules.control.persistence.tools import DemoTools
 
 
@@ -139,6 +140,7 @@ def engine_for(root: Path, name: str, upstream_mode: str) -> Engine:
         else DemoTools(),
         scanner=SemanticScanner("http://127.0.0.1:1", "http://127.0.0.1:1"),
         models=OllamaModels("http://127.0.0.1:1"),
+        secrets=OfflineSecrets(),
     )
 
 
@@ -274,6 +276,7 @@ async def benchmark(args: argparse.Namespace) -> dict:
             "demo_15ms": "actual in-process DemoTools including deliberate 15ms simulated backend wait; end-to-end demo timing",
         },
         "semantic_model": "disabled",
+        "secret_detector": "detect-secrets 1.5.0 offline format/keyword adapter enabled",
         "budget_scope": "independent local instance; counters reset on restart",
         "timing": "perf_counter_ns around complete invocation; nearest-rank percentiles; startup/import/config I/O excluded; cooperative asyncio workers",
         "limitations": "development machine measurements only; other processes and CPU power state uncontrolled; no production latency guarantee; no LLM/HTTP/MCP/DTO parse costs; concurrent denied calls include deliberate cooperative yields; only zero_wait_fixture isolates local control overhead",

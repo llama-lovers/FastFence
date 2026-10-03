@@ -214,6 +214,24 @@ Unicode NFKC and case. These demonstrate feed-driven mitigation of specific patt
 with historical attack classes; **they do not prevent all code execution, deserialization,
 supply-chain attacks, encoded attacks, or prompt injection**.
 
+The privacy pipeline also uses [detect-secrets](https://github.com/Yelp/detect-secrets)
+1.5.0 through an offline adapter with 19 credential-format/keyword detectors, including
+GitHub, GitLab, Slack, AWS, Azure, JWT and private-key markers. Detector instances are
+created once at startup; runtime performs no verification requests, filesystem scans or
+per-request changes to the library's global settings. Active `privacy.enabled`, `input`
+and `output` settings govern both the existing heuristics and this adapter. Findings
+contain detector names only; detector failures block delivery with a sanitized reason.
+
+Bounded line-wrap reconstruction covers a single string up to 4,096 characters and eight
+line breaks; arbitrary fragments across messages or fields are not reconstructed.
+Runtime ignores repository baselines and caller-supplied allowlist comments. Entropy-only
+plugins are excluded from this runtime profile to avoid treating ordinary quoted text as
+credentials; the repository hook uses the full default plugin set.
+
+The pinned pre-commit hook runs with `--no-verify` and a reviewed `.secrets.baseline` of
+known synthetic fixtures and public revision hashes. New findings fail the hook; baseline
+entries must be reviewed explicitly, and commits never regenerate it automatically.
+
 Privacy detection covers API-key patterns, secret assignments, sensitive dictionary keys,
 private-key blocks, email addresses, and string/numeric 11-digit Polish-ID candidates. Nested
 objects, lists, dictionary keys and strings are inspected. Numeric/identifier patterns are
@@ -322,7 +340,14 @@ Measure deterministic enforcement separately:
 uv run python evaluation/benchmark_gateway.py --output evaluation/results/local-runtime.json
 ```
 
-The [recorded benchmark](evaluation/results/memory-runtime-benchmark.json) contains 24,000
+The [current offline detector benchmark](evaluation/results/detect-secrets-runtime-benchmark.json)
+includes all 19 runtime detector plugins and post-redaction size checks: 24,000 timed calls,
+with allowed zero-wait fixture calls at p95 **0.142 ms** serial (7,531 calls/s) and
+**0.135 ms** with eight cooperative workers. The demo backend's intentional 15 ms delay
+gives p95 18.107 ms serial and 19.944 ms with eight workers. These are core measurements,
+excluding HTTP/MCP and model inference; they are not production performance guarantees.
+
+The [pre-detect-secrets baseline benchmark](evaluation/results/memory-runtime-benchmark.json) contains 24,000
 timed calls, 100 excluded warmup calls per scenario, and serial/eight-worker workloads on
 Apple M3 Pro, 18 GiB RAM, Python 3.12.12. The zero-wait upstream is explicitly a benchmark
 fixture; actual authorization, input/output checks, budget reservation/settlement and bounded
@@ -349,7 +374,8 @@ the running dashboard's policy or budgets.
 `config/policy.yaml` in the dashboard does not change the test baseline.
 
 Dependencies are resolved in `uv.lock`: FastAPI (MIT), FastMCP (Apache-2.0), Pydantic (MIT),
-HTTPX (BSD-3-Clause), Uvicorn (BSD-3-Clause), PyYAML (MIT); development tools pytest and Ruff.
+HTTPX (BSD-3-Clause), Uvicorn (BSD-3-Clause), PyYAML (MIT), detect-secrets (Apache-2.0);
+development tools pytest and Ruff.
 The project uses their public interfaces and does not vendor Laya, Kev or FastSprout code.
 The supplied FastSprout tree informed organization only. FastCRUD and Bubus are unnecessary
 for this small control pipeline; security decisions stay synchronous with execution rather than

@@ -21,6 +21,14 @@ repos:
         # Direct commits to main are explicitly requested for this hackathon.
         args: [--branch, staging, --branch, development]
 
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        # Only reviewed synthetic fixtures/public hashes enter this baseline.
+        # Never verify candidate credentials against external services.
+        args: [--baseline, .secrets.baseline, --no-verify]
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.12.8
     hooks:

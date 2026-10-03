@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Literal
 
-from fastfence.modules.control.contracts.ports import ToolsPort
+from fastfence.modules.control.contracts.ports import SecretsPort, ToolsPort
 from fastfence.modules.control.domain.controls import (
     privacy_filter,
     signature_findings,
@@ -26,8 +26,21 @@ def encode(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
+def check_size(
+    value: Any,
+    maximum: int,
+    direction: Literal["input", "output"],
+    findings: list[str] | None = None,
+) -> None:
+    if len(encode(value).encode()) > maximum:
+        raise RejectedError(f"{direction}_too_large", findings)
+
+
 def inspect_payload(
-    value: Any, snapshot: Snapshot, direction: Literal["input", "output"]
+    value: Any,
+    snapshot: Snapshot,
+    direction: Literal["input", "output"],
+    secrets: SecretsPort | None = None,
 ) -> tuple[Any, list[str]]:
     policy = snapshot.policy
     maximum = (
@@ -35,8 +48,7 @@ def inspect_payload(
         if direction == "input"
         else policy.max_output_bytes
     )
-    if len(encode(value).encode()) > maximum:
-        raise RejectedError(f"{direction}_too_large")
+    check_size(value, maximum, direction)
     if policy.signatures_enabled:
         attacks = signature_findings(value, snapshot.feed)
         if attacks:
@@ -49,17 +61,28 @@ def inspect_payload(
     if not policy.privacy.enabled:
         return value, []
     safe, findings = privacy_filter(value)
+    if secrets is not None:
+        try:
+            safe, detected = secrets.redact(safe)
+        except Exception:
+            raise RejectedError(
+                f"{direction}_secret_detector_unavailable"
+            ) from None
+        findings = sorted(set(findings).union(detected))
     action = (
         policy.privacy.input if direction == "input" else policy.privacy.output
     )
     if findings and action == "block":
         raise RejectedError(f"{direction}_sensitive_data", findings)
+    check_size(safe, maximum, direction, findings)
     return safe, findings
 
 
 class InputInspector:
-    def __init__(self, tools: ToolsPort) -> None:
-        self.tools = tools
+    def __init__(
+        self, tools: ToolsPort, secrets: SecretsPort | None = None
+    ) -> None:
+        self.tools, self.secrets = tools, secrets
 
     def _authorize(self, state: InvocationState) -> ToolPolicy | ModelPolicy:
         identity, call, policy = (
@@ -98,7 +121,9 @@ class InputInspector:
             if isinstance(call, ToolCall)
             else self._model_payload(call)
         )
-        payload, findings = inspect_payload(original, state.snapshot, "input")
+        payload, findings = inspect_payload(
+            original, state.snapshot, "input", self.secrets
+        )
         state.findings.update(findings)
         if isinstance(call, ToolCall):
             payload = self.tools.validate(call.tool, payload, state.identity)
