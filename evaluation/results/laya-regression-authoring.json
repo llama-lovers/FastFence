@@ -1,0 +1,45 @@
+{
+  "source": "real_laya",
+  "model": "qwen3:4b",
+  "upstream_commit": "b3b998c03dc44076675305581eb4640b9bf6ff8f",
+  "schema_valid": true,
+  "inference_ms": 11104,
+  "generated_cases": 4,
+  "generation_format": "four_required_named_case_objects",
+  "public_format": "validated_ordered_case_list",
+  "adapter": "Case keys become labels; operation, content, scope and expectation values are unchanged",
+  "operations_repaired": false,
+  "expectations_repaired": false,
+  "cases": [
+    {
+      "label": "case-1",
+      "expected_decision": "no_local_match",
+      "actual_decision": "no_local_match",
+      "passed": true
+    },
+    {
+      "label": "case-2",
+      "expected_decision": "blocked",
+      "actual_decision": "blocked",
+      "passed": true
+    },
+    {
+      "label": "case-3",
+      "expected_decision": "blocked",
+      "actual_decision": "blocked",
+      "passed": true
+    },
+    {
+      "label": "case-4",
+      "expected_decision": "no_local_match",
+      "actual_decision": "no_local_match",
+      "passed": true
+    }
+  ],
+  "prior_diagnostics": {
+    "duplicate_label_proposal": "strictly_rejected",
+    "prefixItems_generation_schema": "provider_error; replaced with supported object schema"
+  },
+  "scope": "Actual local management-plane generation and independent deterministic comparison; no full authorization, budget or semantic approval",
+  "passed": true
+}

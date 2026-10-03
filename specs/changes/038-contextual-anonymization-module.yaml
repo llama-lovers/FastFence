@@ -1,0 +1,52 @@
+id: FF-038
+title: Separate local stateless pseudonymization module
+status: verified
+problem: Users need local pattern-based anonymization with stable owner-scoped identifiers and optional self-contained recovery,
+  without a conversation store.
+scope:
+- Add an independent anonymization module with application facade, typed ports, domain matching and stateless token adapter.
+- Define shared immutable Pydantic configuration and context/result contracts for composition without feature-to-feature imports.
+- Support literal dictionaries and RE2 patterns with a provided alias prefix or ANONIM default.
+- Reuse stable keyed identifiers on input and output across independent parallel requests.
+- Restore complete reversible tokens only for their owner and currently authorized unchanged rules.
+constraints:
+- No dataclasses, database, network I/O or inference on the anonymization path.
+- Compile bounded RE2 expressions during configuration validation; reject unsupported or empty-match patterns, never fall
+  back to backtracking regex.
+- Deterministic non-cascading leftmost, longest, policy-order matching; preserve already issued aliases.
+- No conversation identifiers, alias vaults, inverse dictionaries, capsules or request history.
+- Scope keyed identifiers and authenticated tokens to verified tenant and subject; no original values in audit, logs, status
+  or errors.
+- Bound matched values, token sizes and replacements per request; failures are closed.
+- Restoration is off by default and separately allowed by each active rule; changed or removed rules invalidate tokens under
+  current policy.
+change_paths:
+- src/fastfence/shared/anonymization.py
+- src/fastfence/modules/anonymization/**
+- tests/unit/test_anonymization*.py
+- pyproject.toml
+- uv.lock
+acceptance:
+- Two different values receive different stable identifiers with custom or default prefixes.
+- Repeated values reuse full tokens within a request and stable identifiers across independent requests.
+- Other subjects, tenants and expired or modified tokens cannot restore originals.
+- Current rule permissions and token mode independently govern restoration.
+- Capacity failure is fail-closed and replacements are non-cascading without structural-key changes.
+validation:
+- command: uv run pytest -q --no-cov tests/unit/test_anonymization.py tests/unit/test_anonymization_tokens.py tests/integration/test_stateless_control.py
+  expected: Stateless matching, authenticated owner/rule binding, expiry, rotation, restart, parallel requests and mocked
+    control integration regressions pass.
+- command: uv run lint-imports
+  expected: Feature modules remain independent and all existing layer contracts pass.
+- command: uv run pre-commit run --all-files
+  expected: All configured quality gates pass.
+evidence:
+- command: uv run pytest -q --no-cov tests/unit/test_anonymization.py tests/unit/test_anonymization_tokens.py tests/integration/test_stateless_control.py
+  result: '60 cases pass: 48 module/crypto cases and 12 REST/native-chat/OpenAI/MCP control integration cases; upstream is explicitly
+    a local echo test double, with no live-model inference.'
+- command: uv run basedpyright src
+  result: Zero errors, warnings or notes.
+- command: uv run lint-imports
+  result: All sixteen architecture contracts kept.
+- command: Ruff owned files and pyscn anonymization module
+  result: Lint/format and module complexity gates pass.

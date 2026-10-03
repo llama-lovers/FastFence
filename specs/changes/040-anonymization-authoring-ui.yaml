@@ -1,0 +1,38 @@
+id: FF-040
+title: Draft and review stateless anonymization rules and restoration consent
+status: verified
+problem: Policy authoring and the browser do not expose stable value aliases or explicit restoration consent.
+scope:
+  - Add typed anonymization-rule upsert and removal to reviewed policy operations and actual Laya generation.
+  - Explain alias prefixes, scope and restoration permission in the policy studio.
+  - Model and tool calls remain independent and send no conversation identifiers or mappings.
+constraints:
+  - Restoration is false by default and requires both request consent and active rule permission.
+  - Anonymization operations preserve unrelated privacy, budgets, hard-block and access controls.
+  - No private values, tokens, alias maps, conversation identifiers or credentials are stored in browser session storage.
+  - A verified agent identity change resets restoration consent; unknown removal identifiers are rejected.
+  - Actual model calls require coordination and cannot be replaced by a synthetic live claim.
+change_paths:
+  - src/fastfence/modules/control/domain/policy_authoring.py
+  - integrations/laya/draft_policy.py
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/app/interfaces/http/web/playground.js
+  - src/fastfence/app/interfaces/http/web/policy-studio.js
+  - tests/unit/test_anonymization_operations.py
+  - tests/integration/test_anonymization_authoring_ui.py
+acceptance:
+  - Reviewed operations upsert or remove only the identified rule and expose restoration permission in their exact diff.
+  - Laya schema and prompt support literal and bounded-regex anonymization with default ANONIM prefix.
+  - Model and tool calls send explicit restore_originals false until requested and omit conversation state.
+  - A changed authenticated agent resets restoration consent and stale in-flight responses cannot overwrite the new identity view.
+  - Browser displays anonymized and restored metadata without alias maps.
+validation:
+  - command: uv run pytest -q --no-cov tests/unit/test_anonymization_operations.py tests/integration/test_anonymization_authoring_ui.py
+    expected: Typed operations, conservation, invalid removals, browser lifecycle and restoration consent pass.
+  - command: uv run ruff check src/fastfence/modules/control/domain/policy_authoring.py integrations/laya/draft_policy.py tests/unit/test_anonymization_operations.py tests/integration/test_anonymization_authoring_ui.py
+    expected: Changed Python passes configured lint rules.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_anonymization_operations.py tests/integration/test_anonymization_authoring_ui.py
+    result: Thirteen focused tests pass, including strict restoration consent, exact rule conservation and removal, explicit selective privacy companions, real Node execution of delivered stateless calls, consent and review UI, and API draft/empty-preview/exact activation with one explicitly mocked generation.
+  - command: uv run ruff check src/fastfence/modules/control/domain/policy_authoring.py integrations/laya/draft_policy.py tests/unit/test_anonymization_operations.py tests/integration/test_anonymization_authoring_ui.py
+    result: Changed Python passes lint and format checks; both browser scripts pass node syntax validation. Actual Laya inference is not claimed by these fixtures.

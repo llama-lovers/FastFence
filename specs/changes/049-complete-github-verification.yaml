@@ -1,0 +1,41 @@
+id: FF-049
+title: Run the complete quality toolchain in GitHub Actions
+status: implemented
+problem: Existing GitHub verification covers tests, Ruff, types and imports but does not yet run every configured
+  local quality gate or validate specification coverage against the change set.
+scope:
+- Run the full pre-commit quality suite alongside pytest and its coverage gate on pushes and pull requests.
+- Validate that changed implementation files are covered by changed implemented specifications.
+- Preserve the existing strict MkDocs build and GitHub Pages deployment workflow.
+- Keep normal CI offline with fake inference and separately provide a reproducible opt-in real OCR smoke command.
+- Call the documentation build/deploy workflow only after the verification job succeeds on main; retain independent
+  docs builds for pull requests.
+constraints:
+- Reuse pinned action references and least-privilege workflow permissions.
+- No real model credentials, private runtime configuration or customer documents in CI.
+- Tests for new stateless and OCR boundaries run in the ordinary suite; real OCR model weights are an explicitly
+  separate environment-dependent check.
+change_paths:
+- .github/workflows/ci.yml
+- scripts/check_specs.py
+- tests/unit/test_spec_gate.py
+- docs/testing.md
+- .secrets.baseline
+- .github/workflows/docs.yml
+acceptance:
+- GitHub runs test coverage, Ruff, basedpyright, import contracts, no-dataclass checks, file limits, complexity,
+  secret scanning and specification validation.
+- Clean-checkout specification checks inspect the actual committed diff rather than an empty index.
+- GitHub Pages deployment depends on passing tests and every quality gate for the same commit.
+validation:
+- command: uv run pre-commit run --all-files
+  expected: Complete configured quality checks pass before pushing.
+- command: uv run pytest -q
+  expected: Offline test suite and coverage gate pass.
+evidence:
+- command: uv run pytest -q --no-cov tests/unit/test_spec_gate.py
+  result: Committed-diff gate rejects uncovered implementation with an empty index and accepts changed matching
+    implemented specs
+- review: 'Seven exact false positives: five synthetic OCR file SHA256 hashes, benchmark source SHA256 and literal
+    key-ID alphabet. No credentials accepted.'
+- review: Additional exact public Laya revision hash in the actual-generation report; no credential.

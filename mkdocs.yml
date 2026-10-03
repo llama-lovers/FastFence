@@ -60,6 +60,7 @@ nav:
   - Guides:
       - Policies and controls: policies.md
       - Laya, MCP and models: integrations.md
+      - Manual acceptance test: manual-testing.md
       - Testing and evidence: testing.md
       - Challenge readiness: challenge-readiness.md
   - Reference:

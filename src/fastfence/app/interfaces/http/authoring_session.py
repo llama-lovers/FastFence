@@ -2,6 +2,7 @@ import secrets
 import threading
 import time
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from fastfence.app.interfaces.http.authoring_process import PolicyAuthoringError
 from fastfence.app.interfaces.http.authoring_records import (
@@ -14,9 +15,16 @@ from fastfence.app.interfaces.http.authoring_records import (
     StoredProposal,
     WorkerResponse,
 )
+from fastfence.app.interfaces.http.authoring_regression import (
+    SavedRegressionSuite,
+    policy_digest,
+    save_reviewed_tests,
+    yaml_diff,
+)
 from fastfence.modules.control.application.facade import ControlRuntime
 from fastfence.modules.control.application.use_cases.policy_preview import (
-    preview_sample,
+    RegressionResult,
+    compare_sample,
 )
 from fastfence.modules.control.domain.models import Identity, Snapshot
 from fastfence.modules.control.domain.policy_authoring import (
@@ -34,9 +42,11 @@ class PolicyAuthoringSession:
         *,
         ttl: float = 600,
         limit: int = 32,
+        tests_path: Path | None = None,
     ) -> None:
         self.runtime, self.author = runtime, author
         self.ttl, self.limit = ttl, limit
+        self.tests_path = tests_path
         self._lock = threading.RLock()
         self._proposals: dict[str, StoredProposal] = {}
 
@@ -121,6 +131,7 @@ class PolicyAuthoringSession:
                 prepared=prepared,
                 model=worker.model,
                 inference_ms=worker.inference_ms,
+                yaml_diff=yaml_diff(snapshot.policy, prepared.candidate),
             )
             self._proposals[proposal.proposal_id] = proposal
             return proposal.view()
@@ -130,19 +141,57 @@ class PolicyAuthoringSession:
     ) -> PreviewView:
         with self._lock:
             proposal = self._get(request.proposal_id, identity)
-            snapshot = Snapshot(
-                policy=proposal.prepared.candidate,
-                feed=self.runtime.snapshot().feed,
+            feed = self.runtime.snapshot().feed
+            base = Snapshot(policy=proposal.base_policy, feed=feed)
+            candidate = Snapshot(policy=proposal.prepared.candidate, feed=feed)
+            tests = (
+                tuple(request.tests)
+                if request.tests is not None
+                else proposal.prepared.tests
             )
-            results = [
-                preview_sample(
-                    snapshot, sample, index, self.runtime.engine.secrets
+            if proposal.prepared.tests and not tests:
+                raise PolicyAuthoringError("proposal_tests_required")
+            comparisons = [
+                compare_sample(
+                    base,
+                    candidate,
+                    sample,
+                    index,
+                    self.runtime.engine.secrets,
+                    self.runtime.engine.anonymization,
                 )
                 for index, sample in enumerate(request.samples)
             ]
+            regressions = []
+            for index, test in enumerate(tests):
+                comparison = compare_sample(
+                    base,
+                    candidate,
+                    test,
+                    index,
+                    self.runtime.engine.secrets,
+                    self.runtime.engine.anonymization,
+                )
+                regressions.append(
+                    RegressionResult(
+                        test=test,
+                        comparison=comparison,
+                        passed=comparison.after.decision
+                        == test.expected_decision,
+                    )
+                )
             proposal.previewed = True
-            proposal.previewed_feed_version = snapshot.feed.version
-            return PreviewView(**proposal.view().model_dump(), results=results)
+            proposal.previewed_feed_version = feed.version
+            proposal.reviewed_tests = tests
+            proposal.tests_passed = all(result.passed for result in regressions)
+            return PreviewView(
+                **proposal.view().model_dump(),
+                results=[pair.after for pair in comparisons],
+                comparisons=comparisons,
+                test_results=regressions,
+                tests_passed=proposal.tests_passed,
+                feed_version=feed.version,
+            )
 
     def activate(
         self, proposal_id: str, base_version: int, identity: Identity
@@ -153,6 +202,8 @@ class PolicyAuthoringSession:
                 raise PolicyAuthoringError("policy_base_version_conflict", 409)
             if not proposal.previewed:
                 raise PolicyAuthoringError("proposal_preview_required", 409)
+            if not proposal.tests_passed:
+                raise PolicyAuthoringError("proposal_regression_failed", 409)
             if (
                 self.runtime.snapshot().feed.version
                 != proposal.previewed_feed_version
@@ -172,8 +223,28 @@ class PolicyAuthoringSession:
                     "policy_activation_conflict", 409
                 ) from None
             proposal.consumed = True
+            saved = False
+            warnings = []
+            if proposal.reviewed_tests:
+                try:
+                    if self.tests_path is None:
+                        raise OSError("No regression path configured")
+                    save_reviewed_tests(
+                        self.tests_path,
+                        SavedRegressionSuite(
+                            policy_version=snapshot.policy.version,
+                            policy_sha256=policy_digest(snapshot.policy),
+                            feed_version=snapshot.feed.version,
+                            tests=proposal.reviewed_tests,
+                        ),
+                    )
+                    saved = True
+                except OSError:
+                    warnings.append("policy_tests_not_saved")
             return ActivationView(
                 proposal_id=proposal_id,
                 policy_version=snapshot.policy.version,
                 operations=list(proposal.prepared.operations),
+                tests_saved=saved,
+                warnings=warnings,
             )

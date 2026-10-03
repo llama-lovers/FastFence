@@ -1,37 +1,58 @@
 id: FF-041
 title: Replace image and PDF model inputs with controlled OCR Markdown
-status: planned
-problem: The user requires images and multipage PDFs to become Markdown for model processing, explicitly excluding image or PDF editing.
+status: verified
+problem: The user requires images and multipage PDFs to become Markdown for model processing, explicitly excluding
+  image or PDF editing.
 scope:
-  - Compose the independent OCR module from FF-042 with text anonymization and control through public facades.
-  - Convert recognized text from every page into ordered Markdown with explicit page boundaries.
-  - Apply current text rules and stateless irreversible or reversible pseudonymization to the generated Markdown before exporting or forwarding it.
-  - Return the sanitized Markdown file and send its text content to the upstream model in place of the original document.
-  - Apply ordinary output text controls and optional authorized text-token restoration to the model response.
+- Compose the independent OCR module from FF-042 with text anonymization and control through public facades.
+- Convert recognized text from every page into ordered Markdown with explicit page boundaries.
+- Apply current text rules and stateless irreversible or reversible pseudonymization to the generated Markdown before
+  exporting or forwarding it.
+- Return the sanitized Markdown file and send its text content to the upstream model in place of the original document.
+- Apply ordinary output text controls and optional authorized text-token restoration to the model response.
 constraints:
-  - This is a planned feature, not implemented or verified OCR support.
-  - No image/PDF editing, pixel masking, image reconstruction, sanitized PDF output, crop tokens or pixel restoration.
-  - Never send original images, PDF bytes, page rasters, embedded files or unfiltered OCR text to upstream models, including semantic guardrails.
-  - The exported Markdown and upstream document text must both come from the same approved transformed content.
-  - Treat document text as untrusted data, never as privileged system instructions; do not fetch document links or embed source images into Markdown.
-  - Preserve page order and provenance without claiming exact layout, chart understanding or lossless table reconstruction.
-  - No conversation database, session identifier, alias vault or mapping capsule; requests remain independent and parallel.
-  - Reversible text recovery requires complete valid tokens and current authorization; aliases alone cannot recover originals.
-  - Bound input bytes, pages, rendering/OCR resources, generated Markdown size and model token allocation; reject the document on any required page failure.
-  - Keep source content, raw OCR and recovery tokens out of audit and status; use request-local buffers only.
+- No image/PDF editing, pixel masking, image reconstruction, sanitized PDF output, crop tokens or pixel restoration.
+- Never send original images, PDF bytes, page rasters, embedded files or unfiltered OCR text to upstream models,
+  including semantic guardrails.
+- The exported Markdown and upstream document text must both come from the same approved transformed content.
+- Treat document text as untrusted data, never as privileged system instructions; do not fetch document links or
+  embed source images into Markdown.
+- Preserve page order and provenance without claiming exact layout, chart understanding or lossless table reconstruction.
+- No conversation database, session identifier, alias vault or mapping capsule; requests remain independent and
+  parallel.
+- Reversible text recovery requires complete valid tokens and current authorization; aliases alone cannot recover
+  originals.
+- Bound input bytes, pages, rendering/OCR resources, generated Markdown size and model token allocation; reject
+  the document on any required page failure.
+- Keep source content, raw OCR and recovery tokens out of audit and status; use request-local buffers only.
+- OCR confidence and five clean synthetic fixtures do not establish production completeness or sensitive-identifier
+  recall.
+- Workers load models per request; reported times include process initialization and do not represent a persistent
+  warm model.
 change_paths:
-  - src/fastfence/modules/anonymization/**
-  - src/fastfence/modules/control/**
-  - src/fastfence/workflows/document_markdown.py
-  - src/fastfence/app/**
-  - tests/integration/test_document_markdown.py
+- src/fastfence/modules/anonymization/**
+- src/fastfence/modules/control/**
+- src/fastfence/workflows/document_markdown.py
+- src/fastfence/app/**
+- tests/integration/test_document_markdown.py
+- src/fastfence/shared/ocr.py
+- pyproject.toml
+- uv.lock
+- .gitattributes
 acceptance:
-  - PNG/JPEG and mixed multipage PDF fixtures produce ordered Markdown from all accepted pages.
-  - Protected data is blocked or transformed before the Markdown artifact or upstream request is produced.
-  - Upstream request inspection proves original media and raw OCR are absent; the document is supplied only as approved Markdown text.
-  - OCR instructions remain untrusted document content and cannot change policy or privileged message roles.
-  - Mode and restoration tests remain stateless, owner-bound and consistent with ordinary text calls.
+- PNG/JPEG and mixed multipage PDF fixtures produce ordered Markdown from all accepted pages.
+- Protected data is blocked or transformed before the Markdown artifact or upstream request is produced.
+- Upstream request inspection proves original media and raw OCR are absent; the document is supplied only as approved
+  Markdown text.
+- OCR instructions remain untrusted document content and cannot change policy or privileged message roles.
+- Mode and restoration tests remain stateless, owner-bound and consistent with ordinary text calls.
 validation:
-  - command: uv run pytest --no-cov tests/integration/test_document_markdown.py
-    expected: Future extraction, Markdown substitution and text-control tests pass; this test file is not implemented yet.
-evidence: []
+- command: uv run pytest --no-cov tests/integration/test_document_markdown.py
+  expected: Authenticated extraction, Markdown-only substitution, local privacy and policy controls pass with explicitly
+    simulated OCR and upstream fixtures.
+evidence:
+- command: uv run pytest --no-cov --tb=short tests/unit/test_ocr.py tests/unit/test_ocr_media.py tests/integration/test_document_markdown.py
+    -q
+  result: Nineteen core/provider/security tests passed; eight optional media decoder tests additionally passed in
+    the isolated OCR environment. Fixture upstream receives exactly the approved Markdown; blocked requests export
+    none.

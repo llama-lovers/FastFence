@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, field_serializer, model_validator
+from pydantic import Field, StrictBool, field_serializer, model_validator
 
 from fastfence.modules.control.domain.frozen import (
     FrozenControlModel,
@@ -11,6 +11,7 @@ from fastfence.modules.control.domain.frozen import (
 )
 from fastfence.modules.control.domain.privacy import Privacy
 from fastfence.modules.control.domain.text_rules import TextRule
+from fastfence.shared.anonymization import AnonymizationConfig
 from fastfence.shared.models import StrictModel
 
 
@@ -57,6 +58,9 @@ class Policy(FrozenControlModel):
     models: FrozenMap[ModelPolicy] = Field(default_factory=dict)
     budgets: FrozenMap[Limits]
     privacy: Privacy = Field(default_factory=Privacy)
+    anonymization: AnonymizationConfig = Field(
+        default_factory=AnonymizationConfig
+    )
     semantic: SemanticConfig = Field(default_factory=SemanticConfig)
     signatures_enabled: bool = True
     max_input_bytes: int = Field(default=16_384, ge=64, le=65_536)
@@ -128,6 +132,7 @@ class SignatureFeed(FrozenControlModel):
 class ToolCall(StrictModel):
     tool: str = Field(pattern=r"^[a-zA-Z0-9_.-]{1,64}$")
     arguments: dict[str, Any] = Field(default_factory=dict)
+    restore_originals: StrictBool = False
 
 
 class ModelMessage(StrictModel):
@@ -139,6 +144,7 @@ class ModelCall(StrictModel):
     model: str = Field(min_length=1, max_length=100)
     prompt: str = Field(max_length=65_536)
     max_output_tokens: int = Field(default=256, ge=1, le=2048)
+    restore_originals: StrictBool = False
     stop: list[Annotated[str, Field(min_length=1, max_length=128)]] | None = (
         Field(default=None, min_length=1, max_length=4)
     )
@@ -169,6 +175,8 @@ class Verdict(StrictModel):
     upstream_executed: bool = False
     instance_id: str | None = None
     telemetry_scope: Literal["instance"] = "instance"
+    anonymized: bool = False
+    restored: bool = False
 
 
 class Snapshot(FrozenControlModel):

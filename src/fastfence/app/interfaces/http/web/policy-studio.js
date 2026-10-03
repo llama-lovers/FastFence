@@ -1,5 +1,6 @@
 let studioProposal = null;
 let studioPreviewed = false;
+let studioTestsPassed = false;
 let studioRevision = 0;
 let studioBusy = false;
 
@@ -11,6 +12,8 @@ const studioErrors = {
   proposal_expired_redraft: 'This proposal expired. Draft it again before activation.',
   proposal_feed_changed_preview_again: 'The threat feed changed after preview. Test the examples again before activation.',
   proposal_preview_required: 'Test examples before activating this proposal.',
+  proposal_regression_failed: 'Some reviewed expectations failed. Inspect the cases and policy; nothing was activated.',
+  proposal_tests_required: 'Keep at least one reviewed regression case for this generated proposal.',
   proposal_already_activated: 'This proposal was already activated. Inspect the current policy.',
   proposal_not_found: 'This proposal is no longer available for this management identity. Draft again.',
   laya_not_installed_run_setup: 'Laya is not installed for this gateway. Run integrations/laya/setup.sh in the configured project directory.',
@@ -27,13 +30,16 @@ function studioMessage(text, failed = false) {
   $('policyStudioMessage').className = 'message ' + (failed ? 'red' : 'green');
 }
 function updateStudioActivation() {
-  $('activatePolicyDraft').disabled = studioBusy || !studioProposal || !studioPreviewed || !$('policyReviewed').checked;
+  $('activatePolicyDraft').disabled = studioBusy || !studioProposal || !studioPreviewed || !studioTestsPassed || !$('policyReviewed').checked;
 }
 function invalidateStudioPreview() {
   studioRevision += 1;
   studioPreviewed = false;
+  studioTestsPassed = false;
   $('policyReviewed').checked = false;
   $('policySampleResults').replaceChildren();
+  $('policyBehaviorDiff').replaceChildren();
+  $('policyRegressionResults').replaceChildren();
   updateStudioActivation();
 }
 function invalidateStudioProposal() {
@@ -60,7 +66,7 @@ $('policyStudioDialog').addEventListener('cancel', (event) => {
   if (studioBusy) event.preventDefault();
 });
 $('policyInstruction').addEventListener('input', invalidateStudioProposal);
-['policySamples', 'policySampleDirection', 'policySampleTarget'].forEach((name) => {
+['policySamples', 'policySampleDirection', 'policySampleTarget', 'policyGeneratedTests'].forEach((name) => {
   $(name).addEventListener('input', invalidateStudioPreview);
 });
 $('policyReviewed').onchange = updateStudioActivation;
@@ -68,6 +74,7 @@ const policyExamples = {
   letters: ['Blokuj każde słowo zawierające literę a w wejściu i wyjściu modeli, bez rozróżniania wielkości liter.', 'Hello\nCat', 'input', 'model'],
   emails: ['Redaguj adresy e-mail w danych wejściowych i wyjściowych.', 'Contact us\nanna@example.org', 'input', 'model'],
   secrets: ['Blokuj dane osobowe i sekrety w danych wejściowych i wyjściowych.', 'Public report\nanna@example.org', 'output', 'tool'],
+  aliases: ['Anonimizuj adresy e-mail jako EMAIL w wejściu i wyjściu modeli i narzędzi. Pozwól przywrócić oryginały tylko na wyraźne żądanie użytkownika.', 'Contact us\nanna@example.org\nanna@example.org', 'input', 'model'],
   roles: ['Ogranicz narzędzie knowledge.search wyłącznie do istniejącej roli operator.', 'Quarterly report', 'input', 'tool'],
 };
 document.querySelectorAll('[data-policy-example]').forEach((button) => {
@@ -90,6 +97,18 @@ function policyEffect(operation) {
     return 'Block ' + targets[rule.target] + ' ' + directions[rule.direction] + ' when ' + predicate +
       ' ' + JSON.stringify(rule.value) + ' (' + (rule.case_sensitive ? 'case sensitive' : 'case insensitive') + ').';
   }
+  if (operation.type === 'upsert_anonymization_rule') {
+    const rule = operation.rule;
+    return 'Anonymize ' + targets[rule.target] + ' ' + directions[rule.direction] +
+      ' using ' + rule.operator + ' ' + JSON.stringify(rule.value) +
+      '. Equal values receive scoped ' + rule.replacement + '_… aliases independently of conversation state (' +
+      (rule.case_sensitive ? 'case sensitive' : 'case insensitive') + '). Original restoration: ' +
+      (rule.allow_restore ? 'permitted only when requested; other controls still apply.' : 'not permitted.');
+  }
+  if (operation.type === 'set_anonymization_mode') return operation.mode === 'reversible' ?
+    'Use reversible pseudonymization. Recovery needs the complete authenticated token, matching owner and active rule permission.' :
+    'Use irreversible masking. No recoverable original value is carried in the alias.';
+  if (operation.type === 'remove_anonymization_rule') return 'Remove only anonymization rule ' + operation.rule_id + '.';
   if (operation.type === 'set_privacy' || operation.type === 'set_privacy_detector') {
     const detector = {pii_email: 'email addresses', pii_polish_id: 'eleven-digit Polish ID matches'};
     const subject = operation.type === 'set_privacy' ? 'detected personal data and secrets' : detector[operation.detector];
@@ -110,6 +129,8 @@ function showProposal(proposal) {
     ' · drafted in ' + (proposal.inference_ms / 1000).toFixed(2) + ' s · expires ' +
     new Date(proposal.expires_at).toLocaleTimeString();
   $('policyOperations').textContent = JSON.stringify(proposal.operations, null, 2);
+  $('policyGeneratedTests').value = JSON.stringify(proposal.tests || [], null, 2);
+  $('policyYamlDiff').textContent = proposal.yaml_diff || 'No YAML diff supplied.';
   $('policyEffects').replaceChildren(...proposal.operations.map((operation) => el('li', policyEffect(operation))));
   $('policyRolePreviewNote').classList.toggle('hidden', !proposal.operations.some((operation) => operation.type === 'restrict_tool_roles'));
   $('policyDiff').replaceChildren(...proposal.changes.map((change) => {
@@ -142,6 +163,15 @@ $('draftPolicy').onclick = async () => {
   } catch (error) { studioMessage(error.message, true); }
   finally { studioLock(false); }
 };
+function behaviorRow(pair, title) {
+  const row = el('div', '', 'budgetrow');
+  row.append(el('strong', title + ' · ' + (pair.changed ? 'changed local outcome' : 'unchanged local outcome'), 'small'));
+  row.append(el('p', 'BASE: ' + pair.before.decision.toUpperCase() + ' (' + pair.before.reason + ')' +
+    ' → CANDIDATE: ' + pair.after.decision.toUpperCase() + ' (' + pair.after.reason + ')', 'small'));
+  row.append(el('p', 'Findings: ' + (pair.before.findings.join(', ') || 'none') + ' → ' + (pair.after.findings.join(', ') || 'none'), 'small'));
+  row.append(el('pre', JSON.stringify({before: pair.before.safe_text, after: pair.after.safe_text}, null, 2)));
+  return row;
+}
 $('previewPolicy').onclick = async () => {
   if (!studioProposal) return;
   invalidateStudioPreview();
@@ -154,7 +184,9 @@ $('previewPolicy').onclick = async () => {
   studioLock(true);
   studioMessage('Testing examples against the proposed local controls…');
   try {
-    const result = await api('/api/admin/policies/preview', token, {proposal_id: proposal.proposal_id, samples});
+    const tests = JSON.parse($('policyGeneratedTests').value || '[]');
+    if (!Array.isArray(tests) || tests.length > 8) throw Error('Review at most eight structured test cases.');
+    const result = await api('/api/admin/policies/preview', token, {proposal_id: proposal.proposal_id, samples, tests});
     if (revision !== studioRevision || studioProposal !== proposal || admin !== token) throw Error('Proposal changed. Preview again.');
     $('policySampleResults').replaceChildren(...result.results.map((sample, index) => {
       const row = el('div', '', 'budgetrow');
@@ -164,13 +196,20 @@ $('previewPolicy').onclick = async () => {
       if (sample.safe_text !== null && sample.safe_text !== undefined) row.append(el('pre', sample.safe_text));
       return row;
     }));
+    $('policyBehaviorDiff').replaceChildren(...result.comparisons.map((pair, index) => behaviorRow(pair, 'Sample ' + (index + 1))));
+    $('policyRegressionResults').replaceChildren(...result.test_results.map((item) => {
+      const row = behaviorRow(item.comparison, item.test.label);
+      row.prepend(el('strong', (item.passed ? 'PASS' : 'FAIL') + ' · expected ' + item.test.expected_decision.toUpperCase(), item.passed ? 'green' : 'red'));
+      return row;
+    }));
     studioPreviewed = true;
-    studioMessage('Examples checked. Confirm you reviewed the changes to enable activation.');
+    studioTestsPassed = result.tests_passed === true;
+    studioMessage(studioTestsPassed ? 'Reviewed expectations pass. Inspect the before/after results and confirm review to enable activation.' : 'Reviewed expectations failed. Inspect the policy or edit the intended expectations explicitly, then preview again.', !studioTestsPassed);
   } catch (error) { studioMessage(error.message, true); }
   finally { studioLock(false); }
 };
 $('activatePolicyDraft').onclick = async () => {
-  if (!studioProposal || !studioPreviewed || !$('policyReviewed').checked || studioBusy) return;
+  if (!studioProposal || !studioPreviewed || !studioTestsPassed || !$('policyReviewed').checked || studioBusy) return;
   const proposal = studioProposal;
   studioLock(true);
   studioMessage('Activating the exact reviewed proposal…');
@@ -180,7 +219,12 @@ $('activatePolicyDraft').onclick = async () => {
     });
     invalidateStudioProposal();
     await refresh();
-    studioMessage('Policy v' + result.policy_version + ' is active. Test it in the playground; no model was called during activation.');
+    studioMessage('Policy v' + result.policy_version + ' is active. ' +
+      (result.tests_saved ? 'Reviewed cases saved to config/policy-tests.yaml. ' : '') +
+      'No model was called during activation.');
+    if ((result.warnings || []).includes('policy_tests_not_saved')) {
+      studioMessage('Policy v' + result.policy_version + ' is active, but the reviewed test file could not be saved. Check local configuration write permissions before the next activation.', true);
+    }
   } catch (error) { invalidateStudioPreview(); studioMessage(error.message, true); }
   finally { studioLock(false); }
 };

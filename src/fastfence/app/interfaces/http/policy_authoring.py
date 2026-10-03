@@ -26,7 +26,9 @@ def configure_policy_authoring(
     app: FastAPI, runtime: ControlRuntime, admin: Callable[..., Any]
 ) -> None:
     app.state.policy_authoring = PolicyAuthoringSession(
-        runtime, LayaPolicyAuthor(app.state.settings)
+        runtime,
+        LayaPolicyAuthor(app.state.settings),
+        tests_path=app.state.settings.root / "config/policy-tests.yaml",
     )
 
     @app.post("/api/admin/policies/draft")

@@ -3,11 +3,18 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Literal
 
+from fastfence.modules.control.application.services.alias_session import (
+    AliasSession,
+)
 from fastfence.modules.control.application.services.inspection import (
+    check_size,
     encode,
     inspect_payload,
+    inspect_privacy,
+    inspect_restrictions,
 )
 from fastfence.modules.control.contracts.ports import (
+    AnonymizationPort,
     LedgerPort,
     ModelsPort,
     ScannerPort,
@@ -31,10 +38,12 @@ class Executor:
         models: ModelsPort,
         ledger: LedgerPort,
         secrets: SecretsPort | None = None,
+        anonymization: AnonymizationPort | None = None,
     ) -> None:
         self.tools, self.scanner, self.models = tools, scanner, models
         self.ledger = ledger
         self.secrets = secrets
+        self.anonymization = anonymization
 
     async def scan(
         self,
@@ -106,12 +115,17 @@ class Executor:
         return output
 
     async def inspect_output(self, state: InvocationState, output: Any) -> Any:
+        aliases = AliasSession(state, self.anonymization)
         output, findings = inspect_payload(
             output,
             state.snapshot,
             "output",
             self.secrets,
             target="tool" if isinstance(state.call, ToolCall) else "model",
+            anonymize=(lambda value: aliases.mask(value, "output"))
+            if aliases.enabled
+            else None,
+            reveal=aliases.reveal,
         )
         state.findings.update(findings)
         config = state.snapshot.policy.semantic
@@ -122,4 +136,11 @@ class Executor:
                 state.snapshot.policy.max_output_bytes + 2048,
                 "output",
             )
+        if state.call.restore_originals:
+            output = aliases.restore(output)
+            check_size(output, state.snapshot.policy.max_output_bytes, "output")
+            inspect_restrictions(
+                output, state.snapshot, "output", aliases.target
+            )
+            inspect_privacy(output, state.snapshot, "output", self.secrets)
         return output

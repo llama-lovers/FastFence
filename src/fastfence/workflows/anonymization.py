@@ -1,0 +1,160 @@
+"""Compose independent features and preserve model protocol metadata."""
+
+import base64
+import json
+from collections.abc import Callable
+from copy import deepcopy
+from typing import Any, Literal
+
+from fastfence.modules.anonymization.application.facade import (
+    AnonymizationRuntime,
+)
+from fastfence.shared.anonymization import (
+    AnonymizationConfig,
+    AnonymizationContext,
+    AnonymizationError,
+    AnonymizationResult,
+)
+from fastfence.shared.settings.app_settings import AppSettings
+
+
+def model_content(value: Any) -> tuple[Any, list[tuple[Any, Any]], list[Any]]:
+    payload = deepcopy(value)
+    positions: list[tuple[Any, Any]] = []
+    if isinstance(payload, dict):
+        positions.extend(
+            (payload, key)
+            for key in ("prompt", "text", "stop")
+            if key in payload
+        )
+        for message in payload.get("messages", []):
+            if isinstance(message, dict) and "content" in message:
+                positions.append((message, "content"))
+    return payload, positions, [container[key] for container, key in positions]
+
+
+def build_anonymization(settings: AppSettings) -> "AnonymizationWorkflow":
+    if settings.anonymization_keys_json is None:
+        return AnonymizationWorkflow()
+    try:
+        entries = json.loads(
+            settings.anonymization_keys_json.get_secret_value()
+        )
+        if not isinstance(entries, dict) or not entries:
+            raise ValueError
+        keys = {
+            key: base64.b64decode(value, validate=True)
+            for key, value in entries.items()
+        }
+        runtime = AnonymizationRuntime(
+            keyring=keys,
+            current_key_id=settings.anonymization_key_id,
+            ttl_seconds=settings.anonymization_ttl_seconds,
+        )
+    except Exception:
+        raise ValueError(
+            "Invalid private anonymization key configuration"
+        ) from None
+    return AnonymizationWorkflow(runtime)
+
+
+class AnonymizationWorkflow:
+    def __init__(self, runtime: AnonymizationRuntime | None = None) -> None:
+        self.runtime = runtime
+
+    @staticmethod
+    def _unavailable(
+        value: Any, config: AnonymizationConfig
+    ) -> AnonymizationResult:
+        if config.enabled or "FFI1." in str(value) or "FFR1." in str(value):
+            raise AnonymizationError("anonymization_unavailable")
+        return AnonymizationResult(value=value)
+
+    @staticmethod
+    def _content(
+        value: Any, target: str, action: Callable[[Any], AnonymizationResult]
+    ) -> AnonymizationResult:
+        if target == "tool":
+            return action(value)
+        payload, positions, content = model_content(value)
+        result = action(content)
+        for (container, key), transformed in zip(
+            positions, result.value, strict=True
+        ):
+            container[key] = transformed
+        return result.model_copy(update={"value": payload})
+
+    def transform(
+        self,
+        value: Any,
+        *,
+        context: AnonymizationContext,
+        config: AnonymizationConfig,
+        direction: Literal["input", "output"],
+        target: Literal["model", "tool"],
+    ) -> AnonymizationResult:
+        runtime = self.runtime
+        if runtime is None:
+            return self._unavailable(value, config)
+        return self._content(
+            value,
+            target,
+            lambda content: runtime.transform(
+                content,
+                context=context,
+                config=config,
+                direction=direction,
+                target=target,
+            ),
+        )
+
+    def restore(
+        self,
+        value: Any,
+        *,
+        context: AnonymizationContext,
+        config: AnonymizationConfig,
+        target: Literal["model", "tool"],
+    ) -> AnonymizationResult:
+        runtime = self.runtime
+        if runtime is None:
+            return self._unavailable(value, config)
+        return self._content(
+            value,
+            target,
+            lambda content: runtime.restore(
+                content,
+                context=context,
+                config=config,
+                target=target,
+            ),
+        )
+
+    def reveal_for_checks(
+        self,
+        value: Any,
+        *,
+        context: AnonymizationContext,
+        config: AnonymizationConfig,
+        target: Literal["model", "tool"],
+    ) -> AnonymizationResult:
+        runtime = self.runtime
+        if runtime is None:
+            return self._unavailable(value, config)
+        return self._content(
+            value,
+            target,
+            lambda content: runtime.reveal_for_checks(
+                content,
+                context=context,
+                config=config,
+                target=target,
+            ),
+        )
+
+    def scratch(self) -> "AnonymizationWorkflow":
+        return AnonymizationWorkflow(self.runtime)
+
+    def close(self) -> None:
+        if self.runtime is not None:
+            self.runtime.close()

@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-10-03T17:11:55.361974+00:00",
+  "hardware": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "architecture": "arm64",
+    "cpu": "Apple M3 Pro"
+  },
+  "runtime": {
+    "python": "3.12.12",
+    "implementation": "CPython"
+  },
+  "source_sha256": "8d55c5a18975fcebef56634f5c5dfaff14e1fec5d137e834e9dc19c7ffd198d4",
+  "scope": "Real stateless facade with AES-GCM, HMAC, RE2 literal matching, typed results and owner/rule verification; configured static synthetic key; scalar one-value workloads.",
+  "concurrency": 1,
+  "measurement": "perf_counter_ns per operation, nearest-rank percentile; warmups excluded; startup/configuration compilation and HKDF excluded.",
+  "upstream": "None: no HTTP/MCP/model inference or synthetic upstream delay.",
+  "limitations": [
+    "Local microbenchmark; not end-to-end gateway latency or universal throughput guarantee.",
+    "Background OS/application activity is not isolated; no fresh transport matrix is inferred.",
+    "Byte expansion is measured UTF-8 length, not model tokenizer counts.",
+    "Long recovery tokens must be copied exactly by an upstream model; model round trips are separate evidence."
+  ],
+  "results": [
+    {
+      "workload": "synthetic_polish_name",
+      "samples": 1000,
+      "warmup": 100,
+      "plaintext_utf8_bytes": 13,
+      "recovery_token_utf8_bytes": 135,
+      "byte_expansion_ratio": 10.385,
+      "transform": {
+        "median_ms": 0.017042,
+        "p95_ms": 0.018375,
+        "p99_ms": 0.020667
+      },
+      "restore": {
+        "median_ms": 0.016625,
+        "p95_ms": 0.017791,
+        "p99_ms": 0.019916
+      },
+      "round_trip": {
+        "median_ms": 0.033667,
+        "p95_ms": 0.036166,
+        "p99_ms": 0.040333
+      },
+      "correct_round_trips": 1000
+    },
+    {
+      "workload": "synthetic_email",
+      "samples": 1000,
+      "warmup": 100,
+      "plaintext_utf8_bytes": 16,
+      "recovery_token_utf8_bytes": 132,
+      "byte_expansion_ratio": 8.25,
+      "transform": {
+        "median_ms": 0.017791,
+        "p95_ms": 0.018125,
+        "p99_ms": 0.019708
+      },
+      "restore": {
+        "median_ms": 0.017458,
+        "p95_ms": 0.017709,
+        "p99_ms": 0.018167
+      },
+      "round_trip": {
+        "median_ms": 0.03525,
+        "p95_ms": 0.035875,
+        "p99_ms": 0.037792
+      },
+      "correct_round_trips": 1000
+    }
+  ]
+}

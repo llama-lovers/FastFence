@@ -3,10 +3,14 @@ import uuid
 from typing import Any
 
 from fastfence.modules.control.application.services.engine import Engine
+from fastfence.modules.control.application.use_cases.content import (
+    ContentUseCases,
+)
 from fastfence.modules.control.application.use_cases.management import (
     ManagementUseCases,
 )
 from fastfence.modules.control.contracts.ports import (
+    AnonymizationPort,
     IdentityPort,
     LedgerPort,
     PolicyPort,
@@ -60,6 +64,25 @@ class ControlRuntime:
     ) -> Verdict:
         return await self.engine.invoke(identity, call)
 
+    async def prepare_document(
+        self, identity: Identity, markdown: str, model: str | None = None
+    ) -> Verdict:
+        return await ContentUseCases(self.engine).prepare(
+            identity, markdown, model
+        )
+
+    async def complete_document(
+        self,
+        identity: Identity,
+        markdown: str,
+        model: str | None = None,
+        max_output_tokens: int = 256,
+        restore_originals: bool = False,
+    ) -> tuple[Verdict, str | None]:
+        return await ContentUseCases(self.engine).complete(
+            identity, markdown, model, max_output_tokens, restore_originals
+        )
+
     def status(self) -> dict[str, Any]:
         return self.management.status()
 
@@ -92,9 +115,13 @@ class ControlRuntime:
 
     def close(self) -> None:
         self.ledger.close()
+        if self.engine.anonymization is not None:
+            self.engine.anonymization.close()
 
 
-def build_runtime(settings: AppSettings) -> ControlRuntime:
+def build_runtime(
+    settings: AppSettings, *, anonymization: AnonymizationPort | None = None
+) -> ControlRuntime:
     identities = (
         IdentityStore(records=json.loads(settings.identity_config_json))
         if settings.identity_config_json is not None
@@ -122,6 +149,7 @@ def build_runtime(settings: AppSettings) -> ControlRuntime:
         scanner=SemanticScanner(settings.ollama_url, settings.kev_url),
         models=OllamaModels(settings.ollama_url),
         secrets=OfflineSecrets(),
+        anonymization=anonymization,
     )
     return ControlRuntime(
         identities=identities, policies=policies, ledger=ledger, engine=engine

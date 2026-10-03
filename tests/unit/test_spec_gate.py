@@ -141,3 +141,64 @@ def test_arbitrary_staged_paths_require_matching_specification(
 
 def test_specification_updates_do_not_require_another_specification():
     assert uncovered_changes(["specs/changes/change.yaml"], []) == []
+
+
+def test_committed_gate_detects_uncovered_files_with_empty_index(
+    tmp_path, specification
+):
+    script = Path(__file__).resolve().parents[2] / "scripts/check_specs.py"
+
+    def git(*args):
+        return subprocess.check_output(
+            [
+                "git",
+                "-c",
+                "user.name=Fixture",
+                "-c",
+                "user.email=fixture@example.org",
+                "-c",
+                "core.hooksPath=/dev/null",
+                *args,
+            ],
+            cwd=tmp_path,
+            text=True,
+        ).strip()
+
+    git("init", "--quiet")
+    (tmp_path / "specs").mkdir()
+    spec = tmp_path / "specs/change.yaml"
+    spec.write_text(yaml.safe_dump(specification))
+    git("add", ".")
+    git("commit", "-qm", "baseline")
+    base = git("rev-parse", "HEAD")
+    (tmp_path / "uncovered.py").write_text("VALUE = 1\n")
+    git("add", ".")
+    git("commit", "-qm", "uncovered")
+    result = subprocess.run(
+        [sys.executable, str(script), "--base", base],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0 and "uncovered.py" in result.stderr
+    specification["change_paths"] = ["uncovered.py"]
+    spec.write_text(yaml.safe_dump(specification))
+    git("add", ".")
+    git("commit", "-qm", "specification")
+    result = subprocess.run(
+        [sys.executable, str(script), "--base", base],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("base", ["--help", "HEAD~1", "abc", "A" * 40])
+def test_commit_base_rejects_options_and_unresolved_refs(base):
+    from scripts.check_specs import changed_paths
+
+    with pytest.raises(ValueError, match="full lowercase commit SHA"):
+        changed_paths(base)

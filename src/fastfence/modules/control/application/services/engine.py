@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 import time
 import uuid
+from collections.abc import Callable
+from typing import Any
 
 from pydantic import ValidationError
 
@@ -12,6 +14,7 @@ from fastfence.modules.control.application.services.inspection import (
     encode,
 )
 from fastfence.modules.control.contracts.ports import (
+    AnonymizationPort,
     LedgerPort,
     ModelsPort,
     PolicyPort,
@@ -43,13 +46,20 @@ class Engine:
         scanner: ScannerPort,
         models: ModelsPort,
         secrets: SecretsPort | None = None,
+        anonymization: AnonymizationPort | None = None,
     ) -> None:
         self.policies, self.ledger, self.tools = policies, ledger, tools
         self.scanner, self.models = scanner, models
         self.secrets = secrets
+        self.anonymization = anonymization
 
     async def invoke(
-        self, identity: Identity, call: ToolCall | ModelCall
+        self,
+        identity: Identity,
+        call: ToolCall | ModelCall,
+        *,
+        inspect_only: bool = False,
+        input_sink: Callable[[dict[str, Any]], None] | None = None,
     ) -> Verdict:
         snapshot = self.policies.snapshot()
         verdict = Verdict(
@@ -72,7 +82,9 @@ class Engine:
             else "llm:" + call.model,
         )
         try:
-            await self._run(state)
+            await self._run(
+                state, inspect_only=inspect_only, input_sink=input_sink
+            )
         except (Exception, asyncio.CancelledError) as error:
             self._mark_failure(state, error)
         finally:
@@ -81,10 +93,21 @@ class Engine:
             raise asyncio.CancelledError
         return verdict
 
-    async def _run(self, state: InvocationState) -> None:
-        inspector = InputInspector(self.tools, self.secrets)
+    async def _run(
+        self,
+        state: InvocationState,
+        *,
+        inspect_only: bool,
+        input_sink: Callable[[dict[str, Any]], None] | None,
+    ) -> None:
+        inspector = InputInspector(self.tools, self.secrets, self.anonymization)
         executor = Executor(
-            self.tools, self.scanner, self.models, self.ledger, self.secrets
+            self.tools,
+            self.scanner,
+            self.models,
+            self.ledger,
+            self.secrets,
+            self.anonymization,
         )
         prepared = inspector.prepare(state)
         self.ledger.reserve(
@@ -104,8 +127,17 @@ class Engine:
                 prepared.input_units + 2048,
                 "input",
             )
-        output = await executor.call(state, prepared)
-        state.verdict.output = await executor.inspect_output(state, output)
+        if input_sink is not None:
+            input_sink(prepared.payload)
+        if inspect_only:
+            assert isinstance(state.call, ModelCall)
+            state.verdict.output = {
+                "markdown": prepared.payload["prompt"],
+                "model": state.call.model,
+            }
+        else:
+            output = await executor.call(state, prepared)
+            state.verdict.output = await executor.inspect_output(state, output)
         state.verdict.decision = "redacted" if state.findings else "allowed"
         state.verdict.reason = (
             "privacy_redacted" if state.findings else "controls_passed"

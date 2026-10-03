@@ -90,6 +90,7 @@ def _configure_public(
             "playground.js",
             "policy-studio.js",
             "audit.js",
+            "documents.js",
         }:
             raise HTTPException(404, "Unknown asset")
         return FileResponse(

@@ -1,6 +1,6 @@
 id: FF-048
 title: Generated policy regression cases and before-after behavioral diff
-status: planned
+status: verified
 problem: Users need to review both the configuration change and its observable effect on synthetic cases before activating a natural-language-authored policy.
 scope:
   - Extend the existing Laya draft and preview workflow with bounded generated positive, negative and boundary test cases plus editable expected local outcomes.
@@ -9,7 +9,7 @@ scope:
   - Show a before-after results table with changed decisions, rule findings, safe transformed text and pass/fail against reviewed expectations.
   - Store reviewed synthetic regression cases in a separate local YAML file beside the policy; keep runtime secrets in deployment environment or .env.
 constraints:
-  - This is a planned enhancement; existing configuration diff and candidate-only manual preview already work.
+  - Preserve existing configuration diff and candidate-only preview compatibility.
   - Policy remains in config/policy.yaml; propose config/policy-tests.yaml for test cases so normal request processing does not load or generate tests.
   - Generated expected outcomes are proposals for human review, not independent proof that the policy is safe; do not rewrite expectations to make failing tests pass.
   - Use bounded Pydantic test schemas and YAML safe loading, never generated executable Python or shell commands.
@@ -25,8 +25,11 @@ change_paths:
   - src/fastfence/app/interfaces/http/web/index.html
   - src/fastfence/modules/control/application/use_cases/policy_preview.py
   - src/fastfence/modules/control/domain/policy_authoring.py
+  - src/fastfence/modules/control/domain/policy_tests.py
   - integrations/laya/draft_policy.py
+  - integrations/laya/policy_generation.py
   - config/policy-tests.yaml
+  - evaluation/results/laya-regression-authoring.json
   - tests/unit/test_policy_regression*.py
   - tests/integration/test_policy_regression*.py
   - docs/policies.md
@@ -38,7 +41,15 @@ acceptance:
   - The UI distinguishes local no-match from a full runtime ALLOW and identifies uncovered semantic/permission/budget behavior.
 validation:
   - command: uv run pytest --no-cov tests/unit/test_policy_regression.py tests/integration/test_policy_regression_diff.py
-    expected: Future generation validation, exact-snapshot comparison and regression checks pass; these test files are not implemented yet.
+    expected: Bounded generated expectations, exact-snapshot comparisons and reviewed regression checks pass.
   - command: uv run pre-commit run --all-files
-    expected: Future implementation satisfies typing, architecture and specification gates.
-evidence: []
+    expected: Implementation satisfies typing, architecture and specification gates.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_policy_regression.py tests/integration/test_policy_regression_diff.py tests/unit/test_anonymization_operations.py tests/integration/test_anonymization_authoring_ui.py tests/integration/test_policy_authoring_api.py
+    result: Fifty-eight focused tests pass, including strict four-key generation-envelope normalization with no operation/expected-outcome repairs. Covers exact YAML/snapshot diff, pinned feed during concurrent reload, wrong expectations preserved and blocking activation, explicit edits, unchanged budgets/no upstream, fixed atomic YAML save/reload, truthful post-activation persistence failure and actual Node execution of stateless consent and review UI. Inference fixtures are explicitly synthetic; the separate coordinated actual Laya run is recorded below.
+  - command: uv run basedpyright src
+    result: Zero errors, warnings or notes.
+  - command: uv run lint-imports
+    result: All sixteen architecture contracts pass.
+  - command: Coordinated real LayaPolicyAuthor with pinned upstream and local qwen3:4b, followed by independent local before-after content inspection
+    result: Actual generation succeeds in 11104 ms with a case-insensitive word_contains rule scoped only to model input and four distinct valid cases; all four proposed expectations match local outcomes. Provider-supported fixed-key object generation is converted losslessly to public list cases; no generated rule, sample, scope or expected result is repaired. An earlier duplicate-label proposal was correctly rejected; unsupported prefixItems was replaced with the measured supported object schema.

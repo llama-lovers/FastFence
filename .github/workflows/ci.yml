@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Install uv and Python 3.12
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
@@ -31,16 +32,30 @@ jobs:
         run: uv sync --locked
       - name: Run offline tests and coverage gate
         run: uv run --locked pytest -q --tb=short
-      - name: Check Ruff lint and formatting
+      - name: Run all configured quality gates
+        run: uv run --locked pre-commit run --all-files --show-diff-on-failure
+      - name: Reject files rewritten by quality hooks
+        run: git diff --exit-code
+      - name: Verify specifications cover committed changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BASE: ${{ github.event.before }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          uv run --locked ruff check src tests scripts evaluation integrations
-          uv run --locked ruff format --check src tests scripts evaluation integrations
-      - name: Check types
-        run: uv run --locked basedpyright
-      - name: Check import architecture
-        run: uv run --locked lint-imports
-      - name: Check Pydantic and architecture boundaries
-        run: uv run --locked python scripts/check_architecture.py
-      - name: Validate specification catalog
-        # Checkout has no staged implementation changes; local hooks enforce staged coverage.
-        run: uv run --locked python scripts/check_specs.py
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            base="$PR_BASE"
+          elif [ -n "$PUSH_BASE" ] && [ "$PUSH_BASE" != "0000000000000000000000000000000000000000" ]; then
+            base="$PUSH_BASE"
+          else
+            base="$(git rev-parse HEAD^)"
+          fi
+          uv run --locked python scripts/check_specs.py --base "$base"
+
+  documentation:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs.yml

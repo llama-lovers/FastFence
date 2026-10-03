@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -66,6 +66,50 @@ class AppSettings(BaseSettings):
     kev_url: str = Field(
         default="http://127.0.0.1:8009", description="Trusted Kev endpoint"
     )
+    anonymization_keys_json: SecretStr | None = Field(
+        default=None,
+        description="Private JSON keyring: key ID to base64-encoded 32-byte key; required for stateless anonymization",
+        repr=False,
+    )
+    anonymization_key_id: str = Field(
+        default="local-v1",
+        pattern=r"^[a-zA-Z0-9_-]{1,16}$",
+        description="Active key ID for issuing stateless anonymization tokens",
+    )
+    anonymization_ttl_seconds: int = Field(
+        default=1800,
+        ge=60,
+        le=86400,
+        description="Maximum lifetime of reversible text tokens in seconds",
+    )
+
+    ocr_python: Path | None = Field(
+        default=None, description="Trusted isolated OCR Python interpreter"
+    )
+    ocr_models: Path | None = Field(
+        default=None, description="Trusted local OCR model directory"
+    )
+    ocr_timeout_seconds: float = Field(
+        default=60, ge=1, le=180, description="OCR worker timeout in seconds"
+    )
+    ocr_max_pages: int = Field(
+        default=10,
+        ge=1,
+        le=20,
+        description="Maximum document pages; excess pages are rejected",
+    )
+    ocr_max_pixels: int = Field(
+        default=20_000_000,
+        ge=1000,
+        le=40_000_000,
+        description="Maximum pixels per OCR page",
+    )
+    ocr_max_total_pixels: int = Field(
+        default=80_000_000,
+        ge=1000,
+        le=160_000_000,
+        description="Maximum aggregate pixels per OCR request",
+    )
 
     @model_validator(mode="after")
     def resolve_paths(self) -> Self:
@@ -84,4 +128,4 @@ class AppSettings(BaseSettings):
 
     @classmethod
     def environment(cls) -> Self:
-        return cls()
+        return cls(_env_file=".env")  # pyright: ignore[reportCallIssue]

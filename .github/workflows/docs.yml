@@ -1,14 +1,7 @@
 name: Documentation
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - docs/**
-      - mkdocs.yml
-      - pyproject.toml
-      - uv.lock
-      - .github/workflows/docs.yml
+  workflow_call:
   pull_request:
     paths:
       - docs/**
@@ -16,7 +9,6 @@ on:
       - pyproject.toml
       - uv.lock
       - .github/workflows/docs.yml
-  workflow_dispatch:
 
 permissions:
   contents: read

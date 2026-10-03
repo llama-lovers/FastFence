@@ -1,0 +1,21 @@
+[
+  {
+    "case": "restore_False",
+    "decision": "redacted",
+    "restored": false,
+    "anonymized": true
+  },
+  {
+    "case": "restore_True",
+    "decision": "redacted",
+    "restored": true,
+    "anonymized": true
+  },
+  {
+    "case": "real_pdf_extract",
+    "pages": 2,
+    "decision": "redacted",
+    "ocr_ms": 4240,
+    "upstream_executed": false
+  }
+]

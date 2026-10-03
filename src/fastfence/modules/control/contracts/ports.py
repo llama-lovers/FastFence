@@ -12,6 +12,45 @@ from fastfence.modules.control.domain.models import (
     ToolCall,
     Verdict,
 )
+from fastfence.shared.anonymization import (
+    AnonymizationConfig,
+    AnonymizationContext,
+    AnonymizationResult,
+)
+
+
+class AnonymizationPort(Protocol):
+    def transform(
+        self,
+        value: Any,
+        *,
+        context: AnonymizationContext,
+        config: AnonymizationConfig,
+        direction: Literal["input", "output"],
+        target: Literal["model", "tool"],
+    ) -> AnonymizationResult: ...
+
+    def restore(
+        self,
+        value: Any,
+        *,
+        context: AnonymizationContext,
+        config: AnonymizationConfig,
+        target: Literal["model", "tool"],
+    ) -> AnonymizationResult: ...
+
+    def reveal_for_checks(
+        self,
+        value: Any,
+        *,
+        context: AnonymizationContext,
+        config: AnonymizationConfig,
+        target: Literal["model", "tool"],
+    ) -> AnonymizationResult: ...
+
+    def scratch(self) -> "AnonymizationPort": ...
+
+    def close(self) -> None: ...
 
 
 class IdentityPort(Protocol):

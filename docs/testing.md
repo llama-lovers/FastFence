@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The bounded-ingress and reloadable-policy checkpoint passes **474 tests**, with **95.88%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The stateless anonymization, OCR, policy regression and CI checkpoint passes **606 tests**, with **91.40%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -27,6 +27,33 @@ uv run pre-commit run --all-files
 Pre-commit includes formatting, type checking, architecture checks, staged-specification coverage, and offline repository secret scanning. The reviewed `.secrets.baseline` contains known synthetic fixtures and public revision hashes. New findings require review; the hook does not regenerate the baseline automatically.
 
 Architectural checks enforce the layer boundaries and reject first-party dataclasses and database imports in the memory-only runtime. Changes must be covered by a staged implemented or verified specification. See the [architecture](architecture.md) for the source layout.
+
+## GitHub Actions
+
+Every push to `main` and every pull request runs the locked Python 3.12 environment,
+pytest with the 85% coverage gate, and the complete pre-commit suite: Ruff,
+basedpyright, import-linter, Pydantic architecture checks, module size,
+complexity, secret scanning, generated settings and lockfile validation.
+CI fails if a hook rewrites tracked files. The specification gate checks the
+committed change set against changed implemented specifications, including on PRs.
+After verification succeeds, CI calls the documentation workflow to build MkDocs
+strictly and deploy GitHub Pages at https://fastfence.dev/ from the same `main`
+commit. Failed tests or linters prevent deployment. Documentation pull requests
+receive a separate build without deployment. The workflow follows GitHub
+[reusable workflow conventions](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows).
+
+Ordinary CI uses fake inference and OCR adapters; it does not download weights or
+require private credentials. Real OCR and Qwen checks run locally as separate
+integration evidence.
+
+## Current stateless and document evidence
+
+- [Actual Laya regression authoring](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/laya-regression-authoring.json): one synthetic instruction produced a valid letter rule and four independently passing local cases. Expectations were not repaired to force a pass.
+- [Actual Qwen and document pipeline](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/live-anonymization-document.json): default output withheld the original name, opt-in restored an exact copied token, and real OCR Markdown reached the controlled model.
+- [Local OCR extraction](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/ocr-local.json): five synthetic PNG/JPEG/PDF fixtures, 22 expected-text/page checks; fresh-worker p50 3166 ms and p95 3732 ms. This tiny fixture set does not establish general recognition accuracy.
+- [Stateless token microbenchmark](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/stateless-token-benchmark.json): Apple M3 Pro, 1000 iterations per name/email workload, transform/restore p95 approximately 0.018 ms per operation. It excludes startup, transport and model latency. Recovery tokens expanded these short values by roughly 8–10 times in UTF-8 bytes; tokenization overhead is not measured.
+
+For hands-on steps, use the [manual acceptance test](manual-testing.md).
 
 ## Real-model checks
 

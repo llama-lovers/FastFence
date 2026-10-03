@@ -14,11 +14,13 @@ from pydantic import (
 
 from fastfence.modules.control.domain.frozen import FrozenControlModel, Roles
 from fastfence.modules.control.domain.models import Policy
+from fastfence.modules.control.domain.policy_tests import GeneratedPolicyTest
 from fastfence.modules.control.domain.privacy import (
     PrivacyAction,
     PrivacyDetector,
 )
 from fastfence.modules.control.domain.text_rules import TextRule
+from fastfence.shared.anonymization import AnonymizationRule
 
 type Scope = Literal["input", "output", "both"]
 
@@ -26,6 +28,21 @@ type Scope = Literal["input", "output", "both"]
 class UpsertTextRule(FrozenControlModel):
     type: Literal["upsert_text_rule"]
     rule: TextRule
+
+
+class UpsertAnonymizationRule(FrozenControlModel):
+    type: Literal["upsert_anonymization_rule"]
+    rule: AnonymizationRule
+
+
+class SetAnonymizationMode(FrozenControlModel):
+    type: Literal["set_anonymization_mode"]
+    mode: Literal["irreversible", "reversible"]
+
+
+class RemoveAnonymizationRule(FrozenControlModel):
+    type: Literal["remove_anonymization_rule"]
+    rule_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
 
 
 class SetPrivacy(FrozenControlModel):
@@ -48,7 +65,13 @@ class RestrictToolRoles(FrozenControlModel):
 
 
 type PolicyOperation = Annotated[
-    UpsertTextRule | SetPrivacy | SetPrivacyDetector | RestrictToolRoles,
+    UpsertTextRule
+    | UpsertAnonymizationRule
+    | RemoveAnonymizationRule
+    | SetAnonymizationMode
+    | SetPrivacy
+    | SetPrivacyDetector
+    | RestrictToolRoles,
     Field(discriminator="type"),
 ]
 
@@ -56,11 +79,16 @@ type PolicyOperation = Annotated[
 class DraftEnvelope(FrozenControlModel):
     supported: StrictBool
     operations: tuple[PolicyOperation, ...] = Field(max_length=8)
+    tests: tuple[GeneratedPolicyTest, ...] = Field(default=(), max_length=8)
 
     @model_validator(mode="after")
     def valid_support(self) -> Self:
         if self.supported != bool(self.operations):
             raise ValueError("Supported proposals need operations")
+        if not self.supported and self.tests:
+            raise ValueError("Unsupported proposals cannot include tests")
+        if len({test.label for test in self.tests}) != len(self.tests):
+            raise ValueError("Test labels must be unique")
         return self
 
 
@@ -102,6 +130,7 @@ class PreparedPolicy(FrozenControlModel):
     operations: tuple[PolicyOperation, ...]
     changes: tuple[PolicyChange, ...]
     warnings: tuple[str, ...]
+    tests: tuple[GeneratedPolicyTest, ...] = ()
 
 
 def _directions(scope: Scope) -> tuple[str, ...]:
@@ -146,6 +175,34 @@ def _upsert_rule(data: dict[str, Any], operation: UpsertTextRule) -> None:
     rules.append(prepared)
 
 
+def _anonymization_rule(
+    data: dict[str, Any],
+    operation: UpsertAnonymizationRule | RemoveAnonymizationRule,
+) -> None:
+    config = data["anonymization"]
+    rules = config["rules"]
+    rule_id = (
+        operation.rule.id
+        if isinstance(operation, UpsertAnonymizationRule)
+        else operation.rule_id
+    )
+    index = next(
+        (i for i, existing in enumerate(rules) if existing["id"] == rule_id),
+        None,
+    )
+    if isinstance(operation, RemoveAnonymizationRule):
+        if index is None:
+            raise ValueError("Unknown anonymization rule")
+        rules.pop(index)
+        return
+    prepared = operation.rule.model_dump(mode="json")
+    if index is None:
+        rules.append(prepared)
+    else:
+        rules[index] = prepared
+    config["enabled"] = True
+
+
 def _changes(
     before: dict[str, Any], after: dict[str, Any], prefix: str = ""
 ) -> list[PolicyChange]:
@@ -169,6 +226,12 @@ def prepare_policy(policy: Policy, envelope: DraftEnvelope) -> PreparedPolicy:
     for operation in envelope.operations:
         if isinstance(operation, UpsertTextRule):
             _upsert_rule(data, operation)
+        elif isinstance(
+            operation, UpsertAnonymizationRule | RemoveAnonymizationRule
+        ):
+            _anonymization_rule(data, operation)
+        elif isinstance(operation, SetAnonymizationMode):
+            data["anonymization"]["mode"] = operation.mode
         elif isinstance(operation, SetPrivacy):
             _set_privacy(data, operation)
         elif isinstance(operation, SetPrivacyDetector):
@@ -190,6 +253,7 @@ def prepare_policy(policy: Policy, envelope: DraftEnvelope) -> PreparedPolicy:
         operations=envelope.operations,
         changes=changes,
         warnings=warnings,
+        tests=envelope.tests,
     )
 
 
@@ -205,4 +269,5 @@ def authoring_catalog(policy: Policy) -> dict[str, Any]:
         },
         "privacy": policy.privacy.model_dump(mode="json"),
         "existing_text_rule_ids": [rule.id for rule in policy.text_rules],
+        "anonymization": policy.anonymization.model_dump(mode="json"),
     }

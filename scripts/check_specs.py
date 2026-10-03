@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
 import fnmatch
+import re
 import subprocess
 from pathlib import Path
 from typing import Literal
@@ -74,7 +76,30 @@ def uncovered_changes(paths: list[str], specs: list[ChangeSpec]) -> list[str]:
     ]
 
 
+def changed_paths(base: str | None) -> tuple[list[str], str]:
+    if base is None:
+        args, revision = ["--cached"], ":"
+    else:
+        if not re.fullmatch(r"[0-9a-f]{40}", base):
+            raise ValueError("Base must be a full lowercase commit SHA")
+        git("cat-file", "-e", base + "^{commit}")
+        args, revision = [base, "HEAD"], "HEAD:"
+    paths = [
+        path
+        for path in git(
+            "diff", *args, "--name-only", "--no-renames", "-z"
+        ).split("\0")
+        if path
+    ]
+    return paths, revision
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--base", help="Compare committed changes against a full base SHA"
+    )
+    options = parser.parse_args()
     paths = sorted(Path("specs").rglob("*.yaml"))
     if not paths:
         raise SystemExit("No project specifications found under specs/")
@@ -82,18 +107,12 @@ def main() -> None:
     ids = [spec.id for spec in specs]
     if len(ids) != len(set(ids)):
         raise SystemExit("Specification IDs must be unique")
-    staged = [
-        path
-        for path in git(
-            "diff", "--cached", "--name-only", "--no-renames", "-z"
-        ).split("\0")
-        if path
-    ]
+    staged, revision = changed_paths(options.base)
     staged_specs = []
     for path in staged:
         if path.startswith("specs/") and path.endswith(".yaml"):
             staged_text = subprocess.run(
-                ["git", "show", f":{path}"],
+                ["git", "show", f"{revision}{path}"],
                 text=True,
                 capture_output=True,
                 check=False,
@@ -103,11 +122,11 @@ def main() -> None:
     missing = uncovered_changes(staged, staged_specs)
     if missing:
         raise SystemExit(
-            "Implementation changes require a staged implemented/verified "
+            "Implementation changes require a changed implemented/verified "
             "specification covering these paths:\n" + "\n".join(missing)
         )
     print(
-        f"Specification gate passed: {len(specs)} valid specs; {len(staged)} staged paths"
+        f"Specification gate passed: {len(specs)} valid specs; {len(staged)} changed paths"
     )
 
 

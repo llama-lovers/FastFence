@@ -1,3 +1,11 @@
+let playgroundRevision = 0;
+function resetPlaygroundConversation() {
+  playgroundRevision += 1;
+  if ($('documentMarkdown')) { $('documentMarkdown').textContent = ''; $('documentDownload').disabled = true; }
+  $('restoreOriginals').checked = false;
+  $('result').replaceChildren(el('span', 'Identity changed. Calls are stateless; restoration consent was cleared.', 'small'));
+}
+
 function syncPlaygroundModels(preserveEditing = true) {
   if (!active) return;
   const names = Object.keys(active.models || {});
@@ -35,6 +43,8 @@ function renderVerdict(verdict) {
       ' · ' + verdict.latency_ms + ' ms · upstream ' +
       (verdict.upstream_executed ? 'executed' : 'not executed'), 'small'),
     el('p', 'Audit request ID: ' + verdict.request_id, 'small'),
+    el('p', 'Anonymized: ' + (verdict.anonymized ? 'yes' : 'no') +
+      ' · originals restored: ' + (verdict.restored ? 'yes' : 'no'), 'small'),
     el('pre', JSON.stringify({output: verdict.output, findings: verdict.findings,
       semantic_score: verdict.semantic_score, tokens: verdict.tokens}, null, 2))
   );
@@ -47,17 +57,23 @@ $('invokeBtn').onclick = async () => {
   if (!agent) { $('connectDialog').showModal(); return; }
   $('invokeBtn').disabled = true;
   const isModel = $('playgroundMode').value === 'model';
+  const revision = playgroundRevision;
+  const identity = agent;
+  const context = {restore_originals: $('restoreOriginals').checked};
   $('result').replaceChildren(el('span', isModel ? 'Checking policy and calling the local model…' : 'Inspecting through active controls…', 'small'));
   try {
     const payload = isModel ? {
+      ...context,
       model: $('completionModel').value,
       prompt: $('completionPrompt').value,
       max_output_tokens: Number($('completionTokens').value),
-    } : {tool: $('tool').value, arguments: JSON.parse($('arguments').value)};
-    const verdict = await api(isModel ? '/api/models/complete' : '/api/invoke', agent, payload);
+    } : {...context, tool: $('tool').value, arguments: JSON.parse($('arguments').value)};
+    const verdict = await api(isModel ? '/api/models/complete' : '/api/invoke', identity, payload);
+    if (revision !== playgroundRevision || identity !== agent) return;
     renderVerdict(verdict);
     await refresh();
   } catch (error) {
+    if (revision !== playgroundRevision || identity !== agent) return;
     $('result').replaceChildren(el('span', error.message, 'red'));
   } finally { $('invokeBtn').disabled = false; }
 };

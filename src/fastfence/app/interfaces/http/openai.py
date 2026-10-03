@@ -51,7 +51,7 @@ class ChatCompletionRequest(StrictModel):
             raise ValueError("At least one user message is required")
         return value
 
-    def as_model_call(self) -> ModelCall:
+    def as_model_call(self, *, restore_originals: bool = False) -> ModelCall:
         stop = [self.stop] if isinstance(self.stop, str) else self.stop
         return ModelCall(
             model=self.model,
@@ -62,6 +62,7 @@ class ChatCompletionRequest(StrictModel):
             ],
             max_output_tokens=min(self.max_tokens, 2048),
             stop=stop,
+            restore_originals=restore_originals,
         )
 
 
@@ -107,6 +108,8 @@ def verdict_response(verdict: Verdict, model: str) -> JSONResponse:
         "decision": verdict.decision,
         "upstream_executed": verdict.upstream_executed,
         "budget_units": verdict.tokens,
+        "anonymized": verdict.anonymized,
+        "restored": verdict.restored,
     }
     headers = {
         "X-FastFence-Request-Id": verdict.request_id,
@@ -193,10 +196,15 @@ def create_router(runtime: ControlRuntime) -> APIRouter:
             return error_response(401, "authentication_required")
         if identity.admin:
             return error_response(403, "execution_identity_required")
+        restore = request.headers.get("x-fastfence-restore-originals", "false")
+        if restore not in {"true", "false"}:
+            return error_response(422, "invalid_restoration_flag")
         payload = await read_payload(request)
         if isinstance(payload, JSONResponse):
             return payload
-        verdict = await runtime.invoke(identity, payload.as_model_call())
+        verdict = await runtime.invoke(
+            identity, payload.as_model_call(restore_originals=restore == "true")
+        )
         return verdict_response(verdict, payload.model)
 
     return router

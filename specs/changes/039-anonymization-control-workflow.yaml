@@ -1,0 +1,85 @@
+id: FF-039
+title: Compose stateless anonymization and control through a protected workflow
+status: implemented
+problem: The independent anonymization module must protect real HTTP, MCP and model traffic while preserving existing
+  policy precedence, tenant isolation, budgets and audit.
+scope:
+- Add a control-side anonymization port and a workflow adapter to the independent module facade.
+- Extend central policy with typed anonymization configuration and calls with restore_originals metadata without
+  conversation state.
+- Apply transformations to model content and tool values on both input and output, never protocol metadata or structural
+  keys.
+- Keep aliases toward upstream models/tools; optional restoration occurs only at the caller-facing output boundary.
+- Preview proposals through an stateless synthetic identity scope without any original-value dictionary.
+constraints:
+- Feature modules cannot import one another; app/workflows compose public facades through shared Pydantic contracts.
+- Original text/signature and explicit privacy BLOCK decisions remain authoritative before transformation.
+- Alias replacements and restored output undergo final size, text/signature and privacy BLOCK checks.
+- Existing redaction applies to unmatched sensitive content; restoration reveals only active-rule-approved aliases
+  in the same verified owner scope.
+- No original-value dictionary or payload bodies in audit, errors or management status.
+- Disabled/empty anonymization preserves the existing fast path without extra semantic calls or conversation state
+  allocation.
+- Preserve budget settlement, snapshot consistency and upstream_executed semantics.
+change_paths:
+- src/fastfence/modules/control/domain/models.py
+- src/fastfence/modules/control/contracts/ports.py
+- src/fastfence/modules/control/application/facade.py
+- src/fastfence/modules/control/application/services/**
+- src/fastfence/modules/control/application/use_cases/policy_preview.py
+- src/fastfence/workflows/**
+- src/fastfence/app/factory.py
+- src/fastfence/shared/settings/app_settings.py
+- src/fastfence/app/interfaces/http/web/index.html
+- src/fastfence/app/interfaces/http/web/playground.js
+- src/fastfence/app/interfaces/http/routes.py
+- src/fastfence/app/interfaces/cli/**
+- src/fastfence/modules/control/application/use_cases/content.py
+- config/policy.anonymization.yaml
+- docs/settings.md
+- docs/manual-testing.md
+- .env.example
+- mkdocs.yml
+- src/fastfence/app/interfaces/http/openai.py
+- src/fastfence/app/interfaces/http/authoring_session.py
+- src/fastfence/modules/control/interfaces/mcp/server.py
+- tests/integration/test_anonymization*.py
+- tests/integration/test_stateless_control.py
+- src/fastfence/app/interfaces/http/policy_authoring.py
+- src/fastfence/app/interfaces/http/web/documents.js
+- docs/architecture.md
+- docs/integrations.md
+- docs/policies.md
+- docs/testing.md
+- docs/getting-started.md
+- specs/requirements.yaml
+- README.md
+- evaluation/results/stateless-document-smoke.json
+- evaluation/results/live-anonymization-document.json
+- tests/unit/test_anonymization_reinspection.py
+acceptance:
+- Real protected calls send aliases upstream and retain stable scoped aliases across independent calls and output.
+- Restore is false by default and is denied when ownership, active rules or privacy BLOCK controls do not permit
+  it.
+- HTTP, MCP and OpenAI-compatible calls expose transformation flags without conversation identifiers or original-value
+  maps.
+- Original attacks and forbidden replacement/restored content cannot bypass controls through anonymization.
+- Preview results match local enforcement while keeping preview data outside live conversation state.
+- A preserved authenticated token is checked against final replacement restrictions even when it produces no new
+  findings.
+validation:
+- command: uv run pytest -q --no-cov tests/integration/test_stateless_control.py
+  expected: Cross-module pipeline, ownership, restoration, privacy precedence and transport regressions pass.
+- command: uv run lint-imports
+  expected: Modules remain independent under all architecture contracts.
+- command: uv run pre-commit run --all-files
+  expected: Quality, typing, architecture and specification gates pass.
+evidence:
+- command: Actual local ASGI gateway + stateless keyring + demo tool + PaddleOCR two-page PDF
+  result: Default response contains opaque token; opt-in restores original; audit stores neither; PDF yields two
+    redacted pages without upstream execution
+  report: evaluation/results/stateless-document-smoke.json
+- command: Actual local Qwen3:0.6b through FastFence, plus real OCR PNG to model
+  result: Default response withheld original; opt-in restored exact original from copied token. Real OCR Markdown
+    reached Qwen through controls. Synthetic smoke only.
+  report: evaluation/results/live-anonymization-document.json

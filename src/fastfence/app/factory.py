@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 
+from fastfence.app.interfaces.http.documents import configure_documents
 from fastfence.app.interfaces.http.ingress import ProtectedRestIngress
 from fastfence.app.interfaces.http.openai import create_router
 from fastfence.app.interfaces.http.routes import configure_http
@@ -13,6 +14,7 @@ from fastfence.modules.control.application.facade import (
 )
 from fastfence.modules.control.interfaces.mcp.server import create_mcp
 from fastfence.shared.settings.app_settings import AppSettings
+from fastfence.workflows.anonymization import build_anonymization
 
 
 async def watch_config(runtime: ControlRuntime, interval: float) -> None:
@@ -23,7 +25,9 @@ async def watch_config(runtime: ControlRuntime, interval: float) -> None:
 
 def create_app(settings: AppSettings | None = None) -> FastAPI:
     settings = settings or AppSettings.environment()
-    runtime = build_runtime(settings)
+    runtime = build_runtime(
+        settings, anonymization=build_anonymization(settings)
+    )
     mcp = create_mcp(runtime, runtime.identities)
     mcp_app = mcp.http_app(path="/", stateless_http=True, json_response=True)
 
@@ -53,6 +57,7 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
         management_limit=settings.max_config_source_bytes,
     )
     configure_http(app, runtime)
+    configure_documents(app, runtime, settings)
     app.include_router(create_router(runtime))
     app.mount("/mcp", mcp_app)
     return app

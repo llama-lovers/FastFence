@@ -1,9 +1,17 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from typing import Any, Literal
 
-from fastfence.modules.control.contracts.ports import SecretsPort, ToolsPort
+from fastfence.modules.control.application.services.alias_session import (
+    AliasSession,
+)
+from fastfence.modules.control.contracts.ports import (
+    AnonymizationPort,
+    SecretsPort,
+    ToolsPort,
+)
 from fastfence.modules.control.domain.controls import (
     privacy_filter,
     signature_findings,
@@ -65,22 +73,13 @@ def inspect_restrictions(
             raise RejectedError(reason, attacks)
 
 
-def inspect_payload(
+def inspect_privacy(
     value: Any,
     snapshot: Snapshot,
     direction: Literal["input", "output"],
     secrets: SecretsPort | None = None,
-    *,
-    target: Target = "tool",
 ) -> tuple[Any, list[str]]:
     policy = snapshot.policy
-    maximum = (
-        policy.max_input_bytes
-        if direction == "input"
-        else policy.max_output_bytes
-    )
-    check_size(value, maximum, direction)
-    inspect_restrictions(value, snapshot, direction, target)
     if not policy.privacy.enabled:
         return value, []
     safe, findings = privacy_filter(value)
@@ -97,8 +96,39 @@ def inspect_payload(
         for finding in findings
     ):
         raise RejectedError(f"{direction}_sensitive_data", findings)
+    return safe, findings
+
+
+def inspect_payload(
+    value: Any,
+    snapshot: Snapshot,
+    direction: Literal["input", "output"],
+    secrets: SecretsPort | None = None,
+    *,
+    target: Target = "tool",
+    anonymize: Callable[[Any], tuple[Any, list[str]]] | None = None,
+    reveal: Callable[[Any], Any] | None = None,
+) -> tuple[Any, list[str]]:
+    policy = snapshot.policy
+    maximum = (
+        policy.max_input_bytes
+        if direction == "input"
+        else policy.max_output_bytes
+    )
+    check_size(value, maximum, direction)
+    canonical = reveal(value) if reveal is not None else value
+    check_size(canonical, maximum, direction)
+    inspect_restrictions(canonical, snapshot, direction, target)
+    safe, findings = inspect_privacy(canonical, snapshot, direction, secrets)
+    if anonymize is not None:
+        transformed, aliases = anonymize(value)
+        if aliases or transformed != canonical:
+            safe, remaining = inspect_privacy(
+                transformed, snapshot, direction, secrets
+            )
+            findings = sorted(set(findings).union(aliases, remaining))
     check_size(safe, maximum, direction, findings)
-    if findings:
+    if findings or safe != canonical:
         try:
             inspect_restrictions(safe, snapshot, direction, target)
         except RejectedError as error:
@@ -110,9 +140,13 @@ def inspect_payload(
 
 class InputInspector:
     def __init__(
-        self, tools: ToolsPort, secrets: SecretsPort | None = None
+        self,
+        tools: ToolsPort,
+        secrets: SecretsPort | None = None,
+        anonymization: AnonymizationPort | None = None,
     ) -> None:
         self.tools, self.secrets = tools, secrets
+        self.anonymization = anonymization
 
     def _authorize(self, state: InvocationState) -> ToolPolicy | ModelPolicy:
         identity, call, policy = (
@@ -142,6 +176,8 @@ class InputInspector:
 
     def prepare(self, state: InvocationState) -> PreparedInvocation:
         rule = self._authorize(state)
+        aliases = AliasSession(state, self.anonymization)
+        aliases.validate_restore()
         limits = effective_limits(state.identity, state.snapshot.policy)
         if limits is None:
             raise RejectedError("role_budget_missing")
@@ -157,6 +193,10 @@ class InputInspector:
             "input",
             self.secrets,
             target="tool" if isinstance(call, ToolCall) else "model",
+            anonymize=(lambda value: aliases.mask(value, "input"))
+            if aliases.enabled
+            else None,
+            reveal=aliases.reveal,
         )
         state.findings.update(findings)
         if isinstance(call, ToolCall):
