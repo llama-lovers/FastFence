@@ -62,7 +62,7 @@ Before execution, a process-local lock atomically reserves calls, conservative t
 
 Limits apply to **one instance, one trusted subject and one UTC day**. Restart resets all budgets and telemetry. Separate instances have separate allowances; this implementation provides no coordinated global spending cap. A shared cap requires external coordination or consistent subject routing.
 
-Token units combine conservative UTF-8 estimates, bounded completion tokens and scan envelopes. They are not exact provider token counts. `cost_microusd` is a trusted per-call tariff estimate, not an invoice. Compute time is settled within the reserved timeout allocation.
+Token units combine conservative UTF-8 estimates, bounded completion tokens and scan envelopes. Model reservations also allow 1,024 token units for provider prompt-template overhead; unused capacity is released, and larger reported usage still fails closed. They are not exact provider token counts. `cost_microusd` is a trusted per-call tariff estimate, not an invoice. Compute time is settled within the reserved timeout allocation.
 
 ## Privacy and detection
 

@@ -1,0 +1,40 @@
+id: FF-015
+title: Reserve bounded provider prompt-template token overhead
+status: verified
+problem: Real Ollama reports 17 input tokens for the two-character Hi prompt; a raw serialized-content-only reservation rejects a valid one-token completion as model_usage_exceeded.
+scope:
+  - Reserve a bounded model prompt-template allowance in addition to input bytes and requested completion tokens.
+  - Preserve output-token caps, settlement, fail-closed excess usage and independent semantic budgets.
+  - Conservatively charge the reservation when an upstream reports usage beyond its bound.
+  - Verify short real-model-compatible usage and excess usage boundaries with regressions.
+constraints:
+  - No additional network I/O, provider discovery or tokenizer dependency on the request path.
+  - Reserve 1024 token units for model prompt-template overhead; unsupported larger overhead still fails closed.
+  - Unused reservation is released; the allowance is not automatically charged as consumed output.
+  - Tool accounting and semantic scan reservations keep their existing behavior.
+change_paths:
+  - src/fastfence/modules/control/application/services/inspection.py
+  - src/fastfence/modules/control/application/services/execution.py
+  - tests/**
+  - docs/policies.md
+  - docs/architecture.md
+acceptance:
+  - A completion reporting 17 prompt tokens and one generated token for Hi is allowed under an adequate budget.
+  - A call cannot start when its complete reservation exceeds the available budget.
+  - Usage beyond the bounded model reservation remains blocked.
+  - Excess-usage responses cannot refund all but input units after upstream execution.
+  - Existing model/output/semantic budget controls and full test suite pass.
+validation:
+  - command: uv run pytest -q
+    expected: Model-template and all previous budget/security regressions pass.
+  - command: uv run pre-commit run --all-files
+    expected: All configured quality gates pass.
+evidence:
+  - command: uv run pre-commit run --all-files
+    result: All configured hooks passed, including architecture, typing, secrets and specification validation.
+  - command: uv run pytest -q
+    result: 271 tests passed with 94.52 percent coverage, including four new reservation/settlement regressions.
+  - command: uv run basedpyright
+    result: Zero errors or warnings; Ruff also passed.
+  - command: Real Ollama short-prompt probe
+    result: Hi with one completion token reported 17 prompt tokens plus one completion token; the regression uses this observed usage shape.

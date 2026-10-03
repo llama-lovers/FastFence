@@ -25,6 +25,8 @@ from fastfence.modules.control.domain.text_rules import (
     text_rule_findings,
 )
 
+MODEL_PROMPT_TEMPLATE_ALLOWANCE = 1024
+
 
 def encode(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
@@ -172,7 +174,9 @@ class InputInspector:
             else 0
         )
         base = input_units + (
-            maximum if isinstance(call, ModelCall) else policy.max_output_bytes
+            maximum + MODEL_PROMPT_TEMPLATE_ALLOWANCE
+            if isinstance(call, ModelCall)
+            else policy.max_output_bytes
         )
         enabled = policy.semantic.provider != "disabled"
         semantic_reserve = input_units + 2048 if enabled else 0

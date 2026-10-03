@@ -93,6 +93,7 @@ class Executor:
                 completion, timeout=prepared.rule.timeout_ms / 1000
             )
             if units > prepared.base_reserve:
+                state.tokens = state.reserved_tokens
                 raise RejectedError("model_usage_exceeded")
             output_units = units - prepared.input_units
         if (
