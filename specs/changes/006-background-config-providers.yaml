@@ -1,0 +1,47 @@
+status: planned
+constraints:
+- Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
+- Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
+  cap.
+- Restart resets volatile budgets and audit; this is explicit stateless runtime behavior.
+- Only trusted server configuration selects remote sources; client request bodies cannot choose configuration
+  URLs.
+evidence: []
+id: FF-006
+title: Background file and HTTP configuration providers
+problem: Manual reload and copying snapshots on every call do not meet the accepted dynamic low-I/O runtime
+  requirements.
+scope:
+- Trusted local file or single HTTP bundle provider with bounded fetches and timeouts.
+- Background polling prepares and validates a complete policy/feed candidate away from enforcement.
+- Atomically publish deeply immutable Pydantic snapshots and acquire them in O(1).
+- Retain last good configuration on errors; expose sanitized provider diagnostics.
+- Permit feed-only monotonic updates without requiring an unrelated policy bump.
+- Identity configuration can be supplied inline at trusted startup; enforce the requested 85 percent test
+  coverage gate.
+change_paths:
+- src/fastfence/modules/control/**
+- src/fastfence/app/factory.py
+- src/fastfence/shared/settings/**
+- tests/**
+- pyproject.toml
+- uv.lock
+- README.md
+- docs/**
+- .env.example
+acceptance:
+- A valid local or HTTP update becomes active without restarting the runtime.
+- All readers observe one coherent immutable policy/feed snapshot; old in-flight calls keep their versions.
+- Invalid, oversized, timed-out or rollback candidates preserve the last good snapshot.
+- Unchanged versions cannot silently replace changed content; increasing feed version alone can activate.
+- Configuration polling performs no per-invocation network or filesystem work and does not block the event
+  loop.
+- Configured semantic model failures stay fail-closed; provider outage retains the last validated configuration.
+- All configured quality gates and at least 85 percent source coverage pass.
+validation:
+- command: uv run pytest -q
+  expected: Automatic file/HTTP reload, outages, immutable snapshots and isolation checks pass.
+- command: uv run pre-commit run --all-files
+  expected: All quality hooks including import/type/complexity boundaries pass.
+- command: uv run python integrations/laya/run_demo.py --help
+  expected: The preserved real Laya integration remains runnable with the changed runtime.

@@ -1,0 +1,46 @@
+id: FASTFENCE-REQUIREMENTS
+title: Accepted functional and nonfunctional requirements
+status: planned
+problem: Product behavior and architecture must be traceable to the user supplied requirement set.
+scope:
+- F1 Intercept agent/model/MCP/API interactions through controlled adapters.
+- F2 Share one core across HTTP, MCP and compatible model adapters.
+- F3 Centralized validated policies, thresholds, allowlists and budgets.
+- F4 Activate configuration changes without process restart.
+- F5 Local deterministic privacy, secret, signature, identity and authorization controls.
+- F6 Real semantic AI controls when enabled by policy.
+- F7 Allow, block or redact with explicit reasons; review/approval is optional.
+- F8 Resource budgets for calls, conservative token units, estimated cost, compute time and concurrency.
+- F9 External file or HTTP policy/threat-feed updates.
+- F10 Feed-driven detection of documented exploit patterns; no universal exploit prevention claim.
+- F11 Sanitized decision audit and exportable telemetry.
+- F12 Dashboard for posture, threats, policies and resource consumption.
+- F13 Executable positive, negative, redaction, budget and exploit-pattern tests.
+- F14 Runtime configuration providers refresh asynchronously from file or HTTP.
+constraints:
+- NF1 Minimal measured deterministic enforcement overhead; semantic cost reported separately.
+- NF2 No database on the enforcement request path; policy, signatures, counters and telemetry reside in
+  memory.
+- NF3 Runtime can boot from configuration without durable application storage.
+- NF4 Validated atomic hot reload without restart.
+- NF5 Requests acquire immutable snapshots while candidates are prepared separately.
+- NF6 No additional request network I/O except authorized upstream and enabled semantic guardrails.
+- NF7 Last-good config on provider failure; configured semantic failures fail closed.
+- NF8 Core depends on typed ports and domain models, not protocol frameworks.
+- NF9 Lightweight integrations include protected model base URL and authenticated MCP/REST handlers.
+- NF10 Independent horizontal instances have explicitly local budget/audit scope; no coordinated global
+  limit is implied.
+- NF11 Observable latency, throughput, decision counts, semantic calls, provider health and budget usage.
+- NF12 Deterministic controls have predictable behavior independent of model responses.
+- NF13 Invalid configuration keeps the previous valid active state.
+- NF14 Guardrails and runtime assumptions are independently testable.
+change_paths: []
+acceptance:
+- Each requirement is linked to an implementation specification and executable evidence.
+- Architecture assumptions are distinguished from demonstrated product capabilities and challenge constraints.
+validation:
+- command: uv run python scripts/check_specs.py
+  expected: All linked change specifications validate.
+- command: uv run pytest -q
+  expected: Functional and nonfunctional acceptance tests pass.
+evidence: []

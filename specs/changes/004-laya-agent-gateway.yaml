@@ -1,6 +1,6 @@
 id: FF-004
 title: Real Laya agent behind FastFence
-status: implemented
+status: verified
 problem: Laya is currently a reference only; its real model and tool calls do not pass through FastFence.
 scope:
 - Authenticated OpenAI-compatible models and non-streaming chat completion endpoints
@@ -41,3 +41,9 @@ validation:
 evidence:
 - upstream_commit: b3b998c03dc44076675305581eb4640b9bf6ff8f
 - upstream_repository: https://github.com/aayushch/laya
+- artifact: integrations/laya/results/live.json
+  result: Five real upstream Laya model and tool scenarios passed with sanitized gateway audit.
+- command: integrations/laya/setup.sh
+  result: Pinned upstream and 117 hash-verified dependencies installed; idempotent rerun passed.
+- command: uv run pytest -q
+  result: 119 tests passed, including native chat semantics and auxiliary input filtering.

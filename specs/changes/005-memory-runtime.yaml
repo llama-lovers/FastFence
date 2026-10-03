@@ -1,0 +1,36 @@
+status: planned
+constraints:
+- Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
+- Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
+  cap.
+- Restart resets volatile budgets and audit; this is explicit stateless runtime behavior.
+evidence: []
+id: FF-005
+title: Memory-only enforcement runtime
+problem: SQLite and durable counters contradict the accepted NF2/NF3 fast local runtime requirements.
+scope:
+- Replace request-path database and filesystem operations with atomic in-memory counters and reservations.
+- Bounded in-memory audit, rolling latency, throughput and semantic-call telemetry.
+- Start from trusted configuration without a writable data directory or persistent ledger.
+- Trusted instance identity and explicit per-instance per-subject UTC-day budget scope.
+change_paths:
+- src/fastfence/modules/control/**
+- src/fastfence/shared/settings/**
+- src/fastfence/app/interfaces/http/web/**
+- tests/**
+- evaluation/**
+- README.md
+- docs/**
+- .env.example
+acceptance:
+- No database, filesystem or configuration network I/O occurs during deterministic enforcement after startup.
+- Concurrent reservations cannot overspend any configured local limit.
+- Counters reset when a new independent runtime is created; no global distributed-budget claim is made.
+- Audit retention and latency samples remain bounded while aggregate counters remain accurate.
+- Inline trusted identity configuration permits startup without a persistent state directory.
+- Response, privacy, RBAC, tenant and model controls preserve all supported gateway behavior.
+validation:
+- command: uv run pytest -q
+  expected: Memory, no-I/O, independent-instance, concurrency and existing security regressions pass.
+- command: uv run python evaluation/benchmark_gateway.py --output evaluation/results/memory-runtime-benchmark.json
+  expected: Operational local enforcement latency and throughput are measured with honest scope labels.

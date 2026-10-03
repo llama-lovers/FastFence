@@ -245,6 +245,25 @@ business handlers in `modules/control/persistence/tools.py` and keep upstream cr
 The gateway cannot undo business side effects; irreversible operations need an independent
 transaction/approval design appropriate to their domain.
 
+## Real Laya agent behind FastFence
+
+The actual upstream Laya model client and tool dispatcher are integrated through the protected
+OpenAI-compatible endpoint and `/api/invoke`. With the Qwen3:4b hybrid policy active:
+
+```sh
+integrations/laya/setup.sh
+integrations/laya/run-demo.sh
+```
+
+The recorded live run passed all five cases: real model response, injection denial, allowed
+business search, RBAC denial and cross-tenant denial. Native chat roles and stop sequences are
+preserved. Setup pins the upstream revision and hash-verified dependencies in gitignored local
+state. No external accounts or live payments are used. See [integration instructions](integrations/laya/README.md)
+and the [sanitized live report](integrations/laya/results/live.json).
+
+The guarded handler protects the operations routed through it; existing native Laya connectors
+must also be wired through the gateway in a full deployment.
+
 ## Validation and dependencies
 
 The executable tests include positive/negative privacy cases, RBAC and header impersonation,

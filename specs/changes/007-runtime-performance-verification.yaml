@@ -1,0 +1,39 @@
+status: planned
+constraints:
+- Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
+- Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
+  cap.
+- Restart resets volatile budgets and audit; this is explicit stateless runtime behavior.
+- Only trusted server configuration selects remote sources; client request bodies cannot choose configuration
+  URLs.
+evidence: []
+id: FF-007
+title: Verification of fast local runtime requirements
+problem: The functional and nonfunctional requirements need executable evidence rather than architecture
+  claims.
+scope:
+- Regression tests for all preserved controls plus memory accounting and background configuration.
+- Operational warmed deterministic gateway benchmarks for allowed and denied calls.
+- Separate latency percentiles, throughput and concurrency with measured hardware/environment.
+- Real model and Laya regression evidence remain separate from deterministic benchmark results.
+change_paths:
+- tests/**
+- evaluation/**
+- integrations/laya/results/**
+- README.md
+acceptance:
+- The deterministic benchmark exercises actual Engine invocation, budget reservation/settlement and audit.
+- Report p50, p95, p99 and throughput using external high-resolution timing, not integer verdict latency.
+- Sample budgets and bounded audit are configured transparently so exhausted calls cannot masquerade as
+  fast allowed calls.
+- Reports identify simulated upstream, disabled semantic model and local per-instance budget scope.
+- Tests prove no request-path storage I/O and atomic limits under concurrency.
+- Actual Laya/model regression results are recorded independently and do not imply universal attack detection
+  or performance.
+validation:
+- command: uv run pytest -q
+  expected: All meaningful security and new nonfunctional regressions pass.
+- command: uv run python evaluation/benchmark_gateway.py --output evaluation/results/memory-runtime-benchmark.json
+  expected: A reproducible benchmark artifact contains scope, hardware, concurrency and measured outcomes.
+- command: integrations/laya/run-demo.sh
+  expected: All five real Laya model/tool scenarios pass against the memory runtime.

@@ -1,0 +1,149 @@
+{
+  "created_at": "2026-10-03T10:44:45.782004Z",
+  "upstream_commit": "b3b998c03dc44076675305581eb4640b9bf6ff8f",
+  "gateway_url": "http://127.0.0.1:8001",
+  "model": "qwen3:4b",
+  "cases": [
+    {
+      "name": "Laya model allowed",
+      "passed": true,
+      "decision": "allowed",
+      "latency_ms": 4338,
+      "upstream_executed": true,
+      "request_id": "6c4085eb33d642fbb535a775a6046776"
+    },
+    {
+      "name": "Laya model injection blocked",
+      "passed": true,
+      "decision": "blocked",
+      "latency_ms": 16,
+      "upstream_executed": false,
+      "request_id": "c1c55d5986554ae9bb6d5d8ec2fdbd1f"
+    },
+    {
+      "name": "Laya business tool allowed",
+      "passed": true,
+      "decision": "allowed",
+      "latency_ms": 749,
+      "upstream_executed": true,
+      "request_id": "d270cd80adf2464db57c70530d1ee308"
+    },
+    {
+      "name": "Laya tool role denied",
+      "passed": true,
+      "decision": "blocked",
+      "latency_ms": 6,
+      "upstream_executed": false,
+      "request_id": "100aef0b3fa847dcac1d5775ba615c19"
+    },
+    {
+      "name": "Laya cross-tenant tool denied",
+      "passed": true,
+      "decision": "blocked",
+      "latency_ms": 4,
+      "upstream_executed": false,
+      "request_id": "b96429b54ab24e9885066ec9efacc0c2"
+    }
+  ],
+  "audit": [
+    {
+      "sequence": 10,
+      "time": "2026-10-03T10:44:45.766438+00:00",
+      "subject": "analyst-blue",
+      "tenant": "blue",
+      "target": "memory.read",
+      "request_id": "b96429b54ab24e9885066ec9efacc0c2",
+      "decision": "blocked",
+      "reason": "cross_tenant_resource",
+      "policy_version": 2,
+      "feed_version": 1,
+      "latency_ms": 1,
+      "findings": [],
+      "semantic_provider": "ollama",
+      "semantic_score": null,
+      "tokens": 0,
+      "cost_microusd": 0,
+      "upstream_executed": false
+    },
+    {
+      "sequence": 9,
+      "time": "2026-10-03T10:44:45.762171+00:00",
+      "subject": "analyst-blue",
+      "tenant": "blue",
+      "target": "payments.prepare",
+      "request_id": "100aef0b3fa847dcac1d5775ba615c19",
+      "decision": "blocked",
+      "reason": "role_not_allowed",
+      "policy_version": 2,
+      "feed_version": 1,
+      "latency_ms": 1,
+      "findings": [],
+      "semantic_provider": "ollama",
+      "semantic_score": null,
+      "tokens": 0,
+      "cost_microusd": 0,
+      "upstream_executed": false
+    },
+    {
+      "sequence": 8,
+      "time": "2026-10-03T10:44:45.754872+00:00",
+      "subject": "analyst-blue",
+      "tenant": "blue",
+      "target": "knowledge.search",
+      "request_id": "d270cd80adf2464db57c70530d1ee308",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "policy_version": 2,
+      "feed_version": 1,
+      "latency_ms": 742,
+      "findings": [],
+      "semantic_provider": "ollama",
+      "semantic_score": 0,
+      "tokens": 2304,
+      "cost_microusd": 100,
+      "upstream_executed": true
+    },
+    {
+      "sequence": 7,
+      "time": "2026-10-03T10:44:44.996573+00:00",
+      "subject": "analyst-blue",
+      "tenant": "blue",
+      "target": "llm:qwen3:4b",
+      "request_id": "c1c55d5986554ae9bb6d5d8ec2fdbd1f",
+      "decision": "blocked",
+      "reason": "attack_signature",
+      "policy_version": 2,
+      "feed_version": 1,
+      "latency_ms": 1,
+      "findings": [
+        "instruction_override"
+      ],
+      "semantic_provider": "ollama",
+      "semantic_score": null,
+      "tokens": 0,
+      "cost_microusd": 0,
+      "upstream_executed": false
+    },
+    {
+      "sequence": 6,
+      "time": "2026-10-03T10:44:44.875118+00:00",
+      "subject": "analyst-blue",
+      "tenant": "blue",
+      "target": "llm:qwen3:4b",
+      "request_id": "6c4085eb33d642fbb535a775a6046776",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "policy_version": 2,
+      "feed_version": 1,
+      "latency_ms": 2924,
+      "findings": [],
+      "semantic_provider": "ollama",
+      "semantic_score": 0,
+      "tokens": 2882,
+      "cost_microusd": 0,
+      "upstream_executed": true
+    }
+  ],
+  "all_passed": true,
+  "scope": "Actual Laya llm_call and execute_tool; real Ollama completion. Business handlers use FastFence demo data. No native Laya connectors run."
+}
