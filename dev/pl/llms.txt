@@ -1,0 +1,28 @@
+!!! warning "Wersja rozwojowa — niewydana"
+
+    Ten kod może różnić się od pakietu na PyPI. [Dokumentacja stabilna](https://fastfence.dev/latest/). [Commit b4b602e0239d](https://github.com/llama-lovers/FastFence/commit/b4b602e0239d999de78181d11aa45f1396e89d00).
+
+# Dokumentacja FastFence
+
+Uruchom `uv tool run --python 3.12 fastfence init`, a następnie `uv tool run --python 3.12 fastfence serve`. Ollama musi działać. Inicjalizacja przygotowuje Layę i skonfigurowany model oceniający. `init --config-only` pomija pobieranie komponentów. Kod źródłowy FastFence nie jest potrzebny. Polityki i tożsamości są lokalne; budżety i audyt należą do procesu. Propozycja Laya wymaga zatwierdzenia przed aktywacją.
+
+- [Chroń komunikację agentów przez ACP {#protect-agent-to-agent-calls-with-acp}](https://fastfence.dev/dev/pl/examples/acp/)
+- [Napisz własne detektory tekstu w Pythonie {#write-custom-python-text-detectors}](https://fastfence.dev/dev/pl/examples/custom-detectors/)
+- [Anonimizacja z kluczem publicznym i prywatnym {#publicprivate-key-anonymization}](https://fastfence.dev/dev/pl/examples/asymmetric-anonymization/)
+- [Wybierz backend modelu zgodny z OpenAI {#choose-an-openai-compatible-model-upstream}](https://fastfence.dev/dev/pl/examples/openai-upstream/)
+- [Pierwsze kroki](https://fastfence.dev/dev/pl/getting-started/)
+- [Poznaj FastFence](https://fastfence.dev/dev/pl/learn/)
+- [Wywołaj chroniony model Qwen {#call-a-protected-qwen-model}](https://fastfence.dev/dev/pl/examples/protected-request/)
+- [Sprawdź i aktywuj regułę w języku naturalnym {#preview-and-activate-a-natural-language-rule}](https://fastfence.dev/dev/pl/examples/semantic-policy/)
+- [Połącz się klientem FastMCP {#connect-with-the-fastmcp-client}](https://fastfence.dev/dev/pl/examples/mcp-client/)
+- [Chroń serwer FastMCP wewnątrz aplikacji FastAPI {#protect-a-fastmcp-server-inside-a-fastapi-application}](https://fastfence.dev/dev/pl/examples/fastmcp-server/)
+- [OpenAI Python SDK przez FastFence {#openai-python-sdk-through-fastfence}](https://fastfence.dev/dev/pl/examples/openai-client/)
+- [Polityki i kontrole bezpieczeństwa](https://fastfence.dev/dev/pl/policies/)
+- [Integracje](https://fastfence.dev/dev/pl/integrations/)
+- [Dokumentacja integracji](https://fastfence.dev/dev/pl/integration-reference/)
+- [Dokumentacja HTTP API](https://fastfence.dev/dev/pl/reference/http-api/)
+- [Konfiguracja](https://fastfence.dev/dev/pl/settings/)
+- [Architektura](https://fastfence.dev/dev/pl/architecture/)
+- [Sprawdź swoją instalację {#check-your-installation}](https://fastfence.dev/dev/pl/manual-testing/)
+
+- [Pełna dokumentacja](https://fastfence.dev/dev/pl/llms-full.txt)

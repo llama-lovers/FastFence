@@ -1,5 +1,13 @@
 [
   {
+    "version": "dev",
+    "title": "dev (unreleased)",
+    "aliases": [],
+    "properties": {
+      "git_sha": "b4b602e0239d999de78181d11aa45f1396e89d00"
+    }
+  },
+  {
     "version": "1.0.0",
     "title": "1.0.0",
     "aliases": [
