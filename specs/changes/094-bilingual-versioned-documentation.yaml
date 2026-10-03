@@ -1,0 +1,40 @@
+id: FF-094
+title: Publish English and Polish documentation as preserved release-tag versions
+status: implemented
+problem: Public documentation has no language or release selector and generated references always link to mutable main sources.
+scope:
+  - Build complete English and Polish pages, navigation and LLM corpora with static i18n.
+  - Stage generated source references and downloads as physical temporary build inputs compatible with localization.
+  - Preserve tag-specific documentation with mike, archive the first major release and select the newest version as latest.
+  - Keep existing root documentation links, downloads and machine-readable URLs usable.
+constraints:
+  - Build the current version only from its exact verified release tag.
+  - Never retag releases or let replaying an older release downgrade latest.
+  - Preserve identical executable examples in both languages and isolate internal maintainer records.
+  - Documentation source staging must not modify tracked files or private runtime state.
+change_paths:
+  - mkdocs.yml
+  - pyproject.toml
+  - uv.lock
+  - .gitignore
+  - scripts/docs_reference.py
+  - scripts/versioned_docs.py
+  - .github/workflows/docs.yml
+  - .github/workflows/publish.yml
+  - tests/unit/test_documentation_downloads.py
+  - tests/unit/test_versioned_docs.py
+acceptance:
+  - English and Polish pages render with their correct HTML locale, translated navigation and highlighted code.
+  - Every public source page has a complete Polish counterpart with identical runnable code blocks.
+  - Exact tag links appear in generated source references; Polish LLM URLs retain version and locale.
+  - Two-tag rendering preserves both histories, latest copy has no symlinks, and old root URLs remain usable.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_documentation_downloads.py tests/unit/test_versioned_docs.py
+    expected: Actual bilingual and multi-tag builds satisfy locale, integrity and history invariants.
+  - command: uv run mkdocs build --strict
+    expected: Both languages build without missing translation links or generated-file failures.
+evidence:
+  - check: Real release history and current bilingual source
+    result: Archived actual v1.0.0 and built current 1.0.1 sources with mike on an isolated temporary local branch; extracted a symlink-free versioned artifact with both releases and latest. Branch was removed after validation.
+  - check: Rendered contract tests
+    result: Multi-tag history and rollback protection, localized public pages, language/source/code parity, and exact-tag generated references passed automated tests. Strict bilingual build passed.

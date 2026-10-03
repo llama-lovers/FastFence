@@ -5,25 +5,32 @@ on:
     inputs:
       release_tag:
         description: Exact tag whose public PyPI installation has passed verification
-        required: true
+        required: false
+        type: string
+      development_sha:
+        description: Exact successful main CI commit for unreleased documentation
+        required: false
         type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: documentation-${{ inputs.release_tag }}
-  cancel-in-progress: true
+  group: documentation-history
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out documentation
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.release_tag }}
-          persist-credentials: false
+          ref: ${{ inputs.development_sha || inputs.release_tag }}
+          fetch-depth: 0
       - name: Install uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
@@ -31,12 +38,34 @@ jobs:
           python-version: "3.12"
       - name: Install locked documentation dependencies
         run: uv sync --locked --only-group docs
-      - name: Build documentation
-        run: uv run --locked --only-group docs mkdocs build --strict
+      - name: Fetch the preserved documentation history
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git ls-remote --exit-code --heads origin gh-pages; then
+            git fetch origin gh-pages:gh-pages
+          else
+            status=$?
+            test "$status" = 2
+          fi
+      - name: Build the verified documentation channel
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          DEVELOPMENT_SHA: ${{ inputs.development_sha }}
+        run: |
+          if [ -n "$DEVELOPMENT_SHA" ]; then
+            test -z "$RELEASE_TAG"
+            uv run --locked --only-group docs python scripts/versioned_docs.py "$DEVELOPMENT_SHA" --dev
+          else
+            test -n "$RELEASE_TAG"
+            uv run --locked --only-group docs python scripts/versioned_docs.py "$RELEASE_TAG"
+          fi
+      - name: Preserve version history
+        run: git push origin gh-pages
       - name: Upload static site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: site
+          path: site-versioned
 
   deploy:
     needs: build

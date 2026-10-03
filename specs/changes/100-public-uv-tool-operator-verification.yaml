@@ -1,0 +1,37 @@
+id: FF-100
+title: Verify the public package through uv tool run and live operator changes
+status: verified
+problem: Wheel acceptance alone does not exercise the requested uv tool entry point or reproduce live policy and budget changes from the public distribution.
+scope:
+  - Start an exact public PyPI release through uv tool run in a new external working directory.
+  - Check repeated initialization preserves credentials, keys and configuration, then run doctor and serve.
+  - Provide offline fail-closed CI mode and actual Laya/Ollama operator mode.
+  - Exercise file hot reload and same-identity call limits without restarting the gateway.
+  - Retain sanitized post-publication uv tool evidence alongside other package verification artifacts.
+constraints:
+  - No source checkout imports, inherited FastFence configuration, alternate indexes or private operator state.
+  - Exact package version and Python3.12; published OpenAPI version must match.
+  - Keep Laya enabled in full verification and distinguish it from offline checks.
+  - Terminate the complete gateway process group on success or failure.
+change_paths:
+  - scripts/smoke_uv_tool.py
+  - .github/workflows/publish.yml
+  - tests/unit/test_uv_tool_verification.py
+acceptance:
+  - Public package initializes twice without changing valid credentials, identity records, keyring or policy.
+  - Offline mode explicitly uses config-only and observes unavailable assessment failing closed before upstream execution.
+  - Full mode observes Hello allowed, blocked by a higher-version local rule before semantic calls, and allowed after removal.
+  - Current calls C remain unchanged after limit-C denial and become C+1 after limit extension and one allowed request.
+  - Gateway instance remains unchanged and audit retains request metadata without prompt or output bodies.
+validation:
+  - command: uv run --no-project python scripts/smoke_uv_tool.py --version VERSION
+    expected: Exact public package passes offline uv tool lifecycle checks.
+  - command: uv run --no-project python scripts/smoke_uv_tool.py --version VERSION --full
+    expected: Actual Laya/Ollama hot-reload and same-identity budget checks pass in an isolated directory.
+evidence:
+  - command: uv run --no-project python scripts/smoke_uv_tool.py --version 1.0.0 --full --output state/private/uv-tool-1.0.0-full.json
+    result: Passed against exact public package in new external working directory. Actual Laya/Ollama Hello allowed at v1, local rule blocked before semantic/upstream at v2, removal allowed v3, limit-C budget blocked v4 and C+1 allowed v5. Used calls increased from2 to3 without restart; initialization preserved private state, OpenAPI version matched and audit excluded text/output.
+  - command: uv run --no-project python scripts/smoke_uv_tool.py --version 1.0.0 --output state/private/uv-tool-1.0.0-offline.json
+    result: Passed actual public package offline initialization, repeat-preservation, doctor, startup and fail-closed protected invocation; semantic input error, no upstream execution.
+  - command: uv run pytest --no-cov tests/unit/test_uv_tool_verification.py -q
+    result: Six tests passed for exact-version rejection and active-snapshot confirmation including same-version wrong-content rejection; Ruff passed.

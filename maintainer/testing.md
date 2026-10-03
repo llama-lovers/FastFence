@@ -37,10 +37,10 @@ basedpyright, import-linter, Pydantic architecture checks, module size,
 complexity, secret scanning, generated settings and lockfile validation.
 CI fails if a hook rewrites tracked files. The specification gate checks the
 committed change set against changed implemented specifications, including on PRs.
-After verification succeeds, CI calls the documentation workflow to build MkDocs
-strictly and deploy GitHub Pages at https://fastfence.dev/ from the same `main`
-commit. Failed tests or linters prevent deployment. Documentation pull requests
-receive a separate build without deployment. The workflow follows GitHub
+Main and pull-request CI build the bilingual documentation without deployment.
+The version-tag release workflow verifies the public PyPI package and uv tool
+execution before deploying release-matched, versioned GitHub Pages. Failed tests
+or linters prevent release progression. The workflow follows GitHub
 [reusable workflow conventions](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows).
 
 Ordinary CI uses fake inference and OCR adapters; it does not download weights or

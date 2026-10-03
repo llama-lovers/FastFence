@@ -1,0 +1,47 @@
+id: FF-104
+title: Run every public example with uv-managed package dependencies
+status: verified
+problem: Example launch instructions assumed an activated FastFence virtual environment even though the product quickstart uses uv tool isolation.
+scope:
+  - Replace bare Python and FastFence launch commands across all English and Polish example guides with explicit uv-managed Python3.12 and release-pinned package environments.
+  - Install the OpenAI client dependency explicitly and preserve the separate archived ACP SDK environment.
+  - Remove instructions to activate an environment not created by the quickstart.
+constraints:
+  - Preserve executable source inclusions and all application example source code.
+  - Keep English and Polish command blocks identical.
+  - Keep ACP SDK pins separate from the FastFence gateway dependency environment.
+change_paths:
+  - docs/examples/acp.md
+  - docs/examples/acp.pl.md
+  - docs/examples/asymmetric-anonymization.md
+  - docs/examples/asymmetric-anonymization.pl.md
+  - docs/examples/custom-detectors.md
+  - docs/examples/custom-detectors.pl.md
+  - docs/examples/fastmcp-server.md
+  - docs/examples/fastmcp-server.pl.md
+  - docs/examples/mcp-client.md
+  - docs/examples/mcp-client.pl.md
+  - docs/examples/openai-client.md
+  - docs/examples/openai-client.pl.md
+  - docs/examples/openai-upstream.md
+  - docs/examples/openai-upstream.pl.md
+  - docs/examples/protected-request.md
+  - docs/examples/protected-request.pl.md
+  - docs/examples/semantic-policy.md
+  - docs/examples/semantic-policy.pl.md
+acceptance:
+  - Example launch commands resolve their package imports without a manually activated venv or source checkout.
+  - Python heredocs use the same explicit uv-managed dependencies as executable clients.
+  - Complete source inclusions remain unchanged and bilingual command parity holds.
+validation:
+  - command: Isolated public-package uv launches for representative executable examples with --help
+    expected: Every entry point imports its required dependencies from the public package environment.
+  - command: uv run mkdocs build --strict
+    expected: Both locales build successfully.
+evidence:
+  - check: Bilingual source and launch-command parity
+    result: All nine English/Polish pairs have identical fenced commands and source markers. Documentation pins the upcoming1.0.1 release; actual prepublication launcher validation uses currently public1.0.0 explicitly.
+  - command: uv run mkdocs build --strict
+    result: English and Polish documentation builds passed after replacing venv assumptions.
+  - check: Actual public1.0.0 uv-run entry points in a fresh external directory
+    result: Six --help launches passed for protected_request, mcp_client, semantic_policy, asymmetric_keys, acp_gateway and openai_client, with no inherited FastFence settings or PYTHONPATH. OpenAI explicitly used openai2.21.0; scripts were copied public examples and package imports came from uv-managed dependencies. This verifies launch/imports, not new model inference.

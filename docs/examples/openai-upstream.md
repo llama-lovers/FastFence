@@ -23,17 +23,17 @@ require HTTPS; HTTP is accepted only for loopback addresses. Inline URL credenti
 query strings, fragments, redirects and environment proxy settings are rejected
 or disabled.
 
-Download the [complete examples](../downloads/fastfence-examples.zip) into your installation's `examples/` directory and use the activated FastFence virtual environment. Run commands from the installation directory.
+Download the [complete examples](../downloads/fastfence-examples.zip) into your installation's `examples/` directory. Run commands from the installation directory; `uv run` supplies Python 3.12 and the FastFence package for each example, without activating a virtual environment.
 
 ## Run against Ollama's compatible API
 
 After [installing the package](../getting-started.md), run from your installation directory with `ollama serve` running in another terminal:
 
 ```sh
-fastfence init --anonymization
+uv tool run --python 3.12 fastfence@1.0.1 init --anonymization
 FASTFENCE_MODEL_PROVIDER=openai \
 FASTFENCE_OPENAI_BASE_URL=http://127.0.0.1:11434/v1 \
-fastfence serve --port 8002
+uv tool run --python 3.12 fastfence@1.0.1 serve --port 8002
 ```
 
 Ollama exposes its compatible Chat Completions route beneath `/v1`; its native
@@ -45,7 +45,7 @@ agent credential without printing it, requests a 256-token completion, and check
 the gateway verdict as well as upstream execution:
 
 ```sh
-python - <<'PY'
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python - <<'PY'
 import json
 import os
 from pathlib import Path
@@ -106,7 +106,7 @@ start the gateway:
 ```sh
 FASTFENCE_MODEL_PROVIDER=openai \
 FASTFENCE_OPENAI_BASE_URL=http://127.0.0.1:8001/v1 \
-fastfence serve --port 8002
+uv tool run --python 3.12 fastfence@1.0.1 serve --port 8002
 ```
 
 For an authenticated server, configure its credential using vLLM's `--api-key`
@@ -133,7 +133,7 @@ Start FastFence with:
 ```sh
 FASTFENCE_MODEL_PROVIDER=openai \
 FASTFENCE_OPENAI_BASE_URL=http://127.0.0.1:8080/v1 \
-fastfence serve --port 8002
+uv tool run --python 3.12 fastfence@1.0.1 serve --port 8002
 ```
 
 ## Allow and call the served model
@@ -156,7 +156,7 @@ Use roles with budgets in your actual installation. Review the complete change
 and activate the next policy version. Then call the executable client:
 
 ```sh
-python examples/protected_request.py \
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/protected_request.py \
   --url http://127.0.0.1:8002 --model business-model --prompt 'Hello'
 ```
 

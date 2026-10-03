@@ -2,6 +2,7 @@
 
 import io
 import json
+import re
 import runpy
 import subprocess
 import sys
@@ -102,3 +103,41 @@ def test_public_build_excludes_internal_records_from_pages_search_and_llms(
     assert not (site / "maintainer").exists()
     assert (site / "examples/mcp-client/index.html").is_file()
     assert "Source: https://fastfence.dev/getting-started/" in llms
+    polish = (site / "pl/llms-full.txt").read_text()
+    assert "Dokumentacja FastFence" in polish
+    assert "Source: https://fastfence.dev/pl/getting-started/" in polish
+    assert "# Dokumentacja HTTP API" in polish
+    assert 'lang="pl"' in (site / "pl/index.html").read_text()
+    assert 'lang="en"' in (site / "index.html").read_text()
+    assert (
+        "Pierwsze kroki" in (site / "pl/getting-started/index.html").read_text()
+    )
+    for name in internal:
+        assert not (site / "pl" / name).exists()
+        assert f"https://fastfence.dev/pl/{name}/" not in polish
+
+
+def test_polish_pages_preserve_all_runnable_examples_without_fallback():
+    fences = re.compile(r"^```[^\n]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
+    for source in (ROOT / "docs").rglob("*.md"):
+        if source.name.endswith(".pl.md"):
+            continue
+        translated = source.with_suffix(".pl.md")
+        assert translated.is_file(), f"Missing full Polish page: {source.name}"
+        original, polish = source.read_text(), translated.read_text()
+        assert fences.findall(original) == fences.findall(polish), source.name
+        assert HOOK["SOURCE_MARKER"].findall(original) == HOOK[
+            "SOURCE_MARKER"
+        ].findall(polish)
+
+
+def test_versioned_generated_docs_link_to_the_exact_tag_and_locale(monkeypatch):
+    monkeypatch.setenv("MIKE_DOCS_VERSION", "1.0.1")
+    hook = runpy.run_path(str(ROOT / "scripts/docs_reference.py"))
+    reference = hook["endpoint_reference"]()
+    assert "/blob/v1.0.1/" in reference
+    index, full = hook["llm_documents"](
+        "https://fastfence.dev/1.0.1", "pl", reference
+    )
+    assert "https://fastfence.dev/1.0.1/pl/getting-started/" in index
+    assert "/blob/v1.0.1/" in full

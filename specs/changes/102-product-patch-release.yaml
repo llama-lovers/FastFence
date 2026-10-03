@@ -1,0 +1,27 @@
+id: FF-102
+title: Release FastFence 1.0.1 with runtime fixes and complete product documentation
+status: implemented
+problem: The first major release needs semantic reinspection of restored output, OCR admission accounting, and the requested uv, bilingual, highlighted and versioned documentation workflows.
+scope:
+  - Set the next immutable package version to 1.0.1.
+  - Publish the verified runtime fixes and public documentation improvements together.
+constraints:
+  - Preserve 1.0.0 artifacts and operator configuration.
+  - Release only after source, installed-package and documentation checks pass.
+change_paths:
+  - _version.py
+acceptance:
+  - The built and published package reports 1.0.1.
+  - Tag-triggered publication verifies the public distribution and uv tool execution before publishing release notes.
+validation:
+  - command: uv run pytest -q
+    expected: Full regression suite passes.
+  - command: uv build
+    expected: Version 1.0.1 distributions build successfully.
+evidence:
+  - check: Source regression suite
+    result: 1054 tests passed with 92.09 percent coverage, including the expanded corpus and development documentation additions.
+  - check: Installed wheel outside checkout
+    result: Built 1.0.1 wheel and source archive; isolated wheel installation passed version, source isolation, init, doctor, packaged helpers, HTTP assets and protected invocation checks.
+  - check: Installed wheel protocol and local dev acceptance
+    result: Official ACP package peers passed eight checks against the isolated 1.0.1 wheel. A separate uv tool installation completed full Laya and OCR readiness; actual Qwen input and output semantic checks allowed a benign request. Actual OCR read the sensitive-data fixture and withheld Markdown under the input privacy policy.

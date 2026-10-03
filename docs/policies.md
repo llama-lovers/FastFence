@@ -165,7 +165,7 @@ Management clients can retrieve `GET /api/admin/rules/schema`, then call `POST /
 
 ## Describe a policy in the dashboard
 
-Install the pinned Laya engine once with `fastfence setup-laya`, start Ollama with `qwen3:4b` installed, and connect the console with your management identity. In **Policies**, choose **Describe a fast rule**:
+Complete normal `fastfence init` (or the equivalent uv tool command), keep Ollama running with the configured assessor available, and connect the console with your management identity. In **Policies**, choose **Describe a fast rule**:
 
 1. Write a specific instruction in Polish or English and select **Draft with Laya**.
 2. Inspect the before/after changes and exact operations. Drafting does not activate anything.

@@ -1,0 +1,31 @@
+id: FF-106
+title: Use the renamed canonical FastFence repository in active product metadata
+status: implemented
+problem: GitHub renamed the repository to llama-lovers/FastFence while package metadata, documentation source links, generated release notes and the publishing guide retained the former name.
+scope:
+  - Update active repository, issue, source, license and changelog URLs to llama-lovers/FastFence.
+  - Update the PyPI Trusted Publisher repository value and document the required rename correction for an existing publisher.
+constraints:
+  - Historical evidence, local checkout paths, exclusions and fixture strings remain unchanged.
+  - This change does not modify live PyPI permissions or publisher configuration.
+change_paths:
+  - README.md
+  - pyproject.toml
+  - mkdocs.yml
+  - scripts/docs_reference.py
+  - scripts/release_notes.py
+  - maintainer/publishing.md
+acceptance:
+  - Active product links use the canonical GitHub repository name.
+  - Generated source and release-note links retain their exact source references under the canonical repository.
+  - Publishing instructions identify FastFence as the repository and explain that an old PyPI publisher repository name will fail OIDC matching.
+validation:
+  - command: uv run pytest tests/unit/test_documentation_downloads.py tests/unit/test_documentation_highlighting.py tests/unit/test_versioned_docs.py --no-cov -q
+    expected: Generated documentation and release-note tests pass with canonical repository links.
+evidence:
+  - check: Read-only live repository verification
+    result: The public GitHub page identifies llama-lovers/FastFence and default branch main. Anonymous GitHub API access was rate-limited, so no authenticated metadata or credentials were accessed.
+  - check: Official PyPI rename requirement
+    result: PyPI Trusted Publisher troubleshooting explicitly identifies a renamed source repository with an old configured publisher repository name as a cause of invalid-publisher. The guide now specifies owner llama-lovers, repository FastFence, workflow publish.yml and environment pypi.
+  - check: Canonical-link regression validation
+    result: All 14 documentation download, highlighting and versioned release-note tests passed, including a strict bilingual documentation build. Active product metadata contains no old GitHub repository URLs.

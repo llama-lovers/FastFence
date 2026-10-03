@@ -2,17 +2,28 @@
 
 import ast
 import io
+import os
 import re
+import shutil
+import tempfile
 import zipfile
 from pathlib import Path
 
-from mkdocs.structure.files import File
+from mkdocs.plugins import event_priority
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "src/fastfence/app/interfaces/http"
-REPOSITORY = (
-    "https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/"
+RELEASE = os.environ.get("MIKE_DOCS_VERSION", "")
+DEV_SHA = os.environ.get("FASTFENCE_DOCS_SOURCE_SHA", "")
+if DEV_SHA and not re.fullmatch(r"[0-9a-f]{40}", DEV_SHA):
+    raise ValueError("Development documentation source must be an exact SHA")
+SOURCE_REF = (
+    f"v{RELEASE}"
+    if re.fullmatch(r"\d+\.\d+\.\d+", RELEASE)
+    else DEV_SHA or "main"
 )
+REPOSITORY = f"https://github.com/llama-lovers/FastFence/blob/{SOURCE_REF}/"
+BUILD_DOCS = tempfile.TemporaryDirectory(prefix="fastfence-docs-")
 PAGES = (
     (
         "examples/acp.md",
@@ -236,66 +247,120 @@ def endpoint_reference():
     return "\n".join(lines)
 
 
-def on_files(files, config):
-    sources, archive = example_downloads()
-    for name, content in sources.items():
-        files.append(
-            File.generated(config, f"downloads/{name}", content=content)
-        )
-    files.append(
-        File.generated(
-            config, "downloads/fastfence-examples.zip", content=archive
-        )
+def polish_reference(reference):
+    replacements = {
+        "# HTTP API reference": "# Dokumentacja HTTP API",
+        "This endpoint inventory is generated from the Python route declarations on every documentation build. Follow a handler link to inspect its request and response models. The running gateway exposes the complete JSON schemas at `/openapi.json` and an interactive explorer at `/docs`.": "Ten wykaz endpointów powstaje z deklaracji tras w Pythonie przy każdym budowaniu dokumentacji. Link do funkcji prowadzi do modeli żądań i odpowiedzi. Uruchomiona bramka udostępnia pełne schematy JSON pod `/openapi.json` oraz interaktywną dokumentację pod `/docs`.",
+        "All `/api/` and `/v1/` requests require a provisioned bearer identity. `/api/admin/` requires a management identity. `/health` is public. The MCP mount at `/mcp/` uses the same trusted bearer identities and is listed separately in the [integration reference](../integration-reference.md).": "Wszystkie żądania do `/api/` i `/v1/` wymagają skonfigurowanej tożsamości Bearer. `/api/admin/` wymaga uprawnień administracyjnych. `/health` jest publiczny. Endpoint MCP `/mcp/` używa tych samych zaufanych tożsamości; opisuje go [kontrakt integracji](../integration-reference.md).",
+        "| Method | Path | Source handler |": "| Metoda | Ścieżka | Funkcja w kodzie |",
+        "## Response semantics": "## Znaczenie odpowiedzi",
+        "An HTTP 200 response from a protected invocation can still contain a `blocked` security verdict. Check `decision`, `reason` and `upstream_executed`; do not use HTTP status alone as an authorization result. A blocked output can follow an already executed upstream operation.": "Odpowiedź HTTP 200 z chronionego wywołania może zawierać decyzję `blocked`. Sprawdź pola `decision`, `reason` i `upstream_executed`; sam status HTTP nie oznacza zgody na operację. Blokada odpowiedzi może nastąpić po wykonaniu operacji przez docelową usługę.",
+        "OpenAI-compatible calls return their endpoint-specific schema. Streaming, arbitrary upstream providers and arbitrary MCP proxying are not implied by this inventory. See the [protocol contract](../integration-reference.md).": "Wywołania zgodne z OpenAI zwracają schemat właściwy dla danego endpointu. Ten wykaz nie oznacza obsługi streamingu, dowolnych dostawców ani dowolnego proxy MCP. Szczegóły zawiera [kontrakt protokołów](../integration-reference.md).",
+    }
+    for original, translated in replacements.items():
+        reference = reference.replace(original, translated)
+    return reference
+
+
+def llm_documents(base, language, reference):
+    polish = language == "pl"
+    localized_base = base + ("/pl" if polish else "")
+    title = "Dokumentacja FastFence" if polish else "FastFence documentation"
+    introduction = (
+        "Uruchom `uv tool run --python 3.12 fastfence init`, a następnie `uv tool run --python 3.12 fastfence serve`. Ollama musi działać. Inicjalizacja przygotowuje Layę i skonfigurowany model oceniający. `init --config-only` pomija pobieranie komponentów. Kod źródłowy FastFence nie jest potrzebny. Polityki i tożsamości są lokalne; budżety i audyt należą do procesu. Propozycja Laya wymaga zatwierdzenia przed aktywacją."
+        if polish
+        else "Run `uv tool run --python 3.12 fastfence init`, then `uv tool run --python 3.12 fastfence serve`, with Ollama running. Initialization prepares Laya and the configured assessor; `init --config-only` skips component downloads. No FastFence checkout is required. Policies and identities are local; budgets and audit are process-local. Laya proposals require explicit review before activation."
     )
-    for file in list(files):
-        if file.src_uri.endswith(".md") and SOURCE_MARKER.search(
-            file.content_string
-        ):
-            rendered = embed_sources(file.content_string)
-            files.remove(file)
-            files.append(File.generated(config, file.src_uri, content=rendered))
-    reference = endpoint_reference()
-    files.append(
-        File.generated(config, "reference/http-api.md", content=reference)
-    )
-    base = config.site_url.rstrip("/")
-    index = [
-        "# FastFence",
-        "",
-        "> Local security policy enforcement for AI agents, models and tools.",
-        "",
-        "FastFence is installed as a Python 3.12 package with pip install fastfence uv, followed by fastfence init --anonymization. Initialization prepares the configured Laya assessor; fastfence init --config-only explicitly skips component and model downloads. No FastFence checkout is required. Runnable example source and its ZIP archive are available under /downloads/. Policies and identities are local configuration; budgets and audit are process-local. Laya authoring produces a reviewed proposal, never implicit activation.",
-        "",
-        "## Documentation",
-        "",
-    ]
-    full = [
-        "# FastFence documentation",
-        "",
-        "Generated from the same Markdown and route source as the public documentation site. The pages cover installation, configuration, protocols and executable examples.",
-        "",
-    ]
-    for path, title, description in PAGES:
-        url = f"{base}/{path.removesuffix('.md')}/"
-        index.append(f"- [{title}]({url}): {description}")
-        content = (
-            reference
-            if path == "reference/http-api.md"
-            else (ROOT / "docs" / path).read_text()
+    index = [f"# {title}", "", introduction, ""]
+    full = [f"# {title}", "", introduction, ""]
+    for path, name, description in PAGES:
+        source = ROOT / "docs" / path
+        if polish:
+            source = source.with_suffix(".pl.md")
+        if path == "reference/http-api.md":
+            content = polish_reference(reference) if polish else reference
+        else:
+            content = source.read_text()
+        if polish:
+            name = next(
+                line[2:]
+                for line in content.splitlines()
+                if line.startswith("# ")
+            )
+            description = ""
+        url = f"{localized_base}/{path.removesuffix('.md')}/"
+        index.append(
+            f"- [{name}]({url})" + (f": {description}" if description else "")
         )
         full.extend(["---", f"Source: {url}", "", embed_sources(content), ""])
-    index.extend(
-        [
-            "",
-            "## Complete text",
-            "",
-            f"- [Full documentation]({base}/llms-full.txt): Curated pages in one text response.",
-            f"- [Source repository]({config.repo_url}): Apache-2.0 source, tests and specifications.",
-            "",
-        ]
+    label = "Pełna dokumentacja" if polish else "Full documentation"
+    index.extend(["", f"- [{label}]({localized_base}/llms-full.txt)", ""])
+    return "\n".join(index), "\n".join(full)
+
+
+def development_notice(polish=False):
+    if RELEASE != "dev" or not DEV_SHA:
+        return ""
+    if polish:
+        notice = "Wersja rozwojowa — niewydana"
+        detail = "Ten kod może różnić się od pakietu na PyPI."
+        stable = "Dokumentacja stabilna"
+    else:
+        notice = "Development version — unreleased"
+        detail = "This code may differ from the package available on PyPI."
+        stable = "Stable documentation"
+    source = REPOSITORY.split("/blob/", 1)[0] + "/commit/" + DEV_SHA
+    return (
+        f'!!! warning "{notice}"\n\n'
+        f"    {detail} [{stable}](https://fastfence.dev/latest/). "
+        f"[Commit {DEV_SHA[:12]}]({source}).\n\n"
     )
-    files.append(File.generated(config, "llms.txt", content="\n".join(index)))
-    files.append(
-        File.generated(config, "llms-full.txt", content="\n".join(full))
+
+
+@event_priority(-50)
+def on_config(config):
+    # Physical staging supports i18n's file resolver without modifying tracked docs.
+    target = Path(BUILD_DOCS.name) / "docs"
+    if not target.exists():
+        shutil.copytree(ROOT / "docs", target)
+    base = config.site_url.rstrip("/")
+    for path in target.rglob("*.md"):
+        content = embed_sources(path.read_text())
+        content = development_notice(path.name.endswith(".pl.md")) + content
+        if path.name.endswith(".pl.md"):
+            content = content.replace("[Download ", "[Pobierz ").replace(
+                "[View source]", "[Zobacz źródło]"
+            )
+        path.write_text(
+            content.replace(
+                "https://fastfence.dev/downloads/", base + "/downloads/"
+            )
+        )
+    sources, archive = example_downloads()
+    sources["fastfence-examples.zip"] = archive
+    for name, content in sources.items():
+        destination = target / "downloads" / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(content)
+    reference = endpoint_reference()
+    (target / "reference").mkdir(exist_ok=True)
+    (target / "reference/http-api.md").write_text(
+        development_notice() + reference
     )
-    return files
+    (target / "reference/http-api.pl.md").write_text(
+        development_notice(True) + polish_reference(reference)
+    )
+    for language in ("en", "pl"):
+        index, full = llm_documents(base, language, reference)
+        suffix = ".pl" if language == "pl" else ""
+        (target / f"llms{suffix}.txt").write_text(
+            development_notice(language == "pl") + index
+        )
+        (target / f"llms-full{suffix}.txt").write_text(
+            development_notice(language == "pl")
+            + full.replace(
+                "https://fastfence.dev/downloads/", base + "/downloads/"
+            )
+        )
+    config.docs_dir = str(target)
+    return config

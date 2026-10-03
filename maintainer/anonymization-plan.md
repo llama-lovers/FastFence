@@ -1,9 +1,10 @@
 # Stateless anonymization and OCR delivery plan
 
-This is a plan, not a list of released capabilities. Text transformations and
-Laya/UI integration are work in progress. Stateless recovery tokens and the
-OCR-to-Markdown document path are not implemented. The latest user decision
-supersedes the earlier conversation vault and mapping capsule designs.
+Updated 2026-10-04: the accepted stateless text-token and OCR-to-Markdown design is implemented. This record preserves the design rationale and original delivery sequence; it is no longer an outstanding implementation plan. Current code supports irreversible aliases, authenticated symmetric FFR1 tokens, RSA-OAEP/AES-GCM FFR2 envelopes, explicit restoration, local image and multipage PDF OCR, and policy-checked Markdown.
+
+Implementation and evidence are tracked in FF-042, FF-043, FF-047, FF-071, FF-095 and FF-098. The last two changes are part of the upcoming 1.0.1 release: restored plaintext receives semantic output reinspection, and document authorization plus one atomic budget reservation precede OCR. Independent focused verification passed 58 tests across document admission, Markdown, restoration, named rules and OCR. This is a scoped regression result, not a new model-accuracy or performance benchmark.
+
+The current contract is summarized in [requirements](requirements.md); public setup is in the [anonymization example](../docs/examples/asymmetric-anonymization.md) and [manual verification](../docs/manual-testing.md). Conversation vaults, mapping capsules and per-conversation queues were superseded by the stateless design. Image/PDF editing and pixel recovery were explicitly removed from scope.
 
 ## Confirmed requirements
 
@@ -22,7 +23,7 @@ conversation state. Temporary request-local processing buffers are allowed.
 
 ## Two processing modes
 
-These names describe the planned contract, not existing configuration fields.
+These are implemented values of `anonymization.mode`; recovery additionally requires active rule permission and explicit request consent.
 
 | Mode | Output and recovery |
 | --- | --- |
@@ -82,10 +83,7 @@ Public-key encryption alone does not authenticate FastFence as issuer. Never
 create a reusable encryption nonce from the value to force deterministic
 ciphertext.
 
-Gateway-held decryption keys are the working implementation assumption, supplied
-through deployment configuration. Authenticated hybrid public-key encryption can
-separate encryption and decryption roles if needed. Client-only decryption would
-move recovery into the client; the confirmed mode choice does not require it.
+Gateway-held decryption keys are supplied through deployment configuration. The implemented FFR2 mode adds hybrid public-key encryption with a separate issuer MAC. The full gateway still requires the matching private key for security reinspection, even when response restoration is disabled. A public-only gateway or client-only recovery mode is not implemented.
 
 The model can reason about types and repeated opaque identifiers without originals.
 Automatic recovery from its response requires the **complete unmodified reversible
@@ -126,7 +124,7 @@ flowchart LR
     G --> H[Optional authorized text-token restoration and recheck]
 ```
 
-## Delivery order and remaining work
+## Original delivery sequence (implemented milestones)
 
 1. **Replace the unshipped context design.** Remove the planned conversation ID,
    alias vault, mapping capsule and queue dependency from work in progress.
@@ -174,11 +172,8 @@ contains the sanitized Markdown in page order, with no original file attachment
 or unsanitized extracted text. Include document-borne prompt injections as
 untrusted test content, and verify both blocked documents and benign near matches.
 
-## Remaining implementation choices
+## Selected components and remaining measurement
 
-No further product answer is required to continue this plan. Select the local
-OCR engine, reviewed cryptographic format/library, processing limits and test
-fixtures through implementation and measurement. Gateway-held keys, PL/EN printed
-text and text-token recovery are explicit working assumptions. Stateless parallel
-calls, two policy modes, initial multipage PDF and OCR-to-Markdown replacement are
-confirmed.
+The implementation uses local PaddleOCR with the pinned orientation, mobile detection and Latin recognition models, and cryptography primitives for authenticated AES-GCM tokens with optional RSA-3072 wrapping. Keys remain gateway-held; both modes, independent calls, initial multipage PDF support and Markdown substitution are implemented.
+
+Broad OCR quality and default Laya-path load performance remain measurement work. `evaluation/results/ocr-local.json` covers five synthetic fixtures with fresh-worker p50 3165.57 ms and p95 3732.22 ms, excluding HTTP and model inference. It is not representative production accuracy or a latency SLA. The asymmetric crypto report measures crypto operations alone, not end-to-end model token overhead. Preserve these scopes when planning wider document and concurrent semantic evaluations.

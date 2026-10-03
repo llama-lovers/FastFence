@@ -1,0 +1,39 @@
+id: FF-097
+title: Translate the operator manual and all runnable example guides into Polish
+status: verified
+problem: Polish operators need complete instructions for verification and integrations rather than English fallback pages or shortened examples.
+scope:
+  - Translate the complete operator manual including live policy and budget checks.
+  - Translate all nine runnable example guides, preserving complete commands, source inclusions and behavioral limits.
+  - Preserve English UI labels and stable heading anchors for cross-language navigation.
+constraints:
+  - Keep every fenced code block and source inclusion identical to the corresponding English page.
+  - Keep logical English Markdown link targets for suffix-based locale resolution.
+  - Do not introduce translated API fields, altered test prompts or unsupported capability claims.
+change_paths:
+  - docs/manual-testing.pl.md
+  - docs/examples/acp.pl.md
+  - docs/examples/asymmetric-anonymization.pl.md
+  - docs/examples/custom-detectors.pl.md
+  - docs/examples/fastmcp-server.pl.md
+  - docs/examples/mcp-client.pl.md
+  - docs/examples/openai-client.pl.md
+  - docs/examples/openai-upstream.pl.md
+  - docs/examples/protected-request.pl.md
+  - docs/examples/semantic-policy.pl.md
+acceptance:
+  - Every owned English page has a complete Polish counterpart without placeholder prose.
+  - Runnable code and source inclusions are identical across languages.
+  - Existing cross-page heading links remain valid in the Polish build.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: Both languages render without broken links or source inclusion failures.
+  - command: Compare fenced blocks and source markers across all ten translation pairs
+    expected: Exact parity for runnable content.
+evidence:
+  - check: Ten-pair source and fenced-code parity
+    result: Passed for the complete manual and all nine example guides; translated headings retain explicit English anchors.
+  - command: uv run mkdocs build --strict
+    result: Passed for both English and Polish with all ten translated guides and complete embedded examples.
+  - check: Actual headless Chromium desktop and mobile rendering
+    result: Polish headings and navigation rendered; Python syntax colors and actual clipboard copy of complete embedded source passed. Mobile document width stayed within390px, with code scrolling internally. Screenshots retained privately.

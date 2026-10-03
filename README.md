@@ -13,18 +13,17 @@ policy changes, test requests and inspect activity.
 
 ## Run locally
 
-Requirements: macOS or Linux, Python 3.12 and a running [Ollama](https://ollama.com/) service. Git and `sh` are needed by the installer for the pinned external Laya engine; no FastFence checkout is needed.
+Requirements: macOS or Linux, [uv](https://docs.astral.sh/uv/getting-started/installation/) and a running [Ollama](https://ollama.com/) service. uv selects Python 3.12 for the package. Git and `sh` are needed by the installer for the pinned external Laya engine; no FastFence checkout is needed.
 
 ```sh
 mkdir fastfence-local
 cd fastfence-local
-python3.12 -m venv .venv
-source .venv/bin/activate
-python -m pip install fastfence uv
-fastfence init --anonymization
-fastfence doctor
-fastfence serve
+uv tool run --python 3.12 fastfence@1.0.1 init
+uv tool run --python 3.12 fastfence@1.0.1 doctor
+uv tool run --python 3.12 fastfence@1.0.1 serve
 ```
+
+No project environment is required: uv caches the isolated package while configuration and private state stay in `fastfence-local`. Prefer pip? The [installation guide](https://fastfence.dev/getting-started/) includes a virtual-environment alternative.
 
 Open **http://127.0.0.1:8000**, then **Connection**. Use `local-admin` from
 `state/credentials.json` to manage policies and `local-agent` to make protected
@@ -40,14 +39,14 @@ independently. Tool-only and ACP integrations need no separate completion model.
 Laya checks input and output that reach semantic inspection. Missing or failed
 assessment blocks the request; local rules run before it. Repeating `init`
 preserves valid existing configuration and keys. For configuration provisioning
-without downloads, use `fastfence init --config-only --anonymization`; normal
+without downloads, use `uv tool run --python 3.12 fastfence@1.0.1 init --config-only`; normal
 initialization must finish before model-backed protection is ready.
 
 For OCR of images and multipage PDFs:
 
 ```sh
-fastfence setup-ocr
-fastfence doctor --full
+uv tool run --python 3.12 fastfence@1.0.1 setup-ocr
+uv tool run --python 3.12 fastfence@1.0.1 doctor --full
 ```
 
 Restart after installing optional components or changing `.env`. OCR converts
@@ -58,7 +57,7 @@ attachments into inspected Markdown; it does not modify image or PDF pixels.
 This reads your local agent credential without writing it into shell history:
 
 ```sh
-python - <<'PY'
+uv run --no-project --python 3.12 --with httpx python - <<'PY'
 import json
 from pathlib import Path
 import httpx
@@ -113,17 +112,18 @@ policy and credentials; replace its operation with your application logic.
 
 ## Update and verify
 
-Stop the gateway, activate its virtual environment, then run:
+Stop the gateway, then explicitly refresh the tool to the latest published release:
 
 ```sh
-python -m pip install --upgrade fastfence
-fastfence doctor
-fastfence serve
+uv tool run --python 3.12 fastfence@latest doctor
+uv tool run --python 3.12 fastfence@latest serve
 ```
+
+Pinned `@1.0.1` commands remain on that version. With pip, activate your environment and use `python -m pip install --upgrade fastfence` before restarting.
 
 Reload the browser. Your working directory's configuration and private state are independent of the installed package; preserve and back them up. Initialization is repeatable and retains valid existing credentials and keys.
 
-Download [runnable examples](https://fastfence.dev/downloads/fastfence-examples.zip), extract them into `examples/` in your installation directory, and run `python examples/protected_request.py --prompt 'Hello'`. The documentation embeds the complete source for REST, named Laya policies, FastMCP, OpenAI SDK and public/private-key anonymization.
+Download [runnable examples](https://fastfence.dev/downloads/fastfence-examples.zip), extract them into `examples/` in your installation directory, and run `uv run --no-project --python 3.12 --with fastfence==1.0.1 python examples/protected_request.py --prompt 'Hello'`. The documentation embeds the complete source for REST, named Laya policies, FastMCP, OpenAI SDK and public/private-key anonymization.
 
 Follow [the installation checks](https://fastfence.dev/manual-testing/) to verify your own models, policies and documents.
 
@@ -141,5 +141,5 @@ Irreversible business actions require adapter-specific authorization and transac
 controls. [Architecture](https://fastfence.dev/architecture/) · [Policies](https://fastfence.dev/policies/) ·
 [Settings](https://fastfence.dev/settings/).
 
-Licensed under [Apache 2.0](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/LICENSE); see [NOTICE](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/NOTICE). Dependencies retain their
+Licensed under [Apache 2.0](https://github.com/llama-lovers/FastFence/blob/main/LICENSE); see [NOTICE](https://github.com/llama-lovers/FastFence/blob/main/NOTICE). Dependencies retain their
 own licenses. Documentation uses MkDocs Material and GitHub Pages at **fastfence.dev**.

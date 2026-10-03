@@ -13,11 +13,11 @@ After [installing FastFence](../getting-started.md), download the
 values and needs no repository checkout:
 
 ```sh
-fastfence init --anonymization
-python examples/custom_detector.py
+uv tool run --python 3.12 fastfence@1.0.1 init --anonymization
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/custom_detector.py
 export FASTFENCE_SECRET_PLUGIN_FILES='["examples/custom_detector.py"]'
-fastfence doctor
-fastfence serve
+uv tool run --python 3.12 fastfence@1.0.1 doctor
+uv tool run --python 3.12 fastfence@1.0.1 serve
 ```
 
 Keep that environment variable in the terminal or service configuration used to
@@ -75,7 +75,7 @@ custom detector-specific action overrides are not currently supported.
 With the gateway running, use the downloaded client from a second terminal:
 
 ```sh
-python examples/protected_request.py --prompt 'Please summarize ACME-DEMO-1234'
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/protected_request.py --prompt 'Please summarize ACME-DEMO-1234'
 ```
 
 With input blocking enabled, expect `decision: blocked`,

@@ -12,7 +12,8 @@ class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FASTFENCE_", extra="forbid")
 
     root: Path = Field(
-        default_factory=lambda: Path.cwd(), description="Installation/configuration root"
+        default_factory=lambda: Path.cwd(),
+        description="Installation/configuration root",
     )
     state: Path | None = Field(
         default=None,

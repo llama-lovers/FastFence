@@ -1,0 +1,36 @@
+id: FF-091
+title: Reproduce live policy changes and identity budget enforcement from the installed product
+status: verified
+problem: Operators lack a concrete package-user walkthrough proving active file reload and changed limits against existing identity usage.
+scope:
+  - Document a running gateway allowing Hello, blocking it with an input-only literal rule, then allowing it after higher-version removal.
+  - Document exhausted and extended role call limits using the same identity's actual usage without restarting the gateway.
+  - Explain active configuration confirmation, semantic stage evidence and local budget scope.
+  - Remove source-checkout-only restoration test instructions from the public operator manual.
+constraints:
+  - Preserve default semantic assessment and all unrelated policy fields.
+  - Do not claim that updating a role limit clears identity usage or coordinates budgets across processes.
+  - Do not replace a deterministic restoration test with an uppercase peer that could corrupt opaque recovery tokens.
+  - Public instructions work from installed packages, with no private repository state.
+change_paths:
+  - docs/manual-testing.md
+acceptance:
+  - Operators can distinguish a saved file from the higher-version snapshot actually used by the request.
+  - Input literal blocking shows input_text_rule, no upstream execution and both semantic stages not_run.
+  - Setting the role call limit to current used calls C blocks the next reservation; setting it to C+1 admits one more otherwise-valid call.
+  - The same process and identity retain their usage through configuration changes.
+  - Manual initialization and optional OCR commands use the requested uv tool run entry point.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: Public operator documentation builds with valid navigation and links.
+  - command: Actual installed public-package HTTP walkthrough
+    expected: Allow, hot-reload block, removal, budget exhaustion and increased-limit results match the documented active versions.
+evidence:
+  - check: Implementation contract review
+    result: Confirmed two-second default configuration polling, five-second visible dashboard refresh, local input checks before reservation, per-subject UTC-day counters and minimum limits across identity roles. Live installed-package evidence is pending the independent operator walkthrough.
+  - command: uv run mkdocs build --strict
+    result: Passed; operator hot-reload and budget sections render with valid links.
+  - command: uv run python scripts/check_specs.py
+    result: Passed with 93 valid specifications; installed-package walkthrough remains separately pending.
+  - command: uv run --no-project python scripts/smoke_uv_tool.py --version 1.0.0 --full --output state/private/uv-tool-1.0.0-full.json
+    result: Actual public PyPI uv-tool installation passed Hello allow v1, file rule block v2 before semantic/upstream, removal allow v3, calls C=2 exhausted at v4 and limit3 allowed at v5. Same process instance and identity retained counters; audit had no prompt/output. Normal init installed Laya, reused the available local Qwen4b and preserved private state on repeat.

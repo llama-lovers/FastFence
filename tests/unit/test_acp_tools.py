@@ -363,9 +363,7 @@ async def test_sdk_generated_session_uuid_is_discarded_and_never_reused(
     )
 
 
-@pytest.mark.parametrize(
-    "identifier", [123, {}, "x" * 36, "1" * 32]
-)
+@pytest.mark.parametrize("identifier", [123, {}, "x" * 36, "1" * 32])
 async def test_malformed_sdk_session_identifiers_still_fail_closed(
     monkeypatch, identifier
 ):

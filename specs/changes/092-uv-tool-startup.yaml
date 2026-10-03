@@ -1,0 +1,30 @@
+id: FF-092
+title: Run the public FastFence package directly through uv tool run
+status: verified
+problem: Startup guides only describe pip environments despite the requested uv tool run workflow.
+scope:
+  - Lead startup guides with a Python 3.12 and release-pinned uv tool command.
+  - Preserve the pip alternative and explain tool-cache versus working-directory state.
+  - Provide dependency-isolated Python client commands and explicit tool upgrade semantics.
+constraints:
+  - Test the actual public package in an empty temporary working directory without inherited operator configuration.
+  - Do not claim configuration-only initialization performs Laya installation or model inference.
+  - Offline tool cache reuse must not be described as disabling FastFence network operations.
+change_paths:
+  - README.md
+  - docs/getting-started.md
+  - docs/index.md
+acceptance:
+  - Public fastfence 1.0.0 runs with uv tool run and Python 3.12 without a project checkout or virtual environment.
+  - Configuration-only init creates local credentials and keys; repeated doctor uses the same working state.
+  - An already cached exact-version doctor command runs with uv offline mode.
+validation:
+  - command: uv tool run --python 3.12 fastfence@1.0.0 init --config-only
+    expected: Local configuration is created without runtime downloads.
+  - command: uv tool run --offline --python 3.12 fastfence@1.0.0 doctor
+    expected: Cached package validates the temporary installation.
+evidence:
+  - command: Actual public package isolated uv tool probe
+    result: uv 0.7.14 ran public fastfence 1.0.0 help, configuration-only init and doctor successfully from a fresh external temporary directory with sanitized environment and public PyPI selection. A subsequent offline cached doctor succeeded. No local .venv or Laya integration directory was created; credentials and keys were created in the working directory. No full Laya initialization or model inference was performed by this probe.
+  - source: https://docs.astral.sh/uv/concepts/tools/
+    result: Confirmed Python selection, exact-version tool syntax, cached reuse and explicit latest-version refresh against official uv documentation.

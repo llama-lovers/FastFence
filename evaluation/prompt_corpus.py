@@ -11,6 +11,8 @@ CORPUS = (
     / "tests/test_data/training_prompts.jsonl"
 )
 
+MAX_CORPUS_BYTES = 2 * 1024 * 1024
+
 
 class PromptCase(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -26,9 +28,9 @@ class PromptCase(BaseModel):
 
 def load_cases(path: Path = CORPUS) -> list[PromptCase]:
     with path.open("rb") as stream:
-        content = stream.read(1_048_577)
-    if len(content) > 1_048_576:
-        raise ValueError("Corpus exceeds one MiB")
+        content = stream.read(MAX_CORPUS_BYTES + 1)
+    if len(content) > MAX_CORPUS_BYTES:
+        raise ValueError("Corpus exceeds two MiB")
     cases = [
         PromptCase.model_validate_json(line)
         for line in content.decode("utf-8").splitlines()

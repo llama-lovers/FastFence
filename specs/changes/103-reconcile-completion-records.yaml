@@ -1,0 +1,37 @@
+id: FF-103
+title: Reconcile implemented product scope and release-matched startup pins
+status: verified
+problem: Internal records still describe delivered anonymization and OCR as unfinished and call historical test totals current; startup pins must follow the upcoming patched release.
+scope:
+  - Mark delivered stateless token and OCR milestones implemented while preserving their design history and measurement scope.
+  - Add current ACP, initialization, restored-output and pre-OCR admission evidence to the requirements matrix.
+  - Fix moved maintainer references and label older test totals as historical.
+  - Pin current English and Polish startup guides to the upcoming 1.0.1 release.
+constraints:
+  - Preserve historical artifacts and their measured values; do not invent benchmarks, scores or universal guarantees.
+  - Treat exact public 1.0.1 installation verification as a required future release gate until it actually passes.
+  - Keep the ACP minimum compatible version and historical 1.0.0 uv evidence unchanged.
+  - Preserve identical code fences between corresponding English and Polish pages.
+change_paths:
+  - maintainer/anonymization-plan.md
+  - maintainer/requirements.md
+  - specs/requirements.yaml
+  - README.md
+  - docs/index.md
+  - docs/getting-started.md
+  - docs/index.pl.md
+  - docs/getting-started.pl.md
+acceptance:
+  - Current records no longer claim implemented stateless tokens or document extraction are missing.
+  - Requirements distinguish executable integration proof from approximate detection quality and scoped timings.
+  - Startup guides launch the patched release whose documentation will deploy after public-index verification.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: English and Polish guides build with valid links and identical runnable code.
+  - command: uv run python scripts/check_specs.py
+    expected: Specification schemas and staged coverage pass after coordinated staging.
+evidence:
+  - check: Read-only completion audit and independent regression
+    result: Reconciled source, existing specs and actual reports; FF-095/FF-098 focused verification passed 58 tests. No new performance or inference benchmark was run for this documentation change.
+  - check: Documentation and specification validation
+    result: English/Polish startup code-fence parity and specification schemas passed; strict bilingual MkDocs build passed. Historical 1.0.0 package proof and ACP minimum version remain unchanged.

@@ -1,0 +1,35 @@
+id: FF-096
+title: Polish core product documentation with identical runnable code
+status: verified
+problem: Polish users need complete product guides in their language while commands and API contracts stay consistent with English.
+scope:
+  - Translate eight core product guides into suffix-based Polish pages.
+  - Preserve all executable fenced examples and configuration identifiers exactly.
+  - Correct two stale English references to checkout-based execution and separate Laya quickstart setup.
+constraints:
+  - Keep logical English Markdown link targets for the locale resolver and preserve referenced section anchors.
+  - Do not translate API identifiers, configuration values, source markers or executable code.
+  - Preserve operational limits, approximate semantic behavior and independent business-model configuration.
+change_paths:
+  - docs/index.pl.md
+  - docs/getting-started.pl.md
+  - docs/learn.pl.md
+  - docs/policies.pl.md
+  - docs/integrations.pl.md
+  - docs/architecture.pl.md
+  - docs/integration-reference.pl.md
+  - docs/settings.pl.md
+  - docs/policies.md
+  - docs/integration-reference.md
+acceptance:
+  - Polish core pages cover the English installation, controls, adapters, architecture and settings contracts.
+  - Fenced executable content matches the corresponding English page byte-for-byte.
+  - Site build resolves localized pages without broken references.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: English and Polish documentation build successfully with configured localization.
+evidence:
+  - check: Translation source preservation
+    result: Each translated page was assembled with original English code fences copied directly; identifiers and configuration defaults remain unchanged.
+  - check: Bilingual site and code preservation
+    result: All eight Polish core pages preserve every corresponding fenced English code block exactly; strict English/Polish MkDocs build passed. Added stable anchors for localized cross-page links.

@@ -1,7 +1,7 @@
 site_name: FastFence
 site_description: Fast, local policy enforcement for AI agents, tools and models.
 site_url: https://fastfence.dev/
-repo_url: https://github.com/llama-lovers/HackYeah2026-challenge-second
+repo_url: https://github.com/llama-lovers/FastFence
 repo_name: llama-lovers/FastFence
 edit_uri: edit/main/docs/
 copyright: Copyright 2026 FastFence contributors · Apache-2.0
@@ -37,6 +37,40 @@ theme:
 
 plugins:
   - search
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+        - locale: pl
+          name: Polski
+          site_description: Lokalne egzekwowanie polityk bezpieczeństwa dla agentów AI, narzędzi i modeli.
+          nav_translations:
+            Overview: Wprowadzenie
+            Get started: Pierwsze kroki
+            Installation: Instalacja
+            Learn by task: Nauka przez zadania
+            Verify your installation: Sprawdź instalację
+            Guides: Przewodniki
+            Policies and controls: Polityki i kontrole
+            Connect agents and models: Połącz agentów i modele
+            Examples: Przykłady
+            Custom Python detectors: Własne detektory w Pythonie
+            Protected model request: Chronione wywołanie modelu
+            Named Laya rule: Nazwana reguła Laya
+            MCP client: Klient MCP
+            FastMCP server: Serwer FastMCP
+            OpenAI SDK client: Klient OpenAI SDK
+            OpenAI-compatible upstream: Dostawca zgodny z OpenAI API
+            Public/private-key anonymization: Anonimizacja z kluczem publicznym i prywatnym
+            Reference: Dokumentacja techniczna
+            Integration contracts: Kontrakty integracji
+            HTTP API from source: HTTP API
+            Runtime settings: Ustawienia
+            Architecture: Architektura
+            Changelog: Dziennik zmian
 
 hooks:
   - scripts/docs_reference.py
@@ -44,12 +78,20 @@ hooks:
 markdown_extensions:
   - admonition
   - attr_list
-  - fenced_code
   - tables
   - toc:
       permalink: true
   - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: language-mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_css:
   - stylesheets/branding.css
@@ -82,3 +124,10 @@ nav:
       - HTTP API from source: reference/http-api.md
       - Runtime settings: settings.md
       - Architecture: architecture.md
+  - Changelog: https://github.com/llama-lovers/FastFence/releases
+
+extra:
+  version:
+    provider: mike
+    default: latest
+    alias: true

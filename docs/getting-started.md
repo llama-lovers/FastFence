@@ -2,29 +2,38 @@
 
 ## Install FastFence
 
-Use macOS or Linux and **Python 3.12**. Create a directory for your local installation; configuration and private state will live here. You do not need the FastFence source repository.
+Use macOS or Linux with [uv](https://docs.astral.sh/uv/getting-started/installation/). `uv tool run` downloads FastFence into its isolated tool cache; you do not need a source checkout or a manually activated virtual environment. The explicit Python selection matches FastFence's Python 3.12 requirement.
+
+## Initialize and start with uv
+
+Install [Ollama](https://ollama.com/) and start its service before initialization (`ollama serve` in another terminal, or the running desktop app). Keep Git and `sh` available for the pinned Laya engine.
 
 ```sh
 mkdir fastfence-local
 cd fastfence-local
+uv tool run --python 3.12 fastfence@1.0.1 init
+uv tool run --python 3.12 fastfence@1.0.1 doctor
+uv tool run --python 3.12 fastfence@1.0.1 serve
+```
+
+Keep using this directory: `config/`, credentials and keys belong here, not in uv's tool cache. `uvx --python 3.12 fastfence@1.0.1` is the equivalent shorter prefix. The version pin makes repeated commands use the same release.
+
+### Alternative: pip and a virtual environment
+
+If you prefer the `fastfence` command directly, create a Python 3.12 environment in your working directory:
+
+```sh
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install fastfence uv
-```
-
-## Initialize and start
-
-Install [Ollama](https://ollama.com/) and start its service before initialization (`ollama serve` in another terminal, or the running desktop app). Keep Git and `sh` available so initialization can fetch the pinned Laya engine.
-
-```sh
-fastfence init --anonymization
+fastfence init
 fastfence doctor
 fastfence serve
 ```
 
 Open **http://127.0.0.1:8000**. In **Connection**, enter the `local-agent` and `local-admin` tokens from your private `state/credentials.json`. Agent credentials send protected requests; management credentials review and change policies. Tokens stay in dashboard page memory.
 
-Initialization creates `config/`, private credentials and the optional anonymization issuer keyring in your working directory. It also installs the pinned Laya engine and checks Ollama for the active policy's assessment model, downloading that model only when missing. Repeating `init --anonymization` preserves valid existing credentials, policies and keys. Keep this directory when upgrading. Older installations with `state/demo-tokens.json` retain their `security-admin` and `analyst-blue` identities.
+Initialization creates `config/`, private credentials and the anonymization issuer keyring in your working directory. It also installs the pinned Laya engine and checks Ollama for the active policy's assessment model, downloading that model only when missing. Repeating `init` preserves valid existing credentials, policies and keys. Keep this directory when upgrading. Older installations with `state/demo-tokens.json` retain their `security-admin` and `analyst-blue` identities.
 
 There are three separate roles:
 
@@ -34,15 +43,14 @@ There are three separate roles:
 
 Assessment and completion are separate calls even when they use the same model. An agent that only calls tools or ACP peers does not need a separate completion model. Initialization preserves an existing model choice and does not download an extra business model. Missing assessment fails closed; precise literal rules run locally before it.
 
-For offline configuration provisioning, run `fastfence init --config-only --anonymization`. This writes configuration and private state without installing Laya or contacting Ollama. Run normal `init` when the prerequisites are available. `setup-laya` remains an advanced engine installation/repair command; it is not a separate quickstart step.
+For offline configuration provisioning, run `uv tool run --python 3.12 fastfence@1.0.1 init --config-only` (or `fastfence init --config-only` in the pip environment). This writes configuration and private state without installing Laya or contacting Ollama. Run normal `init` when the prerequisites are available. `setup-laya` remains an advanced engine installation/repair command; it is not a separate quickstart step.
 
 ## Send a protected request
 
-In another terminal, activate the same virtual environment from `fastfence-local`. This complete client reads your private agent credential without placing it in shell history:
+In another terminal, change to `fastfence-local`. This complete client uses an isolated Python environment containing HTTPX and reads your private credential without placing it in shell history:
 
 ```sh
-source .venv/bin/activate
-python - <<'PY'
+uv run --no-project --python 3.12 --with httpx python - <<'PY'
 import json
 from pathlib import Path
 import httpx
@@ -67,11 +75,13 @@ Download the [complete examples archive](downloads/fastfence-examples.zip) and e
 
 ```sh
 curl -fL https://fastfence.dev/downloads/fastfence-examples.zip -o fastfence-examples.zip
-python -m zipfile -e fastfence-examples.zip examples
-python examples/protected_request.py --prompt 'Hello'
-python examples/mcp_client.py --prompt 'Hello'
-python examples/semantic_policy.py
+uv run --no-project --python 3.12 python -m zipfile -e fastfence-examples.zip examples
+uv run --no-project --python 3.12 --with fastfence==1.0.1 python examples/protected_request.py --prompt 'Hello'
+uv run --no-project --python 3.12 --with fastfence==1.0.1 python examples/mcp_client.py --prompt 'Hello'
+uv run --no-project --python 3.12 --with fastfence==1.0.1 python examples/semantic_policy.py
 ```
+
+For other example pages, replace their `python` prefix with `uv run --no-project --python 3.12 --with fastfence==1.0.1 python` when using the tool-based installation. Examples needing additional SDKs list those separately. Pip users can run examples with their activated environment.
 
 The last command previews a named natural-language rule through your actual Laya assessor and displays a diff. It activates nothing unless you rerun with `--activate` after review. Each [example page](examples/protected-request.md) also includes the full source and a direct file download.
 
@@ -82,8 +92,8 @@ For semantic intent, follow the [named Laya rule example](examples/semantic-poli
 Alternatively, **Describe a fast rule** asks Laya to draft this bounded deterministic configuration from your instruction. Inspect the generated operator, value and scope before activation; its local matcher differs from runtime semantic assessment.
 
 ```sh
-python examples/mcp_client.py --prompt 'Cat'
-python examples/mcp_client.py --prompt 'Hi'
+uv run --no-project --python 3.12 --with fastfence==1.0.1 python examples/mcp_client.py --prompt 'Cat'
+uv run --no-project --python 3.12 --with fastfence==1.0.1 python examples/mcp_client.py --prompt 'Hi'
 ```
 
 `Cat` must be blocked before the protected model executes. `Hi` passes that rule and can reach Qwen if remaining policies permit it. Scope the rule to both directions if generated words should also be checked. Output denial cannot undo an upstream operation that already ran.
@@ -93,15 +103,24 @@ python examples/mcp_client.py --prompt 'Hi'
 Run the packaged installer:
 
 ```sh
-fastfence setup-ocr
-fastfence doctor --full
+uv tool run --python 3.12 fastfence@1.0.1 setup-ocr
+uv tool run --python 3.12 fastfence@1.0.1 doctor --full
 ```
 
 Continue with [manual verification](manual-testing.md). OCR supports images and multipage PDFs and returns policy-checked Markdown. It does not edit document pixels. Restart after installing optional components, then run `fastfence doctor --full`.
 
 ## Update FastFence
 
-Stop the gateway, activate its virtual environment and run:
+Stop the gateway. For the uv tool installation, explicitly select the newest published release:
+
+```sh
+uv tool run --python 3.12 fastfence@latest doctor
+uv tool run --python 3.12 fastfence@latest serve
+```
+
+A plain unversioned tool command may reuse its cached version; `@latest` refreshes it. A pinned `@1.0.1` command remains pinned. [uv documents these cache semantics](https://docs.astral.sh/uv/concepts/tools/#tool-versions). A cached exact-version command can run with uv’s `--offline` option, but that only disables uv downloads: FastFence still needs its configured model service and normal initialization can download runtime components.
+
+For pip, activate the existing virtual environment and run:
 
 ```sh
 python -m pip install --upgrade fastfence

@@ -9,8 +9,8 @@ No conversation database or plaintext mapping is created. Token verification rem
 After [installing FastFence](../getting-started.md) and extracting the [examples archive](../downloads/fastfence-examples.zip) into `examples/`, run from your installation directory:
 
 ```sh
-fastfence init --anonymization
-python examples/asymmetric_keys.py
+uv tool run --python 3.12 fastfence@1.0.1 init --anonymization
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/asymmetric_keys.py
 ```
 
 The first command provisions the existing private issuer keyring if absent. The second creates `state/private/anonymization-rsa/public.pem` and `private.pem` with mode `0600`. It refuses to overwrite either file. Re-running it is not a key rotation command.
@@ -26,8 +26,8 @@ Set both paths in the shell that starts FastFence, or add these two settings to 
 ```sh
 export FASTFENCE_ANONYMIZATION_PUBLIC_KEY_FILE=state/private/anonymization-rsa/public.pem
 export FASTFENCE_ANONYMIZATION_PRIVATE_KEY_FILE=state/private/anonymization-rsa/private.pem
-fastfence doctor
-fastfence serve
+uv tool run --python 3.12 fastfence@1.0.1 doctor
+uv tool run --python 3.12 fastfence@1.0.1 serve
 ```
 
 Relative RSA paths resolve against `FASTFENCE_ROOT` (the working directory by default). Both PEM files must describe the same RSA-3072 key pair with public exponent 65537. The existing `state/anonymization-keys.json` issuer keyring remains required: public-key encryption alone does not authenticate who issued a token or produce the stable keyed aliases.

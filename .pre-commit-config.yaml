@@ -1,4 +1,4 @@
-exclude: ^(HackYeah2026-challenge(-second)?/|dist/|build/)
+exclude: ^(dist/|build/)
 default_install_hook_types: [pre-commit, post-checkout, post-merge, post-rewrite]
 default_stages: [pre-commit]
 
@@ -9,6 +9,12 @@ repos:
       - id: trailing-whitespace
       - id: check-ast
       - id: check-yaml
+        exclude: ^mkdocs\.yml$
+      - id: check-yaml
+        alias: check-mkdocs-yaml
+        name: Check MkDocs YAML with Python extension tags
+        files: ^mkdocs\.yml$
+        args: [--unsafe]
       - id: check-case-conflict
       - id: check-illegal-windows-names
       - id: check-merge-conflict

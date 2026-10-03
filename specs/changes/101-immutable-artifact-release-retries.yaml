@@ -1,0 +1,28 @@
+id: FF-101
+title: Resume partial publication while verifying immutable public distributions
+status: implemented
+problem: A retry after a successful or partial PyPI upload failed on existing immutable filenames before verification and documentation could resume.
+scope:
+  - Allow the pinned PyPA publishing action to skip existing distribution filenames during retries.
+  - Require the public source archive as well as the wheel to match retained verified build bytes before installation and downstream release steps.
+  - Bound and validate source archive metadata, download size, SHA256 and propagation retries using the same transport checks as wheel verification.
+constraints:
+  - Existing PyPI files are never overwritten.
+  - Skipping upload is not evidence of integrity; public artifact verification remains mandatory.
+  - Missing, yanked, unsafe, corrupt or mismatching source archives stop release verification before package execution.
+change_paths:
+  - .github/workflows/publish.yml
+  - scripts/smoke_pypi.py
+  - tests/unit/test_pypi_verification.py
+acceptance:
+  - Retries can continue when either or both immutable distribution filenames already exist.
+  - The workflow passes both expected wheel and expected source archive paths to public verification.
+  - Exact public filenames, types, trusted HTTPS hosts, sizes and hashes are checked before installation.
+  - Source archive propagation waits are bounded and failures do not invoke the installed-package smoke test.
+  - Verification evidence reports the source archive hash and whether it matches the retained build.
+validation:
+  - command: uv run pytest tests/unit/test_pypi_verification.py --no-cov -q
+    expected: Existing wheel and new source-distribution integrity and retry checks pass.
+evidence:
+  - check: Public artifact verification regression suite
+    result: All 37 tests passed, including repeat verification of existing files, partial source propagation, absent source, wrong local source filename or bytes, yanked or unsafe metadata, size and hash corruption, and bounded retry exhaustion. Ruff checks passed.

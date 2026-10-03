@@ -6,7 +6,11 @@ from collections import Counter
 import pytest
 from pydantic import ValidationError
 
-from evaluation.prompt_corpus import classification_summary, load_cases
+from evaluation.prompt_corpus import (
+    MAX_CORPUS_BYTES,
+    classification_summary,
+    load_cases,
+)
 from fastfence.modules.control.domain.controls import PATTERNS, privacy_filter
 from fastfence.modules.control.domain.models import ModelCall
 from fastfence.modules.control.domain.text_rules import (
@@ -138,7 +142,7 @@ def test_ingestion_rejects_corrupt_or_conflicting_data(tmp_path, mode):
     if mode == "empty":
         content = "\n"
     elif mode == "oversized":
-        content = " " * 1_048_577
+        content = " " * (MAX_CORPUS_BYTES + 1)
     path.write_text(content)
     with pytest.raises((ValueError, ValidationError)):
         load_cases(path)

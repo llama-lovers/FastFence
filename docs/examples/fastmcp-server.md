@@ -9,7 +9,7 @@ The private FastMCP backend is in-process and has no unprotected listening port.
 After [installing the package](../getting-started.md), extract the [examples archive](../downloads/fastfence-examples.zip) into `examples/` in your installation directory. Keep `policy.yaml` and `signatures.json` next to `fastmcp_server.py`. Then run:
 
 ```sh
-python examples/fastmcp_server.py
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/fastmcp_server.py
 ```
 
 The application listens on `http://127.0.0.1:8010`. It initializes a separate policy and credentials in `state/examples/fastmcp-integration/`; it does not change the main installation. Open this console and connect the `local-agent` and `local-admin` credentials from that directory's `state/credentials.json`.
@@ -28,10 +28,10 @@ This standalone example deliberately uses deterministic checks so it runs withou
 
 ## Enable Laya in this example
 
-Stop the example server. From your main installation directory, with Ollama running and the FastFence virtual environment active, prepare the runtime:
+Stop the example server. From your main installation directory, with Ollama running, prepare the runtime:
 
 ```sh
-fastfence init --anonymization
+uv tool run --python 3.12 fastfence@1.0.1 init --anonymization
 export FASTFENCE_AUTHORING_ROOT="$PWD"
 ```
 
@@ -53,7 +53,7 @@ Use the assessment model prepared by your main installation if you changed it fr
 Restart from the same shell:
 
 ```sh
-python examples/fastmcp_server.py
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/fastmcp_server.py
 ```
 
 Send `hello` again. For an allowed response, both `semantic_input_status` and `semantic_output_status` should be `passed`. Missing or failed assessment blocks the request. Input denied by an earlier local rule never reaches the assessor or tool.

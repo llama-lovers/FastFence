@@ -14,7 +14,8 @@ def test_stage_helpers_is_complete_and_repeatable(tmp_path):
         laya_install.LAYA_FILES
     )
     assert (
-        b"b3b998c03dc44076675305581eb4640b9bf6ff8f" in script.read_bytes()  # pragma: allowlist secret - public upstream commit
+        b"b3b998c03dc44076675305581eb4640b9bf6ff8f"  # pragma: allowlist secret - public upstream commit
+        in script.read_bytes()
     )
     before = {p.name: p.read_bytes() for p in script.parent.iterdir()}
     laya_install.stage_laya(tmp_path)

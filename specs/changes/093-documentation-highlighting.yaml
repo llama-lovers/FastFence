@@ -1,0 +1,31 @@
+id: FF-093
+title: Highlight public documentation code and preserve diagram rendering
+status: implemented
+problem: Fenced and embedded executable examples rendered without language token highlighting.
+scope:
+  - Enable Pygments highlighting and SuperFences for public Markdown code blocks.
+  - Keep copy buttons enabled and preserve multiline executable source.
+  - Preserve Mermaid diagrams through their explicit custom fence and loader selector.
+constraints:
+  - No change to documentation version selection or release workflows.
+change_paths:
+  - .pre-commit-config.yaml
+  - mkdocs.yml
+  - docs/javascripts/mermaid.mjs
+  - tests/unit/test_documentation_highlighting.py
+acceptance:
+  - Python, Bash, YAML and JSON fences render language-specific colored token markup.
+  - Embedded example source remains exact and copy buttons remain configured.
+  - Mermaid source remains diagram input rather than highlighted text.
+validation:
+  - command: uv run pytest tests/unit/test_documentation_highlighting.py -q
+    expected: Highlighting, source preservation, copy configuration and diagram regression tests pass.
+  - command: uv run mkdocs build --strict
+    expected: Public documentation builds without errors.
+evidence:
+  - check: Rendered Markdown code regression suite
+    result: Six tests passed for Python, Bash, YAML, JSON, embedded executable source preservation, copy-button configuration and Mermaid loader compatibility.
+  - check: Bilingual strict build
+    result: The documentation agent confirmed the complete English and Polish strict build passes. Browser verification measured seven distinct code colors and copied an embedded Python example through the actual Material copy button; the clipboard contained the complete def main() and httpx source. Desktop and 390px mobile screenshots confirm readable colored code and internal scrolling without page overflow.
+  - check: MkDocs extension-tag validation
+    result: Dedicated YAML syntax validation accepts MkDocs SuperFences Python extension tags; all other YAML retains safe-load validation. Strict bilingual MkDocs builds validate the actual extension configuration.

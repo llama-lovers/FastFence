@@ -1,0 +1,33 @@
+id: FF-099
+title: Automatically release version tags and generate their changelog
+status: implemented
+problem: Publishing required manual workflow dispatch and did not create a release changelog.
+scope:
+  - Trigger the verified package pipeline on pushed version tags.
+  - Publish a GitHub release only after public-index package tests and versioned documentation succeed.
+  - Generate readable change notes from the exact tag range and attach the verified distributions.
+constraints:
+  - Require stable version syntax, matching package version and main ancestry.
+  - Preserve manual dispatch for recovery and existing release notes when rerun.
+  - Treat commit subjects as untrusted text and never interpolate them into shell commands.
+  - Failed quality or public-package checks must prevent the final release announcement.
+change_paths:
+  - .github/workflows/publish.yml
+  - scripts/release_notes.py
+  - tests/unit/test_versioned_docs.py
+  - mkdocs.yml
+  - maintainer/publishing.md
+  - maintainer/testing.md
+acceptance:
+  - Pushing a valid version tag is sufficient to start publication.
+  - Generated notes list only commits after the preceding stable ancestor release.
+  - Release notes contain exact package, versioned documentation and comparison links.
+  - Commit titles cannot inject HTML or Markdown links into the generated changelog.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_versioned_docs.py
+    expected: Changelog range, sanitization and exact-tag behavior pass.
+  - command: Push v1.0.1 after release gates pass
+    expected: Publication, public package checks, versioned Pages and GitHub release complete automatically.
+evidence:
+  - check: Changelog generation
+    result: Real temporary Git history tests passed exact preceding-tag range, contributor-title escaping, versioned links and invalid tag rejection. Live tag-triggered publication remains to be exercised.

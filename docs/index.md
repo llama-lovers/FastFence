@@ -12,18 +12,17 @@ FastFence checks AI requests and responses against your access, privacy, text an
 
 ## Start locally
 
-Use Python 3.12 and a running [Ollama](https://ollama.com/) service. Install the package into a virtual environment in your own working directory:
+Use [uv](https://docs.astral.sh/uv/getting-started/installation/) and a running [Ollama](https://ollama.com/) service. Run the published package with Python 3.12 in your own working directory:
 
 ```sh
 mkdir fastfence-local
 cd fastfence-local
-python3.12 -m venv .venv
-source .venv/bin/activate
-python -m pip install fastfence uv
-fastfence init --anonymization
-fastfence doctor
-fastfence serve
+uv tool run --python 3.12 fastfence@1.0.1 init
+uv tool run --python 3.12 fastfence@1.0.1 doctor
+uv tool run --python 3.12 fastfence@1.0.1 serve
 ```
+
+uv keeps the package in an isolated cache; your configuration stays in `fastfence-local`. The [installation guide](getting-started.md) also covers pip, example scripts and version updates.
 
 `init` prepares private configuration, installs Laya and downloads the configured assessor if needed. The fresh default uses Qwen3:4b for both assessment and completion in separate calls; no second model is required. Open **http://127.0.0.1:8000** and connect with your generated local credentials. The [installation guide](getting-started.md) covers prerequisites and private configuration. No FastFence source checkout is required.
 

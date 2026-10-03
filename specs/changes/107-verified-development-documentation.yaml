@@ -1,0 +1,39 @@
+id: FF-107
+title: Publish clearly labelled development documentation after successful main CI
+status: verified
+problem: Readers cannot preview documentation for verified main changes separately from published package documentation.
+scope:
+  - Add a dev version built from the exact successful same-repository main push commit.
+  - Retain latest and all stable history, root downloads and compatibility redirects.
+  - Label unreleased pages and generated references in both languages with exact commit links.
+constraints:
+  - Failed, cancelled and pull-request verification runs cannot publish development documentation.
+  - Release and development publication share one non-cancelling queued concurrency group through deployment.
+  - Never relax the exact release-tag validation used by stable publication.
+  - Refuse stale or divergent dev revisions rather than replacing newer verified development documentation.
+  - Do not claim stable PyPI packages contain unreleased features.
+  - Bootstrap missing history only from the previously published and verified v1.0.0 tag.
+change_paths:
+  - .github/workflows/docs.yml
+  - .github/workflows/docs-dev.yml
+  - scripts/versioned_docs.py
+  - scripts/docs_reference.py
+  - tests/unit/test_versioned_docs.py
+  - maintainer/publishing.md
+acceptance:
+  - A successful main push verification can publish dev at its head SHA with no mutable checkout reference.
+  - Dev updates and replayed older stable releases preserve the highest stable latest alias and root artifacts.
+  - Dev source references use exact SHA while stable references remain exact release tags.
+  - Authored pages, generated API reference and LLM corpora identify dev as unreleased in English and Polish.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_versioned_docs.py tests/unit/test_documentation_downloads.py
+    expected: Real mike multi-version builds and generated documentation contracts pass.
+  - command: MIKE_DOCS_VERSION=dev FASTFENCE_DOCS_SOURCE_SHA=$(git rev-parse HEAD) uv run --locked mkdocs build --strict
+    expected: Both locales build with unreleased warnings and exact source links.
+evidence:
+  - check: Actual mike fixture history
+    result: Twelve documentation tests passed including actual mike stable 1.0.0 and 1.0.1, two development commits, stale dev rejection, replay of old stable, preserved latest/root downloads and first-dev bootstrap from the known verified v1.0.0 tag.
+  - check: Workflow safety review
+    result: Same-repository successful main push gate, exact SHA checkout, common whole-workflow deployment serialization and max pending queue reviewed independently. No hosted deployment is claimed by local tests.
+  - check: Strict complete bilingual development build
+    result: Passed; actual English and Polish landing pages, generated HTTP reference and LLM corpora contain unreleased warnings and exact commit links. Artifact retained privately at state/private/dev-docs-review.

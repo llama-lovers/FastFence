@@ -21,14 +21,14 @@ ACP or A2A conformance.
 Install FastFence **1.0.0 or later** using [Getting started](../getting-started.md),
 then extract the [complete examples archive](../downloads/fastfence-examples.zip)
 into `examples/`. Run all commands from the installation directory. Keep the
-gateway in your FastFence Python 3.12 environment. Create a separate environment
+gateway in its own `uv run` FastFence environment. Create a separate environment
 for the archived SDK peer and client; its Uvicorn pin does not change your gateway.
 The SDK also imports `requests` without declaring that dependency, so install it
 explicitly in this separate environment:
 
 ```sh
-python -m venv .acp-venv
-.acp-venv/bin/python -m pip install 'acp-sdk==1.0.3' 'uvicorn==0.35.0' 'requests==2.34.2'
+uv venv --python 3.12 .acp-venv
+uv pip install --python .acp-venv/bin/python 'acp-sdk==1.0.3' 'uvicorn==0.35.0' 'requests==2.34.2'
 .acp-venv/bin/python examples/acp_server.py
 ```
 
@@ -37,10 +37,10 @@ It generates a separate private backend credential in
 `state/examples/acp-upstream-token.txt`. All backend endpoints require that
 credential. The file's contents are never printed.
 
-In a second terminal, activate your FastFence environment:
+In a second terminal, run the gateway with its own FastFence dependencies:
 
 ```sh
-python examples/acp_gateway.py
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/acp_gateway.py
 ```
 
 This starts an isolated FastFence instance on port 8030 and registers the

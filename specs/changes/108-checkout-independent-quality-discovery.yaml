@@ -1,0 +1,36 @@
+id: FF-108
+title: Make quality checks independent of the checkout directory name
+status: verified
+problem: Obsolete Ruff and scanner exclusions matched the canonical local checkout name, allowing local formatting hooks to skip files that failed CI under the renamed repository checkout.
+scope:
+  - Remove obsolete repository-name exclusions from Ruff, pyscn and the pre-commit path filter.
+  - Apply Ruff formatting to the three files identified by actual CI.
+  - Keep the reviewed public Laya revision allowlist comment on its literal line.
+constraints:
+  - No runtime logic changes or weakened lint rules.
+  - Preserve generated-environment and build-artifact exclusions.
+  - Public revision allowlisting remains specific to the known upstream commit.
+change_paths:
+  - pyproject.toml
+  - .pre-commit-config.yaml
+  - src/fastfence/shared/settings/app_settings.py
+  - tests/unit/test_acp_tools.py
+  - tests/unit/test_packaged_laya.py
+acceptance:
+  - Recursive Ruff discovery includes every tracked Python file in the canonical old-named checkout.
+  - Explicit all-project lint and format checks agree with the pre-commit hooks.
+  - Complexity, dead-code and dependency checks retain their existing rules and pass.
+validation:
+  - command: uv run pre-commit run ruff-check --all-files
+    expected: All tracked Python files pass Ruff lint.
+  - command: uv run pre-commit run ruff-format --all-files
+    expected: Formatting passes without rewriting files.
+  - command: uv run pyscn check --select complexity,deadcode,deps src
+    expected: Existing scanner gates pass.
+evidence:
+  - check: Explicit and recursive Python discovery
+    result: Explicit274-file project scan passed lint and formatted exactly the three CI-reported files. Recursive Ruff discovery includes all267 tracked Python files under the historically excluded canonical checkout directory.
+  - command: Ruff pre-commit lint and format hooks, pyscn checks and detect-secrets-hook on the public revision fixture
+    result: All passed; the public upstream SHA allowlist stays on the literal line after formatting. No runtime logic changed.
+  - command: uv run pytest --no-cov tests/unit/test_acp_tools.py tests/unit/test_packaged_laya.py tests/unit/test_cli_startup.py -q
+    result: 73 focused regressions passed; specification gate and whitespace checks passed.

@@ -226,3 +226,138 @@ def test_package_initialization_preserves_offline_and_legacy_modes(
     assert len(calls) == (2 if full and not supports_runtime_init else 1)
     if len(calls) == 2:
         assert calls[1] == [str(executable), "setup-laya"]
+
+
+SDIST = b"synthetic-source-distribution-for-integrity-check"
+
+
+def source_metadata():
+    value = metadata()
+    value["urls"].append(
+        {
+            "filename": f"fastfence-{VERSION}.tar.gz",
+            "url": f"https://files.pythonhosted.org/packages/fixture/fastfence-{VERSION}.tar.gz",
+            "packagetype": "sdist",
+            "yanked": False,
+            "digests": {"sha256": hashlib.sha256(SDIST).hexdigest()},
+            "size": len(SDIST),
+        }
+    )
+    return value
+
+
+def source_fixture(monkeypatch, tmp_path, value=None):
+    public = source_metadata() if value is None else value
+    monkeypatch.setattr(
+        smoke_pypi,
+        "read_public",
+        lambda url, maximum: json.dumps(public).encode()
+        if url.endswith("/json")
+        else (SDIST if url.endswith(".tar.gz") else CONTENT),
+    )
+    wheel = tmp_path / f"fastfence-{VERSION}-py3-none-any.whl"
+    source = tmp_path / f"fastfence-{VERSION}.tar.gz"
+    wheel.write_bytes(CONTENT)
+    source.write_bytes(SDIST)
+    calls = []
+    monkeypatch.setattr(smoke_pypi, "smoke", lambda *a, **kw: calls.append(kw))
+    return wheel, source, calls
+
+
+def test_retry_verifies_existing_wheel_and_source_against_both_build_artifacts(
+    monkeypatch, tmp_path
+):
+    wheel, source, calls = source_fixture(monkeypatch, tmp_path)
+    report = tmp_path / "report.json"
+    for _ in range(2):
+        smoke_pypi.verify(
+            VERSION, expected_wheel=wheel, expected_sdist=source, output=report
+        )
+    result = json.loads(report.read_text())
+    assert len(calls) == 2
+    assert result["matches_verified_build"] and result["matches_verified_sdist"]
+    assert result["sdist_sha256"] == hashlib.sha256(SDIST).hexdigest()
+
+
+@pytest.mark.parametrize("mismatch", ["bytes", "filename", "missing_file"])
+def test_wrong_retained_source_never_installs(monkeypatch, tmp_path, mismatch):
+    wheel, source, calls = source_fixture(monkeypatch, tmp_path)
+    if mismatch == "bytes":
+        source.write_bytes(b"different immutable source archive")
+    elif mismatch == "filename":
+        wrong = tmp_path / "another-source.tar.gz"
+        source.rename(wrong)
+        source = wrong
+    else:
+        source.unlink()
+    with pytest.raises(
+        ValueError if mismatch != "missing_file" else FileNotFoundError
+    ):
+        smoke_pypi.verify(VERSION, expected_wheel=wheel, expected_sdist=source)
+    assert not calls
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda entry: entry.update(yanked=True),
+        lambda entry: entry.update(packagetype="bdist_wheel"),
+        lambda entry: entry.update(url="https://attacker.test/archive.tar.gz"),
+        lambda entry: entry.update(size=100_000_000),
+        lambda entry: entry.update(size=len(SDIST) + 1),
+        lambda entry: entry["digests"].update(sha256="a" * 64),
+    ],
+)
+def test_untrusted_or_corrupt_public_source_never_installs(
+    monkeypatch, tmp_path, mutation
+):
+    value = source_metadata()
+    mutation(value["urls"][1])
+    wheel, source, calls = source_fixture(monkeypatch, tmp_path, value)
+    with pytest.raises(ValueError):
+        smoke_pypi.verify(VERSION, expected_wheel=wheel, expected_sdist=source)
+    assert not calls
+
+
+def test_missing_public_source_fails_after_bounded_propagation_wait(
+    monkeypatch, tmp_path
+):
+    wheel, source, calls = source_fixture(monkeypatch, tmp_path, metadata())
+    waits = []
+    monkeypatch.setattr(smoke_pypi.time, "sleep", waits.append)
+    with pytest.raises(RuntimeError, match="retry limit"):
+        smoke_pypi.verify(
+            VERSION,
+            expected_wheel=wheel,
+            expected_sdist=source,
+            attempts=3,
+            delay=1,
+        )
+    assert waits == [1, 1] and not calls
+
+
+def test_partial_upload_propagation_waits_for_source_before_install(
+    monkeypatch, tmp_path
+):
+    wheel, source, calls = source_fixture(monkeypatch, tmp_path)
+    queries = []
+    waits = []
+
+    def read(url, maximum):
+        if url.endswith("/json"):
+            queries.append(url)
+            return json.dumps(
+                metadata() if len(queries) <= 2 else source_metadata()
+            ).encode()
+        return SDIST if url.endswith(".tar.gz") else CONTENT
+
+    monkeypatch.setattr(smoke_pypi, "read_public", read)
+    monkeypatch.setattr(smoke_pypi.time, "sleep", waits.append)
+    smoke_pypi.verify(
+        VERSION,
+        expected_wheel=wheel,
+        expected_sdist=source,
+        attempts=3,
+        delay=1,
+    )
+    assert len(queries) == 3 and waits == [1] and len(calls) == 1

@@ -45,7 +45,7 @@ Local configuration lives in YAML/JSON files. A configured trusted HTTP bundle i
 
 `POST /api/admin/semantic/preview` assesses a candidate named rule against a sample using actual Laya. It requires a management identity, includes the current applicable semantic rules and does not activate the candidate. This is separate from `/api/admin/policies/preview`, which tests a generated configuration proposal against local controls.
 
-With the gateway and Laya running, set `FASTFENCE_MANAGEMENT_TOKEN` to your own management credential and run from the checkout:
+With the gateway and Laya running, set `FASTFENCE_MANAGEMENT_TOKEN` to your own management credential and run from your installation directory:
 
 ```python
 import json

@@ -1,0 +1,39 @@
+{
+  "source_filename": "prompty_treningowe (1).json",
+  "source_sha256": "545d02c705194f18802a60c64c586666e8ade5bcc18949058755d56a52ece8a7",
+  "normalized_sha256": "c395b9b7f09f964b62c324fee04f9bae764e589648c6d8f75a335cb05d3be425",
+  "normalized_bytes": 1270152,
+  "samples": 1312,
+  "original_overlap": 400,
+  "additional_samples": 912,
+  "duplicate_ids": 0,
+  "duplicate_texts": 0,
+  "conflicting_labels": 0,
+  "generator": "qwen",
+  "labeler": "qwen",
+  "label_language_counts": {
+    "good_prompt": {
+      "en": 328,
+      "pl": 328
+    },
+    "bad_prompt": {
+      "en": 328,
+      "pl": 328
+    }
+  },
+  "label_length_bucket_counts": {
+    "good_prompt": {
+      "short": 164,
+      "very_long": 164,
+      "medium": 164,
+      "long": 164
+    },
+    "bad_prompt": {
+      "very_long": 164,
+      "long": 164,
+      "medium": 164,
+      "short": 164
+    }
+  },
+  "scope": "User-supplied synthetic development labels, not independently adjudicated ground truth. Original400 overlaps exactly; prior measured inference applies only to that separate corpus. No expanded live inference is claimed."
+}

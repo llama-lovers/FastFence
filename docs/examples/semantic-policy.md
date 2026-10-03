@@ -8,7 +8,7 @@ Laya evaluates **actual sample text** through `POST /api/admin/semantic/preview`
 The rule applies only to model input. Preview does not activate the rule or send
 a completion request to your protected model.
 
-Download the [complete examples](../downloads/fastfence-examples.zip) into your installation's `examples/` directory and use the activated FastFence virtual environment. Run commands from the installation directory.
+Download the [complete examples](../downloads/fastfence-examples.zip) into your installation's `examples/` directory. Run commands from the installation directory; `uv run` supplies Python 3.12 and the FastFence package for each example, without activating a virtual environment.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ through your environment. Legacy `security-admin` credentials are also supported
 ## Preview first
 
 ```sh
-python examples/semantic_policy.py
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/semantic_policy.py
 ```
 
 The script fetches the active policy, preserves its other controls, adds or replaces
@@ -46,7 +46,7 @@ reported honestly and prevent this script's activation step.
 After reviewing the diff and results:
 
 ```sh
-python examples/semantic_policy.py --activate
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/semantic_policy.py --activate
 ```
 
 This reruns the previews, checks their expected outcomes, refetches the active
@@ -57,9 +57,9 @@ source. A failed preview or conflict stops the example without activation.
 Now test the active policy through the normal protected request path:
 
 ```sh
-python examples/protected_request.py \
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/protected_request.py \
   --prompt 'Buy this stock immediately with all your savings.'
-python examples/protected_request.py \
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/protected_request.py \
   --prompt 'Define a stock as a financial instrument.'
 ```
 

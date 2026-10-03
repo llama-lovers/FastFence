@@ -1,12 +1,12 @@
 name: Publish FastFence to PyPI
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing version tag on main, for example v0.1.0
+        description: Existing version tag on main, for example v1.0.1
         required: true
         type: string
 
@@ -15,6 +15,7 @@ permissions:
 
 concurrency:
   group: pypi-publication
+  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -22,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - name: Check out the release tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.tag || github.event.release.tag_name }}
+          ref: ${{ inputs.tag || github.ref_name }}
           persist-credentials: false
           fetch-depth: 0
       - name: Install uv and Python 3.12
@@ -89,6 +90,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           attestations: true
+          skip-existing: true
 
   verify-pypi:
     needs: [build, publish]
@@ -97,12 +99,12 @@ jobs:
     permissions:
       contents: read
     env:
-      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - name: Check out verification code from the exact release tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.tag || github.event.release.tag_name }}
+          ref: ${{ inputs.tag || github.ref_name }}
           persist-credentials: false
       - name: Install uv and Python 3.12
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
@@ -119,9 +121,12 @@ jobs:
           RELEASE_VERSION="${RELEASE_TAG#v}"
           uv run --no-project python scripts/smoke_pypi.py "$RELEASE_VERSION" \
             --expected-wheel "verified-dist/fastfence-${RELEASE_VERSION}-py3-none-any.whl" \
+            --expected-sdist "verified-dist/fastfence-${RELEASE_VERSION}.tar.gz" \
             --output pypi-verification.json
       - name: Exercise official ACP peers against the public package
         run: uv run --no-project python scripts/smoke_acp_package.py --pypi-version "${RELEASE_TAG#v}" --output acp-pypi-verification.json
+      - name: Exercise exact public package through uv tool run
+        run: uv run --no-project python scripts/smoke_uv_tool.py --version "${RELEASE_TAG#v}" --output uv-tool-verification.json
       - name: Retain public-index verification evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -129,15 +134,50 @@ jobs:
           path: |
             pypi-verification.json
             acp-pypi-verification.json
+            uv-tool-verification.json
           if-no-files-found: error
           retention-days: 14
 
   documentation:
     needs: verify-pypi
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     uses: ./.github/workflows/docs.yml
     with:
-      release_tag: ${{ inputs.tag || github.event.release.tag_name }}
+      release_tag: ${{ inputs.tag || github.ref_name }}
+
+  release-notes:
+    needs: [verify-pypi, documentation]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out exact release history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Download verified release artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: python-distributions
+          path: dist/
+      - name: Publish the GitHub release and automatic changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' > "$RUNNER_TEMP/release-is-draft.txt"; then
+            gh release upload "$RELEASE_TAG" dist/* --clobber
+            if [ "$(cat "$RUNNER_TEMP/release-is-draft.txt")" = true ]; then
+              gh release edit "$RELEASE_TAG" --draft=false
+            fi
+            echo 'Verified release assets present; existing notes preserved.'
+          else
+            python3 scripts/release_notes.py "$RELEASE_TAG" --output "$RUNNER_TEMP/release-notes.md"
+            gh release create "$RELEASE_TAG" dist/* --verify-tag --notes-file "$RUNNER_TEMP/release-notes.md" --title "FastFence ${RELEASE_TAG#v}"
+          fi

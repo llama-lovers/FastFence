@@ -5,10 +5,10 @@
 Complete [Getting started](getting-started.md) in a new directory with Python 3.12, the installed `fastfence` package, and a running Ollama service. No source checkout or maintainer state is needed. For all checks including OCR:
 
 ```sh
-fastfence init --anonymization
-fastfence setup-ocr
-fastfence doctor --full
-fastfence serve
+uv tool run --python 3.12 fastfence init
+uv tool run --python 3.12 fastfence setup-ocr
+uv tool run --python 3.12 fastfence doctor --full
+uv tool run --python 3.12 fastfence serve
 ```
 
 Wait for `doctor --full` to pass. It checks private initialization, Laya, the isolated OCR interpreter and models, and the configured assessment model. It does not require a second, hardcoded completion model. Model downloads require a network connection; OCR inference uses downloaded local files.
@@ -24,7 +24,7 @@ For an existing installation with `state/demo-tokens.json`, use its original
 `security-admin` and `analyst-blue` credentials; upgrades preserve that state.
 
 If another gateway already uses port 8000, stop that instance or use
-`fastfence serve --port 8002` and open <http://127.0.0.1:8002>.
+`uv tool run --python 3.12 fastfence serve --port 8002` and open <http://127.0.0.1:8002>.
 Use the selected port in MCP/client URLs too.
 
 
@@ -77,6 +77,96 @@ input ends in `model_unavailable_fail_closed`; blocked input still needs no mode
 The activated policy lives in `config/policy.yaml`; reviewed regression cases
 are stored separately in `config/policy-tests.yaml`.
 
+## Verify a live policy file change
+
+Use a fresh local installation for these checks. Keep the gateway running from
+that installation directory and use the same `local-agent` connection throughout.
+Complete one check at a time; the changes below intentionally affect subsequent
+requests. Keep a backup of `config/policy.yaml` before editing.
+
+1. In **Test requests**, select the allowlisted `qwen3:4b`, enter `Hello`, and send
+   the request. Expect `allowed`, `controls_passed`, upstream executed, and both
+   semantic stages `passed`. If another control blocks it or an assessor/provider
+   is unavailable, resolve that result before comparing policy changes.
+2. Open **Activity**, find that request ID, and note its policy version **V**.
+3. Edit the existing `config/policy.yaml` in your installation directory. Increase
+   its top-level `version` to **V + 1**. Add this item to `text_rules`; create the
+   list if absent. Keep every other policy setting and existing rule:
+
+   ```yaml
+   text_rules:
+     - id: manual-block-hello
+       operator: contains
+       value: hello
+       direction: input
+       target: model
+       action: block
+       case_sensitive: false
+   ```
+
+4. Save the file without restarting the gateway. The default configuration watcher
+   checks every two seconds; the visible dashboard refreshes every five seconds.
+   Wait until **Policies** shows **Active · v(V + 1)** and the new rule. You can
+   use **Activity → Refresh** to fetch the latest status immediately after the
+   watcher applies it. A newer file alone is not proof that it became active.
+5. Send `Hello` again. Expect `blocked`, reason `input_text_rule`, finding
+   `manual-block-hello`, `upstream_executed: false`, and both semantic stages
+   `not_run`. The exact local match stops the request before Laya or the completion
+   model runs. Its request ID should appear in **Activity** with version **V + 1**.
+6. Remove only `manual-block-hello` from the file. Set `version` to **V + 2**
+   (or higher than the current active version if another change occurred). Save,
+   wait for that active version, and resend `Hello`. It should again reach Laya
+   and the completion model, subject to your remaining controls and budget.
+
+Do not restore an older version number from the backup: valid updates must
+increase the active version. Invalid YAML, invalid rules and version conflicts
+leave the last valid policy active. **Overview** reports a rejected configuration
+update; correct the file and confirm its active version before testing again.
+Policy edits need no restart. Changing `.env` or installing optional runtime
+components still requires one.
+
+## Verify a budget change without resetting usage
+
+First remove the `manual-block-hello` rule above and wait for its removal to
+become active. Keep the same running gateway and `local-agent`; do not send other
+requests with that identity during this check.
+
+1. After at least one successful `Hello`, open **Overview → Resource usage**.
+   Find `local-agent · analyst`. Record the **used Calls** value as **C**, not the
+   maximum displayed after `/`. For example, `Calls · 3 / 20` means **C = 3**.
+   Also record the existing analyst call limit so you can restore it afterward.
+2. In `config/policy.yaml`, change only `budgets.analyst.calls` to **C** and
+   increase the top-level policy `version`. Preserve the analyst token, cost,
+   compute and concurrency limits. Save, wait for the new active version, and
+   confirm the same row now shows **C / C**.
+3. Send `Hello` once. Expect `blocked`, `budget_calls`, upstream not executed,
+   and both semantic stages `not_run`. **Activity** should record the rejection
+   under the new policy version. The used call count stays **C**: a request
+   rejected at reservation does not consume another call.
+4. Change `budgets.analyst.calls` to **C + 1**, increase `version` again and
+   wait for activation. The row should show **C / (C + 1)** before the next call.
+5. Send `Hello` once. With the other limits still sufficient, expect an allowed
+   completion and usage **(C + 1) / (C + 1)**. Sending it again reaches the call
+   limit and returns `budget_calls`.
+6. Restore the previous call limit, or a higher appropriate limit if the check
+   has already consumed it, in another higher-version policy update. No restart
+   is needed to make the new limit effective.
+
+Limits are configured **by role**, while usage is counted **per trusted identity,
+per gateway process, per UTC day**. `local-agent` has role `analyst` in a fresh
+installation. For an identity with several budgeted roles, each effective limit
+is the minimum across those roles. Changing a role limit affects every identity
+with that role, but does not merge their counters or erase prior usage. Restarting
+the process resets its in-memory counters and audit, so restarting would invalidate
+this test. Multiple gateway processes do not share a global budget.
+
+A literal input block happens before reservation; semantic rejection can occur
+after reservation and consume a call even though the completion model did not
+execute. Always read **used Calls** instead of estimating it from the total
+number of requests or allowed decisions. If you see `budget_tokens`,
+`budget_compute_ms`, or another reason, that separate limit must be addressed
+before this becomes a successful call-limit test.
+
 ## Stateless anonymization and optional restoration
 
 For public/private-key encryption, first follow the [RSA envelope setup](examples/asymmetric-anonymization.md). It issues FFR2 tokens using the configured public key, with private-key recovery and an issuer-authentication keyring. The flow below works with either RSA-backed FFR2 or existing symmetric FFR1 tokens.
@@ -124,17 +214,13 @@ the entire authenticated token. A model can shorten or alter tokens, so a respon
 without the name is not by itself a restoration failure. The gateway never guesses
 missing originals. `allow_restore: false` or irreversible mode denies restoration.
 
-For deterministic adapter-level restoration checks, use the automated
-`tests/integration/test_stateless_control.py` suite. Its echo model is an explicit
-test double, not a handler installed in the product.
-
 There is no conversation store or mapping database. Stable opaque IDs identify
 equal values within the trusted owner/rule scope. Reversible tokens carry
 AEAD-encrypted originals and expire; randomized full tokens can differ between
 requests while their stable IDs remain equal. Changing rule text, losing the
 key, expiration or using another identity prevents recovery.
 
-`init --anonymization` provisions the private 32-byte keyring automatically.
+Normal `init` provisions the private 32-byte keyring automatically.
 For a managed installation, use `FASTFENCE_ANONYMIZATION_KEYS_FILE` or
 `FASTFENCE_ANONYMIZATION_KEYS_JSON`, with active key ID
 `FASTFENCE_ANONYMIZATION_KEY_ID` (default `local-v1`). Do not set both explicit
@@ -149,8 +235,8 @@ The full installation above already prepares OCR. Download the [complete example
 To add OCR later:
 
 ```sh
-fastfence setup-ocr
-fastfence doctor --full
+uv tool run --python 3.12 fastfence setup-ocr
+uv tool run --python 3.12 fastfence doctor --full
 ```
 
 Restart the gateway after installing OCR or changing startup settings. The
@@ -177,7 +263,7 @@ it does not edit source image/PDF pixels or produce a redacted PDF.
 With the gateway running and your policy activated, run this from your installation directory:
 
 ```sh
-python - <<'PYCODE'
+uv run --no-project --python 3.12 --with fastfence python - <<'PYCODE'
 import asyncio
 import json
 from pathlib import Path
@@ -207,5 +293,11 @@ and expect an input block before Qwen executes.
 ## Inspect request activity
 
 Open **Activity** and locate the result by request ID. Compare policy/feed version,
-decision, findings and whether upstream executed. Audit contains metadata only;
+decision, reason, findings and whether upstream executed. Expand each row to compare
+**Input text analysis** and **Output text analysis**: `passed` means the semantic
+stage ran and permitted that content, `blocked` means it rejected content, `error`
+means assessment failed, and `not_run` means that stage was not reached. An input
+block prevents upstream execution; an output block withholds delivery after the
+upstream has already run. Match the request ID and policy version when comparing
+before/after results. Audit contains metadata only;
 it must not contain prompts, OCR text, original names or recovery tokens.

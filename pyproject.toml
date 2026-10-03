@@ -35,8 +35,10 @@ dev = [
   "ruff==0.12.8",
 ]
 docs = [
+    "mike==2.2.0",
     "mkdocs>=1.6,<2",
     "mkdocs-material>=9.6,<10",
+    "mkdocs-static-i18n==1.3.1",
 ]
 test = [
   {include-group = "docs"},
@@ -58,8 +60,8 @@ fastfence = "fastfence.app.interfaces.cli.main:main"
 [project.urls]
 Homepage = "https://fastfence.dev"
 Documentation = "https://fastfence.dev"
-Repository = "https://github.com/llama-lovers/HackYeah2026-challenge-second"
-Issues = "https://github.com/llama-lovers/HackYeah2026-challenge-second/issues"
+Repository = "https://github.com/llama-lovers/FastFence"
+Issues = "https://github.com/llama-lovers/FastFence/issues"
 
 [project.optional-dependencies]
 ocr = [
@@ -107,7 +109,7 @@ markers = [
 [tool.ruff]
 line-length = 80
 target-version = "py312"
-exclude = [".git", ".venv", "__pycache__", "build", "dist", "HackYeah2026-challenge", "HackYeah2026-challenge-second"]
+exclude = [".git", ".venv", "__pycache__", "build", "dist"]
 
 [tool.ruff.lint]
 select = ["B", "C9", "E", "F", "I", "N", "RUF", "UP", "T"]
@@ -164,4 +166,4 @@ medium_threshold = 9
 
 [tool.pyscn.analysis]
 include_patterns = ["src/**/*.py"]
-exclude_patterns = ["**/__pycache__/**", "**/.venv/**", "build/**", "dist/**", "HackYeah2026-challenge/**", "HackYeah2026-challenge-second/**"]
+exclude_patterns = ["**/__pycache__/**", "**/.venv/**", "build/**", "dist/**"]
