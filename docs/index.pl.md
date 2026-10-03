@@ -12,19 +12,17 @@ FastFence sprawdza żądania i odpowiedzi AI zgodnie z politykami dostępu, pryw
 
 ## Uruchom lokalnie
 
-Potrzebujesz [uv](https://docs.astral.sh/uv/getting-started/installation/) i działającej usługi [Ollama](https://ollama.com/). Uruchom opublikowany pakiet z Pythonem 3.12 we własnym katalogu roboczym:
+Zainstaluj [uv](https://docs.astral.sh/uv/getting-started/installation/) i uruchom [Ollama](https://ollama.com/). W wybranym katalogu roboczym wykonaj:
 
 ```sh
-mkdir fastfence-local
-cd fastfence-local
-uv tool run --python 3.12 fastfence@1.0.1 init
-uv tool run --python 3.12 fastfence@1.0.1 doctor
-uv tool run --python 3.12 fastfence@1.0.1 serve
+uv tool run fastfence
 ```
 
-uv przechowuje pakiet w izolowanej pamięci podręcznej, a konfiguracja pozostaje w `fastfence-local`. [Instrukcja instalacji](getting-started.md) opisuje także pip, uruchamianie przykładów i aktualizacje.
+FastFence **1.0.2 lub nowszy** przygotowuje wymagane środowisko i uruchamia bramkę jednym poleceniem. Tworzy prywatną konfigurację, instaluje Laya, pobiera brakujący model oceniający i w razie potrzeby przygotowuje OCR. Nowa instalacja używa Qwen3:4b do oceny i generowania odpowiedzi w osobnych wywołaniach; drugi model nie jest potrzebny.
 
-`init` przygotowuje prywatną konfigurację, instaluje Laya i w razie potrzeby pobiera model oceniający. Nowa instalacja domyślnie używa Qwen3:4b do oceny i generowania odpowiedzi w osobnych wywołaniach; drugi model nie jest wymagany. Otwórz **http://127.0.0.1:8000** i połącz się przy użyciu wygenerowanych danych dostępu. [Instrukcja](getting-started.md) opisuje wymagania i prywatną konfigurację. Repozytorium FastFence nie jest potrzebne.
+Otwórz **http://127.0.0.1:8000** i połącz się danymi z `state/credentials.json`. Korzystaj dalej z tego samego katalogu: konfiguracja i klucze pozostają tutaj, a uv przechowuje pakiet osobno. Jeśli uv ma już starsze wydanie w pamięci podręcznej, użyj `uv tool run fastfence@latest`.
+
+Nie potrzebujesz repozytorium ani ręcznie aktywowanego środowiska. [Instrukcja instalacji](getting-started.md) opisuje wymagania, polecenia z przypiętą wersją i aktualizacje.
 
 ## Wybierz zadanie
 

@@ -71,7 +71,7 @@ def initialize_config(root: Path, *, max_source_bytes: int = 262_144) -> None:
     except (ValueError, yaml.YAMLError, RecursionError):
         raise ConfigurationInitializationError(
             "Invalid configuration in config/policy.yaml or config/signatures.json; "
-            "repair those files and rerun fastfence init. Existing files were preserved."
+            "repair those files and retry `uv tool run fastfence`. Existing files were preserved."
         ) from None
     directory.mkdir(parents=True, exist_ok=True)
     for name in missing:

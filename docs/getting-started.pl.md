@@ -1,53 +1,49 @@
 # Pierwsze kroki
 
-## Zainstaluj FastFence
+## Uruchom jednym poleceniem
 
-Użyj macOS lub Linux oraz [uv](https://docs.astral.sh/uv/getting-started/installation/). `uv tool run` pobiera FastFence do izolowanej pamięci podręcznej narzędzi. Nie potrzebujesz repozytorium ani ręcznie aktywowanego środowiska wirtualnego. Jawny wybór interpretera odpowiada wymaganiu Python 3.12.
-
-## Inicjalizacja i uruchomienie przez uv
-
-Zainstaluj [Ollama](https://ollama.com/) i uruchom usługę przed inicjalizacją (`ollama serve` w drugim terminalu albo działająca aplikacja desktopowa). Instalator przypiętej wersji Laya wymaga Git i `sh`.
+Użyj macOS lub Linux z [uv](https://docs.astral.sh/uv/getting-started/installation/), Git i `sh`. Zainstaluj [Ollama](https://ollama.com/) i pozostaw usługę uruchomioną (`ollama serve` w drugim terminalu albo aplikacja desktopowa). W wybranym katalogu roboczym wykonaj:
 
 ```sh
-mkdir fastfence-local
-cd fastfence-local
-uv tool run --python 3.12 fastfence@1.0.1 init
-uv tool run --python 3.12 fastfence@1.0.1 doctor
-uv tool run --python 3.12 fastfence@1.0.1 serve
+uv tool run fastfence
 ```
 
-Korzystaj dalej z tego samego katalogu: tutaj znajdują się `config/`, dane dostępu i klucze, a nie w pamięci podręcznej uv. Krótszy prefiks `uvx --python 3.12 fastfence@1.0.1` działa tak samo. Przypięta wersja zapewnia użycie tego samego wydania w kolejnych poleceniach.
+Od FastFence **1.0.2** uruchomienie bez podkomendy przygotowuje wymagane komponenty i startuje bramkę. Nie potrzebujesz repozytorium, aktywowanego środowiska ani osobnych poleceń `init` i `serve`. uv wybiera zgodny interpreter Python i przechowuje pakiet w swojej pamięci podręcznej. Korzystaj dalej z tego samego katalogu: tutaj pozostają `config/`, dane dostępu i klucze.
+
+Jeśli uv ma już starszą wersję FastFence, odśwież ją poleceniem `uv tool run fastfence@latest`. Aby wybrać dokładnie to wydanie i interpreter:
+
+```sh
+uv tool run --python 3.12 fastfence@1.0.2
+```
 
 ### Alternatywa: pip i środowisko wirtualne
 
-Jeżeli wolisz bezpośrednie polecenie `fastfence`, utwórz środowisko Python 3.12 w katalogu instalacji:
+Jeśli wolisz bezpośrednio zainstalowane polecenie, utwórz środowisko Python 3.12 w tym samym katalogu roboczym:
 
 ```sh
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install fastfence uv
-fastfence init
-fastfence doctor
-fastfence serve
+fastfence
 ```
 
 Otwórz **http://127.0.0.1:8000**. W **Connection** wpisz tokeny `local-agent` i `local-admin` z prywatnego pliku `state/credentials.json`. Token agenta wysyła chronione żądania, a token administratora umożliwia przegląd i zmianę polityk. Panel trzyma tokeny tylko w pamięci strony.
 
-Inicjalizacja tworzy `config/`, prywatne dane dostępu i zestaw kluczy wystawcy tokenów anonimizacji w katalogu roboczym. Instaluje też przypięty silnik Laya oraz sprawdza dostępność modelu oceniającego w Ollama, pobierając go tylko wtedy, gdy go brakuje. Powtórzenie `init` zachowuje poprawne dane dostępu, polityki i klucze. Zachowaj ten katalog podczas aktualizacji. Starsze instalacje z `state/demo-tokens.json` zachowują tożsamości `security-admin` i `analyst-blue`.
+Pierwsze uruchomienie tworzy `config/`, prywatne dane dostępu i zestaw kluczy wystawcy tokenów anonimizacji w katalogu roboczym. Instaluje też przypięty silnik Laya oraz sprawdza dostępność modelu oceniającego w Ollama, pobierając go tylko wtedy, gdy go brakuje. Przygotowuje też zależności i modele OCR, jeśli nie są gotowe. Ponowne uruchomienie zachowuje poprawne dane dostępu, polityki i klucze. Zachowaj ten katalog podczas aktualizacji. Starsze instalacje z `state/demo-tokens.json` zachowują tożsamości `security-admin` i `analyst-blue`.
 
 Rozróżnij trzy role:
 
-- **Laya** to silnik Python uruchamiający oceny bezpieczeństwa i pomagający tworzyć reguły. Instaluje go `init`.
-- **Model oceniający** interpretuje sprawdzany tekst. Domyślnie to **Qwen3:4b** obsługiwany przez Ollama. `init` sprawdza i pobiera skonfigurowany model.
+- **Laya** to silnik Python uruchamiający oceny bezpieczeństwa i pomagający tworzyć reguły. Instaluje go pierwsze uruchomienie.
+- **Model oceniający** interpretuje sprawdzany tekst. Domyślnie to **Qwen3:4b** obsługiwany przez Ollama. Start sprawdza i pobiera skonfigurowany model.
 - **Model lub narzędzie Twojej aplikacji** wykonuje właściwą pracę po kontroli wejścia. Nowa polityka dopuszcza również Qwen3:4b do generowania odpowiedzi, więc wystarczy jedno pobranie. Możesz wybrać inny dozwolony model lub [usługę zgodną z OpenAI](examples/openai-upstream.md).
 
 Ocena i generowanie odpowiedzi to osobne wywołania, nawet jeśli używają tego samego modelu. Agent korzystający tylko z narzędzi lub ACP nie wymaga osobnego modelu do odpowiedzi. Inicjalizacja zachowuje istniejący wybór modelu i nie pobiera dodatkowego modelu biznesowego. Brak oceny blokuje żądanie; dokładne reguły literalne są sprawdzane lokalnie wcześniej.
 
-Do przygotowania samej konfiguracji użyj `uv tool run --python 3.12 fastfence@1.0.1 init --config-only` lub `fastfence init --config-only` w środowisku pip. Polecenie zapisuje konfigurację i stan prywatny bez instalowania Laya i kontaktowania się z Ollama. Uruchom zwykłe `init`, gdy wymagane usługi będą dostępne. `setup-laya` pozostaje zaawansowanym poleceniem instalacji lub naprawy silnika; nie jest osobnym krokiem standardowego startu.
+Do przygotowania samej konfiguracji użyj `uv tool run --python 3.12 fastfence@1.0.2 init --config-only` lub `fastfence init --config-only` w środowisku pip. Polecenie zapisuje konfigurację i stan prywatny bez instalowania Laya i kontaktowania się z Ollama. Uruchom zwykłe polecenie startu, gdy wymagane usługi będą dostępne. `setup-laya` pozostaje zaawansowanym poleceniem instalacji lub naprawy silnika; nie jest osobnym krokiem standardowego startu.
 
 ## Wyślij chronione żądanie
 
-W drugim terminalu przejdź do `fastfence-local`. Ten kompletny klient korzysta z izolowanego środowiska z HTTPX i odczytuje prywatny token bez zapisywania go w historii powłoki:
+W drugim terminalu przejdź do tego samego katalogu roboczego. Ten kompletny klient korzysta z izolowanego środowiska z HTTPX i odczytuje prywatny token bez zapisywania go w historii powłoki:
 
 ```sh
 uv run --no-project --python 3.12 --with httpx python - <<'PY'
@@ -98,34 +94,32 @@ uv run --no-project --python 3.12 --with fastfence==1.0.1 python examples/mcp_cl
 
 `Cat` musi zostać zablokowane przed wykonaniem modelu. `Hi` przechodzi tę regułę i może dotrzeć do Qwen, jeśli pozwalają na to pozostałe kontrole. Wybierz oba kierunki, jeśli reguła ma sprawdzać także odpowiedź. Blokada wyjścia nie cofa wykonanej operacji.
 
-## Dodaj OCR dokumentów
+## OCR dokumentów i zaawansowana diagnostyka
 
-Uruchom instalator dołączony do pakietu:
+Zwykły start przygotowuje OCR automatycznie. Aby naprawić je osobno lub uruchomić pełną diagnostykę:
 
 ```sh
-uv tool run --python 3.12 fastfence@1.0.1 setup-ocr
-uv tool run --python 3.12 fastfence@1.0.1 doctor --full
+uv tool run --python 3.12 fastfence@1.0.2 setup-ocr
+uv tool run --python 3.12 fastfence@1.0.2 doctor --full
 ```
 
-Przejdź do [testów ręcznych](manual-testing.md). OCR obsługuje obrazy i wielostronicowe PDF, zwracając Markdown sprawdzony przez polityki. Nie edytuje pikseli dokumentu. Po instalacji opcjonalnych komponentów uruchom bramkę ponownie, a następnie wykonaj `fastfence doctor --full` odpowiednim prefiksem uv lub pip.
+Przejdź do [testów ręcznych](manual-testing.md). OCR obsługuje obrazy i wielostronicowe PDF, zwracając Markdown sprawdzony przez polityki. Nie edytuje pikseli dokumentu. Po naprawie komponentów uruchom bramkę ponownie, a następnie wykonaj `fastfence doctor --full` odpowiednim prefiksem uv lub pip.
 
 ## Aktualizacja FastFence
 
 Zatrzymaj bramkę. Dla instalacji przez uv jawnie wybierz najnowsze opublikowane wydanie:
 
 ```sh
-uv tool run --python 3.12 fastfence@latest doctor
-uv tool run --python 3.12 fastfence@latest serve
+uv tool run fastfence@latest
 ```
 
-Zwykłe polecenie bez wersji może użyć wersji z pamięci podręcznej; `@latest` odświeża ją. Polecenie z `@1.0.1` pozostaje przypięte do tej wersji. [Dokumentacja uv opisuje te zasady](https://docs.astral.sh/uv/concepts/tools/#tool-versions). Polecenie z pobraną wcześniej dokładną wersją może działać z opcją uv `--offline`, ale wyłącza ona jedynie pobieranie przez uv: FastFence nadal potrzebuje skonfigurowanej usługi modelu, a zwykła inicjalizacja może pobierać komponenty.
+Zwykłe polecenie bez wersji może użyć wersji z pamięci podręcznej; `@latest` odświeża ją. Polecenie z `@1.0.2` pozostaje przypięte do tej wersji. [Dokumentacja uv opisuje te zasady](https://docs.astral.sh/uv/concepts/tools/#tool-versions). Polecenie z pobraną wcześniej dokładną wersją może działać z opcją uv `--offline`, ale wyłącza ona jedynie pobieranie przez uv: FastFence nadal potrzebuje skonfigurowanej usługi modelu, a zwykła inicjalizacja może pobierać komponenty.
 
 Dla pip aktywuj istniejące środowisko i wykonaj:
 
 ```sh
 python -m pip install --upgrade fastfence
-fastfence doctor
-fastfence serve
+fastfence
 ```
 
 Po restarcie odśwież panel. `config/` i `state/` w katalogu roboczym są oddzielone od zainstalowanego pakietu. Twórz ich kopie i zachowuj je podczas aktualizacji. Jeśli wydanie zmienia przypięte pliki pomocnicze Laya, zastosuj instrukcję tego wydania; instalator odmawia nadpisania zmienionych plików.

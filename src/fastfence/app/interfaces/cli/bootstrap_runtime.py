@@ -76,7 +76,7 @@ async def ensure_assessor(settings: AppSettings, model: str) -> None:
         AttributeError,
     ):
         raise SystemExit(
-            "Semantic assessor setup failed. Start Ollama (`ollama serve`) or check FASTFENCE_OLLAMA_URL, then rerun `fastfence init`. "
+            "Semantic assessor setup failed. Start Ollama (`ollama serve`) or check FASTFENCE_OLLAMA_URL, then retry `uv tool run fastfence`. "
             "Existing configuration, credentials and keys were preserved; provider response details are omitted."
         ) from None
 
@@ -108,9 +108,9 @@ def initialize_runtime(settings: AppSettings) -> None:
             setup_laya(root)
             if not _laya_ready(settings):
                 raise SystemExit(
-                    "Laya runtime validation failed; rerun `fastfence setup-laya` and `fastfence init`."
+                    "Laya runtime validation failed; resolve the installation error and retry `uv tool run fastfence`."
                 )
     print(
-        "Required semantic components are ready. Start `fastfence serve`. "
+        "Required semantic components are ready. "
         "Business model providers are configured independently."
     )

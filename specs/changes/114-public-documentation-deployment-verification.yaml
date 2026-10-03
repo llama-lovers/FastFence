@@ -1,0 +1,35 @@
+id: FF-114
+title: Verify actual public documentation before reporting deployment success
+status: implemented
+problem: A successful Pages deployment returned stale public version metadata and missing release pages, so release automation announced documentation before users could reach it.
+scope:
+  - Verify the requested stable tag or exact development commit in public versions.json.
+  - Fetch English and Polish channel pages and the latest stable alias, checking actual HTML language and canonical version.
+  - Require exact source commit links and localized unreleased warnings for development pages.
+  - Run verification after deployment while the shared documentation concurrency lock remains held.
+constraints:
+  - Public checks use no authentication, environment proxy or query cache busting and reject redirects.
+  - Bound each request and response, retry for at most ten minutes with waits no longer than fifteen seconds.
+  - Preserve historical 1.0.0 documentation without requiring a Polish translation that did not exist.
+  - Never emit raw remote response bodies in failure messages or write successful evidence on timeout.
+change_paths:
+  - scripts/verify_public_docs.py
+  - tests/unit/test_public_docs_verification.py
+  - .github/workflows/docs.yml
+acceptance:
+  - Correct current stable and development bilingual pages pass and emit structured verification evidence.
+  - Stale inventory, wrong development SHA, wrong page canonical, incorrect language and development owning latest all fail.
+  - CDN propagation can recover within bounded retries without falsely marking stale content successful.
+  - GitHub release announcement remains dependent on successful public documentation verification.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_public_docs_verification.py tests/unit/test_pages_deployment.py
+    expected: Public content and deployment contract regressions pass.
+  - command: uv run --locked ruff check scripts/verify_public_docs.py tests/unit/test_public_docs_verification.py
+    expected: No lint errors.
+evidence:
+  - check: Targeted deployment and public verification regressions
+    result: All 53 tests passed, including 30 public-content cases; Ruff formatting and checks passed.
+  - check: Actual public 1.0.1 probe before deployment repair
+    result: A bounded five-second unauthenticated check correctly rejected the stale public inventory with requested_documentation_revision_not_public despite the previously successful Pages deployment.
+  - check: Exact release artifact inspection
+    result: Artifact 11287812076 contained 1.0.1 English and Polish pages, latest alias 1.0.1 and the expected dev commit, establishing that the gate catches public serving divergence rather than merely validating the build artifact again.

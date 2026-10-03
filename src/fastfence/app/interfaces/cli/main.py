@@ -7,6 +7,7 @@ from pathlib import Path
 import uvicorn
 
 from fastfence.app.interfaces.cli.bootstrap_config import initialize_config
+from fastfence.app.interfaces.cli.bootstrap_ocr import ensure_ocr
 from fastfence.app.interfaces.cli.bootstrap_runtime import initialize_runtime
 from fastfence.app.interfaces.cli.initialize import (
     initialize,
@@ -22,10 +23,44 @@ from fastfence.app.interfaces.cli.startup import (
 from fastfence.shared.settings.app_settings import AppSettings
 
 
+def _initialize(settings: AppSettings, config_only: bool) -> None:
+    initialize_config(
+        settings.root, max_source_bytes=settings.max_config_source_bytes
+    )
+    external_identity = (
+        settings.identity_config_json is not None
+        or settings.identity_config_file is not None
+    )
+    if not external_identity:
+        initialize(settings.state_path)
+    initialize_anonymization(settings)
+    if external_identity:
+        preflight(settings)
+        print(
+            "Configured external identities validated; local credentials were not created."
+        )
+    if config_only:
+        print(
+            "Configuration initialized; runtime components were not installed (--config-only)."
+        )
+    else:
+        initialize_runtime(settings)
+
+
+def _serve(settings: AppSettings, host: str, port: int) -> None:
+    preflight(settings)
+    print(f"FastFence dashboard: http://{host}:{port}", flush=True)
+    uvicorn.run(
+        "fastfence.app.factory:create_app", factory=True, host=host, port=port
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="FastFence AI Control Layer")
     parser.add_argument(
         "command",
+        nargs="?",
+        help="Omit to prepare required components and start the dashboard; commands provide advanced control.",
         choices=["init", "serve", "doctor", "setup-laya", "setup-ocr"],
     )
     parser.add_argument(
@@ -49,23 +84,18 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
+    if args.config_only and args.command != "init":
+        parser.error("--config-only requires the explicit init command")
     previous_state = os.environ.get("FASTFENCE_STATE")
     if args.state is not None:
         os.environ["FASTFENCE_STATE"] = str(Path(args.state).resolve())
     try:
         settings = AppSettings.environment()
-        if args.command == "init":
-            initialize_config(
-                settings.root, max_source_bytes=settings.max_config_source_bytes
-            )
-            initialize(settings.state_path)
-            initialize_anonymization(settings)
-            if args.config_only:
-                print(
-                    "Configuration initialized; runtime components were not installed (--config-only)."
-                )
-            else:
-                initialize_runtime(settings)
+        if args.command is None:
+            _initialize(settings, config_only=False)
+            _serve(ensure_ocr(settings), args.host, args.port)
+        elif args.command == "init":
+            _initialize(settings, config_only=args.config_only)
         elif args.command == "setup-laya":
             setup_laya(settings.authoring_root or settings.root)
         elif args.command == "setup-ocr":
@@ -73,13 +103,7 @@ def main() -> None:
         elif args.command == "doctor":
             doctor(settings, full=args.full)
         else:
-            preflight(settings)
-            uvicorn.run(
-                "fastfence.app.factory:create_app",
-                factory=True,
-                host=args.host,
-                port=args.port,
-            )
+            _serve(settings, args.host, args.port)
     except (OSError, ValueError, TypeError, KeyError):
         raise SystemExit(startup_error()) from None
     finally:

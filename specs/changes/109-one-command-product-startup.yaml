@@ -1,0 +1,44 @@
+id: FF-109
+title: Prepare and start the complete local product with no subcommand
+status: verified
+problem: Package users still had to orchestrate initialization and component installers before serving the dashboard, despite requiring one executable command.
+scope:
+  - Make no-argument fastfence initialize missing local configuration, credentials and keys, prepare the configured semantic assessor and Laya, prepare missing OCR, and serve the dashboard.
+  - Reload environment settings after OCR setup so the server discovers the installed interpreter and model files.
+  - Honor explicit external identity sources without generating unused local credentials.
+  - Keep advanced explicit CLI commands and remove misleading next-command instructions from normal bootstrap output.
+constraints:
+  - Preserve existing operator configuration, identities and cryptographic keys byte for byte.
+  - Never silently replace a custom OCR installation or install a global Ollama service.
+  - Never start the gateway after invalid private state or failed component preparation.
+  - No dataclasses, database, runtime policy relaxation or version changes.
+change_paths:
+  - src/fastfence/app/interfaces/cli/main.py
+  - src/fastfence/app/interfaces/cli/startup.py
+  - src/fastfence/app/interfaces/cli/bootstrap_config.py
+  - src/fastfence/app/interfaces/cli/bootstrap_ocr.py
+  - src/fastfence/app/interfaces/cli/bootstrap_runtime.py
+  - src/fastfence/app/interfaces/cli/laya_install.py
+  - src/fastfence/app/interfaces/cli/ocr_install.py
+  - tests/unit/test_one_command_startup.py
+  - tests/unit/test_runtime_bootstrap.py
+acceptance:
+  - A no-subcommand invocation creates missing private state and prepares required components before launching the dashboard.
+  - Repeated invocations preserve valid policy, credentials and keyring and reuse ready components.
+  - Explicit configuration root, state directory and external identity settings are respected.
+  - Invalid state, unavailable custom OCR or failed installation abort before serving without exposing credential values.
+  - Explicit init config-only remains offline and explicit serve does not invoke setup.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_one_command_startup.py tests/unit/test_cli_startup.py tests/unit/test_runtime_bootstrap.py tests/unit/test_packaged_laya.py tests/unit/test_packaged_ocr.py -q
+    expected: Focused startup, preservation, failure and installer regressions pass.
+  - command: uv run basedpyright src
+    expected: No type errors.
+  - command: uv run lint-imports
+    expected: Architectural import boundaries pass.
+evidence:
+  - check: Scope of verification
+    result: Unit tests isolate model and OCR downloads while exercising actual configuration and credential provisioning. Real installed-package no-subcommand acceptance belongs to FF-111.
+  - command: uv run pytest --no-cov tests/unit/test_one_command_startup.py tests/unit/test_cli_startup.py tests/unit/test_runtime_bootstrap.py tests/unit/test_packaged_laya.py tests/unit/test_packaged_ocr.py -q
+    result: 58 focused tests passed, including external identity preservation and missing or empty OCR weight detection.
+  - check: Static quality and architecture
+    result: Ruff lint and formatting, basedpyright, all 16 import contracts, pyscn complexity/deadcode/dependency gates and whitespace checks passed.

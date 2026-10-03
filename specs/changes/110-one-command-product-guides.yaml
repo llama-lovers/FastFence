@@ -1,0 +1,37 @@
+id: FF-110
+title: Lead product documentation with one-command startup
+status: verified
+problem: Product quickstarts require a sequence of init, doctor and serve commands instead of the user's requested single-command launch.
+scope:
+  - Lead README and English and Polish landing/install guides with uv tool run fastfence.
+  - Describe automatic private configuration, Laya assessment runtime, missing-model and OCR preparation before serving.
+  - Retain explicit provisioning, repair, pip and exact-version paths as advanced options.
+constraints:
+  - Identify one-command behavior as introduced in version 1.0.2.
+  - Keep running Ollama, uv, Git and shell prerequisites explicit; do not imply global service installation.
+  - Preserve private configuration across restarts and upgrades.
+  - Preserve existing executable integration examples and their working 1.0.1 pins.
+  - English and Polish fenced commands must be identical.
+change_paths:
+  - README.md
+  - docs/index.md
+  - docs/index.pl.md
+  - docs/getting-started.md
+  - docs/getting-started.pl.md
+acceptance:
+  - The first executable code block on all five pages contains only uv tool run fastfence.
+  - The quickstart explains automatic preparation and dashboard URL without a manual init/serve ritual.
+  - Cached old installations have an explicit latest refresh command and reproducible startup is pinned to 1.0.2.
+  - Detailed example clients and integration scope remain available.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_documentation_downloads.py tests/unit/test_documentation_highlighting.py
+    expected: Generated source/download integrity and complete bilingual code parity pass.
+  - command: uv run --locked mkdocs build --strict
+    expected: Both locales build without broken links.
+evidence:
+  - check: CLI implementation contract
+    result: Coordinated with FF109 implementer; normal no-argument launch prepares required runtime and OCR, reloads settings, performs preflight and serves, while explicit commands remain available.
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_documentation_downloads.py tests/unit/test_documentation_highlighting.py
+    result: Eleven tests passed; separately verified that all five first code blocks contain only the requested command and both guide pairs have identical fenced commands.
+  - command: uv run --locked mkdocs build --strict
+    result: Complete English and Polish documentation builds passed. Runtime startup acceptance belongs to FF109; this documentation check does not claim an already published 1.0.2 package.

@@ -109,7 +109,9 @@ def test_failed_setup_is_bounded_and_never_echoes_provider_payload(
         return httpx.Response(200, json={"models": []})
 
     client_fixture(monkeypatch, handle)
-    with pytest.raises(SystemExit, match="rerun `fastfence init`") as caught:
+    with pytest.raises(
+        SystemExit, match="retry `uv tool run fastfence`"
+    ) as caught:
         asyncio.run(
             bootstrap_runtime.ensure_assessor(
                 AppSettings(root=tmp_path), "configured:assessor"

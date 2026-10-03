@@ -13,43 +13,42 @@ policy changes, test requests and inspect activity.
 
 ## Run locally
 
-Requirements: macOS or Linux, [uv](https://docs.astral.sh/uv/getting-started/installation/) and a running [Ollama](https://ollama.com/) service. uv selects Python 3.12 for the package. Git and `sh` are needed by the installer for the pinned external Laya engine; no FastFence checkout is needed.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and run [Ollama](https://ollama.com/) on macOS or Linux. In the directory where you want to keep your FastFence configuration, run:
 
 ```sh
-mkdir fastfence-local
-cd fastfence-local
-uv tool run --python 3.12 fastfence@1.0.1 init
-uv tool run --python 3.12 fastfence@1.0.1 doctor
-uv tool run --python 3.12 fastfence@1.0.1 serve
+uv tool run fastfence
 ```
 
-No project environment is required: uv caches the isolated package while configuration and private state stay in `fastfence-local`. Prefer pip? The [installation guide](https://fastfence.dev/getting-started/) includes a virtual-environment alternative.
+From FastFence **1.0.2**, this command prepares the required runtime and starts the gateway. No separate `init` or `serve` step is needed. uv selects a compatible Python and caches the isolated package; `config/` and private `state/` stay in your current directory. Git and `sh` are needed for the pinned Laya installer. No FastFence checkout is required.
+
+Already have an older version cached? Use `uv tool run fastfence@latest`. For a reproducible installation, use `uv tool run --python 3.12 fastfence@1.0.2`. The [installation guide](https://fastfence.dev/getting-started/) also covers pip and explicit provisioning commands.
 
 Open **http://127.0.0.1:8000**, then **Connection**. Use `local-admin` from
 `state/credentials.json` to manage policies and `local-agent` to make protected
 requests. Tokens are randomly generated, private, and kept only in browser page
 memory after you enter them. Management credentials cannot invoke agent operations.
 
-`init` creates your configuration and credentials, installs the pinned Laya engine,
-and downloads the configured assessment model if it is missing. The fresh default
+The first launch creates your configuration and credentials, installs the pinned Laya engine,
+downloads the configured assessment model if it is missing, and prepares OCR
+dependencies and document models when needed. The fresh default
 uses **Qwen3:4b** for assessment and protected completions, as separate calls, so
 one model download is enough. Your application's completion model can be changed
 independently. Tool-only and ACP integrations need no separate completion model.
 
 Laya checks input and output that reach semantic inspection. Missing or failed
-assessment blocks the request; local rules run before it. Repeating `init`
+assessment blocks the request; local rules run before it. Restarting the command
 preserves valid existing configuration and keys. For configuration provisioning
-without downloads, use `uv tool run --python 3.12 fastfence@1.0.1 init --config-only`; normal
+without downloads, use `uv tool run --python 3.12 fastfence@1.0.2 init --config-only`; normal
 initialization must finish before model-backed protection is ready.
 
-For OCR of images and multipage PDFs:
+OCR of images and multipage PDFs is prepared automatically. For a separate repair or diagnostic check:
 
 ```sh
-uv tool run --python 3.12 fastfence@1.0.1 setup-ocr
-uv tool run --python 3.12 fastfence@1.0.1 doctor --full
+uv tool run --python 3.12 fastfence@1.0.2 setup-ocr
+uv tool run --python 3.12 fastfence@1.0.2 doctor --full
 ```
 
-Restart after installing optional components or changing `.env`. OCR converts
+Restart after repairing components or changing `.env`. OCR converts
 attachments into inspected Markdown; it does not modify image or PDF pixels.
 
 ## Make a protected request
@@ -115,11 +114,10 @@ policy and credentials; replace its operation with your application logic.
 Stop the gateway, then explicitly refresh the tool to the latest published release:
 
 ```sh
-uv tool run --python 3.12 fastfence@latest doctor
-uv tool run --python 3.12 fastfence@latest serve
+uv tool run fastfence@latest
 ```
 
-Pinned `@1.0.1` commands remain on that version. With pip, activate your environment and use `python -m pip install --upgrade fastfence` before restarting.
+Pinned `@1.0.2` commands remain on that version. With pip, activate your environment and use `python -m pip install --upgrade fastfence` before restarting.
 
 Reload the browser. Your working directory's configuration and private state are independent of the installed package; preserve and back them up. Initialization is repeatable and retains valid existing credentials and keys.
 

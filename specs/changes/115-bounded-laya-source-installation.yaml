@@ -1,0 +1,33 @@
+id: FF-115
+title: Fetch only the pinned Laya engine and safely upgrade its installer
+status: verified
+problem: Actual clean one-command package installation spent minutes fetching unrelated upstream assets, including a large animation, before runtime dependencies could install.
+scope:
+  - Use blob-filtered partial Git fetches and non-cone sparse checkout of engine, LICENSE and NOTICE for new installations.
+  - Reuse an available pinned commit without contacting the remote again.
+  - Atomically replace only the exact reviewed setup helper shipped in release 1.0.1; reject unknown modifications.
+constraints:
+  - Keep the existing pinned Laya revision and hash-locked dependency installation.
+  - Preserve existing checkout configuration, custom helpers, operator configuration and private state.
+  - Unit tests use a synthetic local Git repository and never contact public services.
+change_paths:
+  - integrations/laya/setup.sh
+  - src/fastfence/app/interfaces/cli/laya_install.py
+  - tests/unit/test_laya_sparse_install.py
+  - tests/test_data/laya/setup-v1.0.1.sh
+  - .secrets.baseline
+acceptance:
+  - A fresh installation contains engine and legal files while leaving unrelated large blobs absent from both the worktree and local object database.
+  - Repeated installation succeeds with the remote unavailable when the pinned commit and required files are already local.
+  - The known released installer upgrades atomically without changing any other helper or private file.
+  - Even a whitespace modification to the previous installer prevents automatic replacement.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_laya_sparse_install.py tests/unit/test_packaged_laya.py tests/unit/test_runtime_bootstrap.py -q
+    expected: Actual local Git fixture and helper upgrade regressions pass.
+  - command: uv run basedpyright src
+    expected: No type errors.
+evidence:
+  - command: Focused local Git and installer regressions
+    result: 24 tests passed. A synthetic 2 MB unrelated blob remains a promised missing object; repeat installation succeeds with an unavailable remote.
+  - check: Reviewed public fixture signature
+    result: The previous installer is byte-identical to v1.0.1 and matches the exact public SHA256 pinned by the upgrade gate. Its known public upstream revision is the only new specific false-positive baseline entry.

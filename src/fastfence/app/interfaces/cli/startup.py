@@ -89,10 +89,17 @@ def _ocr_ready(settings: AppSettings) -> bool:
         "PP-OCRv5_mobile_det",
         "latin_PP-OCRv5_mobile_rec",
     )
-    if not all(
-        (settings.ocr_models / name / "inference.json").is_file()
-        for name in names
-    ):
+    try:
+        for name in names:
+            for filename in (
+                "inference.json",
+                "inference.pdiparams",
+                "inference.yml",
+            ):
+                path = settings.ocr_models / name / filename
+                if not path.is_file() or path.stat().st_size == 0:
+                    return False
+    except OSError:
         return False
     return _python_imports(
         settings.ocr_python, "import paddle, paddleocr, pypdfium2, PIL"

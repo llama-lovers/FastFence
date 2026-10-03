@@ -15,17 +15,8 @@ if [ ! -d "$upstream/.git" ]; then
     mkdir -p state/laya
     git init "$upstream"
     git -C "$upstream" remote add origin https://github.com/aayushch/laya.git
-    git -C "$upstream" config remote.origin.promisor true
-    git -C "$upstream" config remote.origin.partialclonefilter blob:none
-    git -C "$upstream" sparse-checkout set --no-cone '/engine/' '/LICENSE' '/NOTICE'
 fi
-if ! GIT_NO_LAZY_FETCH=1 git -C "$upstream" cat-file -e "$revision^{commit}" 2>/dev/null; then
-    if [ "$(git -C "$upstream" config --get remote.origin.partialclonefilter || true)" = "blob:none" ]; then
-        git -C "$upstream" fetch --depth 1 --filter=blob:none origin "$revision"
-    else
-        git -C "$upstream" fetch --depth 1 origin "$revision"
-    fi
-fi
+git -C "$upstream" fetch --depth 1 origin "$revision"
 git -C "$upstream" checkout --detach "$revision"
 if [ ! -x state/laya/venv/bin/python ]; then
     uv venv --python 3.12 state/laya/venv

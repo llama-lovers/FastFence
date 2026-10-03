@@ -1,0 +1,37 @@
+id: FF-113
+title: Deploy each documentation snapshot with its actual history commit identity
+status: implemented
+problem: Development and stable documentation artifacts built from the same source commit produced successful Pages status while the old artifact remained public, leaving the released 1.0.1 pages unavailable.
+scope:
+  - Pass the actual pushed gh-pages commit and exact uploaded artifact ID from build to deployment.
+  - Use the documented Pages REST deployment, status and cancellation APIs with GitHub Actions OIDC.
+  - Check out deployment tooling at the reusable workflow's exact job.workflow_sha while documentation content remains built from its verified source.
+constraints:
+  - Never alter a release tag or substitute an arbitrary timestamp for an existing repository commit.
+  - Keep source provenance in existing mike tag and SHA properties.
+  - Do not print tokens, OIDC values, signed URLs or raw provider responses.
+  - Restrict authenticated requests to fixed GitHub API endpoints and the trusted Actions OIDC hostname; disable redirects and environment proxies.
+  - Bound response sizes, request waits and polling; request cancellation on failure, timeout or interruption.
+  - Preserve the shared serialization queue and independent public-content verification gate.
+change_paths:
+  - scripts/deploy_pages.py
+  - tests/unit/test_pages_deployment.py
+  - .github/workflows/docs.yml
+acceptance:
+  - Two documentation artifacts sharing a source SHA deploy under their distinct actual site history commits.
+  - Deployment uses the ID output by the pinned upload-pages-artifact action without requiring artifact discovery or additional permissions.
+  - Tokens are only sent to their designated trusted endpoints and never appear in operator-facing errors.
+  - Invalid, failed or timed-out status cannot produce successful deployment output.
+  - Public-content verification follows deployment before the common documentation lock is released.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_pages_deployment.py
+    expected: Deployment contract, identity separation, bounded failures, cancellation and token protection pass.
+  - command: uv run --locked pre-commit run check-yaml --files .github/workflows/docs.yml specs/changes/113-distinct-pages-build-identity.yaml
+    expected: Workflow and specification remain valid YAML.
+evidence:
+  - check: Actual pre-fix artifact and public response comparison
+    result: Release artifact11287812076 contains 1.0.1 English/Polish pages, latest1.0.1 and preserved dev; public browser still received 404 and prior latest1.0.0. Independent artifact inspection ruled out missing generated content.
+  - check: Official deployment implementation and documented API
+    result: Pinned actions/deploy-pages v5.0.1 uses GITHUB_SHA as build identity with no configurable input. Official issue383 reports the same distinct-artifact/same-SHA behavior. REST uses the actual generated repository commit instead; actual hosted recovery remains to be verified after push.
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_pages_deployment.py
+    result: Twenty-three focused contract and failure tests passed; Ruff, workflow YAML and specification schema checks passed. Tests use isolated API responses and do not claim a hosted deployment.

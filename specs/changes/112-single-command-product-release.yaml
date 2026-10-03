@@ -1,0 +1,21 @@
+id: FF-112
+title: Release the single-command launcher as FastFence 1.0.2
+status: implemented
+problem: The published package requires separate init and serve commands rather than the requested single invocation.
+scope:
+  - Publish automatic first and repeat startup under a new immutable patch version.
+constraints:
+  - Do not modify the existing 1.0.1 tag or distribution.
+  - Require source and installed-wheel checks before creating the release tag.
+change_paths:
+  - _version.py
+acceptance:
+  - The built package reports version 1.0.2 and its default invocation launches the local product.
+validation:
+  - command: uv run pytest -q
+    expected: The complete regression suite passes.
+  - command: uv build
+    expected: Version 1.0.2 wheel and source distributions build successfully.
+evidence:
+  - check: Candidate distribution acceptance
+    result: Built version 1.0.2 wheel and sdist. Installed candidate completed automatic initialization and repeat launch in a fresh external directory with actual Laya and OCR, without explicit init or serve commands. Public-package verification follows publication.

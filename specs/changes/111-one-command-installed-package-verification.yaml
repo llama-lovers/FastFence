@@ -1,0 +1,28 @@
+id: FF-111
+title: Verify first and repeat startup through the no-command uv tool launcher
+status: implemented
+problem: Separate init and serve acceptance does not verify the requested single-command product launch.
+scope:
+  - Launch the installed wheel or exact public package in a fresh external directory without init, serve or setup commands.
+  - Repeat the same startup and verify private configuration and keys remain byte-identical.
+  - Exercise real Laya input and output assessment, policy hot reload and budget changes after automatic startup.
+  - Process a synthetic PNG through actual locally provisioned OCR on the first automatic start.
+constraints:
+  - Keep source checkout imports and inherited FastFence environment settings out of the installed process.
+  - Use a running local Ollama provider and distinguish this full verification from offline CI.
+  - Never expose private credentials or raw provider output in the retained report.
+change_paths:
+  - scripts/smoke_one_command.py
+acceptance:
+  - A fresh package starts its HTTP dashboard without a preceding setup command.
+  - Actual OCR extracts the synthetic image and the privacy policy withholds its sensitive Markdown.
+  - Repeat startup preserves policy, feed, identity records, credentials and encryption keys.
+  - Benign requests pass actual input/output assessment and policy or budget denials prevent upstream execution.
+validation:
+  - command: uv run --no-project python scripts/smoke_one_command.py --version VERSION --wheel WHEEL --output REPORT
+    expected: Candidate wheel completes automatic and repeat startup with actual configured components.
+  - command: uv run --no-project python scripts/smoke_one_command.py --version VERSION --output REPORT
+    expected: The exact public package passes the same first-run and operator checks.
+evidence:
+  - command: uv run --no-project python scripts/smoke_one_command.py --version 1.0.2 --wheel state/private/release-1.0.2-final/fastfence-1.0.2-py3-none-any.whl --output state/private/one-command-1.0.2-wheel.json
+    result: Passed installed-wheel startup twice without init or serve commands; preserved configuration, identities and keys. Actual OCR read the PNG and privacy controls withheld its sensitive Markdown. Actual Laya input/output checks, policy v1 through v5 changes and same-identity budget accounting passed.

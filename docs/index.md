@@ -12,19 +12,17 @@ FastFence checks AI requests and responses against your access, privacy, text an
 
 ## Start locally
 
-Use [uv](https://docs.astral.sh/uv/getting-started/installation/) and a running [Ollama](https://ollama.com/) service. Run the published package with Python 3.12 in your own working directory:
+With [uv](https://docs.astral.sh/uv/getting-started/installation/) installed and [Ollama](https://ollama.com/) running, execute this in your chosen working directory:
 
 ```sh
-mkdir fastfence-local
-cd fastfence-local
-uv tool run --python 3.12 fastfence@1.0.1 init
-uv tool run --python 3.12 fastfence@1.0.1 doctor
-uv tool run --python 3.12 fastfence@1.0.1 serve
+uv tool run fastfence
 ```
 
-uv keeps the package in an isolated cache; your configuration stays in `fastfence-local`. The [installation guide](getting-started.md) also covers pip, example scripts and version updates.
+FastFence **1.0.2 or later** prepares the required runtime and starts the gateway with one command. It creates private configuration, installs Laya, downloads the configured assessor if missing and prepares OCR when needed. The fresh default uses Qwen3:4b for assessment and completion in separate calls; no second model is needed.
 
-`init` prepares private configuration, installs Laya and downloads the configured assessor if needed. The fresh default uses Qwen3:4b for both assessment and completion in separate calls; no second model is required. Open **http://127.0.0.1:8000** and connect with your generated local credentials. The [installation guide](getting-started.md) covers prerequisites and private configuration. No FastFence source checkout is required.
+Open **http://127.0.0.1:8000** and connect using the credentials in `state/credentials.json`. Keep using the same working directory: configuration and keys stay there, while uv caches the package separately. If uv has an older release cached, use `uv tool run fastfence@latest`.
+
+No source checkout or manually activated environment is required. The [installation guide](getting-started.md) covers prerequisites, exact-version commands and updates.
 
 ## Choose your task
 

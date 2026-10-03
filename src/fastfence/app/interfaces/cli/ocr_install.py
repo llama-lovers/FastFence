@@ -58,5 +58,5 @@ def setup_ocr(state: Path) -> None:
         environment,
     )
     print(
-        "OCR dependencies and local mobile models installed. Restart FastFence to detect the configured state directory's OCR environment."
+        "OCR dependencies and local mobile models installed. A running gateway must restart to load newly installed components."
     )

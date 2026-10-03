@@ -1,7 +1,10 @@
 """Install the reviewed Laya helpers from a wheel without a source checkout."""
 
+import hashlib
+import os
 import shutil
 import subprocess
+import tempfile
 from importlib.resources import files
 from pathlib import Path
 
@@ -19,6 +22,37 @@ LAYA_FILES = (
 )
 
 
+PREVIOUS_SETUP_SHA256 = "b992a7fa7457afd6f1c883fbbad2a5a62d9ec48599441efa8f37d9d4db7e6a5f"  # pragma: allowlist secret - public released installer hash
+
+
+def _reviewed_upgrade(path: Path) -> bool:
+    return (
+        path.name == "setup.sh"
+        and not path.is_symlink()
+        and path.is_file()
+        and hashlib.sha256(path.read_bytes()).hexdigest()
+        == PREVIOUS_SETUP_SHA256
+    )
+
+
+def _upgrade_setup(path: Path, content: bytes) -> None:
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=".setup-upgrade-", dir=path.parent
+    )
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(content)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if not _reviewed_upgrade(path):
+            raise ValueError(
+                "Existing Laya installer changed during upgrade; existing files were preserved."
+            )
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
 def stage_laya(root: Path) -> Path:
     bundle = files("fastfence.shared").joinpath("laya_bundle")
     development = Path(__file__).resolve().parents[5] / "integrations/laya"
@@ -32,7 +66,9 @@ def stage_laya(root: Path) -> Path:
     for name, content in contents.items():
         path = destination / name
         if path.is_symlink() or (
-            path.exists() and path.read_bytes() != content
+            path.exists()
+            and path.read_bytes() != content
+            and not _reviewed_upgrade(path)
         ):
             raise ValueError(
                 "Existing Laya helper files differ from this package; preserve your changes and choose a new FASTFENCE_AUTHORING_ROOT."
@@ -42,6 +78,8 @@ def stage_laya(root: Path) -> Path:
         path = destination / name
         if not path.exists():
             _create_exclusive(path, content)
+        elif path.read_bytes() != content:
+            _upgrade_setup(path, content)
     return destination / "setup.sh"
 
 
@@ -67,5 +105,5 @@ def setup_laya(root: Path) -> None:
             "Laya setup failed; resolve the installer error and retry."
         )
     print(
-        "Laya installed. Run `fastfence init` to verify the configured semantic assessor. Business models are configured independently."
+        "Laya installed. The configured semantic assessor and business models are managed independently."
     )
