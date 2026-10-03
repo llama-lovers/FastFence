@@ -1,0 +1,39 @@
+id: FF-012
+title: Material documentation and GitHub Pages publishing
+status: implemented
+problem: The project needs public, navigable documentation at fastfence.dev with repeatable publishing from main.
+scope:
+  - Add MkDocs Material, tested usage guides, architecture and honest feature status.
+  - Build documentation on pull requests and publish main using GitHub Pages Actions.
+  - Configure fastfence.dev and document the required DNS and repository settings.
+constraints:
+  - Publish only public documentation; never include state, credentials or generated private artifacts.
+  - Use a locked documentation dependency group and strict builds.
+  - Distinguish implemented controls from planned natural-language rule compilation.
+  - Keep generated settings documentation compatible with its existing generator.
+change_paths:
+  - mkdocs.yml
+  - docs/**
+  - .github/workflows/docs.yml
+  - .gitignore
+  - pyproject.toml
+  - uv.lock
+  - README.md
+acceptance:
+  - Strict MkDocs build succeeds with working internal links.
+  - Navigation includes quickstart, policies, integrations, testing, architecture and deployment.
+  - Pages artifact includes CNAME for fastfence.dev and excludes private runtime files.
+  - Workflow grants deployment permissions only to the deployment job on main.
+  - Documentation clearly explains remaining DNS or repository configuration when unavailable.
+validation:
+  - command: uv run --group docs mkdocs build --strict
+    expected: Static Material site builds without warnings.
+  - command: uv run pre-commit run --all-files
+    expected: All repository quality gates pass.
+evidence:
+  - command: uv run pre-commit run --all-files
+    result: All configured hooks passed, including secret scanning, architecture, typing and specification gates.
+  - command: uv run --group docs mkdocs build --strict
+    result: Ten HTML pages built; local links and assets checked; CNAME targets fastfence.dev; no runtime credential files in artifact.
+  - command: Authenticated GitHub Pages API configuration
+    result: HTTP 422; current GitHub plan does not support Pages for this private repository. Hosting choice pending; repository visibility unchanged.

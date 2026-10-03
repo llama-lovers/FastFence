@@ -5,6 +5,14 @@
 Licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for project attribution.
 Third-party dependencies and integrations retain their respective licenses and notices.
 
+Documentation is configured for [fastfence.dev](https://fastfence.dev/) using MkDocs Material
+and GitHub Pages. [Publishing and DNS setup](docs/deployment.md) describes the required
+repository and domain settings. Preview it locally on a separate port from the gateway:
+
+```sh
+uv run --group docs mkdocs serve --dev-addr 127.0.0.1:8001
+```
+
 FastFence sits between an agent and business tools, tenant memory, or an allowlisted local LLM.
 It verifies a provisioned identity, applies centralized policy, reserves a budget before invoking
 the upstream, inspects the result, and records a sanitized decision. The dashboard lets judges
