@@ -1,0 +1,33 @@
+id: FF-041
+title: Image redaction with context-linked region identifiers
+status: planned
+problem: Confidential text in images must be protected before model processing while optionally preserving authorized restoration and references across text and image content.
+scope:
+  - Compose the independent OCR module from FF-042 with anonymization and control through a workflow after the encrypted-context contract is settled.
+  - Consume OCR text and bounding boxes, evaluate central rules over full text spans, and overwrite every affected region in a newly encoded image.
+  - Label masked regions with opaque identifiers linked to the conversation's protected mapping.
+  - Keep optional restoration material in a separate authenticated encrypted context carried by the caller, outside model-visible content.
+constraints:
+  - This is a future feature; OCR, image transport and restoration are not implemented or verified by this specification.
+  - A plain hash of sensitive text is neither encryption nor sufficient restoration material; public region identifiers must not expose guessable raw-value hashes.
+  - Exact pixel restoration requires encrypted original crops and coordinates bound to the exact image; an OCR string only supports text recovery. Pixel restoration is a proposed later phase pending the user's scope decision.
+  - Produce opaque pixel masks rather than removable overlays and strip source metadata from the exported image.
+  - Reuse text aliases for matching values within one context where policy permits it.
+  - Authentication, owner binding, expiry and current restoration permissions remain authoritative.
+  - Define image byte and pixel limits, OCR timeout and failure behavior before implementation; uncertain processing must not silently forward the original image.
+  - Benchmark OCR and image encoding independently from the deterministic text path; no image latency claims without measurements.
+  - Key ownership and encrypted-context format remain pending the user's design decision.
+  - OCR extracts text and geometry without importing control or anonymization; the workflow calls their public facades and enforces the active policy.
+change_paths:
+  - src/fastfence/modules/anonymization/**
+  - src/fastfence/workflows/**
+  - tests/integration/test_image_anonymization.py
+acceptance:
+  - Supported image fixtures have all expected sensitive regions masked and labelled while preserving non-sensitive layout.
+  - The upstream model receives only the sanitized image, never the original image or restoration material.
+  - Authorized restoration recovers the intended original crops and refuses mismatched images, modified capsules and other owners.
+  - OCR misses, low confidence, limits and failure behavior have explicit tests and documented coverage limitations.
+validation:
+  - command: uv run pytest --no-cov tests/integration/test_image_anonymization.py
+    expected: Future tests demonstrate masking, content isolation and authorized restoration; this command is not yet runnable.
+evidence: []

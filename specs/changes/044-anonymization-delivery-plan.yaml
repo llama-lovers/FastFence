@@ -1,0 +1,27 @@
+id: FF-044
+title: Publish the anonymization and OCR delivery plan
+status: verified
+problem: The team needs an explicit sequence of remaining work and design decisions without mistaking planned image and encrypted-context features for implemented capabilities.
+scope:
+  - Add a documentation page separating current work in progress from proposed delivery stages.
+  - Describe independent OCR, anonymization and control modules connected through workflows.
+  - Record key ownership, image scope and same-conversation parallelism as pending user decisions.
+constraints:
+  - This change publishes plans only and does not claim OCR or encrypted-context support exists.
+  - Keep incomplete runtime changes outside this documentation commit.
+change_paths:
+  - docs/anonymization-plan.md
+  - mkdocs.yml
+acceptance:
+  - The page lists module responsibilities, ordered tasks, validation expectations and outstanding decisions.
+  - The page is reachable from the documentation navigation and strict MkDocs build succeeds.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: Documentation builds with the new plan page and no broken links.
+  - command: uv run pre-commit run --files docs/anonymization-plan.md mkdocs.yml specs/changes/041-image-pseudonymization.yaml specs/changes/042-independent-ocr-module.yaml specs/changes/043-client-carried-encrypted-context.yaml specs/changes/044-anonymization-delivery-plan.yaml
+    expected: Relevant documentation and specification hooks pass.
+evidence:
+  - command: uv run mkdocs build --strict
+    result: Passed; the plan is included in the documentation navigation. This verifies documentation only.
+  - command: uv run pre-commit run --files docs/anonymization-plan.md mkdocs.yml specs/changes/041-image-pseudonymization.yaml specs/changes/042-independent-ocr-module.yaml specs/changes/043-client-carried-encrypted-context.yaml specs/changes/044-anonymization-delivery-plan.yaml
+    result: All applicable hooks passed; Python-only hooks skipped for this documentation-only change.

@@ -1,0 +1,35 @@
+id: FF-043
+title: Client-carried authenticated encrypted restoration context
+status: planned
+problem: Short stable aliases require an inverse mapping, but the gateway should not require a persistent conversation database or instance-local mapping affinity.
+scope:
+  - Define a bounded versioned encrypted capsule carrying the inverse mapping, conversation identifier, owner binding, expiry and rule fingerprints.
+  - Return the updated capsule to the client after each successful update and keep it outside upstream model and tool content.
+  - Resolve key ownership and the client's restoration role before implementing the cryptographic format.
+  - Evaluate authenticated hybrid public-key encryption where separate encryption and decryption roles are required; use a reviewed standard/library rather than a custom construction.
+  - Integrate current-policy restoration permission checks and explicit opt-in restoration.
+constraints:
+  - Public-key encryption alone does not authenticate FastFence as the issuer of a mapping; require issuer authentication and owner binding.
+  - Do not claim that a capsule proves it is the newest version; a fully stateless gateway cannot detect rollback to a still-valid older capsule.
+  - Proposed MVP serializes updates per conversation in the client; parallel updates require explicit branch and merge semantics before support.
+  - Expiry and current policy are checked on every use; individual immediate revocation or single-use guarantees require additional state.
+  - Never reuse an AEAD nonce with the same key; define key identifiers, provisioning and rotation through the selected library's supported construction.
+  - Never put private keys, capsule contents or original values in policy files, logs or model-visible content.
+  - Bound decoded and encoded capsule sizes; encrypted image crops require a separate payload-size decision.
+  - Measure crypto and transport overhead against the memory implementation; no unmeasured performance superiority claim.
+  - If only the client can decrypt, the gateway cannot reuse the encrypted mapping by itself; specify client-side aliasing or a separate safe mapping mechanism before implementation.
+change_paths:
+  - src/fastfence/modules/anonymization/**
+  - src/fastfence/shared/anonymization.py
+  - src/fastfence/workflows/**
+  - tests/unit/test_encrypted_context.py
+  - tests/integration/test_encrypted_context.py
+acceptance:
+  - Stable aliases survive a gateway restart with the same keys and a valid client-carried context, without a conversation database.
+  - Tampering, ownership mismatch, expiry, unsupported versions and oversized capsules fail closed.
+  - Removed or changed rules and revoked restoration permission prevent unauthorized original recovery.
+  - Documented parallelism and replay limitations match actual behavior.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_encrypted_context.py tests/integration/test_encrypted_context.py
+    expected: Future cryptographic lifecycle and integration checks pass; these tests are not implemented yet.
+evidence: []

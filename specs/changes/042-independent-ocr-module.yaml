@@ -1,0 +1,37 @@
+id: FF-042
+title: Independent local OCR module for protected image workflows
+status: planned
+problem: Image controls need locally extracted text with reliable coordinates without coupling OCR providers to security rules or sending originals to upstream models.
+scope:
+  - Create modules/ocr with domain geometry, contracts for provider ports, persistence adapters and an application facade.
+  - Define shared Pydantic request/result schemas with normalized image dimensions, ordered text, word offsets, bounding boxes and confidence where available.
+  - Select a local OCR engine after evaluating Polish and English printed-text fixtures, deployment requirements and code/model licenses.
+  - Decode bounded raster images, normalize orientation and retain one coordinate system for OCR, masking and restoration.
+  - Compose OCR through workflows/image_anonymization, never direct imports between feature modules.
+constraints:
+  - Proposed first scope is PNG/JPEG printed text in Polish and English; PDF, handwriting and exact pixel restoration await scope confirmation.
+  - No OCR or image dependencies on the ordinary text-only request path.
+  - Apply byte, decoded-pixel, time and concurrency limits; run blocking OCR outside the event loop with enforceable resource limits.
+  - OCR only extracts content; central policy determines what to block or anonymize.
+  - Preserve character offsets and word geometry so matches spanning several words mask all corresponding regions.
+  - Engine errors, unsupported input and rejected quality checks must not silently forward the original image.
+  - OCR may miss text; confidence and known failure checks are not proof that every secret was detected.
+  - No original image, OCR text, crop or encrypted restoration capsule in audit or management status.
+change_paths:
+  - src/fastfence/modules/ocr/**
+  - src/fastfence/shared/ocr.py
+  - src/fastfence/workflows/image_anonymization.py
+  - tests/unit/test_ocr*.py
+  - tests/integration/test_ocr*.py
+acceptance:
+  - Synthetic Polish and English fixtures return expected text spans and bounded coordinates after orientation normalization.
+  - Multiword, multiline and rotated fixtures map policy matches to all affected image regions or are explicitly rejected by the supported-input contract.
+  - Corrupt, oversized, unsupported and timed-out inputs produce bounded failures without upstream execution.
+  - Architecture checks prevent direct imports between OCR, anonymization and control modules.
+  - Cold-start and warm p50/p95 OCR measurements are reported separately from text guardrail latency alongside detection coverage.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_ocr.py tests/integration/test_ocr_workflow.py
+    expected: Future OCR and workflow checks pass; these tests are not implemented yet.
+  - command: uv run lint-imports
+    expected: Future module boundaries satisfy repository contracts.
+evidence: []

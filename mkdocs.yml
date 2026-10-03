@@ -61,5 +61,6 @@ nav:
       - Challenge readiness: challenge-readiness.md
   - Reference:
       - Architecture: architecture.md
+      - Anonymization and OCR plan: anonymization-plan.md
       - Runtime settings: settings.md
       - Documentation deployment: deployment.md
