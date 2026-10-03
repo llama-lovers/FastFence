@@ -46,6 +46,51 @@ Ordinary CI uses fake inference and OCR adapters; it does not download weights o
 require private credentials. Real OCR and Qwen checks run locally as separate
 integration evidence.
 
+## Fresh-clone installation evidence
+
+The [core acceptance report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/clean-install-core.json)
+records a fresh clone of commit `fc4cddc36718d07fccd27a40f02cef44a1bcc71f`,
+with no inherited `.env`, virtual environment, credentials or application state.
+All ten checks passed: actionable missing-state diagnostics, repeated initialization
+preserving private files, doctor validation, unauthenticated denial, an allowed
+tool, injection denial, default anonymization, opt-in restoration, sanitized audit,
+and restoration flags through actual MCP transport. Reproduce the core check with:
+
+```sh
+uv run python scripts/smoke_clean_install.py
+```
+
+An independent [fresh OCR installation report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/clean-install-ocr.json)
+uses the same source commit. Its empty clone ran `uv sync --locked`,
+`uv run fastfence init --anonymization` and `sh scripts/setup-ocr.sh`.
+The installation created a new isolated OCR environment and model directory;
+settings discovery worked without a `.env` file. The locked environment used
+PaddleOCR 3.4.0, PaddlePaddle 3.3.0, Pydantic 2.13.5, Pillow 12.3.0 and
+pypdfium2 5.13.0.
+
+Actual extraction passed all **22 text/page checks across five synthetic fixtures**:
+PNG, Polish JPEG, rotated PNG, scanned two-page PDF and mixed digital/scanned PDF.
+Fresh-worker wall time was p50 **5557 ms** and p95 **5777 ms**. Each fixture ran
+once; these timings include worker initialization and exclude HTTP and model
+inference. They describe this local run, not general OCR accuracy or a latency SLA.
+
+The document route was also exercised through FastAPI's in-process TestClient
+with actual OCR: the default input-blocking policy returned 422 without Markdown;
+changing input privacy to redaction returned 200 with both pages in order and
+the synthetic email removed. No LLM was called in this OCR installation check.
+Reproduce extraction after setup with:
+
+```sh
+state/private/ocr-env/bin/python -m fastfence.modules.ocr.interfaces.smoke \
+  --python state/private/ocr-env/bin/python \
+  --models state/private/ocr-models \
+  --repeats 1 --output state/ocr-install-check.json
+```
+
+These reports establish clean installation for the core and OCR paths. They do
+not establish fresh-clone Laya authoring or the complete real-model acceptance
+flow; those require a separate successful `--full` run.
+
 ## Current stateless and document evidence
 
 - [Actual Laya regression authoring](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/laya-regression-authoring.json): one synthetic instruction produced a valid letter rule and four independently passing local cases. Expectations were not repaired to force a pass.

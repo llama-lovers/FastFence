@@ -1,0 +1,89 @@
+{
+  "source": "real_laya",
+  "model": "qwen3:4b",
+  "inference_ms": 13720,
+  "existing_anonymization_scope": {
+    "direction": "both",
+    "target": "all"
+  },
+  "generation_schema": "Explicit text rule scope and fixed model-output/tool-input boundary cases.",
+  "generated_text_rule_scopes": [
+    {
+      "direction": "input",
+      "target": "model"
+    }
+  ],
+  "generated_cases": [
+    {
+      "label": "case-1",
+      "direction": "input",
+      "target": "model",
+      "expected": "no_local_match",
+      "actual": "no_local_match",
+      "pass": true
+    },
+    {
+      "label": "case-2",
+      "direction": "input",
+      "target": "model",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "label": "case-3",
+      "direction": "output",
+      "target": "model",
+      "expected": "no_local_match",
+      "actual": "no_local_match",
+      "pass": true
+    },
+    {
+      "label": "case-4",
+      "direction": "input",
+      "target": "tool",
+      "expected": "no_local_match",
+      "actual": "no_local_match",
+      "pass": true
+    }
+  ],
+  "independent_scope_cases": [
+    {
+      "target": "model",
+      "direction": "input",
+      "case": "match",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "target": "model",
+      "direction": "input",
+      "case": "benign",
+      "expected": "no_local_match",
+      "actual": "no_local_match",
+      "pass": true
+    },
+    {
+      "target": "model",
+      "direction": "output",
+      "case": "match",
+      "expected": "no_local_match",
+      "actual": "no_local_match",
+      "pass": true
+    },
+    {
+      "target": "tool",
+      "direction": "input",
+      "case": "match",
+      "expected": "no_local_match",
+      "actual": "no_local_match",
+      "pass": true
+    }
+  ],
+  "proposal_repaired": false,
+  "expected_results_repaired": false,
+  "historical_probe": "laya-explicit-scope-initial.json contains the prior actual wrong expected result.",
+  "scope": "Actual Laya generation and deterministic local comparisons; no activation or protected model call.",
+  "passed": true
+}

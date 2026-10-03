@@ -1,0 +1,91 @@
+{
+  "provider": "paddleocr",
+  "models": [
+    "PP-LCNet_x1_0_doc_ori",
+    "PP-OCRv5_mobile_det",
+    "latin_PP-OCRv5_mobile_rec"
+  ],
+  "scope": "Local synthetic quality checks; every request starts a fresh model worker. No LLM/HTTP timing. Tiny sample, no general accuracy guarantee.",
+  "samples": 5,
+  "passed": true,
+  "p50_wall_ms": 5557.23,
+  "p95_wall_ms": 5777.46,
+  "results": [
+    {
+      "fixture": "english.png",
+      "sha256": "127b9315df0040bd3f2257ab52c26274da53aed98b3be7f527f437afe22a97d2",
+      "repeat": 0,
+      "pages": 1,
+      "checks": 3,
+      "checks_passed": 3,
+      "passed": true,
+      "wall_ms": 5557.23,
+      "worker_ms": 4947,
+      "confidence_min": 0.9960664510726929
+    },
+    {
+      "fixture": "polish.jpg",
+      "sha256": "ca967e22bf36d2c946737db64b793d48a354f0015ba6f3ac2963ccc20fe21110",
+      "repeat": 0,
+      "pages": 1,
+      "checks": 4,
+      "checks_passed": 4,
+      "passed": true,
+      "wall_ms": 4363.32,
+      "worker_ms": 3731,
+      "confidence_min": 0.9686667323112488
+    },
+    {
+      "fixture": "rotated.png",
+      "sha256": "7432a3aa25537a95fb4f96ccff9d12a5dabaf0b99a3c3ca659a39116a46b35dd",
+      "repeat": 0,
+      "pages": 1,
+      "checks": 3,
+      "checks_passed": 3,
+      "passed": true,
+      "wall_ms": 4102.01,
+      "worker_ms": 3525,
+      "confidence_min": 0.9964379668235779
+    },
+    {
+      "fixture": "two-pages.pdf",
+      "sha256": "b25ea02fe8bb920eb2e48b7f684eb4a336e56dee4ed428824b60cce1227f0bff",
+      "repeat": 0,
+      "pages": 2,
+      "checks": 6,
+      "checks_passed": 6,
+      "passed": true,
+      "wall_ms": 5736.43,
+      "worker_ms": 5121,
+      "confidence_min": 0.9774813652038574
+    },
+    {
+      "fixture": "mixed.pdf",
+      "sha256": "d78e94681c2221a0d698b6c9c27fabee6465e96589f5e187aee98e5021eda3cb",
+      "repeat": 0,
+      "pages": 2,
+      "checks": 6,
+      "checks_passed": 6,
+      "passed": true,
+      "wall_ms": 5777.46,
+      "worker_ms": 5107,
+      "confidence_min": 0.9824040532112122
+    }
+  ],
+  "source_commit": "fc4cddc36718d07fccd27a40f02cef44a1bcc71f",
+  "fresh_clone": true,
+  "env_file_present": false,
+  "autodiscovery_verified": true,
+  "installed_versions": {
+    "paddleocr": "3.4.0",
+    "paddlepaddle": "3.3.0",
+    "pydantic": "2.13.5",
+    "pillow": "12.3.0",
+    "pypdfium2": "5.13.0"
+  },
+  "http": {
+    "default_policy_blocks_pdf": true,
+    "redact_policy_allows_sanitized_pdf": true,
+    "pages": 2
+  }
+}

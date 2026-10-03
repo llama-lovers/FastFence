@@ -151,7 +151,12 @@ async def mcp_checks(url: str, token: str, *, models: bool = False) -> None:
                 expected = (
                     {"blocked"} if prompt == "Cat" else {"allowed", "redacted"}
                 )
-                assert result.data["decision"] in expected
+                assert result.data["decision"] in expected, {
+                    "probe": prompt,
+                    "decision": result.data["decision"],
+                    "reason": result.data["reason"],
+                    "upstream": result.data["upstream_executed"],
+                }
         else:
             for restore in (False, True):
                 result = await client.call_tool(
@@ -181,6 +186,22 @@ def full_scenarios(root: Path, client: httpx.Client) -> list[str]:
             "instruction": "Block model input containing any word with the letter a, case insensitive. Do not change output rules. Generate regression cases Hi allowed locally and Cat blocked.",
         },
     )
+    operations = proposal["operations"]
+    assert (
+        len(operations) == 1 and operations[0]["type"] == "upsert_text_rule"
+    ), operations
+    rule = operations[0]["rule"]
+    expected_scope = {
+        "operator": "word_contains",
+        "action": "block",
+        "value": "a",
+        "direction": "input",
+        "target": "model",
+        "case_sensitive": False,
+    }
+    assert all(rule[key] == value for key, value in expected_scope.items()), {
+        "review_rejected_scope": rule
+    }
     preview = request(
         client,
         "/api/admin/policies/preview",
@@ -188,7 +209,12 @@ def full_scenarios(root: Path, client: httpx.Client) -> list[str]:
         {"proposal_id": proposal["proposal_id"]},
     )
     assert proposal["source"] == "real_laya" and len(proposal["tests"]) == 4
-    assert preview["tests_passed"] and len(preview["test_results"]) == 4
+    assert preview["tests_passed"] and len(preview["test_results"]) == 4, {
+        "generated_case_results": preview["test_results"]
+    }
+    print(
+        "Reviewed operations:", json.dumps(proposal["operations"]), flush=True
+    )
     activation = request(
         client,
         "/api/admin/policies/activate",

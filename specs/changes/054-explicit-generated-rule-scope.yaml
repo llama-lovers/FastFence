@@ -1,0 +1,38 @@
+id: FF-054
+title: Require explicit scope in generated text-rule proposals
+status: verified
+problem: Actual fresh-install acceptance produced a both/all text rule for a model-input-only instruction with an unrelated both/all anonymization rule present. The old raw model response was not retained, so omitted versus explicitly incorrect scope is not proven; generated scope must be explicit and reviewed against independent boundaries.
+scope:
+  - Require explicit direction and target in the generation-only text-rule schema.
+  - Reject generated text rules with missing or invalid scope without rewriting model output.
+  - Distinguish the requested rule scope from the scope of unrelated existing anonymization rules.
+  - Generate relevant out-of-scope regression cases alongside requested positive and negative cases.
+  - Pin case-3 to model output and case-4 to tool input in the generation-only schema, while cases 1 and 2 cover the requested rule scope.
+constraints:
+  - Preserve public TextRule defaults for existing manually authored policies.
+  - Never infer scope from another catalog rule or silently repair generated scope or expectations.
+  - Four named synthetic cases remain a lossless generation-envelope adapter.
+  - Reject incorrect fixed case scopes; leave incorrect expected decisions unchanged for the editable preview gate.
+change_paths:
+  - integrations/laya/policy_generation.py
+  - integrations/laya/draft_policy.py
+  - tests/unit/test_policy_regression_generation.py
+  - evaluation/results/laya-explicit-scope.json
+  - evaluation/results/laya-explicit-scope-initial.json
+acceptance:
+  - Generation schema requires direction and target without schema defaults on text rules.
+  - Missing or invalid generated scope is rejected before public DSL defaults can apply.
+  - A real Laya input-only model proposal retains input/model scope with an unrelated both/all anonymization rule present.
+  - Local comparisons cover input matches and out-of-scope model output and tool input.
+validation:
+  - command: uv run pytest -q --no-cov tests/unit/test_policy_regression_generation.py
+    expected: Strict generated scope, unchanged public defaults and lossless case normalization regressions pass.
+  - command: Coordinated real Laya probe with local qwen3:4b and synthetic catalog
+    expected: Explicit input/model scope and independent local case comparisons pass without output repair.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_policy_regression_generation.py
+    result: Eighteen tests pass, covering explicit generation-only rule scope, unchanged public defaults, fixed boundary scopes, strict rejection instead of repair and lossless expected results.
+  - command: Coordinated real LayaPolicyAuthor with qwen3:4b and an existing unrelated both/all reversible anonymization rule
+    result: Final probe generated explicit input/model scope in 13720 ms. All four generated cases and all four independent scope probes pass, including model output and tool input. No rule, sample or expected result was repaired; earlier wrong generated expectation remains in the separate historical report.
+  - command: uv run ruff check integrations/laya/policy_generation.py integrations/laya/draft_policy.py tests/unit/test_policy_regression_generation.py
+    result: Ruff check and format check pass.

@@ -32,4 +32,12 @@ validation:
     expected: Fresh-clone offline acceptance passes.
   - command: uv run python scripts/smoke_clean_install.py --full
     expected: Fresh-clone full feature acceptance passes with local Ollama available.
-evidence: []
+evidence:
+  - command: Fresh-clone core acceptance at fc4cddc36718d07fccd27a40f02cef44a1bcc71f
+    result: All ten checks passed without inherited private state, including repeat initialization, HTTP protection, stateless restoration and actual MCP flags. Sanitized report evaluation/results/clean-install-core.json.
+  - command: Fresh clone, uv sync --locked, uv run fastfence init --anonymization, sh scripts/setup-ocr.sh, then actual OCR smoke
+    result: New locked OCR environment and model directory initialized without .env; automatic settings discovery passed. Five synthetic image/PDF fixtures passed all 22 text/page checks. Fresh-worker p50 5557 ms and p95 5777 ms are local single-repeat observations, not a production SLA. Report evaluation/results/clean-install-ocr.json records versions and hashes.
+  - command: Document route through FastAPI TestClient with actual OCR in the fresh checkout
+    result: Default privacy block returned 422 without Markdown; privacy redact returned 200 with two ordered pages and the synthetic email removed. This in-process transport check invoked no LLM.
+  - command: Full fresh-clone Laya and model acceptance
+    result: Not established by the core and OCR reports; retain implemented status until a complete --full run succeeds.

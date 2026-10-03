@@ -30,8 +30,13 @@ For unsupported, ambiguous or impossible requests set supported=false and operat
 Only seven operations exist:
 - upsert_text_rule: local literal block rule. contains=substring, word_contains=substring
   WITHIN Unicode letter words (letter a matches Cat/data), equals=entire content. No regex,
-  stemming or semantic predicates. Preserve explicitly requested direction/target; absent
-  direction defaults both and target defaults model. action block, case_sensitive false.
+  stemming or semantic predicates. ALWAYS emit explicit direction and target in each
+  text rule. Preserve the instruction's exact scope: "model input" means direction=input
+  and target=model, NEVER both/all. "Do not change output rules" forbids extending the
+  new rule to output. Only when the instruction omits direction choose both; only when
+  it omits target choose model. action block, case_sensitive false.
+  Existing catalog anonymization scopes belong to DIFFERENT rules. Never copy their
+  both/all scope into a new text rule or extend a rule to match generated expectations.
 - set_privacy: global action for ALL sensitive data; direction input/output/both, block/redact.
 - set_privacy_detector: SELECTIVE email (pii_email) or eleven-digit Polish ID (pii_polish_id),
   direction input/output/both, block/redact. Email-only instructions MUST use this operation,
@@ -67,8 +72,17 @@ Do not replace a specific unsupported request with a broader supported action.
 For every supported proposal, generate exactly four synthetic tests in the object keys
 case-1, case-2, case-3, case-4. Each is DATA without a label field, containing text
 (max 4096 bytes), explicit direction input/output,
-target model/tool, expected_decision blocked/redacted/no_local_match. Cover a benign
-near match, intended match, relevant boundaries and requested direction/target.
+target model/tool, expected_decision blocked/redacted/no_local_match. Assign these keys:
+- case-1: benign near match IN the requested direction/target scope.
+- case-2: intended match IN the requested direction/target scope.
+- case-3: the intended match on MODEL OUTPUT: direction=output, target=model.
+- case-4: the intended match on TOOL INPUT: direction=input, target=tool.
+The schema requires the last two scopes. They test output and tool boundaries;
+do not substitute repeated model-input examples. If the new rule applies only to
+model input, case-3 and case-4 do NOT match that rule. They may still match an
+existing control; derive their expectations from the actual reviewed policy.
+For a tool-output-only rule, cases 1/2 must use tool output; cases 3/4 retain their
+fixed scopes. These four content tests are bounded coverage, not every runtime path.
 no_local_match means no local content control matched, never a full runtime ALLOW.
 Expectations must account for the proposal AND existing privacy/text/signature controls.
 For word_contains letter a, Cat, CAT and Data match; Hi and Hello do not. Use

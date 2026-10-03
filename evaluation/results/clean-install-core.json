@@ -1,0 +1,19 @@
+{
+  "source_commit": "fc4cddc36718d07fccd27a40f02cef44a1bcc71f",
+  "fresh_clone": true,
+  "inherited_private_state": false,
+  "full_features": false,
+  "checks": [
+    "missing_identity_actionable",
+    "repeat_init_preserves_private_files",
+    "doctor_passes",
+    "unauthenticated_denied",
+    "allowed_tool",
+    "injection_blocked",
+    "anonymization_default",
+    "restoration_opt_in",
+    "audit_has_no_originals",
+    "real_mcp_restoration_flags"
+  ],
+  "passed": true
+}
