@@ -96,7 +96,8 @@ path. Publication replaces a single coherent snapshot; in-flight requests retain
 The dashboard exposes source health, generation, last refresh and sanitized failure codes.
 
 Set `FASTFENCE_CONFIG_URL` to use a trusted HTTPS endpoint (HTTP is limited to loopback).
-It returns one JSON object containing exactly `policy` and `feed`, each with the same schema
+The fetch deadline covers connection, headers and the complete streamed body; timeout cancellation
+closes the client and response. It returns one JSON object containing exactly `policy` and `feed`, each with the same schema
 as the local files. Redirects are disabled; reads have a configured timeout and size bound.
 Remote configuration is edited at its source; the management gateway does not overwrite it.
 `FASTFENCE_CONFIG_POLL_INTERVAL`, `FASTFENCE_CONFIG_FETCH_TIMEOUT` and
@@ -308,6 +309,35 @@ uv run python evaluation/run_semantic.py --model qwen3:4b --output evaluation/re
 uv run python evaluation/smoke_hybrid.py --output evaluation/results/local-hybrid.json
 ```
 
+The memory runtime passed five actual Laya cases and five actual hybrid gateway cases;
+reports are [Laya](integrations/laya/results/live.json) and
+[hybrid gateway](evaluation/results/hybrid-gateway-memory-smoke.json).
+
+Measure deterministic enforcement separately:
+
+```sh
+uv run python evaluation/benchmark_gateway.py --output evaluation/results/local-runtime.json
+```
+
+The [recorded benchmark](evaluation/results/memory-runtime-benchmark.json) contains 24,000
+timed calls, 100 excluded warmup calls per scenario, and serial/eight-worker workloads on
+Apple M3 Pro, 18 GiB RAM, Python 3.12.12. The zero-wait upstream is explicitly a benchmark
+fixture; actual authorization, input/output checks, budget reservation/settlement and bounded
+audit remain active. These direct core measurements exclude HTTP/MCP, DTO parsing and LLM time.
+
+| Zero-wait workload, serial | p50 | p95 | p99 | Calls/s |
+| --- | --- | --- | --- | --- |
+| Allowed business call | 0.041 ms | 0.044 ms | 0.048 ms | 23,796 |
+| Signature denial | 0.015 ms | 0.016 ms | 0.017 ms | 63,442 |
+| RBAC denial | 0.010 ms | 0.011 ms | 0.011 ms | 92,214 |
+
+Eight cooperative workers gave p95 0.046 ms for allowed fixture calls. A separate mode uses
+the actual demo backend, including its intentional 15 ms delay: allowed end-to-end p95 was
+17.202 ms serial and 17.494 ms with eight workers. These are development measurements for
+small fixed requests, with other processes and CPU power state uncontrolled; they are not
+production performance guarantees. Reservations and expected verdicts are checked throughout
+so budget denials cannot masquerade as fast allowed calls.
+
 The hybrid smoke test creates temporary isolated policy/state and exercises the real model,
 REST gateway, RBAC, output redaction, model completion and sanitized export. It does not change
 the running dashboard's policy or budgets.
@@ -326,7 +356,8 @@ depending on eventual event processing.
 
 The implementation and acceptance criteria are tracked in `specs/requirements.yaml` and
 `specs/changes/`. Every code change must stage an implemented or verified specification;
-pre-commit rejects uncovered changes and architectural violations.
+pre-commit rejects uncovered changes and architectural violations. Follow-up fixes FF-008 and
+FF-009 cover trusted telemetry classification and a complete remote-fetch deadline.
 
 | Requirements | Delivered scope |
 | --- | --- |

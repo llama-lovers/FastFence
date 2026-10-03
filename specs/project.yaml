@@ -1,33 +1,35 @@
 id: FASTFENCE-BASELINE
-title: AI Control Layer for authenticated agents
+title: Historical MVP baseline; runtime architecture superseded by FF-005 and FF-006
 status: verified
 problem: Autonomous agents require independent enforcement of access, privacy and resource limits.
 scope:
-  - REST and authenticated MCP tool and tenant-resource gateway
-  - Centrally validated versioned policies and externally maintained literal signature feed
-  - Independent deterministic controls plus configurable real semantic inference
-  - Durable atomic per-subject UTC-day budgets and sanitized audit export
-  - Management dashboard with access, threat and resource telemetry
+- REST and authenticated MCP tool and tenant-resource gateway
+- Centrally validated versioned policies and externally maintained literal signature feed
+- Independent deterministic controls plus configurable real semantic inference
+- Durable atomic per-subject UTC-day budgets and sanitized audit export
+- Management dashboard with access, threat and resource telemetry
 constraints:
-  - Business tools are simulated; no live financial transactions.
-  - Model scores are not calibrated security probabilities.
-  - One gateway process owns each state directory.
-  - Costs and token units are documented conservative estimates.
+- This records the historical b8bab10 baseline, not current storage or instance semantics; current architecture
+  is specified in requirements.yaml and FF-005 through FF-009.
+- Business tools are simulated; no live financial transactions.
+- Model scores are not calibrated security probabilities.
+- One gateway process owns each state directory.
+- Costs and token units are documented conservative estimates.
 change_paths: []
 acceptance:
-  - Unauthorized identities, roles, tenants and targets do not execute upstream operations.
-  - Concurrent requests cannot spend the same remaining budget.
-  - Secrets are filtered from results and never stored in audit payloads.
-  - Invalid policy reload retains the previous complete snapshot.
-  - Configured model failures fail closed.
+- Unauthorized identities, roles, tenants and targets do not execute upstream operations.
+- Concurrent requests cannot spend the same remaining budget.
+- Secrets are filtered from results and never stored in audit payloads.
+- Invalid policy reload retains the previous complete snapshot.
+- Configured model failures fail closed.
 validation:
-  - command: uv run pytest -q
-    expected: Existing baseline has 60 passing tests before the architecture migration.
-  - command: uv run python evaluation/run_semantic.py --output evaluation/results/local-semantic.json
-    expected: Live scores and failures are recorded without fabricated inference.
-  - command: uv run python evaluation/smoke_hybrid.py --output evaluation/results/local-hybrid.json
-    expected: Actual local inference and five real gateway scenarios pass.
+- command: uv run pytest -q
+  expected: Existing baseline has 60 passing tests before the architecture migration.
+- command: uv run python evaluation/run_semantic.py --output evaluation/results/local-semantic.json
+  expected: Live scores and failures are recorded without fabricated inference.
+- command: uv run python evaluation/smoke_hybrid.py --output evaluation/results/local-hybrid.json
+  expected: Actual local inference and five real gateway scenarios pass.
 evidence:
-  - baseline_commit: b8bab1036adf21d464bc748f1e46276caa45acb7
-  - artifact: evaluation/results/qwen3-4b-binary-schema.json
-  - artifact: evaluation/results/hybrid-gateway-smoke.json
+- baseline_commit: b8bab1036adf21d464bc748f1e46276caa45acb7
+- artifact: evaluation/results/qwen3-4b-binary-schema.json
+- artifact: evaluation/results/hybrid-gateway-smoke.json

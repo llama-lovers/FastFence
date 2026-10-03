@@ -1,4 +1,4 @@
-status: implemented
+status: verified
 constraints:
 - Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
 - Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
@@ -9,10 +9,15 @@ constraints:
 - HTTP bundle is authoritative and read-only through gateway management; edits occur at its source.
 evidence:
 - command: uv run pytest -q
-  result: 141 tests passed; 93.16% source coverage; memory/no-I/O/concurrency, config-only startup, immutable
-    snapshots, source failures and read-only HTTP management verified
+  result: 153 tests passed; source coverage 93.44% exceeds enforced 85% gate
 - command: uv run pre-commit run --all-files
-  result: All configured hooks passed; 16 import contracts kept, zero type errors
+  result: All configured hooks passed; 16 import contracts kept; zero type errors
+- artifact: evaluation/results/memory-runtime-benchmark.json
+  result: 24,000 timed actual core invocations; budget settlement, bounded audit and expected outcomes
+    verified
+- follow_up: FF-009
+  result: Full HTTP wall-clock fetch deadline verified over real slow-drip and delayed-header loopback
+    source
 id: FF-006
 title: Background file and HTTP configuration providers
 problem: Manual reload and copying snapshots on every call do not meet the accepted dynamic low-I/O runtime

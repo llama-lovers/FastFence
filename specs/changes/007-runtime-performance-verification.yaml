@@ -1,4 +1,4 @@
-status: planned
+status: verified
 constraints:
 - Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
 - Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
@@ -6,7 +6,24 @@ constraints:
 - Restart resets volatile budgets and audit; this is explicit stateless runtime behavior.
 - Only trusted server configuration selects remote sources; client request bodies cannot choose configuration
   URLs.
-evidence: []
+- Benchmark uses an explicitly labeled zero-wait simulated upstream to measure local controls; the demo
+  backend artificial 15 ms delay must never be reported as guardrail overhead.
+evidence:
+- command: uv run pytest -q
+  result: 153 tests passed; source coverage 93.44% exceeds enforced 85% gate
+- command: uv run pre-commit run --all-files
+  result: All configured hooks passed; 16 import contracts kept; zero type errors
+- artifact: evaluation/results/memory-runtime-benchmark.json
+  result: 24,000 timed invocations; 2,000 per scenario plus 100 warmups; Apple M3 Pro 18 GiB Python 3.12.12;
+    zero-wait local controls p95 0.043875 ms, about 23,796 calls/s serial; actual demo 15 ms backend reported
+    separately
+- artifact: integrations/laya/results/live.json
+  result: 5/5 actual Laya client/dispatcher cases passed against memory runtime with real Qwen3:4b
+- artifact: evaluation/results/hybrid-gateway-memory-smoke.json
+  result: 5/5 actual model/REST scenarios passed, including semantic denial, output redaction and model
+    completion
+- command: uv build
+  result: Source distribution and wheel built successfully
 id: FF-007
 title: Verification of fast local runtime requirements
 problem: The functional and nonfunctional requirements need executable evidence rather than architecture

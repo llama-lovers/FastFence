@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-03T10:44:45.782004Z",
+  "created_at": "2026-10-03T11:14:06.300003Z",
   "upstream_commit": "b3b998c03dc44076675305581eb4640b9bf6ff8f",
   "gateway_url": "http://127.0.0.1:8001",
   "model": "qwen3:4b",
@@ -8,25 +8,25 @@
       "name": "Laya model allowed",
       "passed": true,
       "decision": "allowed",
-      "latency_ms": 4338,
+      "latency_ms": 6020,
       "upstream_executed": true,
-      "request_id": "6c4085eb33d642fbb535a775a6046776"
+      "request_id": "8bdbc359201649919c07af4aa981ddfb"
     },
     {
       "name": "Laya model injection blocked",
       "passed": true,
       "decision": "blocked",
-      "latency_ms": 16,
+      "latency_ms": 15,
       "upstream_executed": false,
-      "request_id": "c1c55d5986554ae9bb6d5d8ec2fdbd1f"
+      "request_id": "24e6fc13edf04eb9ac12f787abbb3826"
     },
     {
       "name": "Laya business tool allowed",
       "passed": true,
       "decision": "allowed",
-      "latency_ms": 749,
+      "latency_ms": 716,
       "upstream_executed": true,
-      "request_id": "d270cd80adf2464db57c70530d1ee308"
+      "request_id": "ae821ac1a99e413792405c849e8782b2"
     },
     {
       "name": "Laya tool role denied",
@@ -34,7 +34,7 @@
       "decision": "blocked",
       "latency_ms": 6,
       "upstream_executed": false,
-      "request_id": "100aef0b3fa847dcac1d5775ba615c19"
+      "request_id": "a36045b8c53341c0b548a6173021cad0"
     },
     {
       "name": "Laya cross-tenant tool denied",
@@ -42,17 +42,17 @@
       "decision": "blocked",
       "latency_ms": 4,
       "upstream_executed": false,
-      "request_id": "b96429b54ab24e9885066ec9efacc0c2"
+      "request_id": "36e15ae4a466454da3bbfb2e2841a224"
     }
   ],
   "audit": [
     {
-      "sequence": 10,
-      "time": "2026-10-03T10:44:45.766438+00:00",
+      "sequence": 5,
+      "time": "2026-10-03T11:14:06.283895+00:00",
       "subject": "analyst-blue",
       "tenant": "blue",
       "target": "memory.read",
-      "request_id": "b96429b54ab24e9885066ec9efacc0c2",
+      "request_id": "36e15ae4a466454da3bbfb2e2841a224",
       "decision": "blocked",
       "reason": "cross_tenant_resource",
       "policy_version": 2,
@@ -63,15 +63,17 @@
       "semantic_score": null,
       "tokens": 0,
       "cost_microusd": 0,
-      "upstream_executed": false
+      "upstream_executed": false,
+      "instance_id": "dff4bbd332c74febbf940b2e2fbcf89b",
+      "telemetry_scope": "instance"
     },
     {
-      "sequence": 9,
-      "time": "2026-10-03T10:44:45.762171+00:00",
+      "sequence": 4,
+      "time": "2026-10-03T11:14:06.279039+00:00",
       "subject": "analyst-blue",
       "tenant": "blue",
       "target": "payments.prepare",
-      "request_id": "100aef0b3fa847dcac1d5775ba615c19",
+      "request_id": "a36045b8c53341c0b548a6173021cad0",
       "decision": "blocked",
       "reason": "role_not_allowed",
       "policy_version": 2,
@@ -82,34 +84,38 @@
       "semantic_score": null,
       "tokens": 0,
       "cost_microusd": 0,
-      "upstream_executed": false
+      "upstream_executed": false,
+      "instance_id": "dff4bbd332c74febbf940b2e2fbcf89b",
+      "telemetry_scope": "instance"
     },
     {
-      "sequence": 8,
-      "time": "2026-10-03T10:44:45.754872+00:00",
+      "sequence": 3,
+      "time": "2026-10-03T11:14:06.270798+00:00",
       "subject": "analyst-blue",
       "tenant": "blue",
       "target": "knowledge.search",
-      "request_id": "d270cd80adf2464db57c70530d1ee308",
+      "request_id": "ae821ac1a99e413792405c849e8782b2",
       "decision": "allowed",
       "reason": "controls_passed",
       "policy_version": 2,
       "feed_version": 1,
-      "latency_ms": 742,
+      "latency_ms": 710,
       "findings": [],
       "semantic_provider": "ollama",
       "semantic_score": 0,
       "tokens": 2304,
       "cost_microusd": 100,
-      "upstream_executed": true
+      "upstream_executed": true,
+      "instance_id": "dff4bbd332c74febbf940b2e2fbcf89b",
+      "telemetry_scope": "instance"
     },
     {
-      "sequence": 7,
-      "time": "2026-10-03T10:44:44.996573+00:00",
+      "sequence": 2,
+      "time": "2026-10-03T11:14:05.546977+00:00",
       "subject": "analyst-blue",
       "tenant": "blue",
       "target": "llm:qwen3:4b",
-      "request_id": "c1c55d5986554ae9bb6d5d8ec2fdbd1f",
+      "request_id": "24e6fc13edf04eb9ac12f787abbb3826",
       "decision": "blocked",
       "reason": "attack_signature",
       "policy_version": 2,
@@ -122,26 +128,30 @@
       "semantic_score": null,
       "tokens": 0,
       "cost_microusd": 0,
-      "upstream_executed": false
+      "upstream_executed": false,
+      "instance_id": "dff4bbd332c74febbf940b2e2fbcf89b",
+      "telemetry_scope": "instance"
     },
     {
-      "sequence": 6,
-      "time": "2026-10-03T10:44:44.875118+00:00",
+      "sequence": 1,
+      "time": "2026-10-03T11:14:05.462512+00:00",
       "subject": "analyst-blue",
       "tenant": "blue",
       "target": "llm:qwen3:4b",
-      "request_id": "6c4085eb33d642fbb535a775a6046776",
+      "request_id": "8bdbc359201649919c07af4aa981ddfb",
       "decision": "allowed",
       "reason": "controls_passed",
       "policy_version": 2,
       "feed_version": 1,
-      "latency_ms": 2924,
+      "latency_ms": 4821,
       "findings": [],
       "semantic_provider": "ollama",
       "semantic_score": 0,
-      "tokens": 2882,
+      "tokens": 2884,
       "cost_microusd": 0,
-      "upstream_executed": true
+      "upstream_executed": true,
+      "instance_id": "dff4bbd332c74febbf940b2e2fbcf89b",
+      "telemetry_scope": "instance"
     }
   ],
   "all_passed": true,

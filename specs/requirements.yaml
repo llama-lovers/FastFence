@@ -1,6 +1,6 @@
 id: FASTFENCE-REQUIREMENTS
 title: Accepted functional and nonfunctional requirements
-status: implemented
+status: verified
 problem: Product behavior and architecture must be traceable to the user supplied requirement set.
 scope:
 - F1 Intercept agent/model/MCP/API interactions through controlled adapters.
@@ -44,6 +44,10 @@ validation:
 - command: uv run pytest -q
   expected: Functional and nonfunctional acceptance tests pass.
 evidence:
-- specifications: FF-001 through FF-007
+- specifications: FF-001 through FF-009
   mapping: README requirement coverage table distinguishes delivered scope, optional features and local-budget/restart
     tradeoffs
+- command: uv run pytest -q
+  result: 153 tests passed; source coverage 93.44% exceeds enforced 85% gate
+- artifacts: evaluation/results/memory-runtime-benchmark.json; integrations/laya/results/live.json; evaluation/results/hybrid-gateway-memory-smoke.json
+  result: Measured local controls and actual model/Laya behavior are documented separately

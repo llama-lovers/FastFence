@@ -1,4 +1,4 @@
-status: implemented
+status: verified
 constraints:
 - Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
 - Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
@@ -6,10 +6,12 @@ constraints:
 - Restart resets volatile budgets and audit; this is explicit stateless runtime behavior.
 evidence:
 - command: uv run pytest -q
-  result: 141 tests passed; 93.16% source coverage; memory/no-I/O/concurrency, config-only startup, immutable
-    snapshots, source failures and read-only HTTP management verified
+  result: 153 tests passed; source coverage 93.44% exceeds enforced 85% gate
 - command: uv run pre-commit run --all-files
-  result: All configured hooks passed; 16 import contracts kept, zero type errors
+  result: All configured hooks passed; 16 import contracts kept; zero type errors
+- artifact: evaluation/results/memory-runtime-benchmark.json
+  result: 24,000 timed actual core invocations; budget settlement, bounded audit and expected outcomes
+    verified
 id: FF-005
 title: Memory-only enforcement runtime
 problem: SQLite and durable counters contradict the accepted NF2/NF3 fast local runtime requirements.
