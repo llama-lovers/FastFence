@@ -1,9 +1,9 @@
 # Stateless anonymization and OCR delivery plan
 
 This is a plan, not a list of released capabilities. Text transformations and
-Laya/UI integration are work in progress. Stateless recovery tokens, OCR and PDF
-processing are not implemented. The latest user decision supersedes the earlier
-conversation vault and client-carried mapping capsule designs.
+Laya/UI integration are work in progress. Stateless recovery tokens and the
+OCR-to-Markdown document path are not implemented. The latest user decision
+supersedes the earlier conversation vault and mapping capsule designs.
 
 ## Confirmed requirements
 
@@ -11,7 +11,10 @@ conversation vault and client-carried mapping capsule designs.
   session affinity or client-carried conversation mapping.
 - Independent parallel calls; no per-conversation queue.
 - Policy selects irreversible masking or reversible pseudonymization.
-- PNG/JPEG and multipage PDF belong to the first document release.
+- Printed Polish/English text in PNG/JPEG and multipage PDF belongs to the first
+  document release.
+- Local OCR produces Markdown that replaces the original document in the model
+  request. Deliver the sanitized `.md` artifact and send its contents upstream.
 - Bounded local processing; measure total latency including model token overhead.
 
 Static configured keys and active policy are runtime configuration, not
@@ -23,8 +26,8 @@ These names describe the planned contract, not existing configuration fields.
 
 | Mode | Output and recovery |
 | --- | --- |
-| `irreversible` | Sanitized content and opaque aliases only. Retain/export no original values, inverse maps, original crops or encrypted recovery payloads. Reject restoration. |
-| `reversible` | Self-contained authenticated encrypted tokens, each carrying its own recoverable value. Restoration also requires explicit opt-in, verified ownership and current policy permission. |
+| `irreversible` | Sanitized Markdown/text and opaque aliases only. Retain/export no original values, inverse maps or encrypted recovery payloads. Reject restoration. |
+| `reversible` | Self-contained authenticated encrypted text tokens, each carrying its own recoverable value. Restoration also requires explicit opt-in, verified ownership and current policy permission. |
 
 Disabling output restoration does not destroy a reversible token's recovery
 material. Switching policy to irreversible prevents gateway recovery under that
@@ -32,20 +35,52 @@ policy but cannot erase copies already held by clients. Reversible replacement
 is pseudonymization. Removing detected values is not proof that all identifying
 information has been removed from surrounding content.
 
+## Document input becomes Markdown
+
+Image and PDF editing are outside this scope: no pixel masking, modified PDF
+export, image reconstruction or pixel restoration.
+
+The document path accepts PNG/JPEG and multipage PDF. OCR and any necessary PDF
+page rendering run locally, before a text-model request. Assemble the extracted
+content as one ordered Markdown document, preserving explicit page boundaries
+and page order. Digital and scanned PDF pages use the same downstream text
+contract.
+
+Run the extracted Markdown through the existing text controls and the selected
+stateless transformation mode. Only after these checks pass, produce the sanitized
+`.md` artifact and use the **same sanitized contents** as the model's document
+input. Original image/PDF bytes and raw OCR text must never reach the upstream
+model or audit logs. The ordinary text path must not execute OCR or load image
+models.
+
+Treat document Markdown as untrusted content. Keep it in the document/user-data
+portion of the model request; never promote extracted headings, instructions or
+embedded prompts into system instructions. Preserve hard blocks and check both
+original extracted content and the transformed text, so replacing a sensitive
+value cannot hide an attack from the remaining controls.
+
+Markdown preserves text and page separation, rather than the original visual
+layout. Reading order and tables are best effort and require evaluation on
+representative documents. Do not claim exact table reconstruction, faithful page
+layout or complete extraction from every document. Optional restoration applies
+to text tokens and delivered text responses only.
+
 ## Stateless tokens
 
 A short alias such as `[EMAIL_K7Q...]` uses a keyed fingerprint scoped to the
 verified tenant, subject, rule and entity type. Equal values can have the same
 identifier across independent calls, without sequential counters. This
 intentionally reveals equality within the scope; do not correlate different
-owners or expose plain hashes of guessable personal data.
+owners or expose plain hashes of guessable personal data. The configured default
+alias prefix is `ANONIM`.
 
-A reversible token additionally carries the encrypted value, version, key ID and
-necessary cryptographic metadata. Use a reviewed authenticated construction,
-separate keys for identifiers and encryption, fresh nonces where required, owner
-and purpose binding, strict size limits and current-policy checks. Public-key
-encryption alone does not authenticate FastFence as issuer. Never derive a
-reusable encryption nonce from the value to force deterministic ciphertext.
+A reversible token additionally carries the encrypted text value, version, key
+ID and necessary cryptographic metadata. Use a reviewed authenticated
+construction, separate keys for identifiers and encryption, fresh nonces where
+required, owner and purpose binding, strict size limits and current-policy checks.
+Public-key encryption alone does not authenticate FastFence as issuer. Never
+create a reusable encryption nonce from the value to force deterministic
+ciphertext.
 
 Gateway-held decryption keys are the working implementation assumption, supplied
 through deployment configuration. Authenticated hybrid public-key encryption can
@@ -69,24 +104,26 @@ latest-version or individual immediate-revocation guarantees without state.
 
 | Component | Responsibility |
 | --- | --- |
-| `modules/ocr` | Local ordered text, offsets, page IDs, bounding boxes and confidence; normalized orientation and bounded rendering/OCR. |
-| `modules/anonymization` | Pattern matching, scoped aliases, self-contained recovery tokens, pixel masking and authorized recovery without a conversation store. |
+| `modules/ocr` | Local PL/EN extraction, page IDs, reading order, confidence and ordered Markdown production, with bounded PDF rendering/OCR. |
+| `modules/anonymization` | Text matching, scoped aliases, self-contained encrypted text tokens and authorized text recovery without a conversation store. |
 | `modules/control` | Authentication, central policy, hard blocks, budgets, semantic checks and safe audit metadata. |
-| `workflows` | Connect public facades, map text matches to pixel regions and send sanitized content upstream. |
-| `shared` | Pydantic text-span, geometry and transformation contracts. |
+| `workflows` | Connect public facades, pass OCR Markdown through text controls, deliver sanitized `.md` bytes and send the same contents to the model. |
+| `shared` | Pydantic extraction, page-boundary, Markdown and text-transformation contracts. |
 
 Feature modules do not import one another. OCR extracts content; central rules
-decide what to mask or block. Laya authors typed rules. The ordinary text path
-must not execute OCR or load image models.
+decide what to mask or block. Laya authors typed rules. Transformation and output
+restoration remain independently controlled by active policy and explicit request
+consent.
 
 ```mermaid
 flowchart LR
-    A[Independent authenticated request] --> B[Text or local OCR of PDF pages]
-    B --> C[Policy checks and stateless aliases]
-    C --> D[Sanitized text or masked document]
-    D --> E[Upstream model]
-    C --> F[Self-contained tokens only if reversible]
-    F --> G[Authorized token recovery]
+    A[Authenticated PNG/JPEG or multipage PDF input] --> B[Bounded local extraction and OCR]
+    B --> C[Ordered untrusted Markdown with page boundaries]
+    C --> D[Text controls and stateless transformation]
+    D --> E[Sanitized Markdown artifact and contents]
+    E --> F[Text-model document input]
+    F --> G[Output controls]
+    G --> H[Optional authorized text-token restoration and recheck]
 ```
 
 ## Delivery order and remaining work
@@ -96,62 +133,52 @@ flowchart LR
    Specify stateless tokens and modes before integration; preserve shipped controls.
 2. **Finish text transformations.** Implement literal/pattern rules, distinct
    aliases with a default `ANONIM` prefix, input/output processing and optional
-   authorized recovery. Preserve original hard blocks and recheck transformed or
-   restored values. Finish Laya, isolated preview, HTTP, MCP and OpenAI-compatible
+   authorized text recovery. Preserve original hard blocks and recheck transformed
+   or restored values. Finish Laya, isolated preview, HTTP, MCP and OpenAI-compatible
    integration against the stateless contract.
 3. **Verify tokens.** Test tampering, ownership, rule revocation, expiry, key
    rotation, malformed/oversized input, parallel calls and restart with identical
    keys. Prove irreversible mode retains no recovery material. Test actual-model
    copying and measure ciphertext expansion.
-4. **Build OCR and PDF rendering.** Evaluate local engines on synthetic printed
-   Polish/English fixtures and check code/model licenses. Add full-text offsets,
-   word geometry, page IDs and confidence. Include mixed scanned/digital
-   multipage PDFs from the start. Enforce processing limits outside the event loop.
-5. **Build masking.** Map multiword matches to every affected region, overwrite
-   pixels and add opaque labels. Export fresh sanitized images and multipage
-   raster PDFs. Equal values share scoped aliases across text and pages.
-6. **Add document transport and demo.** Define authenticated bounded uploads and
-   select a vision-capable upstream. Show multipage PDF input and sanitized PDF
-   output. Cover output images when the upstream actually produces them; text
-   completion alone does not demonstrate image support.
-7. **Add optional pixel recovery later.** A complete self-contained recovery token
-   must carry its own encrypted crop, coordinates and exact artifact binding.
-   A short region label cannot restore pixels. If implemented, tokens accompany
-   the document as explicit recovery data, never a hidden conversation mapping
-   or server lookup. Text recovery does not imply exact image recovery.
-8. **Publish evidence.** Verify architecture, quality, isolation and transport.
-   Evaluate OCR misses and false masks; measure text, crypto, model token overhead,
-   cold/warm OCR and page encoding separately, including p50/p95. No unmeasured
-   performance or perfect-detection claims.
+4. **Build local extraction.** Evaluate OCR engines on synthetic printed
+   Polish/English PNG/JPEG and mixed scanned/digital multipage PDF fixtures. Check
+   code/model licenses, preserve page order and boundaries, and produce Markdown.
+   Evaluate accents, reading order, multiline values and tables without assuming
+   OCR confidence proves complete detection. Run rendering/OCR outside the event loop.
+5. **Add document transport and demo.** Define authenticated bounded uploads and
+   a sanitized `.md` artifact response. Show a multipage PDF becoming Markdown,
+   passing text controls and replacing the original document in the model request.
+   Verify the upstream receives exactly the sanitized Markdown content.
+6. **Publish evidence.** Verify architecture, quality, isolation and transport.
+   Evaluate extraction misses, false matches and table/reading-order limitations.
+   Measure text transformation, crypto, model token overhead, cold/warm OCR and
+   multipage extraction separately, including p50/p95. No unmeasured performance
+   or perfect-detection claims.
 
-## Image and PDF contract
+## Bounded document contract
 
-PNG/JPEG and multipage PDF are confirmed initial scope. Printed Polish/English
-text is the working baseline; handwriting, video and exact pixel recovery remain
-later stages. For reversible recognized-text recovery, the complete text tokens
-must be carried in the document response and supplied to recovery; labels alone
-are insufficient. No prior response is stored by FastFence.
+Set upload byte, page-count, per-page/aggregate rendering pixel, extracted text,
+sanitized Markdown byte, render/OCR timeout and concurrency limits. Reject
+unsupported or encrypted PDFs explicitly in the first release. Any page failure
+rejects the document; never present partially checked Markdown as a fully sanitized
+artifact.
 
-Render every PDF page, OCR locally, mask affected pixels and assemble a new PDF
-exclusively from sanitized rasters. Preserve page order and dimensions. Do not
-copy source PDF text/OCR layers, objects, attachments, metadata, forms or scripts.
-A rectangle drawn over original PDF text is insufficient. Initial output loses
-searchable/selectable text, accessibility structure, interactive forms, links,
-signatures and original vector representation; safe reconstruction is later work.
+Keep processing request-local. Deliver sanitized `.md` bytes and content through
+an authenticated response; do not use a conversation store to retain document
+originals or recovery data. Use safe artifact names and metadata. Audit/status
+records contain sanitized decisions and processing counts, never original files,
+raw OCR text, Markdown bodies or recovery tokens.
 
-Set upload/output byte, page-count, per-page/aggregate pixel, render/OCR timeout
-and concurrency limits. Reject encrypted/unsupported PDFs explicitly at first.
-Any page failure rejects the whole document; never present partial processing as
-fully sanitized. Keep originals, OCR text and recovery tokens out of audit/status.
-
-Crop recovery restores canonical raster pixels at the chosen resolution, not the
-original PDF bytes or structure. OCR confidence cannot prove every secret was
-detected; test and document misses.
+Test the boundary directly: inspect the text-model request and confirm that it
+contains the sanitized Markdown in page order, with no original file attachment
+or unsanitized extracted text. Include document-borne prompt injections as
+untrusted test content, and verify both blocked documents and benign near matches.
 
 ## Remaining implementation choices
 
 No further product answer is required to continue this plan. Select the local
 OCR engine, reviewed cryptographic format/library, processing limits and test
 fixtures through implementation and measurement. Gateway-held keys, PL/EN printed
-text and text recovery before exact pixel recovery are explicit working assumptions.
-Stateless parallel calls, two policy modes and initial multipage PDF are confirmed.
+text and text-token recovery are explicit working assumptions. Stateless parallel
+calls, two policy modes, initial multipage PDF and OCR-to-Markdown replacement are
+confirmed.

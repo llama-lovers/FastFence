@@ -1,0 +1,28 @@
+id: FF-047
+title: Record OCR-to-Markdown substitution and remove media editing scope
+status: verified
+problem: The user explicitly chose OCR Markdown as the replacement model input and excluded image/PDF editing, superseding the earlier masking and crop-recovery plan.
+scope:
+  - Update the documentation and planned OCR/workflow specifications to the confirmed Markdown replacement flow.
+  - Keep PNG/JPEG and multipage PDF input, stateless modes and authorized text recovery.
+  - Remove planned media editing, sanitized PDF output, crop storage and pixel restoration.
+constraints:
+  - This commit updates the plan only; no OCR runtime or working file-conversion claim.
+  - Original media and raw OCR must not be sent upstream; the exported Markdown must also pass text controls.
+  - Do not change incomplete runtime work during this documentation update.
+change_paths:
+  - docs/anonymization-plan.md
+acceptance:
+  - Documentation describes local OCR, ordered Markdown, text controls, model substitution and text-only output recovery.
+  - No remaining active-plan requirement promises image/PDF editing or pixel restoration.
+  - Strict documentation build and applicable specification/hooks checks pass.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: Updated plan builds successfully.
+  - command: uv run python scripts/check_specs.py
+    expected: Revised specifications validate and staged documentation is covered.
+evidence:
+  - command: uv run mkdocs build --strict
+    result: Updated OCR-to-Markdown plan builds; document editing and pixel recovery are explicitly excluded. This is documentation evidence only.
+  - command: uv run python scripts/check_specs.py
+    result: All 49 specifications validate with document substitution and text-only recovery as the current planned scope.

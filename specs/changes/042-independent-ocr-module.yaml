@@ -1,40 +1,38 @@
 id: FF-042
-title: Independent local OCR module for protected image workflows
+title: Independent local OCR module producing ordered document text
 status: planned
-problem: Image controls need locally extracted text with reliable coordinates without coupling OCR providers to security rules or sending originals to upstream models.
+problem: The document-to-Markdown workflow needs local extraction of text from images and every PDF page without coupling providers to security policy or media editing.
 scope:
-  - Create modules/ocr with domain geometry, contracts for provider ports, persistence adapters and an application facade.
-  - Define shared Pydantic request/result schemas with normalized page dimensions, page identifiers, ordered text, word offsets, bounding boxes and confidence where available.
-  - Select a local OCR engine after evaluating Polish and English printed-text fixtures, deployment requirements and code/model licenses.
-  - Decode bounded raster images, normalize orientation and retain one coordinate system for OCR, masking and restoration.
-  - Render and process multipage scanned, digital and mixed PDF documents from the first release, preserving page order and dimensions.
-  - Compose OCR through workflows/image_anonymization, never direct imports between feature modules.
+  - Create modules/ocr with extraction domain models, provider ports, persistence adapters and a public application facade.
+  - Define shared Pydantic results containing page identifiers, ordered text blocks, confidence and optional geometry needed to establish reading order.
+  - Start provider evaluation with PaddleOCR and pretrained Polish/English-capable models; verify actual quality, deployment and code/model licenses.
+  - Decode bounded PNG/JPEG images and locally render multipage scanned, digital and mixed PDFs from the first release.
+  - Compose extraction through workflows/document_markdown without direct imports between feature modules.
 constraints:
-  - PNG/JPEG and multipage PDF are confirmed initial scope; printed Polish and English is the proposed baseline, with handwriting and exact pixel restoration deferred unless requested.
-  - No OCR or image dependencies on the ordinary text-only request path.
-  - Apply upload/output byte, page-count, per-page and aggregate decoded-pixel, render/OCR time and concurrency limits; run blocking work outside the event loop with enforceable resource limits.
-  - Reject encrypted or unsupported PDFs explicitly at first; a page processing failure rejects the full document rather than presenting partial sanitization as complete.
-  - OCR only extracts content; central policy determines what to block or anonymize.
-  - Preserve character offsets and word geometry so matches spanning several words mask all corresponding regions.
-  - Engine errors, unsupported input and rejected quality checks must not silently forward the original image.
-  - OCR may miss text; confidence and known failure checks are not proof that every secret was detected.
-  - No original image, OCR text, crop or recovery token in audit or management status.
+  - No image/PDF editing or pixel restoration; geometry supports reading order and diagnostics, not a masking API.
+  - No OCR execution or heavyweight OCR imports on the ordinary text-only request path.
+  - Apply byte, page-count, per-page and aggregate pixel, render/OCR timeout and concurrency limits; run blocking work outside the event loop.
+  - Reject encrypted or unsupported PDFs explicitly at first; a required page failure rejects the whole document, not a silently truncated result.
+  - OCR only extracts content; central text policy controls the resulting Markdown before export or upstream use.
+  - Preserve multiword and multiline text so policy checks do not depend on isolated OCR words; page order and separators must be explicit.
+  - Do not fetch external resources, interpret document text as instructions or copy embedded source media into model inputs.
+  - Confidence does not prove completeness; evaluate OCR omissions and incorrect recognition, especially sensitive identifiers and Polish characters.
+  - No original document or raw OCR content in logs, audit or management status; no persistent conversation state.
 change_paths:
   - src/fastfence/modules/ocr/**
   - src/fastfence/shared/ocr.py
-  - src/fastfence/workflows/image_anonymization.py
+  - src/fastfence/workflows/document_markdown.py
   - tests/unit/test_ocr*.py
   - tests/integration/test_ocr*.py
 acceptance:
-  - Synthetic Polish and English fixtures return expected text spans and bounded coordinates after orientation normalization.
-  - Multiword, multiline and rotated fixtures map policy matches to all affected image regions or are explicitly rejected by the supported-input contract.
-  - Corrupt, oversized, unsupported and timed-out inputs produce bounded failures without upstream execution.
-  - Multipage and mixed PDF fixtures preserve page attribution and exercise per-document limits and page-failure behavior.
+  - Synthetic Polish and English fixtures produce expected text and page order after orientation normalization.
+  - Multiword, multiline, rotated and mixed multipage PDF fixtures exercise reading order and document-wide limits.
+  - Corrupt, unsupported, oversized and timed-out inputs fail without forwarding original media or partial results as complete.
   - Architecture checks prevent direct imports between OCR, anonymization and control modules.
-  - Cold-start and warm p50/p95 OCR measurements are reported separately from text guardrail latency alongside detection coverage.
+  - Report OCR omissions and identifier-recognition quality together with cold/warm p50/p95; do not claim production speed from an unrelated benchmark.
 validation:
   - command: uv run pytest --no-cov tests/unit/test_ocr.py tests/integration/test_ocr_workflow.py
-    expected: Future OCR and workflow checks pass; these tests are not implemented yet.
+    expected: Future local extraction and workflow checks pass; these tests are not implemented yet.
   - command: uv run lint-imports
-    expected: Future module boundaries satisfy repository contracts.
+    expected: Future module boundaries satisfy repository architecture contracts.
 evidence: []
