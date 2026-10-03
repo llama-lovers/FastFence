@@ -1,3 +1,5 @@
+![FastFence logo](assets/fastfence-logo.svg){ .fastfence-landing-logo width="196" height="198" }
+
 # FastFence
 
 **Fast agents. Clear boundaries.**

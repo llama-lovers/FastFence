@@ -1,0 +1,30 @@
+id: FF-045
+title: Record stateless processing modes and initial multipage PDF scope
+status: verified
+problem: The user confirmed irreversible and reversible settings, initial multipage PDF scope and stateless independent calls without conversation mappings, superseding earlier capsule and image-only proposals.
+scope:
+  - Update the delivery plan and planned feature specifications with the confirmed modes and PDF scope.
+  - Distinguish irreversible retention from reversible processing with restoration temporarily off.
+  - Describe fresh raster PDF output, page limits, document failure behavior and lost PDF capabilities.
+  - Replace mapping capsules and sequential updates with self-contained token plans and explicit restoration and performance limits.
+constraints:
+  - This is a planning change, not a claim that OCR, PDF or encrypted context is implemented.
+  - Key location was not explicitly answered; label gateway-held keys a working assumption, not a confirmed user choice.
+  - Stateless parallel calls are confirmed; do not ask again whether to queue a conversation.
+change_paths:
+  - docs/anonymization-plan.md
+acceptance:
+  - Both modes specify retention and restoration behavior and cannot be confused with a single output toggle.
+  - PDF and multipage support are included in first scope with hidden content removal and processing limits.
+  - No conversation ID, mapping capsule or server alias vault is required by the revised plan; complete tokens are required for recovery.
+  - Documentation and specification validation pass.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: Updated documentation builds successfully.
+  - command: uv run python scripts/check_specs.py
+    expected: Specifications remain valid and staged documentation is covered.
+evidence:
+  - command: uv run mkdocs build --strict
+    result: Updated plan builds successfully; this validates documentation rather than implementation of planned features.
+  - command: uv run python scripts/check_specs.py
+    result: All specifications validate; revised plans explicitly require stateless parallel calls and initial multipage PDF support.

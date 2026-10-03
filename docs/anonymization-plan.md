@@ -1,113 +1,157 @@
-# Anonymization and OCR delivery plan
+# Stateless anonymization and OCR delivery plan
 
-This page is a plan, not a list of released capabilities. Text pseudonymization,
-context handling and Laya/UI integration are work in progress. The encrypted
-client-carried context and OCR/image workflow below are not implemented.
-Reversible replacement is pseudonymization: original values still exist in
-protected restoration material.
+This is a plan, not a list of released capabilities. Text transformations and
+Laya/UI integration are work in progress. Stateless recovery tokens, OCR and PDF
+processing are not implemented. The latest user decision supersedes the earlier
+conversation vault and client-carried mapping capsule designs.
 
-## Module boundaries
+## Confirmed requirements
+
+- No conversation database, server alias vault, conversation identifier,
+  session affinity or client-carried conversation mapping.
+- Independent parallel calls; no per-conversation queue.
+- Policy selects irreversible masking or reversible pseudonymization.
+- PNG/JPEG and multipage PDF belong to the first document release.
+- Bounded local processing; measure total latency including model token overhead.
+
+Static configured keys and active policy are runtime configuration, not
+conversation state. Temporary request-local processing buffers are allowed.
+
+## Two processing modes
+
+These names describe the planned contract, not existing configuration fields.
+
+| Mode | Output and recovery |
+| --- | --- |
+| `irreversible` | Sanitized content and opaque aliases only. Retain/export no original values, inverse maps, original crops or encrypted recovery payloads. Reject restoration. |
+| `reversible` | Self-contained authenticated encrypted tokens, each carrying its own recoverable value. Restoration also requires explicit opt-in, verified ownership and current policy permission. |
+
+Disabling output restoration does not destroy a reversible token's recovery
+material. Switching policy to irreversible prevents gateway recovery under that
+policy but cannot erase copies already held by clients. Reversible replacement
+is pseudonymization. Removing detected values is not proof that all identifying
+information has been removed from surrounding content.
+
+## Stateless tokens
+
+A short alias such as `[EMAIL_K7Q...]` uses a keyed fingerprint scoped to the
+verified tenant, subject, rule and entity type. Equal values can have the same
+identifier across independent calls, without sequential counters. This
+intentionally reveals equality within the scope; do not correlate different
+owners or expose plain hashes of guessable personal data.
+
+A reversible token additionally carries the encrypted value, version, key ID and
+necessary cryptographic metadata. Use a reviewed authenticated construction,
+separate keys for identifiers and encryption, fresh nonces where required, owner
+and purpose binding, strict size limits and current-policy checks. Public-key
+encryption alone does not authenticate FastFence as issuer. Never derive a
+reusable encryption nonce from the value to force deterministic ciphertext.
+
+Gateway-held decryption keys are the working implementation assumption, supplied
+through deployment configuration. Authenticated hybrid public-key encryption can
+separate encryption and decryption roles if needed. Client-only decryption would
+move recovery into the client; the confirmed mode choice does not require it.
+
+The model can reason about types and repeated opaque identifiers without originals.
+Automatic recovery from its response requires the **complete unmodified reversible
+token**. A short alias, missing token or paraphrase cannot recover the original.
+Never let the model invent missing values. Test exact token copying with the real
+upstream model. Randomized encryption can produce different complete tokens for
+one stable identifier; request-local reuse is allowed but no persistent cache is
+required. Authenticate tokens before preserving them as previously processed data.
+
+Long ciphertexts cost additional model tokens. Benchmark crypto, transport and
+upstream inference together. There is no registry: valid tokens may be replayed
+until expiry or applicable policy/key revocation. Do not claim single-use,
+latest-version or individual immediate-revocation guarantees without state.
+
+## Independent modules
 
 | Component | Responsibility |
 | --- | --- |
-| `modules/ocr` | Extract ordered text, word offsets, bounding boxes and confidence locally; normalize image orientation and enforce processing limits. |
-| `modules/anonymization` | Match configured patterns, issue stable aliases, protect restoration material and perform permitted restoration; render image masks using supplied regions. |
-| `modules/control` | Enforce authentication, policy, budgets, hard blocks, semantic checks and safe audit metadata. |
-| `workflows` | Connect public module facades, map text matches to image regions, and send only sanitized content upstream. |
-| `shared` | Pydantic contracts for text spans, geometry, context and transformation results. |
+| `modules/ocr` | Local ordered text, offsets, page IDs, bounding boxes and confidence; normalized orientation and bounded rendering/OCR. |
+| `modules/anonymization` | Pattern matching, scoped aliases, self-contained recovery tokens, pixel masking and authorized recovery without a conversation store. |
+| `modules/control` | Authentication, central policy, hard blocks, budgets, semantic checks and safe audit metadata. |
+| `workflows` | Connect public facades, map text matches to pixel regions and send sanitized content upstream. |
+| `shared` | Pydantic text-span, geometry and transformation contracts. |
 
-Feature modules do not import one another. OCR does not decide policy, and the
-ordinary text path does not load or execute OCR. Laya authors typed rules; local
-runtime rules enforce the approved configuration.
+Feature modules do not import one another. OCR extracts content; central rules
+decide what to mask or block. Laya authors typed rules. The ordinary text path
+must not execute OCR or load image models.
 
 ```mermaid
 flowchart LR
-    A[Authenticated image request] --> B[Local OCR]
-    B --> C[Policy checks and alias assignment]
-    C --> D[Opaque pixel masks with alias labels]
-    D --> E[Sanitized image to model]
-    C --> F[Protected restoration context]
-    F --> G[Caller only]
+    A[Independent authenticated request] --> B[Text or local OCR of PDF pages]
+    B --> C[Policy checks and stateless aliases]
+    C --> D[Sanitized text or masked document]
+    D --> E[Upstream model]
+    C --> F[Self-contained tokens only if reversible]
+    F --> G[Authorized token recovery]
 ```
 
 ## Delivery order and remaining work
 
-1. **Finish text pseudonymization.** Complete input/output workflow integration,
-   stable distinct aliases, default `ANONIM` prefixes, explicit restoration,
-   ownership checks and rule revocation. Preserve original hard blocks and
-   recheck transformed/restored content. Finish HTTP, MCP, OpenAI-compatible
-   transport, isolated policy preview and Laya/UI tests.
-2. **Settle the encrypted-context contract.** Decide who decrypts, specify a
-   bounded client-carried capsule and select a reviewed authenticated encryption
-   construction. Define key provisioning/rotation, expiry, owner binding and
-   update ordering. Replace reliance on a process-local mapping only after
-   tamper, expiry, restart and cross-owner tests pass.
-3. **Build the independent OCR module.** Evaluate a local engine against
-   synthetic Polish/English fixtures and check code/model licenses. Add typed
-   spans, character offsets, dimensions, bounding boxes and confidence. Test
-   orientation, multiword matches, limits, timeout and corrupt inputs. Keep
-   blocking processing outside the request event loop.
-4. **Build image masking.** Map full-text rule matches back to every affected
-   region, replace pixels with opaque rectangles, render opaque alias labels and
-   export a fresh image without source metadata. Use the same context aliases
-   for equal values in text and images where policy permits. Keep restoration
-   material outside the model request.
-5. **Add image transport and demo.** Choose explicit upload/API contracts and
-   a vision-capable upstream. The existing text-model demo alone does not prove
-   image support. Show input sanitization first, then test the same controls on
-   image outputs when the upstream actually returns images.
-6. **Add optional pixel restoration.** Encrypt original crops and coordinates,
-   bind them to the exact sanitized image and owner, handle overlapping regions,
-   and restore only when requested and currently permitted. OCR text recovery
-   alone does not reconstruct original pixels. Keep this after the first image
-   demo unless the user selects it for initial scope.
-7. **Verify and publish evidence.** Run architecture, typing, lint, transport and
-   isolation checks. Evaluate OCR detection misses as well as successes. Measure
-   text, capsule encryption/transfer, cold/warm OCR and image encoding separately;
-   report p50/p95 and fixture coverage without claiming perfect detection.
+1. **Replace the unshipped context design.** Remove the planned conversation ID,
+   alias vault, mapping capsule and queue dependency from work in progress.
+   Specify stateless tokens and modes before integration; preserve shipped controls.
+2. **Finish text transformations.** Implement literal/pattern rules, distinct
+   aliases with a default `ANONIM` prefix, input/output processing and optional
+   authorized recovery. Preserve original hard blocks and recheck transformed or
+   restored values. Finish Laya, isolated preview, HTTP, MCP and OpenAI-compatible
+   integration against the stateless contract.
+3. **Verify tokens.** Test tampering, ownership, rule revocation, expiry, key
+   rotation, malformed/oversized input, parallel calls and restart with identical
+   keys. Prove irreversible mode retains no recovery material. Test actual-model
+   copying and measure ciphertext expansion.
+4. **Build OCR and PDF rendering.** Evaluate local engines on synthetic printed
+   Polish/English fixtures and check code/model licenses. Add full-text offsets,
+   word geometry, page IDs and confidence. Include mixed scanned/digital
+   multipage PDFs from the start. Enforce processing limits outside the event loop.
+5. **Build masking.** Map multiword matches to every affected region, overwrite
+   pixels and add opaque labels. Export fresh sanitized images and multipage
+   raster PDFs. Equal values share scoped aliases across text and pages.
+6. **Add document transport and demo.** Define authenticated bounded uploads and
+   select a vision-capable upstream. Show multipage PDF input and sanitized PDF
+   output. Cover output images when the upstream actually produces them; text
+   completion alone does not demonstrate image support.
+7. **Add optional pixel recovery later.** A complete self-contained recovery token
+   must carry its own encrypted crop, coordinates and exact artifact binding.
+   A short region label cannot restore pixels. If implemented, tokens accompany
+   the document as explicit recovery data, never a hidden conversation mapping
+   or server lookup. Text recovery does not imply exact image recovery.
+8. **Publish evidence.** Verify architecture, quality, isolation and transport.
+   Evaluate OCR misses and false masks; measure text, crypto, model token overhead,
+   cold/warm OCR and page encoding separately, including p50/p95. No unmeasured
+   performance or perfect-detection claims.
 
-## Proposed first image demo
+## Image and PDF contract
 
-- PNG/JPEG, printed Polish and English text, one image per request.
-- Local OCR plus deterministic rules; opaque rectangles with labels such as
-  `[EMAIL_1]` and optional recovery of the recognized text.
-- PDF, handwriting, video and exact pixel restoration in later stages.
-- Reject unsupported, oversized, failed or insufficient-quality processing
-  according to explicit policy. OCR confidence cannot prove no sensitive text
-  was missed; validation must measure those misses.
+PNG/JPEG and multipage PDF are confirmed initial scope. Printed Polish/English
+text is the working baseline; handwriting, video and exact pixel recovery remain
+later stages. For reversible recognized-text recovery, the complete text tokens
+must be carried in the document response and supplied to recovery; labels alone
+are insufficient. No prior response is stored by FastFence.
 
-These are proposed defaults awaiting the scope decision, not commitments that
-the capabilities already exist.
+Render every PDF page, OCR locally, mask affected pixels and assemble a new PDF
+exclusively from sanitized rasters. Preserve page order and dimensions. Do not
+copy source PDF text/OCR layers, objects, attachments, metadata, forms or scripts.
+A rectangle drawn over original PDF text is insufficient. Initial output loses
+searchable/selectable text, accessibility structure, interactive forms, links,
+signatures and original vector representation; safe reconstruction is later work.
 
-## Context and cryptography decisions
+Set upload/output byte, page-count, per-page/aggregate pixel, render/OCR timeout
+and concurrency limits. Reject encrypted/unsupported PDFs explicitly at first.
+Any page failure rejects the whole document; never present partial processing as
+fully sanitized. Keep originals, OCR text and recovery tokens out of audit/status.
 
-Short labels such as `[EMAIL_1]` require an inverse map. The proposed stateless
-gateway carries that map in an authenticated encrypted capsule held by the
-client. A hash is not restoration material, and a plain hash of predictable
-personal data is unsuitable as a public region identifier.
+Crop recovery restores canonical raster pixels at the chosen resolution, not the
+original PDF bytes or structure. OCR confidence cannot prove every secret was
+detected; test and document misses.
 
-Public-key encryption alone does not prove that FastFence issued a capsule.
-The selected construction must authenticate the issuer and bind the capsule to
-the verified owner and conversation. If only the client can decrypt, the
-gateway cannot independently recover its mapping on the next request; that
-choice requires a different client-side aliasing/restoration contract.
+## Remaining implementation choices
 
-A stateless gateway cannot tell whether an otherwise valid capsule is the
-latest one. Two parallel calls starting from the same mapping can allocate the
-same numbered alias to different values. The proposed first implementation
-serializes updates within one conversation at the client; different
-conversations remain independent. Parallel branches need an explicit merge
-design. Immediate per-capsule revocation and strict rollback prevention require
-state; expiry alone does not provide them.
-
-## Questions awaiting answers
-
-1. **Key ownership:** does FastFence decrypt and restore after checking access,
-   or must only the client possess the decryption key?
-2. **Initial image scope:** accept the PNG/JPEG text-recovery demo above, or
-   require exact pixel restoration or PDF in the first implementation?
-3. **Conversation concurrency:** can the client serialize updates to one
-   conversation, or must parallel tool calls share and merge context immediately?
-
-OCR engine selection, bounded processing limits and the first synthetic test
-corpus can be researched independently while these answers are pending.
+No further product answer is required to continue this plan. Select the local
+OCR engine, reviewed cryptographic format/library, processing limits and test
+fixtures through implementation and measurement. Gateway-held keys, PL/EN printed
+text and text recovery before exact pixel recovery are explicit working assumptions.
+Stateless parallel calls, two policy modes and initial multipage PDF are confirmed.

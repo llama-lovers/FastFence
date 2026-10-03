@@ -1,0 +1,36 @@
+id: FF-046
+title: Use supplied FastFence artwork in the documentation
+status: verified
+problem: The documentation uses a generic shield instead of the supplied project identity.
+scope:
+  - Use the supplied teal logo on the documentation landing page and its inverse variant in the header.
+  - Derive a small favicon from the supplied artwork and provide responsive logo styling.
+constraints:
+  - Preserve the original vector artwork; do not generate replacement artwork.
+  - SVG assets must contain no scripts, event handlers, foreign objects or external references.
+  - Logos must remain readable in the existing light and dark themes.
+  - Do not change runtime code, policy behavior or anonymization work in progress.
+change_paths:
+  - docs/assets/fastfence-logo.svg
+  - docs/assets/fastfence-header.svg
+  - docs/assets/favicon.png
+  - docs/stylesheets/branding.css
+  - docs/index.md
+  - mkdocs.yml
+acceptance:
+  - Landing and header render the supplied artwork and preserve the FastFence page title.
+  - The favicon is a local raster derivative of the teal logo.
+  - A strict documentation build resolves the assets with no external artwork dependencies.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: Documentation builds without missing asset warnings.
+  - command: uv run pre-commit run --files docs/index.md mkdocs.yml docs/assets/fastfence-logo.svg docs/assets/fastfence-header.svg docs/assets/favicon.png docs/stylesheets/branding.css specs/changes/046-documentation-branding.yaml
+    expected: Applicable quality and specification hooks pass.
+evidence:
+  - command: uv run mkdocs build --strict
+    result: Strict build passes; supplied vector trees remain unchanged and contain only svg/path nodes with no scripts, event handlers or external references. Both logos were raster-rendered and visually inspected. Teal landing art and inverse header art preserve their supplied colors.
+  - command: uv run pre-commit run --files docs/index.md mkdocs.yml docs/assets/fastfence-logo.svg docs/assets/fastfence-header.svg docs/assets/favicon.png docs/stylesheets/branding.css specs/changes/046-documentation-branding.yaml
+    result: Applicable hooks pass after the standard EOF hook adds final newlines to the SVG files; no vector geometry or colors change.
+
+  - command: Root coordinated Chromium screenshots and actual theme-toggle review of built documentation
+    result: Root verified light, dark and mobile layouts; logos are readable, the latest navigation label renders, and the mobile page has no horizontal overflow. Private screenshots are kept under state/private/docs-branding/.

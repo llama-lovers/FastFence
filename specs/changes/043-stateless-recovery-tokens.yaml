@@ -1,0 +1,39 @@
+id: FF-043
+title: Stateless self-contained recovery tokens without conversation context
+status: planned
+problem: The user requires independent parallel calls without any conversation store or mapping capsule while optionally recovering protected values.
+scope:
+  - Supersede the mapping-capsule proposal with self-contained authenticated encrypted tokens carrying each recoverable value.
+  - Issue stable opaque keyed aliases scoped to verified tenant, subject, rule and entity type without counters or conversation state.
+  - Separate irreversible masking with no recovery material from reversible tokens with optional authorized output restoration.
+  - Select a reviewed cryptographic construction and key provisioning/rotation contract; gateway-held decryption keys are the working assumption.
+  - Integrate stateless token validation and current-policy recovery into input and output workflows.
+constraints:
+  - No database, conversation ID, alias registry, inverse-map vault, mapping capsule, session affinity or per-conversation queue.
+  - Static keys and policy plus temporary request-local buffers are allowed; recovery must not depend on a previous request.
+  - Public-key encryption alone does not authenticate token issuance; authenticate issuer, owner and purpose with the selected construction.
+  - Use separate keys for identifiers and encryption; never reuse an AEAD nonce with the same key or derive reusable nonces from original values.
+  - Irreversible mode retains or exports no originals, crops or recovery payloads and rejects restoration; restore=false alone does not make reversible mode irreversible.
+  - Restoration requires the complete unmodified token; short aliases, missing tokens or model paraphrases must not trigger guessed replacements.
+  - Stable identifiers reveal equality within their scope; no plain hashes of guessable personal data or correlation across owners.
+  - Bound token parsing and decoded sizes; never log original values, private keys or recovery tokens.
+  - No single-use, latest-version or individual immediate-revocation claims for stateless tokens; validate expiry and current policy/key permission.
+  - Benchmark crypto and upstream token/transport overhead before making speed claims.
+  - Client-only decryption is a separate optional architecture, not implied by reversible mode.
+change_paths:
+  - src/fastfence/modules/anonymization/**
+  - src/fastfence/shared/anonymization.py
+  - src/fastfence/workflows/**
+  - tests/unit/test_stateless_tokens.py
+  - tests/integration/test_stateless_tokens.py
+acceptance:
+  - Valid tokens recover after restart with identical configured keys without previous requests, lookup state or conversation metadata.
+  - Parallel independent calls require no coordination or numbered-alias allocation.
+  - Tampering, owner mismatch, expiry, unsupported versions and oversized tokens fail closed.
+  - Changed or removed rules and revoked restoration permission prevent unauthorized recovery.
+  - Irreversible mode returns and retains no recovery material; a caller restore flag cannot upgrade the policy mode.
+  - Real-model checks distinguish exact-token round trips from modified, missing or alias-only responses.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_stateless_tokens.py tests/integration/test_stateless_tokens.py
+    expected: Future stateless lifecycle and integration checks pass; these tests are not implemented yet.
+evidence: []

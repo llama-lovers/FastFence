@@ -10,8 +10,8 @@ strict: true
 theme:
   name: material
   language: en
-  icon:
-    logo: material/shield-check
+  logo: assets/fastfence-header.svg
+  favicon: assets/favicon.png
   font: false
   palette:
     - scheme: default
@@ -47,6 +47,9 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.inlinehilite
 
+extra_css:
+  - stylesheets/branding.css
+
 extra_javascript:
   - path: javascripts/mermaid.mjs
     type: module
@@ -61,6 +64,6 @@ nav:
       - Challenge readiness: challenge-readiness.md
   - Reference:
       - Architecture: architecture.md
-      - Anonymization and OCR plan: anonymization-plan.md
+      - Stateless anonymization and OCR plan: anonymization-plan.md
       - Runtime settings: settings.md
       - Documentation deployment: deployment.md
