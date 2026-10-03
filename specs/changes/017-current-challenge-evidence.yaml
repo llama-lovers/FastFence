@@ -1,0 +1,38 @@
+id: FF-017
+title: Replace stale readiness scores with current challenge evidence
+status: verified
+problem: The public readiness page presents obsolete pre-authoring scores and test counts, and mixes explicit challenge requirements with optional production enhancements.
+scope:
+  - Map each formal challenge requirement to delivered behavior and reproducible evidence.
+  - Replace unsupported numerical self-grading with current implementation and validation status.
+  - Separate remaining robustness and demonstration work from optional infrastructure features.
+  - Record the differing assessment weights in the supplied criteria and rules documents.
+constraints:
+  - Do not invent jury scores or claim universal security from bounded tests.
+  - Keep historical reports and specification checkpoints intact.
+  - Do not publish the participant PDFs or private local artifacts.
+change_paths:
+  - docs/challenge-readiness.md
+  - docs/testing.md
+acceptance:
+  - Current readiness page includes real Laya authoring and the 271-test checkpoint.
+  - Every formal requirement identifies the delivered scope and evidence limitations.
+  - No obsolete weighted readiness score is presented as current status.
+  - Optional SIEM, durable storage and billing integrations are not listed as mandatory deliverables.
+validation:
+  - command: Read supplied criteria and rules PDFs and compare delivered reports
+    expected: Requirement mapping and both weight sets accurately reflect the sources.
+  - command: uv run --group docs mkdocs build --strict
+    expected: Documentation builds with valid internal links.
+  - command: uv run pre-commit run --all-files
+    expected: All repository gates pass.
+evidence:
+  - command: Read criteria pages 3 and 4 and competition rules sections 5 and 11
+    result: Six formal requirement areas mapped; both differing weight sets recorded; optional infrastructure separated from explicit deliverables.
+  - command: Inspect recorded coverage and live reports
+    result: Latest automated checkpoint is 271 tests with 94.52 percent coverage; five real authored-rule HTTP cases passed; older hybrid and core benchmarks now explicitly identified as historical checkpoints.
+  - command: uv run --group docs mkdocs build --strict
+    result: Material documentation built successfully with the current evidence mapping.
+
+  - command: uv run pre-commit run --all-files
+    result: All configured hooks passed, including specification and secret-scanning checks.

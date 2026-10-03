@@ -43,9 +43,9 @@ uv run python evaluation/smoke_hybrid.py \
 
 The recorded binary-schema Qwen3:4b development run classified 20 synthetic probes correctly: 10 benign and 10 attack cases. Its median was 343 ms and p95 1,384 ms on the development machine. This small development sample does not establish general detection accuracy. The earlier numeric-score prompt missed all 10 attacks; its report remains available alongside the improved run.
 
-The recorded memory-runtime hybrid smoke and actual Laya integration each passed five cases. These checks use actual local model inference; business tools remain simulated. The Laya runner and prerequisites are described in [integrations](integrations.md).
+The recorded memory-runtime hybrid smoke and original actual Laya integration each passed five cases. These historical checks predate the detector and authored-rule changes; they establish those integration checkpoints, not a fresh combined run of all current controls. They use actual local model inference; business tools remain simulated. The Laya runner and prerequisites are described in [integrations](integrations.md).
 
-Source reports (repository access is required while the repository is private):
+Public source reports:
 
 - [Binary-schema semantic probes](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/qwen3-4b-binary-schema.json)
 - [Original numeric-schema probes](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/qwen3-4b-initial-numeric-schema.json)
@@ -59,7 +59,7 @@ uv run python evaluation/benchmark_gateway.py \
   --output evaluation/results/local-runtime.json
 ```
 
-The current [detect-secrets runtime report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/detect-secrets-runtime-benchmark.json) measures 24,000 timed invocations, with 100 excluded warmup calls per scenario. It exercises actual Engine decisions, memory reservation/settlement, and bounded audit at concurrency one and eight. Semantic analysis is disabled; the offline secret detector is enabled.
+The detector-enabled core baseline in the [detect-secrets runtime report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/detect-secrets-runtime-benchmark.json) measures 24,000 timed invocations, with 100 excluded warmup calls per scenario. It exercises actual Engine decisions, memory reservation/settlement, and bounded audit at concurrency one and eight. Semantic analysis is disabled; the offline secret detector is enabled. This report predates authored text rules and does not measure a gateway configured with those rules; the separate matcher benchmark below does not measure their combined cost either.
 
 On an Apple M3 Pro with 18 GiB memory and Python 3.12.12, the serial zero-wait fixture measured:
 
