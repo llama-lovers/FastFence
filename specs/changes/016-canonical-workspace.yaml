@@ -1,0 +1,38 @@
+id: FF-016
+title: Remove ambiguity from the local project workspace
+status: verified
+problem: An obsolete checkout in the workspace parent duplicates the canonical nested repository and retains uncommitted early work.
+scope:
+  - Archive the obsolete parent checkout outside the active workspace with its Git history and uncommitted files intact.
+  - Preserve both nested repositories and competition reference documents in their existing locations.
+  - Record the canonical repository boundary for future agent work.
+constraints:
+  - Do not delete old files or replace current source with stale versions.
+  - Preserve private local state without publishing it or its contents.
+  - Move only explicitly identified obsolete project artifacts.
+  - Do not change the canonical repository remote or rewrite history.
+change_paths:
+  - AGENTS.md
+acceptance:
+  - The workspace parent no longer contains a FastFence source tree or Git checkout.
+  - Archived artifacts retain their contents and metadata.
+  - The canonical repository remains accessible and its active processes use its directory.
+validation:
+  - command: Inspect archive manifest and canonical Git status
+    expected: All identified artifacts preserved; nested repositories and reference documents remain in place.
+  - command: uv run pre-commit run --all-files
+    expected: Repository quality gates pass.
+evidence:
+  - command: Read-only comparison of parent and canonical checkout
+    result: Parent HEAD is an ancestor of canonical main; all substantive source, tests and config have canonical counterparts; no unique functionality identified.
+  - command: Same-filesystem archive rename and inode verification
+    result: Preserved all 23 identified entries including Git history, uncommitted work and private state; verified inode, mode and modification time for each moved entry; protected directory inodes unchanged.
+  - command: Inspect workspace parent after archival
+    result: Only two nested repositories, competition reference documents and Finder metadata remain; no parent Git checkout or source tree.
+  - command: Local private archive location
+    result: Timestamped private directory under sibling _archive, outside the active workspace; manifest records original paths and metadata
+  - command: Verify canonical runtime after restart
+    result: Canonical gateway health returns ready with policy version 1; gateway and documentation processes use canonical repository paths.
+
+  - command: uv run pre-commit run --all-files
+    result: All configured repository gates passed after archival.
