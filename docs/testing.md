@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The policy-studio and bounded-signature integration checkpoint passes **391 tests**, with **94.90%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The optimized gateway and reproducible-demo checkpoint passes **413 tests**, with **95.59%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -67,7 +67,7 @@ The separate [six-case strictness smoke](https://github.com/llama-lovers/HackYea
 
 ## Policy studio and selective controls
 
-For a real browser walkthrough, install the optional test browser and run:
+First complete the [Laya and two-model setup](getting-started.md#describe-a-rule-then-test-it-through-mcp), with Ollama running. For a real browser walkthrough, install the optional test browser and run:
 
 ```sh
 uv run --with playwright python -m playwright install chromium
@@ -133,7 +133,7 @@ The same 38-case inert corpus is retained for the [before](https://github.com/ll
 uv run python evaluation/benchmark_transport.py --samples 100 --warmup 20 --output evaluation/results/local-transport.json
 ```
 
-The [transport report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/transport-benchmark.json) exercises isolated uvicorn processes over loopback TCP with actual HTTP and JSON-RPC MCP requests, offline secret detection and the bounded signature matcher. It covers 0/1/64 authored rules, short/8 KiB payloads and concurrency 1/8. All 76 groups passed their expected outcomes with zero transport errors or unexpected verdicts. Warmups are excluded from timing and included in budget/audit reconciliation.
+The [transport report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/transport-benchmark.json) exercises isolated uvicorn processes over loopback TCP with actual HTTP and JSON-RPC MCP requests, offline secret detection and the bounded signature matcher. It covers 0/1/64 authored rules, short/~8 KB payloads and concurrency 1/8. All 76 groups passed their expected outcomes with zero transport errors or unexpected verdicts. Warmups are excluded from timing and included in budget/audit reconciliation.
 
 Across configurations, 7,680 business invocations produced 2,880 allowed and 4,800 blocked decisions, exactly 7,680 audit entries, 23,466,240 settled token units and 288,000 configured micro-USD cost. No semantic model ran and no reservations remained in flight. Allowed calls include the simulated business backend's intentional 15 ms delay.
 
@@ -143,3 +143,22 @@ Across configurations, 7,680 business invocations produced 2,880 allowed and 4,8
 | MCP, across all payload/rule/concurrency groups | 24.8–131.1 ms | 1.92–40.17 ms |
 
 These ranges span different workloads; the report retains every group. They are not pure guardrail overhead and do not establish a universal latency SLA. Health and authenticated MCP ping are labeled non-equivalent transport baselines and are never subtracted from business-call measurements. Client serialization, transport, response decoding and server execution are included; the local machine is not a controlled production benchmark environment.
+
+## Scan optimization and current transport checkpoint
+
+The [core before](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/scan-optimization-before.json) and [core after](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/scan-optimization-after.json) reports cover the same eight configurations, each with 200 measured calls and 20 warmups. A request-local base64 memo avoids repeated identical decodes while preserving all resource counters. The pinned default keyword detector skips its assignment regexes only when a required quote or denylisted keyword is absent; unsupported versions/configurations retain the original scan. All 19 credential plugins remain enabled. Differential tests compare exact upstream candidates and complete redacted output/findings over 460 keyword/syntax/Unicode samples plus nested credential cases.
+
+For 8,000-byte clean inputs, core p95 fell from 5.93–6.24 ms to 2.05–2.41 ms across 0/64 rules and concurrency 1/8. This includes authorization, validation, input/output inspection, budgets and audit with a zero-wait upstream fixture; it excludes HTTP/MCP. Short-input results are mixed: one 64-rule serial group changed from 0.203 to 0.219 ms p95, with its noisier tail retained in the report.
+
+The subsequent [optimized transport report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/transport-optimized.json) repeats all 76 groups with the same 100 samples and 20 warmups. All 7,680 invocations and audit entries reconcile, with zero unexpected verdicts, transport errors, semantic calls or pending reservations. The earlier transport report above remains the pre-optimization checkpoint.
+
+| Allowed request, 64 rules, 8,000 bytes | Earlier p95 | Optimized p95 |
+| --- | ---: | ---: |
+| HTTP, concurrency 1 | 29.80 ms | 29.80 ms |
+| HTTP, concurrency 8 | 106.52 ms | 41.43 ms |
+| MCP, concurrency 1 | 30.48 ms | 29.97 ms |
+| MCP, concurrency 8 | 114.55 ms | 42.03 ms |
+
+Across the optimized matrix, allowed HTTP p95 spans 22.90–41.43 ms and MCP 24.62–44.30 ms. Blocked HTTP p95 spans 1.06–27.48 ms and MCP 1.63–35.79 ms. These remain full transport measurements including the allowed demo backend's intentional 15 ms wait, on one development machine; they are not a universal latency guarantee.
+
+The [final combined hybrid rehearsal](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/hybrid-final-rehearsal.json) also passed five cases using actual Qwen3:4b with the current detector and feed: allowed business input, semantic attack denial, output redaction, role denial and an allowed real completion. Audit export remained sanitized. Business handlers are simulated, and this live check is separate from deterministic timing.

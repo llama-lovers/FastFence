@@ -1,0 +1,49 @@
+id: FF-024
+title: Preserve detection while reducing repeated deterministic scan work
+status: verified
+problem: Profiling eight-kilobyte clean requests identifies repeated keyword regex scans and repeated base64 decoding as the main deterministic CPU costs.
+scope:
+  - Add a request-local bounded base64 decode memo without changing inspection views or resource accounting.
+  - Apply a proven necessary-condition precheck only to the pinned default KeywordDetector configuration.
+  - Preserve an operational core benchmark before and after the change with simulated zero-wait upstream.
+constraints:
+  - No cross-request raw-text caches, persistent state, network calls or request-time filesystem operations.
+  - Every repeated printable base64 candidate still counts toward the existing decode, candidate and view limits.
+  - Cache capacity exhaustion falls back to decoding rather than dropping candidates.
+  - All nineteen credential plugins remain configured; keyword findings and redaction behavior remain unchanged.
+  - Unsupported upstream versions or nondefault keyword configuration bypass the optimization and run the original detector.
+  - No recursive decoding, heuristic safe-content bypass or changed transport benchmark claims.
+change_paths:
+  - src/fastfence/modules/control/domain/signature_matching.py
+  - src/fastfence/modules/control/persistence/secrets.py
+  - tests/unit/test_scan_optimization.py
+  - evaluation/benchmark_scan_optimization.py
+  - evaluation/results/scan-optimization-before.json
+  - evaluation/results/scan-optimization-after.json
+  - evaluation/results/transport-optimized.json
+  - docs/testing.md
+  - docs/challenge-readiness.md
+  - .secrets.baseline
+acceptance:
+  - Keyword parity covers upstream denylisted names, supported syntax, case variants and Unicode near matches.
+  - Repeated base64 content reduces actual decoder calls while preserving findings and overflow rejection.
+  - Cache isolation, capacity fallback, malformed and one-layer encoding behavior have meaningful regression tests.
+  - Before and after operational benchmarks retain real authorization, validation, inspection, budgets and audit accounting.
+validation:
+  - command: uv run pytest -q
+    expected: Detection, privacy, configuration, authoring and architecture regressions pass.
+  - command: uv run python -m evaluation.benchmark_scan_optimization --phase after --output evaluation/results/scan-optimization-after.json
+    expected: All benchmark decisions and budget/audit accounting pass; timings remain explicitly scoped to simulated upstream core.
+  - command: uv run pre-commit run --all-files
+    expected: Quality, typing, architecture and specification gates pass.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_scan_optimization.py
+    result: Fourteen new regression functions pass, including 460 upstream keyword/syntax/Unicode samples and exact final redacted-text/findings parity with all nineteen unoptimized plugins.
+  - result: Existing signature, secret-detector and input/output privacy regressions passed alongside the optimization tests; repeated candidates retain candidate and decoded-byte overflow rejection, cache isolation and bounded fallback.
+  - result: Source typing reported zero errors/warnings; all four owned Python files pass Ruff check and format check.
+  - result: Preserved before/after operational core reports each verify eight configurations with 200 samples and 20 warmup calls, real budgets and audit, and simulated zero-wait upstream.
+  - result: Eight-kilobyte core p95 changed from 5.93-6.24ms to 2.05-2.41ms; short 64-rule/concurrency1 p95 regression 0.203-to-0.219ms is retained rather than hidden.
+  - artifact: evaluation/results/transport-optimized.json
+    result: Parent independently reran the same 76-group actual HTTP/MCP transport matrix; all decisions/accounting passed. Eight-kilobyte/concurrency8 allowed HTTP p95 changed 102.529-110.103ms to 38.959-41.426ms, MCP 114.551-131.113ms to 42.034-44.302ms, including simulated 15ms business delay.
+  - command: Full combined suite and reviewed secret-scan findings
+    result: 413 tests passed with 95.59% source coverage. Eight exact baseline entries reviewed as six verified source SHA256 digests and two synthetic keyword-test strings; no broad exclusions.

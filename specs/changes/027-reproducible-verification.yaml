@@ -1,0 +1,48 @@
+id: FF-027
+title: Reproducible CLI assertions and locked continuous verification
+status: implemented
+problem: The demonstration can exit successfully after unexpected decisions and only
+  documentation currently has automated GitHub verification.
+scope:
+- Assert expected decision, reason and upstream execution for each default-policy
+  demo scenario.
+- Reject unexpected budget denials or other mismatches with sanitized case labels
+  and nonzero exit.
+- Run the locked offline test suite and quality/architecture/specification gates on
+  main and pull requests.
+constraints:
+- No models, external accounts or credential verification required in CI.
+- Reuse SHA-pinned official checkout and setup-uv actions; read-only contents permissions.
+- Do not print unexpected response bodies or credential values.
+- Keep the CLI module below 300 lines and use Pydantic records.
+change_paths:
+- src/fastfence/app/interfaces/cli/main.py
+- tests/unit/test_cli_demo.py
+- .github/workflows/ci.yml
+acceptance:
+- All seven expected demo scenarios validate their decision/reason/execution triples.
+- Budget denial cannot appear as a successful allowed-case demonstration.
+- CI syncs uv.lock on Python 3.12 and runs the 85 percent coverage gate plus static
+  architecture/spec gates.
+validation:
+- command: uv run pytest -q --no-cov tests/unit/test_cli_demo.py
+  expected: Correct demo outcomes pass; budget, decision and execution mismatches
+    fail without private output.
+- command: uv run python scripts/check_specs.py
+  expected: All specifications remain valid; staged coverage is enforced locally where
+    staged changes exist.
+- command: uv run pre-commit run --all-files
+  expected: Normal quality gates pass.
+evidence:
+- command: uv run pytest -q --no-cov --tb=short tests/unit/test_cli_demo.py
+  result: 8 tests passed, including real API/Engine positive flow and budget/malformed/execution
+    mismatches without private output.
+- command: uv run basedpyright src/fastfence/app/interfaces/cli/main.py
+  result: 0 errors,0warnings;Ruff lint and formatting passed.
+- command: uv run python scripts/check_specs.py
+  result: 30valid specifications,0stagedpaths.
+- artifact: .github/workflows/ci.yml
+  result: Locked Python3.12 workflow added using existing public SHA-pinned official
+    actions; first hosted run awaits commit/push.
+- command: uv run fastfence demo
+  result: Actual running local gateway returned all seven expected decision, reason and upstream-execution triples; zero errors.

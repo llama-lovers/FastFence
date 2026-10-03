@@ -1,18 +1,28 @@
+function syncPlaygroundModels(preserveEditing = true) {
+  if (!active) return;
+  const names = Object.keys(active.models || {});
+  $('allowedModels').replaceChildren(...names.map((name) => {
+    const option = document.createElement('option');
+    option.value = name;
+    return option;
+  }));
+  const input = $('completionModel');
+  if (!names.includes(input.value) &&
+      (!preserveEditing || document.activeElement !== input)) {
+    input.value = names[0] || '';
+  }
+}
+
 function selectPlayground() {
   const model = $('playgroundMode').value === 'model';
   $('toolPlayground').classList.toggle('hidden', model);
   $('toolPresets').classList.toggle('hidden', model);
   $('modelPlayground').classList.toggle('hidden', !model);
   $('modelPresets').classList.toggle('hidden', !model);
-  if (active) {
-    $('allowedModels').replaceChildren(...Object.keys(active.models).map((name) => {
-      const option = document.createElement('option');
-      option.value = name;
-      return option;
-    }));
-  }
+  syncPlaygroundModels(false);
 }
 $('playgroundMode').onchange = selectPlayground;
+$('completionModel').onblur = () => syncPlaygroundModels(false);
 document.querySelectorAll('[data-model-prompt]').forEach((button) => {
   button.onclick = () => { $('completionPrompt').value = button.dataset.modelPrompt; };
 });

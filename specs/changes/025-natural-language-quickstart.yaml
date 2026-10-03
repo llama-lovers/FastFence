@@ -1,0 +1,29 @@
+id: FF-025
+title: Reproducible natural-language rule quickstart
+status: verified
+problem: The quickstart runs a gateway but omits the additional setup needed to author a rule in the dashboard and test it against Qwen through MCP.
+scope:
+  - Document the minimum Laya and Ollama setup for the default deterministic policy.
+  - Refresh requirement traceability and document the scope of source conflict protection.
+  - Give a reviewed input-only no-letter-a example with authenticated MCP calls.
+constraints:
+  - Distinguish authoring inference from local enforcement and model completion.
+  - Keep credentials in private local state and avoid promising generated output text.
+  - Do not overwrite the user's active policy or require the hybrid profile for authoring.
+change_paths:
+  - docs/getting-started.md
+  - docs/testing.md
+  - docs/challenge-readiness.md
+acceptance:
+  - A fresh checkout user can identify all prerequisites for dashboard drafting.
+  - The example explains the expected blocked-before-upstream result and audit correlation.
+validation:
+  - command: uv run --group docs mkdocs build --strict
+    expected: All documentation links and pages build successfully.
+  - command: Review against evaluation/results/policy-studio-live.json and MCP integration tests
+    expected: Commands and protocol fields match verified implementation.
+evidence:
+  - command: uv run --group docs mkdocs build --strict
+    result: Strict documentation build passed.
+  - command: Review current MCP and policy-studio implementation and live reports
+    result: The example uses the verified complete tool fields, default model allowlist, private credential file and existing dashboard review flow.

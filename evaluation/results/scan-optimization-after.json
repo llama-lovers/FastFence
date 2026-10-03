@@ -1,0 +1,139 @@
+{
+  "phase": "after",
+  "created_at": "2026-10-03T14:20:42.965135+00:00",
+  "environment": {
+    "operating_system": "macOS-27.0.1-arm64-arm-64bit",
+    "architecture": "arm64",
+    "python": "3.12.12",
+    "logical_cpus": 11,
+    "cpu": "Apple M3 Pro",
+    "model": "Mac15,6",
+    "memory_bytes": 19327352832
+  },
+  "source_sha256": {
+    "src/fastfence/modules/control/domain/signature_matching.py": "d35d751494624ed2fc2eaf2300f51419ded4693b15bb3d7b0a9bdb88d87cf044",
+    "src/fastfence/modules/control/persistence/secrets.py": "674543412c7b576538e770f249cd46007e489f16a8caaf3921903d2b382f6344",
+    "evaluation/benchmark_scan_optimization.py": "4afca1ff60df0a4df3fe47ca7fa5a1d50221483834b6922725045dca7ee71342"
+  },
+  "scope": "Actual Engine authorization, schema validation, deterministic input/output inspection, memory budget reserve/settle and audit; zero-wait simulated tools; no HTTP/MCP or model inference.",
+  "limitations": [
+    "Self-authored clean synthetic business inputs on one development machine, not a production latency guarantee.",
+    "Concurrency8 schedules cooperating tasks on one event loop; individual timers measure Engine execution, not transport queue latency.",
+    "Startup, policy construction and invariant checks are outside request timing; warmup remains in accounting."
+  ],
+  "results": [
+    {
+      "payload_class": "short",
+      "query_utf8_bytes": 35,
+      "rules": 0,
+      "concurrency": 1,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.030236,
+      "throughput_rps": 6614.686,
+      "p50_ms": 0.147667,
+      "p95_ms": 0.159,
+      "p99_ms": 0.164209,
+      "all_verdicts_and_accounting_passed": true
+    },
+    {
+      "payload_class": "short",
+      "query_utf8_bytes": 35,
+      "rules": 0,
+      "concurrency": 8,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.032087,
+      "throughput_rps": 6232.989,
+      "p50_ms": 0.149875,
+      "p95_ms": 0.174333,
+      "p99_ms": 0.271333,
+      "all_verdicts_and_accounting_passed": true
+    },
+    {
+      "payload_class": "short",
+      "query_utf8_bytes": 35,
+      "rules": 64,
+      "concurrency": 1,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.044812,
+      "throughput_rps": 4463.065,
+      "p50_ms": 0.170834,
+      "p95_ms": 0.219167,
+      "p99_ms": 0.802208,
+      "all_verdicts_and_accounting_passed": true
+    },
+    {
+      "payload_class": "short",
+      "query_utf8_bytes": 35,
+      "rules": 64,
+      "concurrency": 8,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.036418,
+      "throughput_rps": 5491.752,
+      "p50_ms": 0.1755,
+      "p95_ms": 0.184,
+      "p99_ms": 0.203792,
+      "all_verdicts_and_accounting_passed": true
+    },
+    {
+      "payload_class": "near_tool_limit",
+      "query_utf8_bytes": 8000,
+      "rules": 0,
+      "concurrency": 1,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.405604,
+      "throughput_rps": 493.092,
+      "p50_ms": 2.024834,
+      "p95_ms": 2.046916,
+      "p99_ms": 2.070084,
+      "all_verdicts_and_accounting_passed": true
+    },
+    {
+      "payload_class": "near_tool_limit",
+      "query_utf8_bytes": 8000,
+      "rules": 0,
+      "concurrency": 8,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.409408,
+      "throughput_rps": 488.51,
+      "p50_ms": 2.039833,
+      "p95_ms": 2.073667,
+      "p99_ms": 2.110542,
+      "all_verdicts_and_accounting_passed": true
+    },
+    {
+      "payload_class": "near_tool_limit",
+      "query_utf8_bytes": 8000,
+      "rules": 64,
+      "concurrency": 1,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.425864,
+      "throughput_rps": 469.633,
+      "p50_ms": 2.12775,
+      "p95_ms": 2.170375,
+      "p99_ms": 2.192333,
+      "all_verdicts_and_accounting_passed": true
+    },
+    {
+      "payload_class": "near_tool_limit",
+      "query_utf8_bytes": 8000,
+      "rules": 64,
+      "concurrency": 8,
+      "samples": 200,
+      "warmup_excluded_from_timing": 20,
+      "wall_seconds": 0.456423,
+      "throughput_rps": 438.19,
+      "p50_ms": 2.160167,
+      "p95_ms": 2.407333,
+      "p99_ms": 5.441,
+      "all_verdicts_and_accounting_passed": true
+    }
+  ],
+  "all_passed": true
+}

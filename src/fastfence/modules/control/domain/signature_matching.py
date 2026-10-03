@@ -17,6 +17,7 @@ MAX_TEXT = 131_072
 MAX_NODES = 4096
 MAX_VIEWS = 4096
 MAX_DECODED = 65_536
+MAX_DECODE_CACHE = 256
 ZERO_WIDTH = "\u200b\u200c\u200d\ufeff\u2060"
 BASE64 = re.compile(
     r"(?<![A-Za-z0-9+/=_-])[A-Za-z0-9+/_-]{8,4096}={0,2}(?![A-Za-z0-9+/=_-])"
@@ -82,10 +83,28 @@ def scalar_texts(value: Any) -> list[str]:
     return result
 
 
+def decoded_base64(encoded: str) -> tuple[str, int] | None:
+    try:
+        decoded = base64.b64decode(
+            encoded + "=" * (-len(encoded) % 4),
+            altchars=b"-_",
+            validate=True,
+        ).decode("utf-8")
+    except (binascii.Error, UnicodeDecodeError):
+        return None
+    if not decoded or not all(
+        char.isprintable() or char in "\n\r\t" for char in decoded
+    ):
+        return None
+    return normalize(decoded), len(decoded)
+
+
 def inspection_views(value: Any) -> list[str]:
     source = scalar_texts(value)
     views: list[str] = []
     decoded_size = candidates = 0
+    # Private scratch data for this inspection only, including failed decodes.
+    decode_cache: dict[str, tuple[str, int] | None] = {}
     for text in source:
         normalized = normalize(text)
         views.append(normalized)
@@ -98,22 +117,18 @@ def inspection_views(value: Any) -> list[str]:
             views.append(normalize(decoded))
         for candidate in BASE64.finditer(text):
             encoded = candidate.group()
-            try:
-                decoded = base64.b64decode(
-                    encoded + "=" * (-len(encoded) % 4),
-                    altchars=b"-_",
-                    validate=True,
-                ).decode("utf-8")
-            except (binascii.Error, UnicodeDecodeError):
-                continue
-            if decoded and all(
-                char.isprintable() or char in "\n\r\t" for char in decoded
-            ):
+            if encoded in decode_cache:
+                decoded = decode_cache[encoded]
+            else:
+                decoded = decoded_base64(encoded)
+                if len(decode_cache) < MAX_DECODE_CACHE:
+                    decode_cache[encoded] = decoded
+            if decoded is not None:
                 candidates += 1
                 if candidates > 1024:
                     reject_limit()
-                decoded_size += len(decoded)
-                views.append(normalize(decoded))
+                decoded_size += decoded[1]
+                views.append(decoded[0])
         if decoded_size > MAX_DECODED or len(views) > MAX_VIEWS:
             reject_limit()
     return views

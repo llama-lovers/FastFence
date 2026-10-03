@@ -1,0 +1,34 @@
+id: FF-026
+title: Keep playground model selection consistent with the active allowlist
+status: verified
+problem: The model playground retains its small-model default when the active policy permits only Qwen3 four-billion, causing an avoidable allowlist denial.
+scope:
+  - Synchronize model suggestions and selected model on playground selection and policy refresh.
+  - Preserve a currently allowed model and avoid replacing a model field while the user is editing it.
+  - Record a fixture-only browser regression without model inference.
+constraints:
+  - No changes to backend authorization or model allowlists.
+  - Keep prompts and output-token input unchanged during refresh.
+  - Only select models from the current validated policy; no guessed installed models.
+  - Browser fixtures are not represented as live model evidence.
+change_paths:
+  - src/fastfence/app/interfaces/http/web/playground.js
+  - src/fastfence/app/interfaces/http/web/index.html
+  - evaluation/smoke_playground_models.py
+  - evaluation/results/playground-model-selection.json
+acceptance:
+  - A four-billion-only policy selects that model instead of retaining the small-model HTML default.
+  - A valid custom model remains selected across repeated refreshes.
+  - Removed models are replaced by the first allowed model while other input fields remain unchanged.
+  - Background refresh does not clobber an actively edited model field; blur applies the current allowed selection.
+  - Empty allowlists clear stale model suggestions and selection.
+validation:
+  - command: uv run --with playwright python evaluation/smoke_playground_models.py --output evaluation/results/playground-model-selection.json
+    expected: Fixture-only Chromium checks pass without model calls.
+  - command: uv run pre-commit run --all-files
+    expected: Quality and specification gates pass.
+evidence:
+  - command: uv run --with playwright python evaluation/smoke_playground_models.py --output evaluation/results/playground-model-selection.json
+    result: All seven fixture-only Chromium checks passed, including submitted-model verification, allowlist changes and edit preservation; zero actual model calls.
+  - command: uv run ruff check evaluation/smoke_playground_models.py
+    result: All checks passed.

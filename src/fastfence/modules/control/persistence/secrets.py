@@ -2,6 +2,7 @@
 
 import re
 from collections.abc import Callable, Iterable
+from importlib.metadata import version
 from typing import Any
 
 from detect_secrets.plugins.artifactory import ArtifactoryDetector
@@ -13,7 +14,7 @@ from detect_secrets.plugins.discord import DiscordBotTokenDetector
 from detect_secrets.plugins.github_token import GitHubTokenDetector
 from detect_secrets.plugins.gitlab_token import GitLabTokenDetector
 from detect_secrets.plugins.jwt import JwtTokenDetector
-from detect_secrets.plugins.keyword import KeywordDetector
+from detect_secrets.plugins.keyword import DENYLIST_REGEX, KeywordDetector
 from detect_secrets.plugins.mailchimp import MailchimpDetector
 from detect_secrets.plugins.openai import OpenAIDetector
 from detect_secrets.plugins.private_key import PrivateKeyDetector
@@ -41,9 +42,17 @@ class _Detector(FrozenControlModel):
     analyze: Callable[[str], Iterable[str]]
     patterns: tuple[re.Pattern[str], ...]
     whole_value: bool = False
+    necessary_pattern: re.Pattern[str] | None = None
 
 
 def _configure(plugin: BasePlugin) -> _Detector:
+    # The pinned default detector's five patterns all require a quote and a
+    # denylisted keyword. Unknown versions/configurations retain the full scan.
+    keyword_default = (
+        type(plugin) is KeywordDetector
+        and plugin.keyword_exclude is None
+        and version("detect-secrets") == "1.5.0"
+    )
     return _Detector(
         name="detect_secrets_" + type(plugin).__name__,
         analyze=plugin.analyze_string,
@@ -51,6 +60,9 @@ def _configure(plugin: BasePlugin) -> _Detector:
         if isinstance(plugin, RegexBasedDetector)
         else (),
         whole_value=isinstance(plugin, PrivateKeyDetector),
+        necessary_pattern=re.compile(DENYLIST_REGEX, re.IGNORECASE)
+        if keyword_default
+        else None,
     )
 
 
@@ -66,6 +78,11 @@ def _views(text: str) -> Iterable[tuple[str, list[int] | None]]:
 
 
 def _spans(detector: _Detector, text: str) -> Iterable[tuple[int, int]]:
+    if detector.necessary_pattern is not None and (
+        not any(quote in text for quote in "'\"`")
+        or detector.necessary_pattern.search(text) is None
+    ):
+        return
     candidates = set(detector.analyze(text))
     if not candidates:
         return

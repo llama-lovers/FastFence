@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-10-03T14:18:29.042775+00:00",
+  "mode": "UI_contract_fixtures_only_no_inference",
+  "all_passed": true,
+  "checks": [
+    "hybrid_default_selects_allowed_model",
+    "submitted_model_matches_allowlist",
+    "valid_selection_preserved",
+    "removed_model_replaced",
+    "prompt_and_token_inputs_preserved",
+    "focused_model_edit_preserved_until_blur",
+    "empty_allowlist_clears_selection"
+  ],
+  "fixture_completion_requests": 1,
+  "actual_model_calls": 0
+}

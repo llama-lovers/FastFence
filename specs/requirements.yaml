@@ -44,10 +44,11 @@ validation:
 - command: uv run pytest -q
   expected: Functional and nonfunctional acceptance tests pass.
 evidence:
-- specifications: FF-001 through FF-009
-  mapping: README requirement coverage table distinguishes delivered scope, optional features and local-budget/restart
-    tradeoffs
+- specifications: FF-001 through FF-023
+  mapping: docs/challenge-readiness.md links the six formal requirement areas to delivered behavior; docs/testing.md records the current verification checkpoint and its scope.
 - command: uv run pytest -q
-  result: 153 tests passed; source coverage 93.44% exceeds enforced 85% gate
-- artifacts: evaluation/results/memory-runtime-benchmark.json; integrations/laya/results/live.json; evaluation/results/hybrid-gateway-memory-smoke.json
-  result: Measured local controls and actual model/Laya behavior are documented separately
+  result: Policy-studio integration checkpoint passed 391 tests with 94.90% source coverage, above the enforced 85% gate; later checkpoints are recorded in docs/testing.md.
+- artifacts: evaluation/results/transport-benchmark.json; evaluation/results/historical-attack-validation.json
+  result: 76 real HTTP/MCP groups reconciled 7680 invocations; bounded inert attack corpus records 30 true positives, zero false negatives, six true negatives and two false positives.
+- artifacts: evaluation/results/policy-studio-live.json; evaluation/results/policy-operation-live.json; evaluation/results/semantic-strictness-live.json; evaluation/results/semantic-severity-holdout.json
+  result: Actual Laya dashboard authoring, selective privacy and role operations, authenticated MCP Qwen completion and threshold changes have separate sanitized reports; semantic uncertainty remains explicit.

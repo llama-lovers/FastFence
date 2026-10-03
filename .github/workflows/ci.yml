@@ -1,0 +1,46 @@
+name: Verify FastFence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.8.10"
+          python-version: "3.12"
+      - name: Install locked runtime and verification dependencies
+        run: uv sync --locked
+      - name: Run offline tests and coverage gate
+        run: uv run --locked pytest -q --tb=short
+      - name: Check Ruff lint and formatting
+        run: |
+          uv run --locked ruff check src tests scripts evaluation integrations
+          uv run --locked ruff format --check src tests scripts evaluation integrations
+      - name: Check types
+        run: uv run --locked basedpyright
+      - name: Check import architecture
+        run: uv run --locked lint-imports
+      - name: Check Pydantic and architecture boundaries
+        run: uv run --locked python scripts/check_architecture.py
+      - name: Validate specification catalog
+        # Checkout has no staged implementation changes; local hooks enforce staged coverage.
+        run: uv run --locked python scripts/check_specs.py

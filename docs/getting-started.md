@@ -39,6 +39,59 @@ The response includes the decision, reason, request ID, active policy/feed versi
 
 Interactive HTTP schemas are at **http://127.0.0.1:8000/docs**. The dashboard and API are part of the running gateway; this documentation site does not host a gateway or accept credentials.
 
+## Describe a rule, then test it through MCP
+
+After the deterministic setup above, start Ollama and install both local models plus the pinned Laya engine:
+
+```sh
+ollama pull qwen3:4b
+ollama pull qwen3:0.6b
+integrations/laya/setup.sh
+```
+
+`qwen3:4b` drafts the policy through Laya. `qwen3:0.6b` answers the protected completion request. Keep the default policy for this example: semantic assessment can remain disabled because the authored text rule runs locally. If Ollama is not running, start its app or run `ollama serve` in another terminal.
+
+In the connected dashboard at **http://127.0.0.1:8000**:
+
+1. Open **Describe a policy** and enter: `Blokuj każde słowo zawierające literę a wyłącznie w wejściu modeli, bez rozróżniania wielkości liter.`
+2. Draft with Laya. Inspect the operation: the text rule should use `word_contains`, literal `a`, input direction and model target, with case-insensitive matching. Redraft if the model interpreted the instruction differently.
+3. Preview `Hello` and `Cat` on separate lines, with input direction and model target. Expect `NO_LOCAL_MATCH` for `Hello` and `BLOCKED` for `Cat`. Preview checks local content controls; full requests also check permissions and budgets.
+4. Confirm review and activate the proposal. The policy version increments; activation and subsequent rule matching do not call the authoring model.
+
+From the repository root, make two real MCP requests:
+
+```sh
+uv run python - <<'PYTHON'
+import asyncio
+import json
+from pathlib import Path
+
+from fastmcp import Client
+from fastmcp.client.auth import BearerAuth
+
+
+async def main():
+    tokens = json.loads(Path("state/demo-tokens.json").read_text())
+    async with Client(
+        "http://127.0.0.1:8000/mcp/",
+        auth=BearerAuth(tokens["analyst-blue"]),
+    ) as client:
+        for prompt in ("Cat", "Hi"):
+            result = await client.call_tool(
+                "complete",
+                {"model": "qwen3:0.6b", "prompt": prompt, "max_output_tokens": 16},
+            )
+            print(prompt, result.data)
+
+
+asyncio.run(main())
+PYTHON
+```
+
+`Cat` must return a blocked decision with `upstream_executed: false`. `Hi` passes this input rule and reaches Qwen if the other active controls and budget permit it. Its generated text is model-dependent. Find both request IDs in the dashboard audit to confirm which policy and rule made each decision.
+
+This example deliberately restricts **input**. To protect generated words too, request input **and output** in the instruction and review that scope before activation. Then an allowed prompt can still produce a blocked answer; the audit records `upstream_executed: true` for an output-side denial.
+
 ## Add a local Qwen model
 
 The default policy allowlists `qwen3:0.6b` for completion but disables semantic analysis. Completion still requires a running Ollama service and installed model.

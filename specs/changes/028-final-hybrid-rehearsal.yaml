@@ -1,0 +1,24 @@
+id: FF-028
+title: Verify the combined hybrid gateway after policy and scan changes
+status: verified
+problem: The previous full hybrid rehearsal predates dashboard authoring and bounded signature inspection.
+scope:
+  - Rerun the existing isolated hybrid rehearsal against actual local Qwen inference.
+  - Record current allowed business flow, semantic denial, output redaction, role denial and actual completion.
+  - Preserve earlier reports and refresh documentation with the current checkpoint.
+constraints:
+  - Do not modify the active user's policy, credentials or model configuration.
+  - Actual model calls and simulated business tools remain explicitly distinguished.
+  - Reports exclude prompts, generated text and credentials.
+change_paths:
+  - evaluation/results/hybrid-final-rehearsal.json
+  - docs/testing.md
+  - docs/challenge-readiness.md
+acceptance:
+  - All five expected control outcomes and sanitized audit checks pass with current code and threat feed.
+validation:
+  - command: uv run python evaluation/smoke_hybrid.py --output evaluation/results/hybrid-final-rehearsal.json
+    expected: Five real-model gateway checks pass without changing the user's running configuration.
+evidence:
+  - command: uv run python evaluation/smoke_hybrid.py --output evaluation/results/hybrid-final-rehearsal.json
+    result: All five expected outcomes and sanitized audit checks passed with actual Qwen3 4B, policy version 2 and feed version 2.
