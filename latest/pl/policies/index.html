@@ -1,0 +1,1841 @@
+
+<!doctype html>
+<html lang="pl" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Lokalne egzekwowanie polityk bezpieczeństwa dla agentów AI, narzędzi i modeli.">
+      
+      
+      
+        <link rel="canonical" href="https://fastfence.dev/1.0.1/pl/policies/">
+      
+      
+        <link rel="prev" href="../manual-testing/">
+      
+      
+        <link rel="next" href="../integrations/">
+      
+      
+        
+          <link rel="alternate" href="../../policies/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="pl">
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Polityki i kontrole - FastFence</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/branding.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#polityki-i-kontrole-bezpieczenstwa" class="md-skip">
+          Przejdź do treści
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Nagłówek">
+    <a href="../" title="FastFence" class="md-header__button md-logo" aria-label="FastFence" data-md-component="logo">
+      
+  <img src="../../assets/fastfence-header.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FastFence
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Polityki i kontrole
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Wybierz język">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../policies/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="pl" class="md-select__link">
+              Polski
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Szukaj" placeholder="Szukaj" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Szukaj">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Wyczyść" aria-label="Wyczyść" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicjowanie wyszukiwania
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/llama-lovers/FastFence" title="Przejdź do repozytorium" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    llama-lovers/FastFence
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Zakładki" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Wprowadzenie
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Pierwsze kroki
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Przewodniki
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../examples/acp/" class="md-tabs__link">
+          
+  
+  
+  Przykłady
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../integration-reference/" class="md-tabs__link">
+          
+  
+  
+  Dokumentacja techniczna
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://github.com/llama-lovers/FastFence/releases" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Dziennik zmian
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Nawigacja" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="FastFence" class="md-nav__button md-logo" aria-label="FastFence" data-md-component="logo">
+      
+  <img src="../../assets/fastfence-header.svg" alt="logo">
+
+    </a>
+    FastFence
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/llama-lovers/FastFence" title="Przejdź do repozytorium" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    llama-lovers/FastFence
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wprowadzenie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pierwsze kroki
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pierwsze kroki
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instalacja
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nauka przez zadania
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprawdź instalację
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Przewodniki
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Przewodniki
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polityki i kontrole
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Polityki i kontrole
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Spis treści">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Spis treści
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#zroda-konfiguracji" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Źródła konfiguracji
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pola-polityki" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pola polityki
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blokowanie-i-redakcja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blokowanie i redakcja
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sygnatury-znanych-atakow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sygnatury znanych ataków
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kontrole-semantyczne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kontrole semantyczne
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-laya-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nazwane reguły Laya
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Nazwane reguły Laya">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wybierz-wasciwy-edytor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wybierz właściwy edytor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zakres-budzetow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zakres budżetów
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tworzone-reguy-tekstowe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tworzone reguły tekstowe
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opisz-polityke-w-panelu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opisz politykę w panelu
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utworz-regue-jezykiem-naturalnym-w-laya" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utwórz regułę językiem naturalnym w Laya
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Połącz agentów i modele
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Przykłady
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Przykłady
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/acp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Communication Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/custom-detectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Własne detektory w Pythonie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/protected-request/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chronione wywołanie modelu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/semantic-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nazwana reguła Laya
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/mcp-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Klient MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/fastmcp-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serwer FastMCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/openai-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Klient OpenAI SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/openai-upstream/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dostawca zgodny z OpenAI API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/asymmetric-anonymization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anonimizacja z kluczem publicznym i prywatnym
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dokumentacja techniczna
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dokumentacja techniczna
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kontrakty integracji
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/http-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ustawienia
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/llama-lovers/FastFence/releases" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dziennik zmian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Spis treści">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Spis treści
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#zroda-konfiguracji" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Źródła konfiguracji
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pola-polityki" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pola polityki
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blokowanie-i-redakcja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blokowanie i redakcja
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sygnatury-znanych-atakow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sygnatury znanych ataków
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kontrole-semantyczne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kontrole semantyczne
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-laya-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nazwane reguły Laya
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Nazwane reguły Laya">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wybierz-wasciwy-edytor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wybierz właściwy edytor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zakres-budzetow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zakres budżetów
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tworzone-reguy-tekstowe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tworzone reguły tekstowe
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opisz-polityke-w-panelu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opisz politykę w panelu
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utworz-regue-jezykiem-naturalnym-w-laya" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utwórz regułę językiem naturalnym w Laya
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="polityki-i-kontrole-bezpieczenstwa">Polityki i kontrole bezpieczeństwa<a class="headerlink" href="#polityki-i-kontrole-bezpieczenstwa" title="Permanent link">&para;</a></h1>
+<h2 id="zroda-konfiguracji">Źródła konfiguracji<a class="headerlink" href="#zroda-konfiguracji" title="Permanent link">&para;</a></h2>
+<p>FastFence odczytuje <code>config/policy.yaml</code> i <code>config/signatures.json</code> przy starcie. Proces w tle domyślnie sprawdza aktualizacje co dwie sekundy. Każde żądanie pobiera przez referencję jeden głęboko niezmienny snapshot polityki i sygnatur. Odczyt i walidacja konfiguracji odbywają się poza deterministyczną ścieżką żądania.</p>
+<p>Zmiana treści polityki wymaga wyższego <code>policy.version</code>, a zmiana sygnatur — wyższego <code>feed.version</code>. Aktualizacja samych sygnatur może zachować wersję polityki. Błędne aktualizacje, konflikty wersji i awarie źródła pozostawiają ostatni poprawny snapshot. Start wymaga poprawnej konfiguracji.</p>
+<p>Panel administracyjny umożliwia edycję i zapis lokalnej polityki z podniesieniem wersji. Uwierzytelniony administracyjnie <code>POST /api/admin/reload</code> żąda natychmiastowego przeładowania. Diagnostyka konfiguracji pokazuje rodzaj źródła, generację, liczniki odświeżeń i kody błędów bez poufnych danych.</p>
+<p>Dla centralnego źródła ustaw <code>FASTFENCE_CONFIG_URL</code> na zaufany endpoint HTTPS. HTTP jest dozwolone tylko dla adresu pętli zwrotnej. Endpoint musi zwracać obiekt JSON z dokładnie dwoma polami:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">"policy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"complete policy object"</span><span class="p">},</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">"feed"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"complete signature feed object"</span><span class="p">}</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>To ilustracja struktury pakietu, a nie poprawna polityka. Oba obiekty wewnętrzne muszą spełniać te same schematy co pliki lokalne. Przekierowania są wyłączone, a pobieranie ma limit czasu całej odpowiedzi i jej rozmiaru. Zdalną politykę zmienia się u źródła; zapis przez panel bramki nie może jej nadpisać.</p>
+<p>Ustawienia odświeżania, czasu, rozmiaru, tożsamości i usług docelowych opisano w <a href="../settings/">konfiguracji</a>.</p>
+<h2 id="pola-polityki">Pola polityki<a class="headerlink" href="#pola-polityki" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Pole</th>
+<th>Przeznaczenie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tools</code></td>
+<td>Jawna lista dozwolonych narzędzi biznesowych, role, czas i szacowany koszt wywołania.</td>
+</tr>
+<tr>
+<td><code>models</code></td>
+<td>Jawna lista dozwolonych modeli odpowiedzi, role, limit tokenów, czas i szacowany koszt.</td>
+</tr>
+<tr>
+<td><code>budgets</code></td>
+<td>Limity ról: wywołania, jednostki tokenów, koszt w mikro-USD, czas w milisekundach i współbieżność.</td>
+</tr>
+<tr>
+<td><code>privacy</code></td>
+<td>Włączenie kontroli prywatności oraz wybór <code>block</code> lub <code>redact</code> dla wejścia i wyjścia.</td>
+</tr>
+<tr>
+<td><code>signatures_enabled</code></td>
+<td>Włączenie literalnych sygnatur ataków na wejściu i wyjściu.</td>
+</tr>
+<tr>
+<td><code>semantic</code></td>
+<td>Wybór <code>laya</code> (domyślnie), <code>disabled</code>, <code>ollama</code> lub <code>kev</code>; model oceniający, próg, czas, skanowanie wyjścia i opcjonalne instrukcje tylko dla Laya.</td>
+</tr>
+<tr>
+<td><code>max_input_bytes</code>, <code>max_output_bytes</code></td>
+<td>Limity rozmiaru serializowanych danych UTF-8, także po usunięciu danych poufnych.</td>
+</tr>
+</tbody>
+</table>
+<p>Zapis administracyjny sprawdza również dokładny rozmiar zserializowanego YAML względem limitu źródła przed podmianą pliku lub snapshotu. Zbyt duża propozycja zachowuje ostatnie poprawne źródło, które nadal można odczytać po odświeżeniu i restarcie.</p>
+<p>Każda dozwolona rola potrzebuje budżetu. Role, tenanty i nagłówki podane przez klienta nie nadają dostępu: określają go zaufane rekordy tożsamości przy starcie. Nadanie roli nie uprawnia do celu nieobecnego na aktywnej liście dozwolonych operacji.</p>
+<h2 id="blokowanie-i-redakcja">Blokowanie i redakcja<a class="headerlink" href="#blokowanie-i-redakcja" title="Permanent link">&para;</a></h2>
+<p>Dostarczona polityka blokuje wykryte dane poufne na wejściu i redaguje je na wyjściu:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">privacy</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">block</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redact</span>
+</span></code></pre></div>
+<p>Zmień <code>input</code> na <code>redact</code>, aby przekazywać usłudze docelowej treść po usunięciu danych poufnych. Zmień <code>output</code> na <code>block</code>, aby wstrzymać poufną odpowiedź. Przy edycji pliku zwiększ wersję polityki.</p>
+<p>Redakcja nie omija ograniczeń treści. Bramka sprawdza oryginał, a następnie ponownie stosuje lokalne reguły tekstowe i sygnatury do wyniku po redakcji przed przekazaniem lub dostarczeniem. Przykładowo zakaz <code>a</code> bez rozróżniania wielkości liter odrzuci także <code>A</code> w <code>[REDACTED:pii_polish_id]</code>. Takie wejście zostaje zablokowane przed wywołaniem, a wyjście — po wykonaniu operacji. Podgląd stosuje tę samą kolejność. Treść bez wykrytych danych poufnych nie wymaga dodatkowego skanowania.</p>
+<p>Prywatność łączy heurystyki z <strong>detect-secrets 1.5.0</strong> poprzez 19 lokalnych detektorów formatów danych dostępu i słów kluczowych. Obejmuje reprezentatywne formaty GitHub, GitLab, Slack, AWS, Azure, JWT i kluczy prywatnych oraz adresy email i inne wzorce heurystyczne. Sprawdzane są zagnieżdżone klucze i wartości. Wyniki zawierają stałe nazwy detektorów, nigdy wartości sekretów.</p>
+<p>Detektory powstają przy starcie. Analiza żądania nie weryfikuje danych dostępu przez sieć, nie skanuje plików i ignoruje bazę wyjątków repozytorium oraz komentarze klienta deklarujące wyjątki. Błąd detektora blokuje wynik z bezpiecznym opisem przyczyny. Wyłączenie <code>privacy.enabled</code> wyłącza oba składniki prywatności.</p>
+<p>Stosowana jest normalizacja Unicode NFKC. Ograniczone odtwarzanie podziałów wiersza obejmuje pojedynczy tekst do 4096 znaków i ośmiu podziałów. Fragmenty między osobnymi wiadomościami lub polami nie są łączone. Wykrywanie pozostaje heurystyczne; nie rozpoznaje wszystkich możliwych sekretów i danych osobowych.</p>
+<h2 id="sygnatury-znanych-atakow">Sygnatury znanych ataków<a class="headerlink" href="#sygnatury-znanych-atakow" title="Permanent link">&para;</a></h2>
+<p>Źródła zagrożeń zawierają ograniczone wzorce tekstowe, a nie wykonywalne reguły lub dowolne wyrażenia regularne użytkownika. Dopasowanie stosuje NFKC i normalizację wielkości liter, usuwa typowe separatory zerowej szerokości i dopuszcza do ośmiu białych znaków między znakami literału. Granice identyfikatorów zapobiegają dopasowaniu niebezpiecznego identyfikatora wewnątrz dłuższej zwykłej nazwy.</p>
+<p>Sprawdzana jest jedna warstwa dekodowania procentowego i tekstowego base64 w drukowalnym UTF-8. Sąsiadujące teksty na liście mogą być odtworzone; niepowiązane pola słownika nie są łączone. Przekroczenie limitów głębokości, liczby węzłów, łącznej treści, dekodowanych danych i wariantów blokuje żądanie. Kontrole nie wykonują, nie deserializują i nie dekodują rekurencyjnie danych.</p>
+<p>Przykładowo dodaj wzorzec do kompletnego źródła sygnatur i zwiększ jego wersję:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"restricted_project_name"</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">"pattern"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Project Nightfall"</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Block the configured project-name pattern"</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Wzorzec ma 4–256 znaków, a źródło obsługuje do 200 sygnatur. Opcjonalny <code>match_mode: "token_sequence"</code> dopasowuje bezpiecznie escapowane tokeny oddzielone białymi znakami, z <code>max_gap</code> do 256 znaków. Dostarczona sygnatura powłoki używa <code>curl | sh</code> w tym trybie, dopuszczając URL między poleceniem a potokiem bez przyjmowania dowolnego regexu.</p>
+<p>Dopasowanie na wejściu blokuje przed wykonaniem operacji. Dopasowanie na wyjściu wstrzymuje odpowiedź po wykonaniu; audyt zachowuje ID sygnatur i <code>upstream_executed</code>. Ten sam znormalizowany matcher korzysta z wersjonowanego zewnętrznego źródła aktualizowanego poza ścieżką żądania.</p>
+<p>Wzorce obejmują przykładowe ciągi związane z ładowaniem pickle/PyTorch, zdalną powłoką i nadpisywaniem instrukcji. Cytowane opisy zawierające dokładny niebezpieczny wzorzec także bywają blokowane zachowawczo. To ograniczone kontrole tekstowe, a nie analiza binarnych modeli lub pełna ochrona przed exploitami.</p>
+<h2 id="kontrole-semantyczne">Kontrole semantyczne<a class="headerlink" href="#kontrole-semantyczne" title="Permanent link">&para;</a></h2>
+<p>Polityka produktu używa <strong>Laya z lokalnym Qwen3:4b</strong>, 30-sekundowym limitem oceny, progiem <code>0.7</code> i włączoną kontrolą wyjścia. Najpierw wykonywane są kontrole lokalne. Treść docierająca do oceny semantycznej jest analizowana przed przekazaniem, a odpowiedź — przed dostarczeniem. Błędna odpowiedź, brak modelu, przekroczenie czasu lub awaria dostawcy blokuje żądanie. Model odpowiedzi i model oceniający konfiguruje się niezależnie.</p>
+<p>W <strong>Policies → Edit configuration → Semantic analysis</strong> wybierz dostawcę i opcjonalnie wpisz politykę języka naturalnego w <code>semantic.instructions</code>. Pole przyjmuje do 4096 znaków i wymaga <code>laya</code>; niepuste instrukcje z innym dostawcą są odrzucane. Przejrzyj i aktywuj zmianę przed testowaniem reprezentatywnych treści dozwolonych i zabronionych.</p>
+<p>Dokładne wymagania, takie jak zakaz słów z literą a, realizuj deterministycznymi regułami treści. Modele semantyczne mogą przeoczyć ograniczenia znakowe. Instrukcje semantyczne nadają się do zakazów opartych na znaczeniu, ale ich wyniki nadal wymagają oceny na własnych danych.</p>
+<p>Kategorie mają kody: <code>benign</code> → <code>0</code>, <code>suspicious</code> → <code>0.6</code>, <code>malicious</code> → <code>1</code>. Są to uporządkowane kategorie polityki, a nie prawdopodobieństwa. Próg <code>0.5</code> blokuje podejrzane i złośliwe treści, a <code>0.7</code> lub <code>0.8</code> — kategorię złośliwą. Ocena semantyczna uzupełnia uwierzytelnianie, dostęp, prywatność, sygnatury i budżety.</p>
+<h2 id="named-laya-rules">Nazwane reguły Laya<a class="headerlink" href="#named-laya-rules" title="Permanent link">&para;</a></h2>
+<p>Użyj <strong>Policies → Add Laya rule</strong> do ograniczeń znaczeniowych opisanych własnymi słowami. Każda reguła ma ID, instrukcję, kierunek i cel. Proces w panelu to <strong>Test with Laya → Review policy change → Review changes → Activate policy</strong>, z jawnym potwierdzeniem przed publikacją.</p>
+<p>Poniższy fragment <code>semantic</code> połącz z kompletną polityką, zachowując modele, narzędzia, budżety i pozostałe kontrole. Nie jest samodzielnym plikiem polityki:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">semantic</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">laya</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qwen3:4b</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">timeout_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30000</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">scan_output</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no-personal-investment-advice</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="nt">instruction</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">        </span><span class="no">Block personalized recommendations to buy or sell a specific investment.</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="no">Allow general explanations of financial concepts.</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">      </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">model</span>
+</span></code></pre></div>
+<p><code>direction</code> to <code>input</code>, <code>output</code> lub <code>both</code>, a <code>target</code> to <code>model</code>, <code>tool</code> lub <code>all</code>. Do kontekstu oceny trafiają tylko reguły dotyczące bieżącego etapu. Wszystkie pasujące reguły i globalne <code>semantic.instructions</code> współdzielą jedną ocenę modelu na etap wraz z wbudowanymi kryteriami bezpieczeństwa. Wynik to jedna kategoria zagrożenia; FastFence nie wymyśla na jej podstawie ID dopasowanych reguł.</p>
+<p>Limit wynosi osiem reguł z unikalnymi ID, 2048 znaków na niepustą instrukcję i 8192 bajty UTF-8 dla łącznego wyrenderowanego tekstu polityki. Nazwane reguły wymagają <code>laya</code>. Reguła obejmująca wyjście wymaga także <code>scan_output: true</code>; niezgodna konfiguracja jest odrzucana.</p>
+<p>Edytor testuje propozycję na jednej próbce za pomocą rzeczywistej Laya, bez zapisywania polityki i wykonywania chronionego wywołania modelu lub narzędzia. Pokazany zakres to wejście, jeśli reguła obejmuje oba kierunki, oraz model, jeśli obejmuje wszystkie cele. Inne kombinacje sprawdzisz przez <a href="../integration-reference/#test-a-named-laya-rule">administracyjne API podglądu</a>. Propozycja jest oceniana razem z aktualnymi pasującymi regułami: blokady nie można przypisać wyłącznie jej, a brak blokady nie sprawdza całej bramki.</p>
+<p>Po teście przejrzyj różnice i jawnie aktywuj zmianę. Edycja reguły lub próbki unieważnia test; nieaktualna wersja i awaria dostawcy wymagają ponownego przeglądu. Lista reguł pozwala je edytować i usuwać. Zdalne źródła konfiguracji pozostają tylko do odczytu przez lokalne zarządzanie.</p>
+<h3 id="wybierz-wasciwy-edytor">Wybierz właściwy edytor<a class="headerlink" href="#wybierz-wasciwy-edytor" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Edytor</th>
+<th>Co zapisuje</th>
+<th>Działanie podczas żądania</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Add Laya rule</strong></td>
+<td>Nazwaną instrukcję języka naturalnego z kierunkiem i celem</td>
+<td>Rzeczywista ocena semantyczna we właściwych etapach</td>
+</tr>
+<tr>
+<td><strong>Add content rule</strong></td>
+<td>Literalny warunek <code>contains</code>, <code>word_contains</code> lub <code>equals</code></td>
+<td>Deterministyczne dopasowanie lokalne bez modelu</td>
+</tr>
+<tr>
+<td><strong>Describe a fast rule</strong></td>
+<td>Sprawdzoną, ograniczoną propozycję konfiguracji wygenerowaną przez Laya</td>
+<td>Powstałe kontrole; wygenerowane predykaty literalne są dopasowywane lokalnie</td>
+</tr>
+</tbody>
+</table>
+<p>Używaj <strong>Add content rule</strong> do konkretnych słów i liter, a <strong>Add Laya rule</strong> do ograniczeń znaczeniowych. Model może przeoczyć dokładny warunek znakowy. Tworzenie reguł przez Laya nie zamienia dowolnego opisu w gwarantowany szybki predykat.</p>
+<h2 id="zakres-budzetow">Zakres budżetów<a class="headerlink" href="#zakres-budzetow" title="Permanent link">&para;</a></h2>
+<p>Budżet jest lokalny dla instancji, zaufanej tożsamości i dnia UTC. Atomowe rezerwacje zapobiegają wydaniu tej samej pozostałej puli przez równoległe wywołania. Wywołanie jest naliczane przy rezerwacji; rozliczenie zwalnia niewykorzystaną część, a błędy i anulowana praca zachowują zachowawcze obciążenie.</p>
+<p>Jednostki tokenów są zachowawczym oszacowaniem, a nie dokładnym wynikiem tokenizera lub fakturą dostawcy. Rezerwacje modeli uwzględniają 1024 jednostki na narzut szablonu promptu poza bajtami wejścia i ograniczoną odpowiedzią. Niewykorzystana rezerwacja jest zwalniana. <code>cost_microusd</code> to skonfigurowany koszt wywołania; jeden mikro-USD to 0,000001 USD. Modele lokalne mogą mieć koszt finansowy równy zero, nadal podlegając limitom czasu i tokenów.</p>
+<p>Liczniki i ograniczony audyt zerują się po restarcie. Instancje mają niezależne limity bez globalnej koordynacji. Blokada wyjścia nie cofa skutków operacji docelowej.</p>
+<h2 id="tworzone-reguy-tekstowe">Tworzone reguły tekstowe<a class="headerlink" href="#tworzone-reguy-tekstowe" title="Permanent link">&para;</a></h2>
+<p>Dodawaj ograniczone reguły lokalne do <code>policy.text_rules</code>. Używają operatorów literalnych, nigdy generowanego kodu Python ani dowolnych wyrażeń regularnych:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">text_rules</span><span class="p">:</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no-letter-a</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">word_contains</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">model</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">block</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span></code></pre></div>
+<p>Reguła blokuje wejście lub odpowiedź modelu zawierającą słowo z <code>a</code>, również wielkim <code>A</code> i zgodnymi formami Unicode. Stosuje NFKC i opcjonalnie casefold; znaki diakrytyczne pozostają różne, więc <code>ą</code> nie pasuje do <code>a</code>. Słowa składają się z liter Unicode i znaków łączących. <code>contains</code> sprawdza literalny podciąg jednej wartości tekstowej, a <code>equals</code> całą wartość. Wartość <code>word_contains</code> może zawierać tylko litery i znaki łączące.</p>
+<p>Wybierz <code>input</code>, <code>output</code> lub <code>both</code> oraz <code>model</code>, <code>tool</code> lub <code>all</code>. Wejście modelu obejmuje prompt, treści wiadomości i ciągi stop; wyjście obejmuje wygenerowany tekst. Role, identyfikatory modeli i strukturalne klucze JSON są wyłączone. Reguły narzędzi sprawdzają rekurencyjnie wartości tekstowe, bez kluczy słowników. Sygnatury i prywatność zachowują szerszy zakres kontroli.</p>
+<p>Dozwolone są maksymalnie 64 reguły z unikalnymi ID i niepustą wartością do 128 znaków. Przygotowanie literału odbywa się podczas walidacji. Dopasowanie nie potrzebuje kompilatora, modelu, plików ani sieci. Blokady wejścia poprzedzają wykonanie; blokady wyjścia wstrzymują dostarczenie po wykonaniu. Wyniki zawierają ID reguł, nie dopasowaną treść.</p>
+<p>W <strong>Policies</strong> wybierz <strong>Add content rule</strong>, ustaw zakres i próbki, a potem sprawdź podgląd, przejrzyj i aktywuj regułę. Podgląd ocenia tylko proponowany predykat: <code>NO MATCH</code> nie obiecuje zezwolenia pozostałych kontroli. Aktywacja dodaje regułę do bieżącej polityki z nową wersją. Duplikaty ID, błędne reguły i konflikty wersji są odrzucane. Zdalną konfigurację aktualizuje się u jej źródła.</p>
+<p>Klient administracyjny może pobrać <code>GET /api/admin/rules/schema</code>, a następnie wywołać <code>POST /api/admin/rules/preview</code> z obiektem <code>rule</code> i maksymalnie 16 <code>samples</code>, po 4096 znaków. Podgląd nie zmienia polityki i nie wywołuje modelu. Poprawną propozycję publikuj przez wersjonowany <code>PUT /api/admin/policy</code>.</p>
+<h2 id="opisz-polityke-w-panelu">Opisz politykę w panelu<a class="headerlink" href="#opisz-polityke-w-panelu" title="Permanent link">&para;</a></h2>
+<p>Wykonaj zwykłe <code>fastfence init</code> lub odpowiednik przez uv, pozostaw Ollama uruchomioną z dostępnym modelem oceniającym i połącz panel tożsamością administracyjną. W <strong>Policies</strong> wybierz <strong>Describe a fast rule</strong>:</p>
+<ol>
+<li>Napisz konkretną instrukcję po polsku lub angielsku i wybierz <strong>Draft with Laya</strong>.</li>
+<li>Sprawdź stan przed i po zmianie oraz dokładne operacje. Utworzenie propozycji niczego nie aktywuje.</li>
+<li>Podaj przykłady, wybierz kierunek i cel, a następnie <strong>Test examples</strong>.</li>
+<li>Potwierdź przegląd zmian i wyników, po czym wybierz <strong>Activate this proposal</strong>.</li>
+<li>W <strong>Test requests</strong> sprawdź politykę na rzeczywistym chronionym wywołaniu. Narzędzia biznesowe wymagają osobno zarejestrowanych implementacji; domyślny produkt nie ma symulowanych narzędzi. Wynik zawiera ID audytu i informację o wykonaniu operacji docelowej.</li>
+</ol>
+<p>Obsługiwane instrukcje obejmują zakaz słów z <code>a</code>, redakcję emaili, blokowanie danych osobowych i sekretów oraz zawężenie istniejącego narzędzia do podzbioru już dozwolonych ról. Selektywne detektory obejmują obecnie email i heurystykę jedenastocyfrowego polskiego identyfikatora. Ogólne deklaracje zgodności prawnej, nowe narzędzia, rozszerzanie ról i dowolne wykonywalne reguły są odrzucane zamiast wymyślane.</p>
+<p>Selektywna redakcja emaili zmienia na przykład <code>privacy.detector_actions.pii_email</code>, pozostawiając działania innych detektorów. Żądanie z emailem i sekretem nadal jest blokowane, jeśli detektor sekretu ma akcję blokowania. Ogólne instrukcje prywatności zmieniają wszystkie kontrole w wybranym kierunku i usuwają jego selektywne wyjątki. Włączenie wcześniej wyłączonych kontroli jest pokazane w propozycji zmian.</p>
+<p>Propozycja jest związana z tożsamością administratora i wersją bazowej polityki, wygasa po dziesięciu minutach i może zostać aktywowana raz. Serwer wymaga podglądu przed aktywacją. Zmiana przykładów unieważnia potwierdzenie przeglądu w przeglądarce, a zmiana instrukcji usuwa szkic. Aktywacja publikuje dokładnie zapisaną propozycję bez kolejnego wywołania modelu. Podgląd sprawdza tylko lokalne kontrole treści; role, budżety, semantyka i zachowanie usługi docelowej są sprawdzane przy rzeczywistym wywołaniu.</p>
+<p>Endpointy zarządzania to <code>POST /api/admin/policies/draft</code>, <code>/preview</code> i <code>/activate</code>. Tworzenie propozycji używa ograniczonego, izolowanego lokalnego procesu Laya poza deterministycznym matcherem. Ocena semantyczna żądania jest osobnym etapem i może wywołać model dla każdej sprawdzanej interakcji. Wdrożenie z osobnym katalogiem konfiguracji może wskazać zaufanym <code>FASTFENCE_AUTHORING_ROOT</code> katalog instalacji Laya. Użytkownik przeglądarki nie może podawać ścieżek ani adresów modeli.</p>
+<h2 id="utworz-regue-jezykiem-naturalnym-w-laya">Utwórz regułę językiem naturalnym w Laya<a class="headerlink" href="#utworz-regue-jezykiem-naturalnym-w-laya" title="Permanent link">&para;</a></h2>
+<p>Funkcja <strong>Describe a fast rule</strong> korzysta z przypiętego rzeczywistego silnika Laya i lokalnego modelu Qwen do utworzenia ograniczonej propozycji. Wykonaj kroki panelu opisane wyżej albo użyj endpointów szkicu, podglądu i aktywacji. Po aktywacji konkretna reguła tekstowa działa lokalnie; osobno włączona analiza semantyczna nadal korzysta z modelu oceniającego.</p>
+<p>Dla dokładnego przykładu wpisz: <code>Block each word containing the letter a, case insensitive, on model input only.</code>. Sprawdź <code>word_contains</code>, wartość <code>a</code>, cel model i kierunek wejściowy. Przetestuj <code>Hello</code> (brak lokalnego dopasowania) i <code>Cat</code> (blokada), przejrzyj różnice i aktywuj. Powtórz test przez <a href="../examples/mcp-client/">klienta MCP</a>.</p>
+<p>Dla reguły znaczeniowej ocenianej przy każdej interakcji użyj kompletnego <a href="../examples/semantic-policy/">skryptu nazwanej polityki Laya</a>. Testuje rzeczywiste próbki i pokazuje wersjonowane różnice przed opcjonalną aktywacją. To osobna ścieżka względem tworzenia dokładnej reguły literalnej.</p>
+<p>Ogólne wytyczne prawne nie są kompilowane do deterministycznej zgodności z prawem. Oceny i propozycje modelu mogą błędnie zrozumieć intencję; przygotuj niezależne oczekiwane przykłady i analizuj błędy.</p>
+<p>Aby zmienić lub usunąć regułę, wybierz <strong>Edit rule</strong> lub <strong>Remove…</strong> w <strong>Policies</strong>, przejrzyj propozycję i jawnie ją aktywuj. Zaawansowana edycja JSON znajduje się w <strong>Edit configuration</strong>. Możesz też podnieść wersję w centralnym źródle konfiguracji. Zmiany dotyczą kolejnych wywołań.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Powrót do góry
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Stopka" >
+        
+          
+          <a href="../manual-testing/" class="md-footer__link md-footer__link--prev" aria-label="Poprzednia strona: Sprawdź instalację">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Poprzednia strona
+              </span>
+              <div class="md-ellipsis">
+                Sprawdź instalację
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../integrations/" class="md-footer__link md-footer__link--next" aria-label="Następna strona: Połącz agentów i modele">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Następna strona
+              </span>
+              <div class="md-ellipsis">
+                Połącz agentów i modele
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 FastFence contributors · Apache-2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Skopiowano do schowka", "clipboard.copy": "Kopiuj do schowka", "search.result.more.one": "1 wi\u0119cej na tej stronie", "search.result.more.other": "# wi\u0119cej na tej stronie", "search.result.none": "Brak wynik\u00f3w wyszukiwania", "search.result.one": "Wyniki wyszukiwania: 1", "search.result.other": "Wyniki wyszukiwania: #", "search.result.placeholder": "Zacznij pisa\u0107, aby szuka\u0107", "search.result.term.missing": "Brak", "select.version": "Wybierz wersj\u0119"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mermaid.mjs" type="module"></script>
+      
+    
+  </body>
+</html>

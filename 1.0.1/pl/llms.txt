@@ -1,0 +1,24 @@
+# Dokumentacja FastFence
+
+Uruchom `uv tool run --python 3.12 fastfence init`, a następnie `uv tool run --python 3.12 fastfence serve`. Ollama musi działać. Inicjalizacja przygotowuje Layę i skonfigurowany model oceniający. `init --config-only` pomija pobieranie komponentów. Kod źródłowy FastFence nie jest potrzebny. Polityki i tożsamości są lokalne; budżety i audyt należą do procesu. Propozycja Laya wymaga zatwierdzenia przed aktywacją.
+
+- [Chroń komunikację agentów przez ACP {#protect-agent-to-agent-calls-with-acp}](https://fastfence.dev/1.0.1/pl/examples/acp/)
+- [Napisz własne detektory tekstu w Pythonie {#write-custom-python-text-detectors}](https://fastfence.dev/1.0.1/pl/examples/custom-detectors/)
+- [Anonimizacja z kluczem publicznym i prywatnym {#publicprivate-key-anonymization}](https://fastfence.dev/1.0.1/pl/examples/asymmetric-anonymization/)
+- [Wybierz backend modelu zgodny z OpenAI {#choose-an-openai-compatible-model-upstream}](https://fastfence.dev/1.0.1/pl/examples/openai-upstream/)
+- [Pierwsze kroki](https://fastfence.dev/1.0.1/pl/getting-started/)
+- [Poznaj FastFence](https://fastfence.dev/1.0.1/pl/learn/)
+- [Wywołaj chroniony model Qwen {#call-a-protected-qwen-model}](https://fastfence.dev/1.0.1/pl/examples/protected-request/)
+- [Sprawdź i aktywuj regułę w języku naturalnym {#preview-and-activate-a-natural-language-rule}](https://fastfence.dev/1.0.1/pl/examples/semantic-policy/)
+- [Połącz się klientem FastMCP {#connect-with-the-fastmcp-client}](https://fastfence.dev/1.0.1/pl/examples/mcp-client/)
+- [Chroń serwer FastMCP wewnątrz aplikacji FastAPI {#protect-a-fastmcp-server-inside-a-fastapi-application}](https://fastfence.dev/1.0.1/pl/examples/fastmcp-server/)
+- [OpenAI Python SDK przez FastFence {#openai-python-sdk-through-fastfence}](https://fastfence.dev/1.0.1/pl/examples/openai-client/)
+- [Polityki i kontrole bezpieczeństwa](https://fastfence.dev/1.0.1/pl/policies/)
+- [Integracje](https://fastfence.dev/1.0.1/pl/integrations/)
+- [Dokumentacja integracji](https://fastfence.dev/1.0.1/pl/integration-reference/)
+- [Dokumentacja HTTP API](https://fastfence.dev/1.0.1/pl/reference/http-api/)
+- [Konfiguracja](https://fastfence.dev/1.0.1/pl/settings/)
+- [Architektura](https://fastfence.dev/1.0.1/pl/architecture/)
+- [Sprawdź swoją instalację {#check-your-installation}](https://fastfence.dev/1.0.1/pl/manual-testing/)
+
+- [Pełna dokumentacja](https://fastfence.dev/1.0.1/pl/llms-full.txt)
