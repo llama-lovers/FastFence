@@ -40,10 +40,10 @@ def http_configuration(configuration, monkeypatch):
             return httpx.Response(state["status"], content=state["body"])
         return httpx.Response(state["status"], json=state["body"])
 
-    client_class = httpx.Client
+    client_class = httpx.AsyncClient
     monkeypatch.setattr(
         httpx,
-        "Client",
+        "AsyncClient",
         lambda **kwargs: client_class(
             transport=httpx.MockTransport(respond), **kwargs
         ),

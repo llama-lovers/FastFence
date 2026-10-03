@@ -1,0 +1,36 @@
+id: FF-009
+title: Enforce a wall-clock deadline for remote configuration fetches
+status: verified
+problem: Buffered synchronous HTTP iteration lets a slow-drip source exceed the configured total fetch
+  timeout while individual socket reads remain active.
+scope:
+- Bound a complete HTTP configuration fetch with a cancellable asynchronous wall-clock deadline.
+- Preserve synchronous startup API safely when factory is called inside an existing event loop.
+- Test a real loopback slow-drip HTTP server and preserve last-good configuration on timeout.
+constraints:
+- No network I/O is added to the enforcement path.
+- Cancellation must close the HTTP response/client rather than leaving an unbounded fetch running in a
+  worker.
+- Source URL and configuration data must not appear in diagnostics.
+change_paths:
+- src/fastfence/modules/control/persistence/config_providers.py
+- tests/fixtures/configuration.py
+- tests/unit/test_config_deadline.py
+- README.md
+acceptance:
+- A complete remote source fetch has a wall-clock deadline, including headers and streamed body.
+- A slow-drip response exceeding the deadline raises sanitized source_timeout and leaves the active snapshot
+  unchanged.
+- HTTP refresh and config-only startup work both outside and inside an existing event loop.
+- Existing bundle, encoding, bounds, version and readonly-source regressions remain passing.
+validation:
+- command: uv run pytest -q
+  expected: Deadline and all functional/nonfunctional regressions pass.
+- command: uv run pre-commit run --all-files
+  expected: All quality and architectural gates pass.
+evidence:
+- command: uv run pytest -q
+  result: 153 passed; source coverage 93.44%; actual slow-drip/slow-headers, snapshot retention, loop-safe
+    startup and response cancellation/closure regressions passed
+- command: uv run basedpyright src
+  result: 0 errors, 0 warnings

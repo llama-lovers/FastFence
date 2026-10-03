@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import ipaddress
 import json
-import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import urlsplit
@@ -106,35 +107,27 @@ class HttpConfigProvider:
 
     def read(self) -> dict[str, Any]:
         try:
-            return self._read()
-        except httpx.TimeoutException:
+            return self._run_fetch()
+        except (TimeoutError, httpx.TimeoutException):
             raise ConfigSourceError("source_timeout") from None
         except httpx.HTTPError:
             raise ConfigSourceError("source_unavailable") from None
 
-    def _read(self) -> dict[str, Any]:
-        started = time.monotonic()
-        body = bytearray()
-        with httpx.Client(
-            timeout=self.timeout,
-            trust_env=False,
-            follow_redirects=False,
-            headers={"Accept-Encoding": "identity"},
-        ) as client:
-            with client.stream("GET", self.url) as response:
-                if response.status_code != 200:
-                    raise ConfigSourceError("source_unavailable")
-                if (
-                    response.headers.get("Content-Encoding", "identity").lower()
-                    != "identity"
-                ):
-                    raise ConfigSourceError("unsupported_source_encoding")
-                for chunk in response.iter_bytes(chunk_size=8192):
-                    if time.monotonic() - started > self.timeout:
-                        raise ConfigSourceError("source_timeout")
-                    if len(body) + len(chunk) > self.max_bytes:
-                        raise ConfigSourceError("source_too_large")
-                    body.extend(chunk)
+    def _run_fetch(self) -> dict[str, Any]:
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self._read())
+        # Startup remains synchronous even when a factory is called by async code.
+        # Join the worker only after its cancellable fetch closes all HTTP resources.
+        with ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="fastfence-config-fetch"
+        ) as worker:
+            return worker.submit(asyncio.run, self._read()).result()
+
+    async def _read(self) -> dict[str, Any]:
+        async with asyncio.timeout(self.timeout):
+            body = await self._fetch_body()
         try:
             data = json.loads(body)
             if not isinstance(data, dict) or set(data) != {"policy", "feed"}:
@@ -142,3 +135,27 @@ class HttpConfigProvider:
             return data
         except ValueError:
             raise ConfigSourceError("invalid_bundle") from None
+
+    async def _fetch_body(self) -> bytearray:
+        body = bytearray()
+        async with httpx.AsyncClient(
+            timeout=self.timeout,
+            trust_env=False,
+            follow_redirects=False,
+            headers={"Accept-Encoding": "identity"},
+        ) as client:
+            async with client.stream("GET", self.url) as response:
+                if response.status_code != 200:
+                    raise ConfigSourceError("source_unavailable")
+                if (
+                    response.headers.get("Content-Encoding", "identity").lower()
+                    != "identity"
+                ):
+                    raise ConfigSourceError("unsupported_source_encoding")
+                async for chunk in response.aiter_bytes(
+                    chunk_size=min(8192, self.max_bytes + 1)
+                ):
+                    if len(body) + len(chunk) > self.max_bytes:
+                        raise ConfigSourceError("source_too_large")
+                    body.extend(chunk)
+        return body
