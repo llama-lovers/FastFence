@@ -1,3 +1,5 @@
+import json
+import uuid
 from typing import Any
 
 from fastfence.modules.control.application.services.engine import Engine
@@ -60,6 +62,12 @@ class ControlRuntime:
     def status(self) -> dict[str, Any]:
         return self.management.status()
 
+    async def refresh_config(self) -> bool:
+        return await self.policies.refresh()
+
+    def diagnostics(self) -> dict[str, Any]:
+        return self.policies.diagnostics()
+
     def save_policy(self, policy: Policy, identity: Identity) -> Snapshot:
         return self.management.save(policy, identity)
 
@@ -74,12 +82,26 @@ class ControlRuntime:
 
 
 def build_runtime(settings: AppSettings) -> ControlRuntime:
-    identities = IdentityStore(settings.state_path / "identities.json")
+    identities = (
+        IdentityStore(records=json.loads(settings.identity_config_json))
+        if settings.identity_config_json is not None
+        else IdentityStore(
+            settings.identity_config_file
+            or settings.state_path / "identities.json"
+        )
+    )
     policies = PolicyStore(
         settings.root / "config/policy.yaml",
         settings.root / "config/signatures.json",
+        config_url=settings.config_url,
+        poll_interval=settings.config_poll_interval,
+        fetch_timeout=settings.config_fetch_timeout,
+        max_source_bytes=settings.max_config_source_bytes,
     )
-    ledger = Ledger(settings.state_path / "ledger.sqlite3")
+    ledger = Ledger(
+        instance_id=settings.instance_id or uuid.uuid4().hex,
+        audit_limit=settings.audit_limit,
+    )
     engine = Engine(
         policies=policies,
         ledger=ledger,

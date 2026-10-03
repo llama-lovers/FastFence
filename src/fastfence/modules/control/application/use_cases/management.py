@@ -39,17 +39,19 @@ class ManagementUseCases:
                 {
                     **row,
                     "limits": limits.model_dump() if limits else None,
-                    "roles": identity.roles if identity else [],
+                    "roles": list(identity.roles) if identity else [],
                 }
             )
         return {
-            "policy": snapshot.policy.model_dump(),
-            "feed": snapshot.feed.model_dump(),
+            "policy": snapshot.policy.model_dump(mode="json"),
+            "feed": snapshot.feed.model_dump(mode="json"),
             "metrics": self.ledger.stats(),
             "budgets": budgets,
             "audit": self.ledger.audit(),
             "business_backend": "simulated",
-            "budget_window": "UTC day; per trusted subject",
+            "budget_window": "UTC day; per instance and trusted subject",
+            "runtime": self.ledger.scope(),
+            "configuration": self.policies.diagnostics(),
             "semantic_status": "disabled — deterministic controls only"
             if snapshot.policy.semantic.provider == "disabled"
             else "configured — actual model evaluated per invocation; errors fail closed",

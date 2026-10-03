@@ -1,10 +1,15 @@
-status: planned
+status: implemented
 constraints:
 - Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
 - Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
   cap.
 - Restart resets volatile budgets and audit; this is explicit stateless runtime behavior.
-evidence: []
+evidence:
+- command: uv run pytest -q
+  result: 141 tests passed; 93.16% source coverage; memory/no-I/O/concurrency, config-only startup, immutable
+    snapshots, source failures and read-only HTTP management verified
+- command: uv run pre-commit run --all-files
+  result: All configured hooks passed; 16 import contracts kept, zero type errors
 id: FF-005
 title: Memory-only enforcement runtime
 problem: SQLite and durable counters contradict the accepted NF2/NF3 fast local runtime requirements.
@@ -14,6 +19,7 @@ scope:
 - Start from trusted configuration without a writable data directory or persistent ledger.
 - Trusted instance identity and explicit per-instance per-subject UTC-day budget scope.
 change_paths:
+- .importlinter
 - src/fastfence/modules/control/**
 - src/fastfence/shared/settings/**
 - src/fastfence/app/interfaces/http/web/**

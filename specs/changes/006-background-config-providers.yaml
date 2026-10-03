@@ -1,4 +1,4 @@
-status: planned
+status: implemented
 constraints:
 - Pydantic only; preserve architecture contracts and authenticated Laya/REST/MCP behavior.
 - Budgets are local to an instance. Memory counters alone cannot provide a coordinated global spending
@@ -6,7 +6,13 @@ constraints:
 - Restart resets volatile budgets and audit; this is explicit stateless runtime behavior.
 - Only trusted server configuration selects remote sources; client request bodies cannot choose configuration
   URLs.
-evidence: []
+- HTTP bundle is authoritative and read-only through gateway management; edits occur at its source.
+evidence:
+- command: uv run pytest -q
+  result: 141 tests passed; 93.16% source coverage; memory/no-I/O/concurrency, config-only startup, immutable
+    snapshots, source failures and read-only HTTP management verified
+- command: uv run pre-commit run --all-files
+  result: All configured hooks passed; 16 import contracts kept, zero type errors
 id: FF-006
 title: Background file and HTTP configuration providers
 problem: Manual reload and copying snapshots on every call do not meet the accepted dynamic low-I/O runtime

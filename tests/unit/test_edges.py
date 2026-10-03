@@ -4,12 +4,14 @@ import asyncio
 import json
 
 import pytest
+from pydantic import ValidationError
 
 from fastfence.modules.control.domain.models import (
     Assessment,
     ModelCall,
     ToolCall,
 )
+from tests.fixtures.policy import configure_policy
 
 
 def actor(app, tokens):
@@ -20,10 +22,10 @@ async def test_tool_timeout_settles_budget_and_hides_error_details(
     app, tokens, monkeypatch
 ):
     engine = app.state.engine
-    policy = engine.policies.snapshot().policy
-    policy.version += 1
-    policy.tools["knowledge.search"].timeout_ms = 50
-    engine.policies.save(policy)
+    configure_policy(
+        engine,
+        lambda data: data["tools"]["knowledge.search"].update(timeout_ms=50),
+    )
 
     async def slow(*args):
         await asyncio.sleep(1)
@@ -114,10 +116,9 @@ async def test_semantic_output_block_is_after_execution(
     app, tokens, monkeypatch
 ):
     engine = app.state.engine
-    policy = engine.policies.snapshot().policy
-    policy.version += 1
-    policy.semantic.provider = "ollama"
-    engine.policies.save(policy)
+    configure_policy(
+        engine, lambda data: data["semantic"].update(provider="ollama")
+    )
     assessments = 0
 
     async def fake(text, config):
@@ -160,8 +161,21 @@ async def test_output_attack_signature_never_reaches_caller(
 def test_snapshot_callers_cannot_mutate_active_policy(app):
     engine = app.state.engine
     snapshot = engine.policies.snapshot()
-    snapshot.policy.tools["payments.prepare"].roles.append("analyst")
-    snapshot.policy.version += 100
+    with pytest.raises(AttributeError):
+        snapshot.policy.tools["payments.prepare"].roles.append("analyst")
+    with pytest.raises(ValidationError):
+        snapshot.policy.version += 100
+    with pytest.raises(TypeError):
+        snapshot.policy.tools["payments.prepare"] = snapshot.policy.tools[
+            "knowledge.search"
+        ]
+    with pytest.raises(ValidationError):
+        snapshot.policy.budgets["analyst"].calls = 1
+    with pytest.raises(ValidationError):
+        snapshot.policy.privacy.enabled = False
+    with pytest.raises(AttributeError):
+        snapshot.feed.signatures.append(snapshot.feed.signatures[0])
     current = engine.policies.snapshot()
     assert current.policy.version == 1
-    assert current.policy.tools["payments.prepare"].roles == ["operator"]
+    assert current is snapshot
+    assert current.policy.tools["payments.prepare"].roles == ("operator",)

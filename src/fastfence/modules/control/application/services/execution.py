@@ -8,6 +8,7 @@ from fastfence.modules.control.application.services.inspection import (
     inspect_payload,
 )
 from fastfence.modules.control.contracts.ports import (
+    LedgerPort,
     ModelsPort,
     ScannerPort,
     ToolsPort,
@@ -23,9 +24,14 @@ from fastfence.modules.control.domain.models import (
 
 class Executor:
     def __init__(
-        self, tools: ToolsPort, scanner: ScannerPort, models: ModelsPort
+        self,
+        tools: ToolsPort,
+        scanner: ScannerPort,
+        models: ModelsPort,
+        ledger: LedgerPort,
     ) -> None:
         self.tools, self.scanner, self.models = tools, scanner, models
+        self.ledger = ledger
 
     async def scan(
         self,
@@ -36,6 +42,7 @@ class Executor:
     ) -> None:
         config = state.snapshot.policy.semantic
         state.tokens += allocation
+        self.ledger.record_semantic_call()
         assessment = await asyncio.wait_for(
             self.scanner.assess(text, config), config.timeout_ms / 1000
         )

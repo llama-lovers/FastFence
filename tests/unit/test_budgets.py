@@ -8,6 +8,7 @@ import pytest
 from fastfence.modules.control.domain.exceptions import BudgetExceededError
 from fastfence.modules.control.domain.models import Limits, ToolCall
 from fastfence.modules.control.persistence.ledger import Ledger
+from tests.fixtures.policy import configure_policy
 
 
 def limits(**changes):
@@ -31,7 +32,7 @@ def limits(**changes):
     ],
 )
 def test_each_limit_is_enforced_before_spend(tmp_path, field, amount, reason):
-    ledger = Ledger(tmp_path / "ledger.sqlite3")
+    ledger = Ledger(instance_id="budget-test")
     rule = limits(**{field: amount})
     ledger.reserve("first", "subject", rule, 5, 5, 5)
     with pytest.raises(BudgetExceededError, match=reason):
@@ -41,7 +42,7 @@ def test_each_limit_is_enforced_before_spend(tmp_path, field, amount, reason):
 
 
 def test_atomic_parallel_reservations_never_overspend(tmp_path):
-    ledger = Ledger(tmp_path / "ledger.sqlite3")
+    ledger = Ledger(instance_id="budget-test")
     rule = limits(calls=4, tokens=100, concurrent=4)
 
     def reserve(i):
@@ -60,7 +61,7 @@ def test_atomic_parallel_reservations_never_overspend(tmp_path):
 
 
 def test_settlement_releases_unused_reservation_and_is_idempotent(tmp_path):
-    ledger = Ledger(tmp_path / "ledger.sqlite3")
+    ledger = Ledger(instance_id="budget-test")
     ledger.reserve("r", "actor", limits(), 100, 100, 100)
     ledger.settle("r", 20, 30, 40)
     ledger.settle("r", 0, 0, 0)
@@ -75,31 +76,29 @@ def test_settlement_releases_unused_reservation_and_is_idempotent(tmp_path):
     ledger.close()
 
 
-def test_crash_recovery_retains_full_charge_and_refuses_second_owner(tmp_path):
-    path = tmp_path / "ledger.sqlite3"
-    first = Ledger(path)
+def test_restart_and_independent_instances_have_local_reset_counters():
+    first = Ledger(instance_id="first")
     first.reserve("r", "actor", limits(), 100, 100, 100)
-    with pytest.raises(RuntimeError, match="Another gateway"):
-        Ledger(path)
+    second = Ledger(instance_id="second")
+    assert second.budgets() == []
+    second.reserve("r", "actor", limits(), 100, 100, 100)
+    assert first.budgets()[0]["calls"] == second.budgets()[0]["calls"] == 1
     first.close()
-    recovered = Ledger(path)
-    row = recovered.budgets()[0]
-    assert (
-        row["tokens"] == 100
-        and row["cost_microusd"] == 100
-        and row["inflight"] == 0
-    )
-    recovered.close()
+    restarted = Ledger(instance_id="first")
+    assert restarted.budgets() == []
+    assert restarted.audit() == []
+    assert restarted.stats()["requests"] == 0
+    second.close()
+    restarted.close()
 
 
 async def test_parallel_engine_calls_enforce_limit_before_upstream(
     app, tokens, monkeypatch
 ):
     engine = app.state.engine
-    policy = engine.policies.snapshot().policy
-    policy.version += 1
-    policy.budgets["analyst"].calls = 3
-    engine.policies.save(policy)
+    configure_policy(
+        engine, lambda data: data["budgets"]["analyst"].update(calls=3)
+    )
     upstream_count = 0
     original = engine.tools.call
 

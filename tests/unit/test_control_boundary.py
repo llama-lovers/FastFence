@@ -8,11 +8,13 @@ from pathlib import Path
 
 import pytest
 import yaml
-from pydantic import ValidationError
 
 from fastfence.modules.control.application.services.engine import Engine
 from fastfence.modules.control.domain.exceptions import ModelUnavailableError
 from fastfence.modules.control.domain.models import Identity, ToolCall
+from fastfence.modules.control.persistence.config_providers import (
+    ConfigSourceError,
+)
 from fastfence.modules.control.persistence.ledger import Ledger
 from fastfence.modules.control.persistence.models import (
     OllamaModels,
@@ -44,7 +46,7 @@ def boundary(tmp_path):
     feed_file.write_text((ROOT / "config/signatures.json").read_text())
     tools = RecordingTools()
     store = PolicyStore(policy_file, feed_file)
-    ledger = Ledger(tmp_path / "acceptance.sqlite")
+    ledger = Ledger(instance_id="acceptance")
     engine = Engine(
         policies=store,
         ledger=ledger,
@@ -198,7 +200,7 @@ async def test_invalid_reload_keeps_last_good_policy(boundary):
     engine, tools, _, identity, path = boundary
     original_version = engine.policies.snapshot().policy.version
     path.write_text("version: 999\ntools: unvalidated\n")
-    with pytest.raises(ValidationError):
+    with pytest.raises(ConfigSourceError):
         engine.policies.reload()
     result = await engine.invoke(
         identity,

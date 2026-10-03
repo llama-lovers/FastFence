@@ -2,19 +2,24 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field, field_serializer, model_validator
 
+from fastfence.modules.control.domain.frozen import (
+    FrozenControlModel,
+    FrozenMap,
+    Roles,
+)
 from fastfence.shared.models import StrictModel
 
 
-class Identity(StrictModel):
+class Identity(FrozenControlModel):
     subject: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
     tenant: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
-    roles: list[str]
+    roles: Roles
     admin: bool = False
 
 
-class Limits(StrictModel):
+class Limits(FrozenControlModel):
     calls: int = Field(ge=1, le=1_000_000)
     tokens: int = Field(ge=1, le=100_000_000)
     cost_microusd: int = Field(ge=0)
@@ -22,19 +27,19 @@ class Limits(StrictModel):
     concurrent: int = Field(default=4, ge=1, le=100)
 
 
-class ToolPolicy(StrictModel):
-    roles: list[str] = Field(min_length=1)
+class ToolPolicy(FrozenControlModel):
+    roles: Roles = Field(min_length=1)
     timeout_ms: int = Field(default=2000, ge=50, le=60_000)
     cost_microusd: int = Field(default=0, ge=0)
 
 
-class Privacy(StrictModel):
+class Privacy(FrozenControlModel):
     input: Literal["block", "redact"] = "block"
     output: Literal["block", "redact"] = "redact"
     enabled: bool = True
 
 
-class SemanticConfig(StrictModel):
+class SemanticConfig(FrozenControlModel):
     provider: Literal["disabled", "ollama", "kev"] = "disabled"
     model: str = "qwen3:0.6b"
     threshold: float = Field(default=0.7, ge=0, le=1)
@@ -42,19 +47,19 @@ class SemanticConfig(StrictModel):
     scan_output: bool = True
 
 
-class ModelPolicy(StrictModel):
-    roles: list[str] = Field(min_length=1)
+class ModelPolicy(FrozenControlModel):
+    roles: Roles = Field(min_length=1)
     max_output_tokens: int = Field(default=256, ge=1, le=2048)
     cost_microusd: int = Field(default=0, ge=0)
     timeout_ms: int = Field(default=20_000, ge=50, le=60_000)
 
 
-class Policy(StrictModel):
+class Policy(FrozenControlModel):
     version: int = Field(ge=1)
     description: str = Field(max_length=200)
-    tools: dict[str, ToolPolicy]
-    models: dict[str, ModelPolicy] = Field(default_factory=dict)
-    budgets: dict[str, Limits]
+    tools: FrozenMap[ToolPolicy]
+    models: FrozenMap[ModelPolicy] = Field(default_factory=dict)
+    budgets: FrozenMap[Limits]
     privacy: Privacy = Field(default_factory=Privacy)
     semantic: SemanticConfig = Field(default_factory=SemanticConfig)
     signatures_enabled: bool = True
@@ -69,16 +74,29 @@ class Policy(StrictModel):
                 raise ValueError("Every permitted role needs a budget")
         return self
 
+    def editable(self) -> dict[str, Any]:
+        """Return independent JSON data for constructing a validated new version."""
+        return self.model_dump(mode="json")
 
-class Signature(StrictModel):
+
+class Signature(FrozenControlModel):
     id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
     pattern: str = Field(min_length=4, max_length=256)
     description: str = Field(max_length=200)
 
 
-class SignatureFeed(StrictModel):
+class SignatureFeed(FrozenControlModel):
     version: int = Field(ge=1)
-    signatures: list[Signature] = Field(max_length=200)
+    signatures: tuple[Signature, ...] = Field(max_length=200)
+
+    @field_serializer("signatures")
+    def serialize_signatures(
+        self, value: tuple[Signature, ...]
+    ) -> list[dict[str, Any]]:
+        return [signature.model_dump(mode="json") for signature in value]
+
+    def editable(self) -> dict[str, Any]:
+        return self.model_dump(mode="json")
 
 
 class ToolCall(StrictModel):
@@ -123,11 +141,11 @@ class Verdict(StrictModel):
     tokens: int = 0
     cost_microusd: int = 0
     upstream_executed: bool = False
+    instance_id: str | None = None
+    telemetry_scope: Literal["instance"] = "instance"
 
 
-class Snapshot(StrictModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
+class Snapshot(FrozenControlModel):
     policy: Policy
     feed: SignatureFeed
 

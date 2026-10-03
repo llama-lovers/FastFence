@@ -8,6 +8,7 @@ import pytest
 from fastfence.modules.control.domain.controls import privacy_filter
 from fastfence.modules.control.domain.models import Assessment, ToolCall
 from tests.fixtures.auth import headers
+from tests.fixtures.policy import configure_policy
 
 
 def invoke(
@@ -293,10 +294,9 @@ async def test_semantic_threshold_and_snapshot(app, tokens, monkeypatch):
 
     monkeypatch.setattr(app.state.engine.scanner, "assess", fake)
     engine = app.state.engine
-    policy = engine.policies.snapshot().policy
-    policy.version += 1
-    policy.semantic.provider = "ollama"
-    engine.policies.save(policy)
+    configure_policy(
+        engine, lambda data: data["semantic"].update(provider="ollama")
+    )
     identity = app.state.identities.authenticate(tokens["analyst-blue"])
     task = asyncio.create_task(
         engine.invoke(
@@ -305,9 +305,9 @@ async def test_semantic_threshold_and_snapshot(app, tokens, monkeypatch):
         )
     )
     await asyncio.sleep(0.005)
-    policy.version += 1
-    policy.semantic.threshold = 0.95
-    engine.policies.save(policy)
+    configure_policy(
+        engine, lambda data: data["semantic"].update(threshold=0.95)
+    )
     first = await task
     second = await engine.invoke(
         identity,

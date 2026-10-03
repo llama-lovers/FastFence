@@ -52,7 +52,7 @@ packages = ["src/fastfence"]
 
 [tool.pytest.ini_options]
 minversion = "8.4"
-addopts = "-ra"
+addopts = "-ra --cov=src/fastfence --cov-report=term-missing:skip-covered --cov-report=xml:coverage.xml --cov-fail-under=85 --cov-precision=2"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 asyncio_default_test_loop_scope = "function"

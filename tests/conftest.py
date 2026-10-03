@@ -11,6 +11,8 @@ from fastfence.app.factory import create_app
 from fastfence.app.interfaces.cli.main import initialize
 from fastfence.shared.settings.app_settings import AppSettings
 
+pytest_plugins = ["tests.fixtures.configuration"]
+
 
 @pytest.fixture
 def project(tmp_path):

@@ -119,6 +119,17 @@ source_modules =
 forbidden_modules = dataclasses
 allow_indirect_imports = True
 
+[importlinter:contract:no-runtime-databases]
+name = FastFence runtime uses memory accounting rather than database clients
+type = forbidden
+source_modules = fastfence
+forbidden_modules =
+    sqlite3
+    redis
+    asyncpg
+    sqlalchemy
+allow_indirect_imports = True
+
 [importlinter:contract:modules-acyclic]
 name = No dependency cycles between feature modules
 type = acyclic_siblings

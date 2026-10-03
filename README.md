@@ -7,7 +7,7 @@ It verifies a provisioned identity, applies centralized policy, reserves a budge
 the upstream, inspects the result, and records a sanitized decision. The dashboard lets judges
 try requests, change policy, inspect consumption, and export audit records.
 
-Business tools are **simulated**. The gateway controls, HTTP/MCP authentication, database,
+Business tools are **simulated**. The gateway controls, HTTP/MCP authentication, memory accounting,
 policy reload, resource limits, and input/output filtering are real. The default policy runs
 **deterministic controls only**. Hybrid mode uses a real separately hosted Ollama or Kev model;
 there is no pretend classifier or fabricated semantic score in the application.
@@ -56,7 +56,7 @@ flowchart LR
     S --> U[Allowlisted tool / memory / LLM]
     U --> O[Deterministic + optional semantic output checks]
     O --> J[Sanitized result]
-    O --> L[SQLite settlement + audit]
+    O --> L[Atomic memory settlement + bounded audit]
     P[Versioned policy + signature feed] --> R
     P --> D
     P --> B
@@ -78,23 +78,41 @@ All records, settings, snapshots and model assessments use Pydantic; there are n
 
 ## Central configuration
 
-`config/policy.yaml` is the single active policy source. It controls tool/model allowlists,
+By default, `config/policy.yaml` and `config/signatures.json` form the central configuration source. It controls tool/model allowlists,
 per-role permissions, daily per-subject budgets, input/output privacy behavior, signature
 enforcement, semantic provider and risk threshold, size limits, and upstream timeouts.
 
 The management dashboard edits the complete policy and increments its version. Save validates
 the policy and feed before replacing the active snapshot. An invocation keeps its original
 policy/feed versions even while configuration changes. Invalid candidates preserve the last
-good active configuration. Changing files directly requires a higher policy version and
-**Reload local files** or authenticated `POST /api/admin/reload`.
+good active configuration. A background worker polls the source every two seconds by default;
+no restart or manual reload is required. Changed policy or feed content requires its own higher
+version. A feed-only version increase is accepted without changing the policy version.
+Authenticated `POST /api/admin/reload` also triggers an immediate refresh.
+
+Each request acquires the deeply immutable policy/feed snapshot by reference in O(1).
+Reading, parsing, validating and fingerprinting new configuration happen outside the request
+path. Publication replaces a single coherent snapshot; in-flight requests retain the old one.
+The dashboard exposes source health, generation, last refresh and sanitized failure codes.
+
+Set `FASTFENCE_CONFIG_URL` to use a trusted HTTPS endpoint (HTTP is limited to loopback).
+It returns one JSON object containing exactly `policy` and `feed`, each with the same schema
+as the local files. Redirects are disabled; reads have a configured timeout and size bound.
+Remote configuration is edited at its source; the management gateway does not overwrite it.
+`FASTFENCE_CONFIG_POLL_INTERVAL`, `FASTFENCE_CONFIG_FETCH_TIMEOUT` and
+`FASTFENCE_MAX_CONFIG_SOURCE_BYTES` configure polling and fetch bounds.
+A malformed update, version rollback or source outage leaves the last valid snapshot active.
+Startup requires a valid source; there is no fabricated fallback policy.
 
 To demonstrate a less strict privacy policy, change `privacy.input` from `block` to `redact`;
 the useful request proceeds with detected sensitive strings replaced. Set `privacy.output`
 to `block` to suppress a sensitive result. Output blocking cannot roll back an action that
 already ran; the verdict explicitly includes `upstream_executed`.
 
-Provisioned identity claims live in the private `state/identities.json` file, outside client
-requests. Client-provided role/tenant fields do not grant authority. Headers such as `X-Role`
+Provisioned identity claims are trusted startup configuration, outside client requests.
+The demo uses private `state/identities.json`. A deployment can supply the same identity records
+through `FASTFENCE_IDENTITY_CONFIG_JSON` or a read-only `FASTFENCE_IDENTITY_CONFIG_FILE`.
+The runtime needs no writable state directory or application database. Client-provided role/tenant fields do not grant authority. Headers such as `X-Role`
 and `X-Tenant` are ignored. Role grants cannot authorize a tool omitted from the active policy.
 Tenant memory uses a validated `tenant/key` resource and must match the verified tenant.
 
@@ -158,10 +176,10 @@ split of provider prompt and completion tokens.
 
 ## Budget semantics
 
-- Limits are scoped to a **trusted subject and UTC day**, so inventing session IDs cannot
+- Limits are scoped to an **instance, trusted subject and UTC day**, so inventing session IDs cannot
   reset them. Limits cover calls, conservative token units, estimated cost, metered runtime,
   and concurrent invocations. Calls are charged when reserved, including subsequent failures.
-- SQLite `BEGIN IMMEDIATE` atomically reserves the worst permitted allocation before model/tool
+- A process-local lock atomically reserves the worst permitted allocation before model/tool
   execution. Parallel requests cannot each spend the same remainder. Settlement releases unused
   allocation; failed/cancelled/oversized operations retain conservative charges.
 - Token units use a conservative UTF-8 byte estimate for tool I/O and model input, bounded model
@@ -171,17 +189,21 @@ split of provider prompt and completion tokens.
   model a commercial API's upper-bound call charge, while local inference can use zero cost and
   a compute budget. This MVP does not query commercial providers or reconcile their invoices.
 - Runtime reserves the configured upstream/scan timeout allocations and settles measured time
-  bounded by those allocations. Daily counters persist across restart. Unsettled crash reservations
-  remain fully charged rather than refunding unverified work.
-- This implementation supports **one gateway process per state directory**. A process-level file
-  lock prevents unsafe multi-worker recovery. SQLite serializes concurrent requests inside that
-  gateway; this is not a distributed ledger. For horizontal scale, replace it with a shared
-  transactional ledger and lease-aware recovery.
+  bounded by those allocations. Counters and sanitized audit records live only in memory and
+  **reset on restart**. Audit retention is a bounded ring (10,000 entries by default); lifetime
+  decision counters continue growing when old records are evicted.
+- Independent instances can run in parallel, each with a trusted instance ID and its own budget.
+  **There is no global budget coordination.** A subject calling several instances can consume
+  each instance's allowance. Deployments needing a shared spending cap must add external
+  coordination or consistently route each subject; that tradeoff is outside this memory-only MVP.
+- The deterministic enforcement path performs no database, filesystem or configuration-network
+  I/O. Only an approved upstream call and an explicitly enabled semantic model can add network
+  I/O. Management operations and the background configuration worker run outside that path.
 
 ## Signature feed and privacy scope
 
 `config/signatures.json` is a bounded, validated feed of literal signatures. An external system
-can update it on disk; reload requires a non-decreasing feed version and a higher policy version.
+can update it on disk or in the HTTP bundle; changed feed content requires a higher feed version.
 The examples cover Python pickle reducer/deserialization markers, an unsafe PyTorch loading
 option, a remote-shell marker, and a common instruction-override phrase. Detection normalizes
 Unicode NFKC and case. These demonstrate feed-driven mitigation of specific patterns associated
@@ -209,8 +231,8 @@ The HTTP API's interactive schema is available at `/docs`.
 | `GET /api/me` | Either | Show verified server-side identity |
 | `GET /api/admin/status` | Management | Policy, signatures, telemetry, budgets, sanitized audit |
 | `PUT /api/admin/policy` | Management | Validate, save and activate a higher-version policy |
-| `POST /api/admin/reload` | Management | Reload policy and feed from local files |
-| `GET /api/admin/audit.jsonl` | Management | Latest 10,000 sanitized events for SIEM ingestion |
+| `POST /api/admin/reload` | Management | Immediately refresh the configured policy/feed source |
+| `GET /api/admin/audit.jsonl` | Management | Retained sanitized events (bounded memory ring) for SIEM ingestion |
 | `/mcp/` | Agent | Streamable HTTP MCP tool and resource entry point |
 
 Every authenticated invocation returns a request ID, decision/reason, policy and feed versions,
@@ -299,3 +321,24 @@ The project uses their public interfaces and does not vendor Laya, Kev or FastSp
 The supplied FastSprout tree informed organization only. FastCRUD and Bubus are unnecessary
 for this small control pipeline; security decisions stay synchronous with execution rather than
 depending on eventual event processing.
+
+## Requirement coverage
+
+The implementation and acceptance criteria are tracked in `specs/requirements.yaml` and
+`specs/changes/`. Every code change must stage an implemented or verified specification;
+pre-commit rejects uncovered changes and architectural violations.
+
+| Requirements | Delivered scope |
+| --- | --- |
+| F1–F2, NF8–NF9 | Protected REST, OpenAI-compatible chat and authenticated MCP adapters share a protocol-independent core. Real Laya model calls and registered tool handlers use the gateway. A general arbitrary-HTTP proxy and drop-in SDK are not implemented. |
+| F3–F4, F14, NF4–NF5, NF13 | Central file/HTTP configuration, background polling, deep immutable snapshots, atomic publication and last-valid retention. Updates become visible at the next successful poll. |
+| F5–F7, NF7, NF12 | Deterministic auth/RBAC, allowlists, privacy and signatures; optional real Ollama or Kev semantic analysis; allow/block/redact decisions. Semantic errors fail closed. Human approval is not implemented. |
+| F8, NF2–NF3, NF10 | Five atomic resource limits in memory; config-only startup and independent instances. Limits are local and restart resets accounting. |
+| F9–F10 | Versioned external signature feed and representative exploit-pattern denials; detection is bounded to configured literal patterns. |
+| F11–F12, NF11 | Sanitized bounded audit/export, decision counts, rolling latency/throughput, semantic-call count, budgets and configuration diagnostics in the dashboard/API. |
+| F13, NF14 | Automated positive/negative, concurrency, source-failure, protocol and architectural tests; real-model and real-Laya checks recorded separately. |
+| NF1, NF6 | Deterministic request path uses local controls and counters, without configuration I/O. The reproducible benchmark measures it separately from model inference and HTTP transport. |
+
+Full settings are documented in [docs/settings.md](docs/settings.md). Performance evidence is
+kept in `evaluation/results/`; the benchmark reports hardware, sample sizes, percentiles and
+exact scope rather than treating model inference time as control-layer overhead.

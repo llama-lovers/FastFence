@@ -80,7 +80,7 @@ class Engine:
 
     async def _run(self, state: InvocationState) -> None:
         inspector = InputInspector(self.tools)
-        executor = Executor(self.tools, self.scanner, self.models)
+        executor = Executor(self.tools, self.scanner, self.models, self.ledger)
         prepared = inspector.prepare(state)
         self.ledger.reserve(
             state.verdict.request_id,

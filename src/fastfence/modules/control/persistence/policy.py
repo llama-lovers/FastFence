@@ -1,75 +1,170 @@
 from __future__ import annotations
 
+import asyncio
+import hashlib
 import json
 import threading
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import yaml
 
 from fastfence.modules.control.domain.models import (
     Policy,
-    SignatureFeed,
     Snapshot,
+)
+from fastfence.modules.control.persistence.config_providers import (
+    ConfigProvider,
+    ConfigSourceError,
+    FileConfigProvider,
+    HttpConfigProvider,
+    sanitized_error,
 )
 
 
+def fingerprints(snapshot: Snapshot) -> tuple[str, str]:
+    digests = [
+        hashlib.sha256(
+            json.dumps(model.model_dump(mode="json"), sort_keys=True).encode()
+        ).hexdigest()
+        for model in (snapshot.policy, snapshot.feed)
+    ]
+    return digests[0], digests[1]
+
+
 class PolicyStore:
-    """Validate a complete candidate before publishing an immutable invocation snapshot."""
+    """Publish complete immutable snapshots; enforcement acquires a reference."""
 
-    def __init__(self, policy_path: Path, feed_path: Path) -> None:
+    def __init__(
+        self,
+        policy_path: Path,
+        feed_path: Path,
+        *,
+        config_url: str | None = None,
+        poll_interval: float = 2.0,
+        fetch_timeout: float = 5.0,
+        max_source_bytes: int = 262_144,
+    ) -> None:
         self.policy_path, self.feed_path = policy_path, feed_path
-        self._lock = threading.Lock()
-        self._snapshot = self._read()
+        self.poll_interval = poll_interval
+        self.provider: ConfigProvider = (
+            HttpConfigProvider(config_url, fetch_timeout, max_source_bytes)
+            if config_url
+            else FileConfigProvider(policy_path, feed_path, max_source_bytes)
+        )
+        self._lock, self._refresh_lock = threading.Lock(), threading.Lock()
+        try:
+            self._snapshot = self._read()
+        except Exception as error:
+            raise ConfigSourceError(sanitized_error(error)) from None
+        self._fingerprints = fingerprints(self._snapshot)
+        now = datetime.now(UTC).isoformat()
+        self._diagnostics: dict[str, Any] = {
+            "source_kind": self.provider.kind,
+            "management_writable": self.provider.kind == "local_files",
+            "poll_interval_seconds": poll_interval,
+            "generation": 1,
+            "refresh_successes": 0,
+            "refresh_failures": 0,
+            "last_checked_at": now,
+            "last_success_at": now,
+            "last_error": None,
+        }
 
-    def _read(self) -> Snapshot:
-        policy = Policy.model_validate(
-            yaml.safe_load(self.policy_path.read_text())
-        )
-        feed = SignatureFeed.model_validate(
-            json.loads(self.feed_path.read_text())
-        )
-        return Snapshot(policy=policy, feed=feed)
+    def _read(self, policy: Policy | None = None) -> Snapshot:
+        data = self.provider.read()
+        if policy is not None:
+            data["policy"] = policy.model_dump(mode="json")
+        return Snapshot.model_validate(data)
 
     def snapshot(self) -> Snapshot:
+        # Policy/feed models and their nested containers are deeply immutable.
+        return self._snapshot
+
+    def diagnostics(self) -> dict[str, Any]:
         with self._lock:
-            return Snapshot(
-                policy=self._snapshot.policy.model_copy(deep=True),
-                feed=self._snapshot.feed.model_copy(deep=True),
+            return dict(self._diagnostics)
+
+    def _validate_versions(
+        self, candidate: Snapshot, digests: tuple[str, str]
+    ) -> bool:
+        previous = self._snapshot
+        versions = (candidate.policy.version, candidate.feed.version)
+        old_versions = (previous.policy.version, previous.feed.version)
+        for current, old, digest, old_digest in zip(
+            versions, old_versions, digests, self._fingerprints, strict=True
+        ):
+            if current < old or (current == old and digest != old_digest):
+                raise ConfigSourceError("version_conflict")
+        return versions != old_versions
+
+    def _publish(self, candidate: Snapshot, *, persist: bool = False) -> bool:
+        digests = fingerprints(candidate)
+        with self._lock:
+            changed = self._validate_versions(candidate, digests)
+            if persist:
+                self._persist_policy(candidate.policy)
+            if changed:
+                self._snapshot, self._fingerprints = candidate, digests
+                self._diagnostics["generation"] += 1
+            now = datetime.now(UTC).isoformat()
+            self._diagnostics.update(
+                refresh_successes=self._diagnostics["refresh_successes"] + 1,
+                last_checked_at=now,
+                last_success_at=now,
+                last_error=None,
             )
+        return changed
+
+    def _persist_policy(self, policy: Policy) -> None:
+        if self.provider.kind != "local_files":
+            return
+        temporary = self.policy_path.with_suffix(".yaml.tmp")
+        temporary.write_text(
+            yaml.safe_dump(policy.model_dump(mode="json"), sort_keys=False),
+            encoding="utf-8",
+        )
+        temporary.replace(self.policy_path)
+
+    def _failure(self, error: Exception) -> None:
+        with self._lock:
+            self._diagnostics.update(
+                refresh_failures=self._diagnostics["refresh_failures"] + 1,
+                last_checked_at=datetime.now(UTC).isoformat(),
+                last_error=sanitized_error(error),
+            )
+
+    def _refresh(self, policy: Policy | None = None) -> bool:
+        with self._refresh_lock:
+            try:
+                candidate = self._read(policy)
+                if (
+                    policy is not None
+                    and policy.version <= self._snapshot.policy.version
+                ):
+                    raise ConfigSourceError("version_conflict")
+                return self._publish(candidate, persist=policy is not None)
+            except Exception as error:
+                self._failure(error)
+                raise ConfigSourceError(
+                    self.diagnostics()["last_error"]
+                ) from None
 
     def save(self, policy: Policy) -> Snapshot:
-        # The feed is also validated before a new policy reaches disk or the active snapshot.
-        feed = SignatureFeed.model_validate(
-            json.loads(self.feed_path.read_text())
-        )
-        with self._lock:
-            if policy.version <= self._snapshot.policy.version:
-                raise ValueError("Policy version must increase on each save")
-            if feed.version < self._snapshot.feed.version:
-                raise ValueError("Signature feed version cannot decrease")
-            temporary = self.policy_path.with_suffix(".yaml.tmp")
-            temporary.write_text(
-                yaml.safe_dump(policy.model_dump(), sort_keys=False)
-            )
-            temporary.replace(self.policy_path)
-            self._snapshot = Snapshot(
-                policy=policy.model_copy(deep=True), feed=feed
-            )
-            return self.snapshot_unlocked()
-
-    def snapshot_unlocked(self) -> Snapshot:
-        return Snapshot(
-            policy=self._snapshot.policy.model_copy(deep=True),
-            feed=self._snapshot.feed.model_copy(deep=True),
-        )
+        if self.provider.kind != "local_files":
+            error = ConfigSourceError("read_only_source")
+            self._failure(error)
+            raise error
+        self._refresh(policy)
+        return self.snapshot()
 
     def reload(self) -> Snapshot:
-        candidate = self._read()
-        with self._lock:
-            previous = self._snapshot
-            if candidate.policy.version <= previous.policy.version:
-                raise ValueError("Policy version must increase on each reload")
-            if candidate.feed.version < previous.feed.version:
-                raise ValueError("Signature feed version cannot decrease")
-            self._snapshot = candidate
-            return self.snapshot_unlocked()
+        self._refresh()
+        return self.snapshot()
+
+    async def refresh(self) -> bool:
+        try:
+            return await asyncio.to_thread(self._refresh)
+        except ConfigSourceError:
+            return False
