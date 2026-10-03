@@ -1,0 +1,40 @@
+{
+  "created_at": "2026-10-03T13:02:32.647264+00:00",
+  "model": "qwen3:4b",
+  "provider": "Actual pinned Laya llm_call and LiteLLM to local Ollama; bounded JSON proposal, no manual repair",
+  "scope": "Three actual synthetic management-side probes across two schema checkpoints; only unseen literal case rerun after scope constraint. No activation, no manual output repair, not a general compiler accuracy estimate.",
+  "cases": [
+    {
+      "case": "Polish word-containment restriction",
+      "expected_outcome": "supported",
+      "expected_operator": "word_contains",
+      "actual_outcome": "supported",
+      "passed": true,
+      "latency_ms": 23458,
+      "timing_scope": "draft inference and strict proposal parsing",
+      "run_checkpoint": "before_scope_schema_constraint; inherited, not rerun"
+    },
+    {
+      "case": "Unsupported broad compliance requirement",
+      "expected_outcome": "rejected",
+      "actual_outcome": "unsupported_or_ambiguous_instruction",
+      "passed": true,
+      "latency_ms": 22510,
+      "timing_scope": "draft including isolated configuration setup and strict rejection",
+      "run_checkpoint": "before_scope_schema_constraint; inherited, not rerun"
+    },
+    {
+      "case": "Unseen output literal restriction",
+      "expected_outcome": "supported",
+      "expected_operator": "contains",
+      "actual_outcome": "supported",
+      "passed": true,
+      "latency_ms": 3305,
+      "timing_scope": "draft operation as measured; failure includes temporary configuration setup",
+      "run_checkpoint": "after_scope_schema_constraint; actual rerun"
+    }
+  ],
+  "all_passed": true,
+  "privacy": "Instruction, literal value, raw model response, samples and credentials omitted",
+  "historical_artifact": "laya-authoring-probes-initial.json"
+}

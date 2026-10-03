@@ -11,7 +11,7 @@ Start with the [quickstart](getting-started.md), then choose an [integration](in
 | Capability | Delivered behavior |
 | --- | --- |
 | Authentication and permissions | Provisioned bearer identities, role allowlists, separate management access, and tenant-scoped memory. |
-| Deterministic guardrails | Versioned literal attack signatures, privacy heuristics, and offline detect-secrets credential detectors. |
+| Deterministic guardrails | Authored text restrictions, versioned literal attack signatures, privacy heuristics, and offline detect-secrets credential detectors. |
 | Hybrid checks | Optional real Ollama or Kev semantic analysis; configured provider failures fail closed. |
 | Resource limits | Atomic process-local budgets for calls, conservative token units, estimated cost, runtime, and concurrency. |
 | Central configuration | Local files or a trusted HTTP bundle, background reload, immutable snapshots, and last-valid retention. |
@@ -24,7 +24,7 @@ The default policy uses deterministic checks and needs no running model. The bus
 
 The MCP server exposes controlled business-tool invocation and tenant memory. Qwen completion uses REST or the OpenAI-compatible endpoint; a model-completion MCP tool is not implemented.
 
-Natural-language policy authoring, such as compiling “reject every word containing the letter a” into an executable rule, is planned. Current policies use validated structured fields and literal signatures, not arbitrary instructions interpreted as policy.
+The [Laya authoring CLI](policies.md#draft-a-rule-in-natural-language-with-laya) drafts bounded text rules from natural language. Validate and preview the proposal, review its exact private JSON, then activate that same proposal without another model call. Runtime matching is local. The supported DSL covers literal text restrictions; broader semantic or compliance instructions are outside its scope.
 
 Budgets and audit live in memory and reset on restart. Independent instances have independent allowances; there is no global spending coordinator. A blocked output cannot undo upstream actions that already ran.
 

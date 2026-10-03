@@ -93,6 +93,12 @@ The runner creates temporary Laya configuration and audit storage without changi
 
 See the [full integration instructions](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/README.md) and [sanitized live report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/results/live.json), subject to the project repository's access permissions. A full deployment must route relevant native handlers through the gateway and control network egress so an agent cannot bypass it.
 
+## Laya as a rule author
+
+The separate `integrations/laya/author-rule.sh` CLI uses actual Laya model inference to draft bounded text restrictions. It validates and previews the result through management endpoints, then optionally saves a private proposal. Activate that exact proposal with `--proposal ... --activate`; the activation step makes no model call.
+
+This is management-side authoring, separate from the protected agent demonstration above. It uses a trusted local Ollama endpoint directly and a process-local compatibility adapter for structured output. Read the [complete natural-language authoring workflow](policies.md#draft-a-rule-in-natural-language-with-laya). Runtime enforcement remains local and model-independent; broader semantic, legal or compliance instructions are outside this DSL.
+
 ## Real business backends
 
 The current knowledge, contact, memory and payment-preparation handlers are simulated. To connect a real backend, implement its validated allowlisted handler behind the tools port and keep backend credentials on the gateway side. Callers cannot select upstream URLs or supply upstream credentials.

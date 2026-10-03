@@ -2,7 +2,7 @@
 
 This is our assessment of FastFence against the Goldman Sachs **AI Control Layer** challenge document supplied for HackYeah 2026. The source is the locally provided `CRIETRIA AI Control Layer.pdf`; the participant document is not republished here. Its formal requirements are on page 3 and evaluation approach and weights on page 4.
 
-The scores below are our readiness estimates, not jury scores or a security certification. They describe the delivered demo and its known gaps. The current weighted estimate is **6.7/10**.
+The scores below are our readiness estimates, not jury scores or a security certification. The weighted **6.7/10** estimate below records the earlier pre-authoring checkpoint. The subsequent bounded Laya authoring implementation is described below; these historical scores have not been regraded and are not a claim that the newer version is complete.
 
 ## Weighted evaluation categories
 
@@ -20,7 +20,7 @@ The calculation is `6 × 0.30 + 8 × 0.20 + 6 × 0.20 + 8 × 0.15 + 6 × 0.15 = 
 
 | Requirement | Our estimate | Delivered | Gap |
 | --- | --- | --- | --- |
-| Centralized policy engine | 8/10 | Validated policy/feed, role and model allowlists, block/redact settings, budgets, thresholds, background file/HTTP reload, coherent snapshots, and last-valid retention. | Configuration is structured; arbitrary natural-language policy compilation is absent. Identity provisioning is separate startup configuration. |
+| Centralized policy engine | 8/10 | Validated policy/feed, role and model allowlists, block/redact settings, budgets, thresholds, background file/HTTP reload, coherent snapshots, and last-valid retention. | Rule authoring is limited to the supported literal DSL; arbitrary semantic/compliance policy compilation is absent. Identity provisioning is separate startup configuration. |
 | Deterministic controls | 8/10 | Auth, role and tenant access, target allowlists, bounded payloads, literal attack signatures, privacy heuristics, and 19 offline detect-secrets format/keyword detectors. | Heuristics do not recognize every secret, PII type, encoding, or exploit. Fragments across separate fields/messages are not reconstructed. |
 | Semantic controls | 6/10 | Actual optional Ollama/Kev assessment, bounded requests, input/output scans, configured threshold, and fail-closed provider errors. Recorded Qwen binary-schema development probes pass 20/20. | Small development probes do not establish general accuracy. Kev has an adapter but is not benchmarked in the delivered evidence. |
 | Budget and resource governance | 7/10 | Atomic reservations and settlement for calls, conservative token units, estimated cost, runtime, and concurrency, scoped to instance/subject/UTC day. | Counters reset on restart; instances do not share allowances. Token units and configured tariffs are estimates, not provider invoice reconciliation. |
@@ -40,9 +40,9 @@ The calculation is `6 × 0.30 + 8 × 0.20 + 6 × 0.20 + 8 × 0.15 + 6 × 0.15 = 
 
 ## Natural-language rule authoring
 
-Current readiness for **natural-language-to-compiled-rule authoring is 0/10: planned**. The challenge PDF does not explicitly require that feature, detect-secrets, or Laya. It does require hybrid controls, configurable governance, testing, and reporting; judges may modify configuration and try spontaneous prompts.
+The earlier **0/10 (planned)** status has been superseded by a bounded implementation: actual Laya drafts a typed text rule, the management API validates and previews it, and an exact reviewed proposal can be activated without another model call. The challenge PDF does not explicitly require that feature, detect-secrets, or Laya. It does require hybrid controls, configurable governance, testing, and reporting; judges may modify configuration and try spontaneous prompts.
 
-Structured dynamic policy updates are implemented. Entering “reject words containing a” as an executable rule is not. A single-letter literal signature also fails the current minimum-length validation. MCP currently invokes business tools and memory; Qwen completion uses REST or OpenAI-compatible chat. These boundaries matter when preparing an interactive demonstration.
+The authoring CLI supports instructions such as “reject words containing a” through dedicated text rules with input/output and model/tool scope. Runtime matching is local. A single-letter legacy attack signature still fails its separate minimum-length validation; the new text-rule mechanism handles that use case. MCP currently invokes business tools and memory; Qwen completion uses REST or OpenAI-compatible chat. These boundaries matter when preparing an interactive demonstration.
 
 ## What to demonstrate
 

@@ -1,0 +1,110 @@
+{
+  "created_at": "2026-10-03T13:03:37.416306+00:00",
+  "scope": "Real Laya/Qwen3:4b drafting, exact saved-proposal activation, real Qwen3:0.6b HTTP completions; isolated temporary gateway; no semantic scanning",
+  "authoring": {
+    "draft": {
+      "upstream_commit": "b3b998c03dc44076675305581eb4640b9bf6ff8f",
+      "model": "qwen3:4b",
+      "authoring_source": "real_laya",
+      "status": "previewed",
+      "rule_id": "block_words_with_a",
+      "operator": "word_contains",
+      "direction": "both",
+      "target": "model",
+      "sample_count": 2,
+      "matches": [
+        false,
+        true
+      ],
+      "inference_ms": 3635,
+      "activated": false,
+      "policy_version": 1,
+      "scope": "Real Laya/local-model management authoring; no protected-call inference"
+    },
+    "activation": {
+      "upstream_commit": "b3b998c03dc44076675305581eb4640b9bf6ff8f",
+      "model": null,
+      "authoring_source": "reviewed_proposal",
+      "status": "activated",
+      "rule_id": "block_words_with_a",
+      "operator": "word_contains",
+      "direction": "both",
+      "target": "model",
+      "sample_count": 2,
+      "matches": [
+        false,
+        true
+      ],
+      "inference_ms": 0,
+      "activated": true,
+      "policy_version": 2,
+      "scope": "Real Laya/local-model management authoring; no protected-call inference"
+    }
+  },
+  "cases": [
+    {
+      "case": "input denied before Qwen",
+      "max_output_tokens": 32,
+      "request_id": "51d5402828bd40ef8050f5f7ec0ec2a9",
+      "decision": "blocked",
+      "reason": "input_text_rule",
+      "policy_version": 2,
+      "upstream_executed": false,
+      "latency_ms": 1,
+      "findings": [
+        "block_words_with_a"
+      ]
+    },
+    {
+      "case": "NFKC uppercase denied",
+      "max_output_tokens": 32,
+      "request_id": "47289cf8496a43e7939f45b84597cea2",
+      "decision": "blocked",
+      "reason": "input_text_rule",
+      "policy_version": 2,
+      "upstream_executed": false,
+      "latency_ms": 1,
+      "findings": [
+        "block_words_with_a"
+      ]
+    },
+    {
+      "case": "allowed one-token real Qwen response",
+      "max_output_tokens": 1,
+      "request_id": "3684ba4704ae4b578ed17737778662d1",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "policy_version": 2,
+      "upstream_executed": true,
+      "latency_ms": 859,
+      "findings": []
+    },
+    {
+      "case": "output denied after Qwen",
+      "max_output_tokens": 32,
+      "request_id": "65e072ed3c604d08b5873b32cbce9456",
+      "decision": "blocked",
+      "reason": "output_text_rule",
+      "policy_version": 3,
+      "upstream_executed": true,
+      "latency_ms": 147,
+      "findings": [
+        "block_words_with_a"
+      ]
+    },
+    {
+      "case": "hot removal permits same request",
+      "max_output_tokens": 32,
+      "request_id": "b7b1198416ea4a18b29f3da5caa2c3de",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "policy_version": 4,
+      "upstream_executed": true,
+      "latency_ms": 128,
+      "findings": []
+    }
+  ],
+  "all_passed": true,
+  "audit_sanitized": true,
+  "semantic_calls_during_enforcement": 0
+}

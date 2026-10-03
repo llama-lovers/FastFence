@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The documented detector checkpoint passes **174 tests**, with **93.96%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The authored-rule checkpoint passes **271 tests**, with **94.52%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -72,3 +72,25 @@ On an Apple M3 Pro with 18 GiB memory and Python 3.12.12, the serial zero-wait f
 The zero-wait upstream is a labeled benchmark fixture using real tool authorization/validation and constant safe output. A separate mode uses the actual demo backend, including its intentional 15 ms wait. Direct core measurements exclude HTTP/MCP transport, DTO parsing, startup, and LLM inference. Outcomes, budget charges, and audit retention are checked so unexpected budget denials cannot appear as fast allowed requests.
 
 These are development measurements for fixed small inputs, not a production latency guarantee. Other processes and CPU power state are uncontrolled. The earlier [memory-runtime report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/memory-runtime-benchmark.json) predates detect-secrets and must not be presented as current detector performance.
+
+## Authored rules: actual inference and local enforcement
+
+After setting up the pinned Laya engine and pulling Qwen3:4b and Qwen3:0.6b, run:
+
+```sh
+uv run python evaluation/smoke_authored_rules.py \
+  --output evaluation/results/local-authored-rules.json
+```
+
+This starts an isolated real HTTP gateway with temporary credentials. Actual Laya/Qwen3:4b drafts a rule from Polish; the script validates its intended semantics and activates the exact saved proposal without a second inference. It then checks input denial, Unicode normalization, a real allowed one-token Qwen response, output blocking after real inference, and immediate rule removal. Semantic scanning is disabled so the report can prove the authored predicate adds no assessor calls. The report omits prompts, generated text and credentials.
+
+The [recorded full run](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/laya-authored-rules-live.json) passed all five enforcement cases. Drafting took 3,635 ms; activation of the saved proposal used zero inference time. Separate authoring probes cover an unseen literal and rejection of a broad compliance instruction. The [initial report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/laya-authoring-probes-initial.json) preserves a rejected scope mismatch; the [follow-up report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/laya-authoring-probes.json) explicitly identifies which probe was rerun after constraining generation scope.
+
+Authoring is a one-time management operation and can take seconds or tens of seconds on the local model. It is not the latency of runtime rule matching. To measure the latter separately:
+
+```sh
+uv run python evaluation/benchmark_text_rules.py \
+  --output evaluation/results/local-text-rules.json
+```
+
+The [recorded local matching benchmark](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/authored-text-rules-benchmark.json) uses 2,000 measured iterations plus 100 warmups for each combination of 1/16/64 rules and 128 B/4 KiB/64 KiB content. All predicates miss; case handling is mixed. At 4 KiB, p95 was 0.002625 ms for one rule, 0.031166 ms for 16 rules and 0.075 ms for 64 rules. This measures the matcher only, excluding transport, other controls, accounting, auditing and inference. Fixed ASCII inputs and uncontrolled machine load make it development evidence, not a universal latency guarantee.

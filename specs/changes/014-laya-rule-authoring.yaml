@@ -1,0 +1,53 @@
+id: FF-014
+title: Real Laya natural-language rule authoring
+status: verified
+problem: The Laya integration runs protected model/tools but cannot translate a written rule into a locally enforced policy.
+scope:
+  - Add a CLI using the pinned actual Laya llm_call to draft a constrained text rule from Polish or English.
+  - Validate proposals with the management API and preview samples before explicit activation.
+  - Activate by merging a validated rule into the latest versioned policy, preserving other controls.
+  - Record actual local-model authoring and enforcement evidence and document the supported boundary.
+constraints:
+  - Authoring is management-plane work and never runs per protected invocation.
+  - No hardcoded language-template substitution presented as model inference.
+  - No arbitrary generated code, unrestricted regex or implicit broad policy changes.
+  - Unsupported instructions are rejected explicitly; compiler output is an untrusted proposal.
+  - Default CLI drafts only; explicit activate flag publishes after validation.
+  - Saved proposals can be reviewed privately and activated exactly without another inference.
+  - Generation schema fixes the explicitly requested target and direction; parser independently validates them.
+  - Keep upstream configuration isolated and omit credentials or private text from reports.
+change_paths:
+  - integrations/laya/**
+  - tests/**
+  - evaluation/**
+  - docs/**
+  - README.md
+  - .secrets.baseline
+  - CNAME
+acceptance:
+  - Real Laya drafts a word-containing-a rule via a real local model and produces valid schema.
+  - Preview and activation are management authenticated and retain version conflict protection.
+  - Protected requests enforce the activated rule without any compiler/model I/O for rule matching.
+  - Reports distinguish actual inference from unit fixtures and input vs output enforcement.
+validation:
+  - command: integrations/laya/author-rule.sh --help
+    expected: Runnable documented CLI with drafting and explicit activation options.
+  - command: uv run pytest -q
+    expected: Malformed model responses and management errors do not activate invalid rules.
+  - command: uv run pre-commit run --all-files
+    expected: Repository gates pass.
+evidence:
+  - command: uv run python evaluation/smoke_authored_rules.py --output evaluation/results/laya-authored-rules-live.json
+    result: Actual Laya/Qwen drafting 3635 ms; exact saved-proposal activation with zero inference; five real HTTP enforcement cases passed, including input/output blocks and hot removal; zero semantic calls during enforcement.
+  - command: Actual Laya authoring probes
+    result: Supported letter rule, unsupported broad compliance instruction and unseen literal covered; historical scope rejection preserved and explicitly labeled follow-up proves constrained generation fixes requested scope.
+  - command: uv run python evaluation/benchmark_text_rules.py --output evaluation/results/authored-text-rules-benchmark.json
+    result: 18000 measured local matching calls; 4 KiB p95 0.002625 ms for one rule and 0.075 ms for 64; excludes transport, other controls, accounting and models.
+  - command: uv run pytest -q
+    result: 271 tests passed; total coverage 94.52 percent.
+  - command: uv run --group docs mkdocs build --strict
+    result: Material documentation builds successfully with the documented authoring flow.
+  - command: Review new detect-secrets findings
+    result: Exact reviewed exceptions cover synthetic localhost URL userinfo in rejection test and public pinned Laya commit; CNAME receives only a terminal newline from the existing hook.
+  - command: uv run pre-commit run --all-files
+    result: All repository hooks passed including reviewed secret scan, specification coverage, import boundaries and typing.

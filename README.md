@@ -5,8 +5,8 @@
 Licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for project attribution.
 Third-party dependencies and integrations retain their respective licenses and notices.
 
-Documentation is configured for [fastfence.dev](https://fastfence.dev/) using MkDocs Material
-and GitHub Pages. [Publishing and DNS setup](docs/deployment.md) describes the required
+Documentation is published at [fastfence.dev](https://fastfence.dev/) using MkDocs Material
+and GitHub Pages Actions. [Publishing and DNS setup](docs/deployment.md) describes the required
 repository and domain settings. Preview it locally on a separate port from the gateway:
 
 ```sh
@@ -29,7 +29,10 @@ The dashboard's **Text rule** editor previews and activates literal `contains`,
 `word_contains`, or `equals` restrictions. For example, block words containing `a`
 on model input/output, without matching structural JSON keys or model identifiers.
 Rules are validated, versioned and enforced locally without LLM calls.
-See [rule semantics and management endpoints](docs/policies.md#authored-text-rules).
+Draft those rules in natural language with the actual Laya engine, save and review the proposal,
+then activate that exact file without another model call. See
+[rule semantics](docs/policies.md#authored-text-rules) and the
+[Laya authoring workflow](docs/policies.md#draft-a-rule-in-natural-language-with-laya).
 
 ## Run
 

@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-10-03T12:59:17.064891+00:00",
+  "model": "qwen3:4b",
+  "provider": "Actual pinned Laya llm_call and LiteLLM to local Ollama; bounded JSON proposal, no manual repair",
+  "scope": "Three synthetic management-side authoring probes; no activation or protected invocation; not a general compiler accuracy estimate",
+  "cases": [
+    {
+      "case": "Polish word-containment restriction",
+      "expected_outcome": "supported",
+      "expected_operator": "word_contains",
+      "actual_outcome": "supported",
+      "passed": true,
+      "latency_ms": 23458,
+      "timing_scope": "draft inference and strict proposal parsing"
+    },
+    {
+      "case": "Unsupported broad compliance requirement",
+      "expected_outcome": "rejected",
+      "actual_outcome": "unsupported_or_ambiguous_instruction",
+      "passed": true,
+      "latency_ms": 22510,
+      "timing_scope": "draft including isolated configuration setup and strict rejection"
+    },
+    {
+      "case": "Unseen output literal restriction",
+      "expected_outcome": "supported",
+      "expected_operator": "contains",
+      "actual_outcome": "model_changed_requested_scope",
+      "passed": false,
+      "latency_ms": 5455,
+      "timing_scope": "draft inference and strict proposal parsing"
+    }
+  ],
+  "all_passed": false,
+  "privacy": "Instruction, literal value, raw model response, samples and credentials omitted"
+}

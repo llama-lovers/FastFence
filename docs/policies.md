@@ -82,7 +82,7 @@ Semantic checks supplement authentication, authorization, signatures, and budget
 
 Budgets are local to an instance, trusted subject, and UTC day. Atomic reservations prevent parallel invocations from spending the same remainder. Calls are charged at reservation; settlement releases unused allocations while failed or cancelled work retains conservative charges.
 
-Token units are conservative accounting estimates, not an exact tokenizer count or provider invoice. `cost_microusd` is a configured per-call estimate; one micro-USD is $0.000001. Local models may use zero financial cost while retaining runtime and token limits.
+Token units are conservative accounting estimates, not an exact tokenizer count or provider invoice. Model reservations include 1,024 units for provider prompt-template overhead in addition to input bytes and bounded completion tokens; settlement releases unused capacity. `cost_microusd` is a configured per-call estimate; one micro-USD is $0.000001. Local models may use zero financial cost while retaining runtime and token limits.
 
 Counters and bounded audit reset on restart. Multiple instances have independent allowances, with no global coordination. Output blocking cannot roll back upstream side effects. The [deployment guide](deployment.md) explains these operational boundaries.
 
@@ -111,4 +111,34 @@ In the dashboard, select **Text rule**, set its scope and samples, then **Previe
 
 Management clients can retrieve `GET /api/admin/rules/schema`, then call `POST /api/admin/rules/preview` with a `rule` object and up to 16 `samples`, each at most 4,096 characters. Preview neither changes policy nor invokes a model. Publish a validated proposal through the existing versioned `PUT /api/admin/policy` endpoint.
 
-Natural-language drafting through Laya is being integrated separately. The structured rule editor itself does not interpret unrestricted instructions or provide a general compliance engine.
+## Draft a rule in natural language with Laya
+
+The authoring CLI uses the pinned **actual Laya engine** and a real local Qwen model to produce an untrusted proposal in the rule schema above. This happens in the management plane. Once activated, the gateway performs only local literal matching for that rule.
+
+Start the gateway and Ollama, install `qwen3:4b`, and run `integrations/laya/setup.sh` once. Then draft and preview:
+
+```sh
+integrations/laya/author-rule.sh \
+  --instruction 'Blokuj każde słowo zawierające literę a, bez rozróżniania wielkości liter.' \
+  --direction both --target model \
+  --sample Hello --sample Cat \
+  --save-proposal state/no-letter-a.json
+```
+
+The samples should return `[false, true]`: no match for `Hello`, match for `Cat`. Read the exact proposed rule locally before activation:
+
+```sh
+cat state/no-letter-a.json
+integrations/laya/author-rule.sh \
+  --proposal state/no-letter-a.json \
+  --sample Hello --sample Cat \
+  --activate
+```
+
+Saved-proposal activation revalidates and publishes **the same rule without a second model call**. It preserves other controls, increases the current policy version and rejects duplicate rule IDs or concurrent version conflicts. A saved proposal uses private file permissions (`0600`); do not publish files containing private policy literals. Reports omit instruction, literal value, samples and bearer credentials.
+
+`--direction output` restricts responses only; `input` blocks before generation. Use `--target tool` for tool argument/result string values, or `all` for both. The model cannot widen the explicitly requested direction or target during drafting. Supported values are literal `contains`, `word_contains`, and `equals`; this is not a general compliance compiler. Unsupported or invalid proposals are rejected. A model can still misunderstand your intent: inspect the saved rule and preview representative allowed and forbidden examples.
+
+Compilation connects directly to a separately trusted **loopback Ollama endpoint** using management-side Laya. It is outside the protected agent's quota and policy path so existing content restrictions cannot prevent authorized policy maintenance. Credentials, activation and preview use management-authenticated gateway endpoints. The local-only compiler integration uses isolated Laya settings/storage and a narrow Ollama compatibility adapter; it does not alter your normal Laya configuration.
+
+To remove or change a rule, edit `text_rules` through **Manage policy** with an increased version, or update the configured central source. Changes apply to subsequent invocations.
