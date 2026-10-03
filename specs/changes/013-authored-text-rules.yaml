@@ -15,6 +15,7 @@ constraints:
   - Unicode NFKC and optional casefold; diacritics stay distinct; word means Unicode letters.
   - Existing policy snapshots, version checks and last-good retention remain authoritative.
   - Only management identities may access authoring endpoints.
+  - Prepared literals cannot be reassigned or deleted through ordinary attribute access after validation.
 change_paths:
   - src/fastfence/modules/control/domain/**
   - src/fastfence/modules/control/application/services/inspection.py
@@ -36,6 +37,8 @@ validation:
   - command: uv run pre-commit run --all-files
     expected: All configured quality and architecture gates pass.
 evidence:
+  - command: Cache immutability regression and validation roundtrip
+    result: Prepared literal assignment and deletion are rejected; original serialized values and revalidation behavior are preserved; two additional regression tests pass.
   - command: uv run pre-commit run --all-files
     result: All configured hooks passed including architecture, type checking, secret scanning and staged specifications.
   - command: uv run pytest -q

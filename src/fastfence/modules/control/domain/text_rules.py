@@ -38,13 +38,27 @@ class TextRule(FrozenControlModel):
 
     @model_validator(mode="after")
     def prepare_literal(self) -> Self:
-        self._normalized_value = normalized(self.value, self.case_sensitive)
+        object.__setattr__(
+            self,
+            "_normalized_value",
+            normalized(self.value, self.case_sensitive),
+        )
         if self.operator == "word_contains" and (
             not all(word_character(char) for char in self._normalized_value)
             or not any(char.isalpha() for char in self._normalized_value)
         ):
             raise ValueError("word_contains requires one Unicode letter word")
         return self
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name == "_normalized_value":
+            raise TypeError("Prepared rule literal is immutable")
+        super().__setattr__(name, value)
+
+    def __delattr__(self, name: str) -> None:
+        if name == "_normalized_value":
+            raise TypeError("Prepared rule literal is immutable")
+        super().__delattr__(name)
 
 
 def _matches(rule: TextRule, text: str) -> bool:

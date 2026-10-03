@@ -56,6 +56,30 @@ def test_case_sensitivity_and_prepared_value_are_not_serialized():
         rule.value = "changed"
 
 
+def test_prepared_literal_cannot_change_or_disappear_without_policy_version():
+    rule = TextRule(id="word", operator="word_contains", value="CAT")
+    original = rule.model_dump(mode="json")
+    with pytest.raises(TypeError, match="immutable"):
+        rule._normalized_value = "dog"
+    with pytest.raises(TypeError, match="immutable"):
+        del rule._normalized_value
+    assert text_rule_matches(rule, "cat")
+    assert not text_rule_matches(rule, "dog")
+    assert rule.model_dump(mode="json") == original
+    assert original["value"] == "CAT"
+
+
+def test_revalidation_and_roundtrip_prepare_the_same_readonly_literal():
+    rule = TextRule(id="word", operator="word_contains", value="CAT")
+    same = TextRule.model_validate(rule)
+    restored = TextRule.model_validate_json(rule.model_dump_json())
+    for candidate in (same, restored):
+        assert candidate.value == "CAT" and text_rule_matches(candidate, "cat")
+        assert candidate.model_dump(mode="json") == rule.model_dump(mode="json")
+        with pytest.raises(TypeError, match="immutable"):
+            candidate._normalized_value = "dog"
+
+
 @pytest.mark.parametrize(
     "changes",
     [
