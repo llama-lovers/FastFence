@@ -1,0 +1,32 @@
+id: FF-008
+title: Trusted telemetry event classification
+status: verified
+problem: Inferring management events from a caller-controlled tool-name prefix lets denied policy.* invocations
+  disappear from request metrics.
+scope:
+- Classify invocation and management audit events using an explicit server-side event kind.
+- Keep all denied invocation attempts in request, decision and throughput metrics regardless of tool name.
+constraints:
+- Pydantic only; preserve existing architecture and sanitized audit fields.
+- Client request bodies cannot select the audit event kind.
+change_paths:
+- src/fastfence/modules/control/persistence/ledger.py
+- src/fastfence/modules/control/contracts/ports.py
+- src/fastfence/modules/control/application/use_cases/management.py
+- tests/unit/test_telemetry_classification.py
+- README.md
+acceptance:
+- Unknown policy-prefixed tool invocations are denied and counted in request/blocked telemetry.
+- Real management policy changes remain audited without changing invocation counters.
+- Event classification appears in sanitized audit and is determined by trusted call sites.
+validation:
+- command: uv run pytest -q
+  expected: Telemetry classification regressions and all existing controls pass.
+- command: uv run pre-commit run --all-files
+  expected: All configured quality and specification gates pass.
+evidence:
+- command: uv run pytest -q
+  result: 148 tests passed, including seven trusted-event classification regressions; source coverage
+    93.31%
+- command: uv run basedpyright src
+  result: 0 errors, 0 warnings

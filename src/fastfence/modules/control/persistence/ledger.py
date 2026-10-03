@@ -6,7 +6,7 @@ import time
 from collections import Counter, deque
 from datetime import UTC, datetime
 from itertools import islice
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -126,7 +126,13 @@ class Ledger:
                 self._budgets.pop(key, None)
 
     def append(
-        self, subject: str, tenant: str, target: str, verdict: Verdict
+        self,
+        subject: str,
+        tenant: str,
+        target: str,
+        verdict: Verdict,
+        *,
+        event_kind: Literal["invocation", "management"] = "invocation",
     ) -> None:
         verdict.instance_id = self.instance_id
         record = verdict.model_dump(exclude={"output"})
@@ -139,10 +145,11 @@ class Ledger:
                     "subject": subject,
                     "tenant": tenant,
                     "target": target,
+                    "event_kind": event_kind,
                     **record,
                 }
             )
-            if not target.startswith("policy."):
+            if event_kind == "invocation":
                 self._count_request(verdict)
 
     def record_semantic_call(self) -> None:

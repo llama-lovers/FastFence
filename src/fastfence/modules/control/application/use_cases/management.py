@@ -84,4 +84,5 @@ class ManagementUseCases:
                 latency_ms=0,
                 semantic_provider=snapshot.policy.semantic.provider,
             ),
+            event_kind="management",
         )

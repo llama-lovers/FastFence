@@ -1,4 +1,4 @@
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from fastfence.modules.control.domain.models import (
     Assessment,
@@ -48,7 +48,13 @@ class LedgerPort(Protocol):
     ) -> None: ...
 
     def append(
-        self, subject: str, tenant: str, target: str, verdict: Verdict
+        self,
+        subject: str,
+        tenant: str,
+        target: str,
+        verdict: Verdict,
+        *,
+        event_kind: Literal["invocation", "management"] = "invocation",
     ) -> None: ...
 
     def audit(self, limit: int = 200) -> list[dict[str, Any]]: ...
