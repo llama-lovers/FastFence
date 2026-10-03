@@ -49,4 +49,3 @@ budgets:
     cost_microusd: 20000
     compute_ms: 300000
     concurrent: 4
-

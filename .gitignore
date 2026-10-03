@@ -7,3 +7,7 @@ __pycache__/
 state/
 .env
 
+# Local reference documents and separately cloned repositories
+/HackYeah 2026 - Rules for Participants/
+/HackYeah2026-challenge/
+/HackYeah2026-challenge-second/
