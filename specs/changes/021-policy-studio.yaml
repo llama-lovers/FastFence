@@ -1,0 +1,42 @@
+id: FF-021
+title: Interactive policy authoring and real-model playground
+status: verified
+problem: Natural-language policy drafting currently requires a CLI and the dashboard playground cannot demonstrate a protected real model call.
+scope:
+  - Add a natural-language policy studio with draft, inspect, preview and explicit activation stages.
+  - Expose real protected model requests alongside the existing business-tool playground.
+  - Show rule effects, policy versions, execution status and correlated audit metadata.
+constraints:
+  - No unreviewed automatic activation or second inference during activation.
+  - Invalidate preview and activation whenever the instruction, proposal, scope or examples change.
+  - Never persist credentials or render untrusted strings as HTML.
+  - Keep unsupported instructions and model failures visible without claiming success.
+  - Preserve existing structured rule editing and manual policy management.
+change_paths:
+  - src/fastfence/app/interfaces/http/routes.py
+  - src/fastfence/app/interfaces/http/web/**
+  - tests/integration/test_policy_studio_ui.py
+  - evaluation/smoke_policy_studio.py
+  - evaluation/results/policy-studio*.json
+  - docs/**
+  - README.md
+  - .secrets.baseline
+acceptance:
+  - A user can author and activate a supported policy without opening a terminal.
+  - A stale or edited draft cannot be activated using an earlier preview.
+  - Model playground calls cross the same gateway controls and display real verdicts.
+  - UI distinguishes local deterministic matching from management-plane model drafting.
+validation:
+  - command: Browser walkthrough against an isolated live gateway
+    expected: Draft, review, activate, model denial and audit correlation work end to end.
+  - command: uv run pytest -q
+    expected: Backend and asset integration checks pass.
+  - command: uv run pre-commit run --all-files
+    expected: Repository quality gates pass.
+evidence:
+  - command: uv run --with playwright python evaluation/smoke_policy_studio.py --output evaluation/results/policy-studio-ui-contract.json
+    result: Isolated Chromium contract fixtures verify preview gating, edited-sample invalidation, safe rendering of malicious markup, model playground and desktop/mobile layout.
+  - command: uv run --with playwright python evaluation/smoke_policy_studio.py --live --output evaluation/results/policy-studio-live.json
+    result: Actual Laya drafted a Polish no-letter-a policy through the dashboard; reviewed proposal activated once; Cat blocked before Qwen execution and visible in audit; a subsequent authenticated MCP complete call to real Qwen3 0.6B returned allowed output and a correlated audit record. No JavaScript errors; desktop and mobile screenshots inspected.
+  - command: Manual review of new secret-scan findings
+    result: Exact reviewed exceptions cover seven public prompt/corpus/request SHA256 digests and one inert base64 encoded historical marker; no baseline-wide or file-wide exclusions.

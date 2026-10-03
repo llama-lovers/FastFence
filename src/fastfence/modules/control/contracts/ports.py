@@ -23,7 +23,13 @@ class IdentityPort(Protocol):
 class PolicyPort(Protocol):
     def snapshot(self) -> Snapshot: ...
 
-    def save(self, policy: Policy) -> Snapshot: ...
+    def save(
+        self,
+        policy: Policy,
+        *,
+        expected_feed_version: int | None = None,
+        expected_base_policy: Policy | None = None,
+    ) -> Snapshot: ...
 
     def reload(self) -> Snapshot: ...
 

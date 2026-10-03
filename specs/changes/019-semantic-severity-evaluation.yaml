@@ -1,0 +1,55 @@
+id: FF-019
+title: Ordinal semantic severity and independent adversarial evaluation
+status: verified
+problem: Binary Ollama classification makes intermediate policy thresholds equivalent and existing semantic evidence uses a small development dataset.
+scope:
+  - Classify Ollama responses as benign, suspicious, or malicious with an explicit severity rubric.
+  - Map validated categories to deterministic ordinal scores while retaining the Assessment interface.
+  - Demonstrate real-model policy threshold changes for suspicious content.
+  - Evaluate new Polish and English adversarial and benign near-match cases with separate development and holdout splits.
+constraints:
+  - Scores are ordinal severity codes, not probabilities or calibrated confidence.
+  - Unknown categories, duplicate JSON fields, extra fields, truncated responses and provider failures fail closed.
+  - No tuning against holdout; preserve initial reports and disclose false positives, false negatives and errors.
+  - Preserve historical binary-classifier artifacts as evidence of an earlier checkpoint.
+  - No source dataclasses, database dependencies or changes to protected runtime I/O constraints.
+  - Sequential local inference is coordinated with other agents.
+change_paths:
+  - src/fastfence/modules/control/persistence/models.py
+  - src/fastfence/modules/control/persistence/semantic_severity.py
+  - tests/unit/test_models.py
+  - tests/unit/test_semantic_severity.py
+  - tests/integration/test_semantic_severity.py
+  - evaluation/**
+  - docs/**
+  - README.md
+acceptance:
+  - Ollama produces constrained severity categories mapped to benign 0, suspicious 0.6 and malicious 1.
+  - Threshold 0.5 blocks suspicious content and threshold 0.8 permits it, with unchanged malicious blocking.
+  - Input failures precede upstream execution and semantic output failures suppress delivery.
+  - New corpus contains at least 60 independently labeled holdout cases plus a separate development split.
+  - Reports include category confusion, per-threshold FP/FN, fail-closed errors, actual model identity and frozen corpus/prompt digests.
+  - Actual gateway strictness proof is separate from mocked wire tests and model-component evaluation.
+  - Existing quality gates and source coverage of at least 85 percent pass.
+validation:
+  - command: uv run pytest -q
+    expected: Semantic severity regressions and all prior controls pass with coverage gate.
+  - command: uv run python evaluation/run_severity.py --split development --output evaluation/results/semantic-severity-development.json
+    expected: Actual-model development evidence is recorded before holdout.
+  - command: uv run python evaluation/run_severity.py --split holdout --output evaluation/results/semantic-severity-holdout.json
+    expected: Frozen holdout results disclose all classification errors and provider failures.
+  - command: uv run python evaluation/smoke_semantic_strictness.py --output evaluation/results/semantic-strictness-live.json
+    expected: Real gateway verdict changes between thresholds for actual suspicious model classification.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_models.py tests/unit/test_semantic_severity.py tests/integration/test_semantic_severity.py
+    result: 30 focused tests pass; constrained categories, duplicate/extra/invalid JSON rejection, truncated response failure and actual adapter-to-engine threshold composition verified with labeled wire fixtures.
+  - command: uv run python evaluation/run_severity.py --split development --output evaluation/results/semantic-severity-development-initial.json
+    result: Actual Qwen3:4b development run 11 of 12 exact categories, zero provider errors; one suspicious authority-boundary case labeled benign by the model. No prompt tuning after this run.
+  - command: uv run python evaluation/run_severity.py --split holdout --output evaluation/results/semantic-severity-holdout.json
+    result: Single frozen holdout run, 60 new self-authored PL/EN cases, 46 of 60 exact severity matches and zero provider errors. All 20 clearly malicious cases detected; threshold 0.5 has two false positives and twelve false negatives on expected suspicious cases, threshold 0.8 has one false positive and no false negatives. All mistakes retained; no holdout-driven tuning.
+  - command: uv run python evaluation/smoke_semantic_strictness.py --output evaluation/results/semantic-strictness-live.json
+    result: Six actual Ollama/HTTP cases passed. Identical suspicious request produces score 0.6, blocked at threshold 0.5 before tool execution and allowed at 0.8 after versioned policy update. Selected development cases demonstrate functionality, not independent accuracy. Audit sanitized.
+  - command: uv run pytest -q
+    result: Concurrent workspace checkpoint 340 tests passed, 92.51 percent coverage, including in-progress authoring changes from another feature owner.
+  - command: uv run lint-imports and uv run basedpyright
+    result: Sixteen architectural contracts pass and zero type errors, warnings or notes. Own FF019 files pass Ruff; one unrelated authoring-test import formatting issue reported to its owner.

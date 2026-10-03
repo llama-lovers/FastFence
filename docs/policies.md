@@ -54,27 +54,31 @@ Detector instances are constructed at startup. Runtime scanning makes no credent
 
 Unicode NFKC normalization is applied. Bounded line-wrap reconstruction covers one scalar string up to 4,096 characters and eight line breaks. Fragments across separate messages or fields are not reconstructed. Detection remains heuristic; it is not a universal secret or PII recognizer.
 
-## Literal attack signatures
+## Historical attack signatures
 
-A signature is a case-normalized, Unicode-normalized literal substring. It is not a regular expression or a whole-word matcher. Patterns must be 4–256 characters; the feed supports up to 200 entries.
+Threat feeds contain bounded text patterns, not executable rules or user-supplied regular expressions. The matcher applies NFKC/case normalization, strips common zero-width separators, and accepts up to eight whitespace characters between literal characters. Identifier boundaries avoid matching a dangerous identifier inside a longer ordinary name.
 
-For example, add an entry to the complete feed and raise its version:
+One layer of percent decoding and printable UTF-8 base64 decoding is inspected as text. Adjacent string siblings in a list can be reconstructed; unrelated dictionary fields are not joined. Limits on traversal depth/nodes, aggregate text, decoded content and views fail closed. These controls do not execute, deserialize or recursively decode payloads.
+
+For example, add a pattern to the complete feed and increase its version:
 
 ```json
 {
   "id": "restricted_project_name",
   "pattern": "Project Nightfall",
-  "description": "Block this literal project name"
+  "description": "Block the configured project-name pattern"
 }
 ```
 
-The rule applies to both input and output, including nested string values and dictionary keys. A matching input is blocked before upstream execution. A matching output is suppressed after execution; `upstream_executed` distinguishes those cases.
+Patterns are 4–256 characters; the feed supports up to 200 signatures. The optional `match_mode: "token_sequence"` matches escaped whitespace-separated tokens with a bounded `max_gap` of at most 256 characters. The supplied shell signature uses `curl | sh` with that mode, allowing a URL between the command and pipe without accepting arbitrary regular expressions.
 
-The supplied feed demonstrates instruction override, unsafe pickle/PyTorch loading, and remote-shell markers. These are specific pattern checks, not comprehensive prevention of code execution, supply-chain attacks, or prompt injection.
+Input matches block before upstream execution. Output matches suppress delivery after execution; audit retains signature IDs and the `upstream_executed` flag. The same normalized matcher runs on a versioned external feed updated outside the request path.
+
+The supplied patterns cover representative pickle/PyTorch loading, remote-shell and instruction-override strings. Quoted descriptions containing an exact dangerous pattern are conservatively blocked too. These are bounded text controls, not model-binary inspection or comprehensive exploit prevention. Before/after variant results are documented in [testing](testing.md).
 
 ## Semantic controls
 
-The default policy disables semantic checks. The hybrid profile enables a real separately hosted Ollama assessor. The current Ollama response schema produces a binary score: ordinary content `0`, attack `1`; this is not a calibrated risk probability. Invalid responses, timeouts, or configured provider failures fail closed.
+The default policy disables semantic checks. The hybrid profile enables a real separately hosted Ollama assessor. The current Ollama assessor returns one constrained severity category: `benign` maps to `0`, `suspicious` to `0.6`, and `malicious` to `1`. These are ordinal policy codes, not calibrated probabilities. A threshold of `0.5` blocks suspicious and malicious content; `0.8` blocks malicious content. Actual-model threshold behavior is recorded in the testing evidence. Invalid responses, timeouts, or configured provider failures fail closed.
 
 Semantic checks supplement authentication, authorization, signatures, and budgets. They do not replace deterministic enforcement. The completion model and the assessor model are independently configured. See [testing](testing.md) for real-model evidence and its limits.
 
@@ -110,6 +114,24 @@ At most 64 rules are permitted, each with a unique ID and a nonblank value of at
 In the dashboard, select **Text rule**, set its scope and samples, then **Preview** and **Activate rule**. Preview evaluates only the candidate predicate: `NO MATCH` is not a promise that all other security controls will allow the request. Activation adds the rule to the current policy with a new version. Duplicate IDs, invalid rules and version conflicts are rejected. A remote configuration source must be updated at that source.
 
 Management clients can retrieve `GET /api/admin/rules/schema`, then call `POST /api/admin/rules/preview` with a `rule` object and up to 16 `samples`, each at most 4,096 characters. Preview neither changes policy nor invokes a model. Publish a validated proposal through the existing versioned `PUT /api/admin/policy` endpoint.
+
+## Describe a policy in the dashboard
+
+Install the pinned Laya engine once with `integrations/laya/setup.sh`, start Ollama with `qwen3:4b` installed, and connect the dashboard with your management identity. Choose **Describe a policy**:
+
+1. Write a specific instruction in Polish or English and select **Draft with Laya**.
+2. Inspect the before/after changes and exact operations. Drafting does not activate anything.
+3. Enter examples, choose input/output and model/tool scope, and select **Test examples**.
+4. Confirm that you reviewed the changes and results, then select **Activate this proposal**.
+5. Use **Local Qwen model** in the playground to try the policy against a real protected completion, or use a business tool. The result includes the audit request ID and whether upstream execution occurred.
+
+Supported instructions include blocking words containing `a`, redacting email addresses, blocking personal data and secrets, and restricting an existing tool to a subset of its already permitted roles. Selective detectors currently cover email and the eleven-digit Polish identifier heuristic. General compliance statements, new tools, role widening and arbitrary executable rules are rejected rather than silently invented.
+
+For example, selective email redaction changes `privacy.detector_actions.pii_email`, leaving other detectors on their existing actions. A request containing both an email and a secret still blocks if the secret detector remains configured to block. Broad privacy instructions change all privacy controls for the requested direction and clear that direction's selective overrides. Any enabling of previously disabled privacy controls is disclosed in the proposed changes.
+
+A proposal is bound to its management identity and original policy version, expires after ten minutes, and can be activated once. The server requires a preview before activation. Editing examples invalidates the browser's review state; editing the instruction discards the draft. Activation publishes the exact stored candidate without another model call. Preview checks local content controls only: role authorization, budget limits, semantic assessment and upstream behavior still run on an actual invocation.
+
+The management endpoints are `POST /api/admin/policies/draft`, `/preview` and `/activate`. Inference uses a bounded isolated local Laya process and never runs in the deterministic enforcement path. A deployment with a separate configuration root can point the trusted `FASTFENCE_AUTHORING_ROOT` setting at its Laya-enabled checkout. Paths and model endpoints cannot be supplied by browser users.
 
 ## Draft a rule in natural language with Laya
 

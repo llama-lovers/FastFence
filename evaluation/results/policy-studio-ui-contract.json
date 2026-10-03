@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-10-03T13:41:06.062851+00:00",
+  "mode": "UI_contract_fixtures_only",
+  "checks": [
+    "identity_connection",
+    "draft_review",
+    "preview_before_activation",
+    "changed_examples_invalidate_preview",
+    "safe_diff_rendering",
+    "responsive_layout",
+    "model_playground"
+  ],
+  "all_passed": true
+}

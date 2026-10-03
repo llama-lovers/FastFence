@@ -80,7 +80,8 @@ async def test_feed_only_update_and_same_version_content_conflict(
     feed_path.write_text(json.dumps(feed))
     assert await store.refresh()
     updated = store.snapshot()
-    assert updated.policy.version == 1 and updated.feed.version == 2
+    assert updated.policy.version == original.policy.version
+    assert updated.feed.version == original.feed.version + 1
     assert not await store.refresh()
     assert store.snapshot() is updated
     changed = updated.policy.editable()
@@ -131,33 +132,39 @@ async def test_http_bundle_updates_are_atomic_for_concurrent_snapshot_readers(
     store, state = http_configuration
     stopped = threading.Event()
     observed = set()
+    initial = store.snapshot()
+    version_offset = initial.feed.version - initial.policy.version
 
     def read():
         while not stopped.is_set():
             snapshot = store.snapshot()
             pair = (snapshot.policy.version, snapshot.feed.version)
-            assert pair[0] == pair[1]
+            assert pair[1] - pair[0] == version_offset
             observed.add(pair)
             time.sleep(0.0002)
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         readers = [pool.submit(read) for _ in range(4)]
         try:
-            for version in range(2, 15):
+            for increment in range(1, 14):
                 candidate = {
                     "policy": store.snapshot().policy.editable(),
                     "feed": store.snapshot().feed.editable(),
                 }
-                candidate["policy"]["version"] = candidate["feed"][
-                    "version"
-                ] = version
+                candidate["policy"]["version"] = (
+                    initial.policy.version + increment
+                )
+                candidate["feed"]["version"] = initial.feed.version + increment
                 state["body"] = candidate
                 assert await store.refresh()
         finally:
             stopped.set()
         for reader in readers:
             reader.result()
-    assert observed and store.snapshot().policy.version == 14
+    assert (
+        observed
+        and store.snapshot().policy.version == initial.policy.version + 13
+    )
     assert store.diagnostics()["generation"] == 14
 
 

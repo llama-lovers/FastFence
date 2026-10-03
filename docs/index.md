@@ -24,7 +24,7 @@ The default policy uses deterministic checks and needs no running model. The bus
 
 The MCP server exposes controlled business-tool invocation and tenant memory. Qwen completion uses REST or the OpenAI-compatible endpoint; a model-completion MCP tool is not implemented.
 
-The [Laya authoring CLI](policies.md#draft-a-rule-in-natural-language-with-laya) drafts bounded text rules from natural language. Validate and preview the proposal, review its exact private JSON, then activate that same proposal without another model call. Runtime matching is local. The supported DSL covers literal text restrictions; broader semantic or compliance instructions are outside its scope.
+Use [Describe a policy](policies.md#describe-a-policy-in-the-dashboard) to draft text restrictions, selective privacy actions and tool-role restrictions with actual Laya. Inspect the exact changes, test examples and explicitly activate the same proposal without another model call. Local enforcement remains fast. The CLI also supports saved text-rule proposals; arbitrary legal or compliance interpretation is outside the supported catalog.
 
 Budgets and audit live in memory and reset on restart. Independent instances have independent allowances; there is no global spending coordinator. A blocked output cannot undo upstream actions that already ran.
 
@@ -33,5 +33,3 @@ Read the [architecture](architecture.md), [validation evidence](testing.md), [ch
 ## Open source
 
 FastFence is licensed under Apache-2.0. Source, license notices, specifications, and reproducible reports are available in the [project repository](https://github.com/llama-lovers/HackYeah2026-challenge-second). Third-party integrations retain their own licenses and notices.
-
-The repository currently remains private: source and report links require repository access. Publishing this documentation does not make the source repository public.

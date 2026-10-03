@@ -82,10 +82,10 @@ def inspect_payload(
                 f"{direction}_secret_detector_unavailable"
             ) from None
         findings = sorted(set(findings).union(detected))
-    action = (
-        policy.privacy.input if direction == "input" else policy.privacy.output
-    )
-    if findings and action == "block":
+    if any(
+        policy.privacy.action_for(finding, direction) == "block"
+        for finding in findings
+    ):
         raise RejectedError(f"{direction}_sensitive_data", findings)
     check_size(safe, maximum, direction, findings)
     return safe, findings

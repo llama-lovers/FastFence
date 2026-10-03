@@ -34,9 +34,10 @@ The OpenAI-compatible adapter supports bounded text messages, non-streaming resp
 The Streamable HTTP MCP endpoint is `http://127.0.0.1:8000/mcp/`. It accepts verified agent credentials and exposes:
 
 - The `invoke` tool, which accepts an allowlisted business-tool name and arguments.
+- The `complete` tool, which accepts `model`, `prompt` and bounded `max_output_tokens`, and invokes the same model control path as HTTP.
 - The `memory://{tenant}/{key}` resource, which calls the guarded `memory.read` operation.
 
-MCP does not expose a model-completion tool. Qwen/Ollama generation uses the REST or OpenAI-compatible routes above. This server exposes registered operations rather than an unrestricted proxy for arbitrary MCP servers.
+Model completion through MCP requires an installed allowlisted model. Authored input/output rules, privacy, semantic checks, budgets and audit apply identically to HTTP. This server exposes registered operations rather than an unrestricted proxy for arbitrary MCP servers.
 
 From a locally initialized checkout:
 
@@ -61,6 +62,10 @@ async def main():
         )
         print(result.data)
         print(await client.read_resource("memory://blue/forecast"))
+        completion = await client.call_tool(
+            "complete", {"model": "qwen3:0.6b", "prompt": "Cat", "max_output_tokens": 16}
+        )
+        print(completion.data)
 
 
 asyncio.run(main())
@@ -94,6 +99,8 @@ The runner creates temporary Laya configuration and audit storage without changi
 See the [full integration instructions](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/README.md) and [sanitized live report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/results/live.json), subject to the project repository's access permissions. A full deployment must route relevant native handlers through the gateway and control network egress so an agent cannot bypass it.
 
 ## Laya as a rule author
+
+The dashboard now provides [natural-language policy drafting](policies.md#describe-a-policy-in-the-dashboard), including text restrictions, selective privacy actions and tool-role restrictions. It requires exact review, content preview and explicit activation.
 
 The separate `integrations/laya/author-rule.sh` CLI uses actual Laya model inference to draft bounded text restrictions. It validates and previews the result through management endpoints, then optionally saves a private proposal. Activate that exact proposal with `--proposal ... --activate`; the activation step makes no model call.
 

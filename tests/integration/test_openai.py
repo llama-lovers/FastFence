@@ -90,7 +90,9 @@ def test_completion_preserves_messages_stops_and_masks_output(
     assert response.headers["X-FastFence-Decision"] == "redacted"
     assert response.headers["X-FastFence-Upstream-Executed"] == "true"
     assert response.headers["X-FastFence-Policy-Version"] == "1"
-    assert response.headers["X-FastFence-Feed-Version"] == "1"
+    assert response.headers["X-FastFence-Feed-Version"] == str(
+        app.state.runtime.snapshot().feed.version
+    )
     audit = client.get(
         "/api/admin/audit.jsonl", headers=headers(tokens, "security-admin")
     )

@@ -15,6 +15,10 @@ class AppSettings(BaseSettings):
         default=None,
         description="Legacy private startup identity configuration directory",
     )
+    authoring_root: Path | None = Field(
+        default=None,
+        description="Trusted repository root for the isolated Laya authoring installation",
+    )
     identity_config_json: str | None = Field(
         default=None, description="Trusted startup identity records as JSON"
     )
@@ -67,6 +71,8 @@ class AppSettings(BaseSettings):
     def resolve_paths(self) -> Self:
         self.root = self.root.resolve()
         self.state = (self.state or self.root / "state").resolve()
+        if self.authoring_root is not None:
+            self.authoring_root = self.authoring_root.resolve()
         if self.identity_config_file is not None:
             self.identity_config_file = self.identity_config_file.resolve()
         return self

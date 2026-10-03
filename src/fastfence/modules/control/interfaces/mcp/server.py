@@ -6,7 +6,11 @@ from fastmcp.server.auth import AccessToken, TokenVerifier
 from fastmcp.server.dependencies import get_access_token
 from pydantic import ValidationError
 
-from fastfence.modules.control.contracts.dto import Identity, ToolCall
+from fastfence.modules.control.contracts.dto import (
+    Identity,
+    ModelCall,
+    ToolCall,
+)
 from fastfence.modules.control.contracts.ports import (
     IdentityPort,
     InvocationPort,
@@ -52,6 +56,22 @@ def create_mcp(engine: InvocationPort, identities: IdentityPort) -> FastMCP:
             call = ToolCall(tool=tool, arguments=arguments)
         except ValidationError:
             raise ToolError("Invalid invocation schema") from None
+        verdict = await engine.invoke(identity(), call)
+        return verdict.model_dump()
+
+    @mcp.tool()
+    async def complete(
+        model: str, prompt: str, max_output_tokens: int = 256
+    ) -> dict[str, object]:
+        """Call an allowlisted model through input/output controls, budgets and audit."""
+        try:
+            call = ModelCall(
+                model=model,
+                prompt=prompt,
+                max_output_tokens=max_output_tokens,
+            )
+        except ValidationError:
+            raise ToolError("Invalid completion schema") from None
         verdict = await engine.invoke(identity(), call)
         return verdict.model_dump()
 

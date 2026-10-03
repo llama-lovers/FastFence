@@ -1,0 +1,57 @@
+id: FF-018
+title: Actual Laya dashboard policy authoring with exact reviewed activation
+status: verified
+problem: Natural-language authoring is CLI-only and cannot propose selective privacy or restrictive tool authorization changes.
+scope:
+  - Authenticated draft, local preview and exact activation management API for the dashboard.
+  - Real isolated pinned Laya subprocess translates Polish or English into bounded typed operations.
+  - Support literal text rules, broad sensitive-data actions, selective email or Polish-ID actions and narrower tool roles.
+  - Keep proposals immutable, subject-bound, bounded and expiring; preserve unrelated policy controls.
+constraints:
+  - No inference or process creation on the protected invocation path.
+  - No arbitrary regex/code, new tools, privilege widening, user-controlled model endpoints or subprocess paths.
+  - Proposals require explicit activation, retain a base version and activate without another inference.
+  - Selective instructions must remain selective; unsupported detectors and ambiguous requirements are rejected.
+  - Privacy overrides allow block or redact only; any block finding blocks the entire payload.
+  - Draft subprocess has a total deadline, bounded output and one concurrent slot; errors omit private instructions.
+  - Parent owns private workspace cleanup even when a deadline kills the Laya worker.
+  - Activation compares actual source policy and feed with the reviewed base under the configuration refresh lock.
+  - Preview expires when its feed changes; client operations cannot replace the stored proposal.
+  - Existing text-rule CLI remains backward compatible.
+change_paths:
+  - src/fastfence/app/interfaces/http/**
+  - src/fastfence/modules/control/domain/**
+  - src/fastfence/modules/control/application/**
+  - src/fastfence/modules/control/contracts/ports.py
+  - src/fastfence/modules/control/persistence/policy.py
+  - src/fastfence/shared/settings/app_settings.py
+  - integrations/laya/**
+  - tests/**
+  - evaluation/**
+  - docs/**
+  - README.md
+  - .secrets.baseline
+  - .env.example
+acceptance:
+  - Unauthenticated and agent credentials cannot draft, preview or activate policy proposals.
+  - Draft uses actual Laya; preview and activation never invoke the authoring model.
+  - Stale, expired, foreign, consumed or client-tampered proposals cannot activate.
+  - Email redaction does not silently change secret or Polish-ID behavior.
+  - Restricted tool roles deny excluded identities before upstream, preserve budgets and other controls.
+  - Invalid model output, unsupported instructions, busy workers or deadlines retain the last good policy.
+validation:
+  - command: uv run pytest -q
+    expected: Authoring API, selective privacy, restrictive-role and process-boundary regressions pass.
+  - command: uv run pre-commit run --all-files
+    expected: Quality, typing, architecture and specification gates pass.
+evidence:
+  - command: uv run pytest -q
+    result: 391 tests passed with 94.90 percent source coverage, including source-policy/feed CAS, immutable diffs, bounded process cleanup and selective privacy regressions.
+  - command: uv run basedpyright
+    result: Zero errors and warnings.
+  - command: uv run lint-imports
+    result: All sixteen architecture contracts kept.
+  - command: uv run python evaluation/smoke_policy_operations.py --output evaluation/results/policy-operation-live.json
+    result: Actual pinned Laya/Qwen drafts exact selective email redaction and restrictive tool roles; all seven checks passed with zero activation inference and sanitized audit. Initial block-versus-redact interpretation mismatch and diagnostic preserved separately; generic prompt action definitions clarified without substituting proposals.
+  - command: uv run python evaluation/smoke_policy_studio.py --live --output evaluation/results/policy-studio-live.json
+    result: Root recorded actual dashboard drafting, diff, edited-sample repreview, reviewed activation, no-a input blocking and real allowed one-token MCP completion.

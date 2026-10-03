@@ -25,7 +25,12 @@ there is no pretend classifier or fabricated semantic score in the application.
 
 ## Custom local text rules
 
-The dashboard's **Text rule** editor previews and activates literal `contains`,
+The dashboard's **Describe a policy** studio uses actual Laya to draft text restrictions,
+selective email/identifier privacy actions and restrictions on existing tool roles. Review
+the before/after changes, test examples and activate the exact stored proposal. The
+**Local Qwen model** playground and MCP `complete` tool exercise real model controls.
+
+The **Text rule** editor also previews and activates literal `contains`,
 `word_contains`, or `equals` restrictions. For example, block words containing `a`
 on model input/output, without matching structural JSON keys or model identifiers.
 Rules are validated, versioned and enforced locally without LLM calls.
@@ -162,8 +167,10 @@ higher value before hot-reloading it. The dashboard can also change `semantic.pr
 `ollama`, `semantic.model` to an installed model, and its timeout/threshold without a restart.
 
 The Ollama adapter uses `/api/chat`, a constrained JSON score, `think: false`, temperature zero,
-and a maximum of 64 completion tokens. Its constrained decision is binary: attack `1` or
-ordinary content `0`; this is a decision score, not a probability. Both input and output are scanned by default.
+and a maximum of 64 completion tokens. It returns `benign`, `suspicious` or `malicious`,
+mapped to ordinal severity codes `0`, `0.6` and `1`. Threshold `0.5` blocks suspicious
+content; `0.8` permits that category while still blocking malicious content. These codes
+are not probabilities. Both input and output are scanned by default.
 Invalid scores, provider errors, model unavailability and timeouts fail closed. A disabled
 scanner is labeled disabled; it is never automatically substituted for a configured model.
 
@@ -336,7 +343,15 @@ exports, actual model request wire contracts with explicitly labeled test double
 MCP HTTP tools/resources. Live inference quality is assessed separately in `evaluation/` so
 passing unit tests cannot be confused with a model's accuracy.
 
-For the Qwen3:4b binary schema, the recorded 20-probe synthetic development set produced
+The current severity rubric has a frozen, self-authored 60-case PL/EN holdout separate
+from development: 46/60 exact categories, all 20 clearly malicious cases detected.
+At threshold 0.8 there was one false positive and no false negatives under the
+predeclared labels; at 0.5 there were two false positives and twelve missed suspicious
+cases. All errors are retained in [the report](evaluation/results/semantic-severity-holdout.json).
+A separate [six-case actual HTTP check](evaluation/results/semantic-strictness-live.json)
+proves threshold changes affect real model decisions.
+
+For the earlier Qwen3:4b binary schema, the recorded 20-probe synthetic development set produced
 20 correct decisions (10 benign and 10 attack), median 343 ms and p95 1,384 ms on the
 development machine. This is a small development sample, not a general detection guarantee.
 The original numeric-score prompt failed on all 10 attacks; its complete baseline result is

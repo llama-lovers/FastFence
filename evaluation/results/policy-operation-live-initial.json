@@ -1,0 +1,19 @@
+{
+  "created_at": "2026-10-03T13:51:43.417129+00:00",
+  "cases": [
+    {
+      "name": "selective_email_input",
+      "passed": false,
+      "error": "proposal_semantics_mismatch",
+      "operation_types": [
+        "set_privacy_detector"
+      ]
+    },
+    {
+      "name": "sanitized_audit",
+      "passed": true
+    }
+  ],
+  "all_passed": false,
+  "scope": "Actual pinned Laya/local Qwen management authoring; isolated gateway, real deterministic controls, simulated business tools. No activation inference."
+}

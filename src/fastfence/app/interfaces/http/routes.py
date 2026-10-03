@@ -5,6 +5,9 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, Response
 
+from fastfence.app.interfaces.http.policy_authoring import (
+    configure_policy_authoring,
+)
 from fastfence.app.interfaces.http.rule_authoring import (
     configure_rule_authoring,
 )
@@ -24,6 +27,7 @@ def configure_http(app: FastAPI, runtime: ControlRuntime) -> None:
     _configure_public(app, runtime, actor)
     _configure_management(app, runtime, admin)
     configure_rule_authoring(app, admin)
+    configure_policy_authoring(app, runtime, admin)
 
 
 def _configure_safety(app: FastAPI) -> None:
@@ -79,10 +83,12 @@ def _configure_public(
     def dashboard() -> FileResponse:
         return FileResponse(Path(__file__).parent / "web/index.html")
 
-    @app.get("/assets/rules.js")
-    def rule_editor_script() -> FileResponse:
+    @app.get("/assets/{script_name}")
+    def dashboard_script(script_name: str) -> FileResponse:
+        if script_name not in {"rules.js", "playground.js", "policy-studio.js"}:
+            raise HTTPException(404, "Unknown asset")
         return FileResponse(
-            Path(__file__).parent / "web/rules.js",
+            Path(__file__).parent / "web" / script_name,
             media_type="text/javascript",
         )
 

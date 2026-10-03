@@ -6,6 +6,9 @@ from collections.abc import Iterator
 from typing import Any
 
 from fastfence.modules.control.domain.models import SignatureFeed
+from fastfence.modules.control.domain.signature_matching import (
+    signature_findings as match_signatures,
+)
 
 # These are intentionally documented heuristics, not a complete DLP system.
 PATTERNS = {
@@ -42,8 +45,7 @@ def normalize(text: str) -> str:
 
 
 def signature_findings(value: Any, feed: SignatureFeed) -> list[str]:
-    text = normalize("\n".join(strings(value)))
-    return [s.id for s in feed.signatures if normalize(s.pattern) in text]
+    return match_signatures(value, feed)
 
 
 def privacy_filter(value: Any) -> tuple[Any, list[str]]:

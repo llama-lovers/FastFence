@@ -1,0 +1,29 @@
+id: FF-022
+title: Protected model completions through MCP
+status: verified
+problem: MCP clients can use protected business tools but must switch protocols to demonstrate a controlled Qwen completion.
+scope:
+  - Expose a bounded complete tool on the existing authenticated MCP server.
+  - Reuse the same ModelCall and engine path as HTTP for allowlists, authored rules, budgets and audit.
+constraints:
+  - Management tokens cannot act as agents.
+  - Invalid inputs cannot execute upstream or leak validation content.
+  - No alternate model provider, endpoint or identity can be supplied by the caller.
+change_paths:
+  - src/fastfence/modules/control/interfaces/mcp/server.py
+  - tests/integration/test_mcp_models.py
+  - docs/integrations.md
+acceptance:
+  - MCP clients can list and call complete with their existing agent identity.
+  - An authored input rule blocks completion before upstream execution.
+  - Allowed output and blocked output preserve the HTTP engine behavior.
+validation:
+  - command: uv run pytest tests/integration/test_mcp_models.py
+    expected: Actual MCP client tests verify identity, validation and model control paths.
+  - command: uv run pre-commit run --all-files
+    expected: All configured gates pass.
+evidence:
+  - command: uv run pytest tests/integration/test_mcp_models.py -q --no-cov
+    result: Seven tests passed covering authenticated discovery, invalid inputs, authored input/output denials, allowed completion and request audit correlation; model output is a labeled test fixture.
+  - command: uv run --with playwright python evaluation/smoke_policy_studio.py --live --output evaluation/results/policy-studio-live.json
+    result: An actual authenticated JSON-RPC MCP completion to local Qwen3 0.6B returned nonempty allowed output and a correlated audit record under the Laya-authored policy.

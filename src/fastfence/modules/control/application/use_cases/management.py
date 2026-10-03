@@ -57,8 +57,23 @@ class ManagementUseCases:
             else "configured — actual model evaluated per invocation; errors fail closed",
         }
 
-    def save(self, policy: Policy, identity: Identity) -> Snapshot:
-        snapshot = self.policies.save(policy)
+    def save(
+        self,
+        policy: Policy,
+        identity: Identity,
+        *,
+        expected_feed_version: int | None = None,
+        expected_base_policy: Policy | None = None,
+    ) -> Snapshot:
+        snapshot = (
+            self.policies.save(policy)
+            if expected_feed_version is None and expected_base_policy is None
+            else self.policies.save(
+                policy,
+                expected_feed_version=expected_feed_version,
+                expected_base_policy=expected_base_policy,
+            )
+        )
         self._audit_change(identity, "policy.save", "policy_saved")
         return snapshot
 

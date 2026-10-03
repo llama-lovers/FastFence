@@ -72,8 +72,18 @@ class PolicyStore:
             "last_error": None,
         }
 
-    def _read(self, policy: Policy | None = None) -> Snapshot:
+    def _read(
+        self,
+        policy: Policy | None = None,
+        *,
+        expected_base_policy: Policy | None = None,
+    ) -> Snapshot:
         data = self.provider.read()
+        if expected_base_policy is not None and (
+            Policy.model_validate(data["policy"]) != expected_base_policy
+            or self._snapshot.policy != expected_base_policy
+        ):
+            raise ConfigSourceError("source_policy_conflict")
         if policy is not None:
             data["policy"] = policy.model_dump(mode="json")
         return Snapshot.model_validate(data)
@@ -135,10 +145,23 @@ class PolicyStore:
                 last_error=sanitized_error(error),
             )
 
-    def _refresh(self, policy: Policy | None = None) -> bool:
+    def _refresh(
+        self,
+        policy: Policy | None = None,
+        *,
+        expected_feed_version: int | None = None,
+        expected_base_policy: Policy | None = None,
+    ) -> bool:
         with self._refresh_lock:
             try:
-                candidate = self._read(policy)
+                candidate = self._read(
+                    policy, expected_base_policy=expected_base_policy
+                )
+                if expected_feed_version is not None and (
+                    candidate.feed.version != expected_feed_version
+                    or self._snapshot.feed.version != expected_feed_version
+                ):
+                    raise ConfigSourceError("feed_version_conflict")
                 if (
                     policy is not None
                     and policy.version <= self._snapshot.policy.version
@@ -151,12 +174,22 @@ class PolicyStore:
                     self.diagnostics()["last_error"]
                 ) from None
 
-    def save(self, policy: Policy) -> Snapshot:
+    def save(
+        self,
+        policy: Policy,
+        *,
+        expected_feed_version: int | None = None,
+        expected_base_policy: Policy | None = None,
+    ) -> Snapshot:
         if self.provider.kind != "local_files":
             error = ConfigSourceError("read_only_source")
             self._failure(error)
             raise error
-        self._refresh(policy)
+        self._refresh(
+            policy,
+            expected_feed_version=expected_feed_version,
+            expected_base_policy=expected_base_policy,
+        )
         return self.snapshot()
 
     def reload(self) -> Snapshot:

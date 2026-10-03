@@ -69,8 +69,20 @@ class ControlRuntime:
     def diagnostics(self) -> dict[str, Any]:
         return self.policies.diagnostics()
 
-    def save_policy(self, policy: Policy, identity: Identity) -> Snapshot:
-        return self.management.save(policy, identity)
+    def save_policy(
+        self,
+        policy: Policy,
+        identity: Identity,
+        *,
+        expected_feed_version: int | None = None,
+        expected_base_policy: Policy | None = None,
+    ) -> Snapshot:
+        return self.management.save(
+            policy,
+            identity,
+            expected_feed_version=expected_feed_version,
+            expected_base_policy=expected_base_policy,
+        )
 
     def reload_policy(self, identity: Identity) -> Snapshot:
         return self.management.reload(identity)

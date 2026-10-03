@@ -267,7 +267,8 @@ def test_admin_changes_thresholds_and_signatures_live(client, tokens, project):
         client, tokens, arguments={"query": "custom malicious marker"}
     ).json()
     assert (
-        verdict["reason"] == "attack_signature" and verdict["feed_version"] == 2
+        verdict["reason"] == "attack_signature"
+        and verdict["feed_version"] == feed["version"]
     )
 
 

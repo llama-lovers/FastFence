@@ -1,0 +1,53 @@
+id: FF-023
+title: Bounded historical signature normalization and safe decoded views
+status: verified
+problem: Literal historical signatures miss whitespace, encoding and split text variants.
+scope:
+- Add bounded domain signature matcher with NFKC, casefold and zero-width normalization.
+- Inspect one-layer percent/base64 printable text and adjacent string-list fragments
+  without executing payloads.
+- Support feed-configured escaped token sequences with bounded token gaps and identifier
+  boundaries.
+- Preserve before/after historical reports and conservative quoted-literal false positives.
+constraints:
+- No arbitrary regular expressions, recursive decoding or executable deserialization.
+- Traversal, text, decode and view overflow rejects fail closed through RejectedError.
+- Scalar reconstruction only joins adjacent strings in the same list, never unrelated
+  mapping keys or values.
+- Literal obfuscation gaps bounded to eight characters, token sequences to eight tokens
+  and 256-character gaps.
+change_paths:
+- src/fastfence/modules/control/domain/signature_matching.py
+- src/fastfence/modules/control/domain/controls.py
+- src/fastfence/modules/control/domain/models.py
+- config/signatures.json
+- evaluation/historical_attacks.json
+- evaluation/results/historical-attack-validation.json
+- evaluation/results/historical-attack-validation-before.json
+- tests/unit/test_signature_matching.py
+- tests/integration/test_gateway.py
+- tests/integration/test_openai.py
+- tests/unit/test_config_providers.py
+acceptance:
+- Original safe historical variant corpus is rerun unchanged and before results remain
+  available.
+- Identifier near matches and untrusted regex-like pattern text do not produce unintended
+  matches.
+- Decode/traversal budgets have explicit fail-closed regressions.
+- Transport benchmark uses final matcher with zero, one and sixty-four authored rules.
+validation:
+- command: uv run pytest -q --no-cov tests/unit/test_signature_matching.py tests/unit/test_transport_measurements.py
+  expected: Meaningful bounded matcher and benchmark invariants pass.
+- command: uv run python evaluation/validate_historical_attacks.py --output evaluation/results/historical-attack-validation.json
+  expected: Recorded improved variant outcomes and contextual quoted-marker false
+    positives.
+evidence:
+- result: 'Matcher plus transport invariants: 36 targeted tests passed, including
+    ordinary8/16KiB prose, alphabetic unpadded base64, identifier boundaries, bounded
+    decode/depth/candidate rejection.'
+- result: 'Preserved before corpus report: TP10,FN20,TN6,FP2. After same38cases: TP30,FN0,TN6,FP2;
+    quoted exact dangerous markers conservatively blocked.'
+- result: 'Basedpyright: 0 errors/warnings;16 import-linter contracts kept.'
+- result: Final full suite:387passed,94.88%sourcecoverage;Ruffclean,basedpyright0errors/0warnings,16importcontractskept.
+- result: Final transport matrix passed with improvedmatcher andfeedversion2;beforehistoricalreport
+    retained unchanged.

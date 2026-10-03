@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import Field, field_serializer, model_validator
 
@@ -9,6 +9,7 @@ from fastfence.modules.control.domain.frozen import (
     FrozenMap,
     Roles,
 )
+from fastfence.modules.control.domain.privacy import Privacy
 from fastfence.modules.control.domain.text_rules import TextRule
 from fastfence.shared.models import StrictModel
 
@@ -32,12 +33,6 @@ class ToolPolicy(FrozenControlModel):
     roles: Roles = Field(min_length=1)
     timeout_ms: int = Field(default=2000, ge=50, le=60_000)
     cost_microusd: int = Field(default=0, ge=0)
-
-
-class Privacy(FrozenControlModel):
-    input: Literal["block", "redact"] = "block"
-    output: Literal["block", "redact"] = "redact"
-    enabled: bool = True
 
 
 class SemanticConfig(FrozenControlModel):
@@ -97,6 +92,23 @@ class Signature(FrozenControlModel):
     id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
     pattern: str = Field(min_length=4, max_length=256)
     description: str = Field(max_length=200)
+    match_mode: Literal["literal", "token_sequence"] = "literal"
+    max_gap: int = Field(default=128, ge=0, le=256)
+
+    @model_validator(mode="after")
+    def bounded_tokens(self) -> Self:
+        if not self.pattern.strip():
+            raise ValueError(
+                "Signature pattern must contain non-whitespace text"
+            )
+        if (
+            self.match_mode == "token_sequence"
+            and not 2 <= len(self.pattern.split()) <= 8
+        ):
+            raise ValueError(
+                "Token sequence signatures require two to eight tokens"
+            )
+        return self
 
 
 class SignatureFeed(FrozenControlModel):

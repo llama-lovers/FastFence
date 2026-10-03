@@ -23,7 +23,7 @@ async def test_real_adapter_wire_contract(monkeypatch, provider):
             return httpx.Response(
                 200,
                 json={
-                    "message": {"content": '{"risk":1}'},
+                    "message": {"content": '{"severity":"malicious"}'},
                     "prompt_eval_count": 80,
                     "eval_count": 9,
                 },
@@ -54,7 +54,11 @@ async def test_real_adapter_wire_contract(monkeypatch, provider):
     if provider == "ollama":
         assert captured["think"] is False and captured["stream"] is False
         assert captured["options"]["num_predict"] == 64
-        assert captured["format"]["properties"]["risk"]["enum"] == [0, 1]
+        assert captured["format"]["properties"]["severity"]["enum"] == [
+            "benign",
+            "suspicious",
+            "malicious",
+        ]
     else:
         assert captured["questions"]["risk"]["type"] == "noul"
         assert captured["state"] == "untrusted content"

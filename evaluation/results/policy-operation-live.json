@@ -1,0 +1,80 @@
+{
+  "created_at": "2026-10-03T14:05:48.967863+00:00",
+  "cases": [
+    {
+      "name": "selective_email_input",
+      "passed": true,
+      "source": "real_laya",
+      "model": "qwen3:4b",
+      "operations": [
+        {
+          "type": "set_privacy_detector",
+          "detector": "pii_email",
+          "direction": "input",
+          "action": "redact"
+        }
+      ],
+      "inference_ms": 3019,
+      "preview_status": 200,
+      "activation_status": 200,
+      "activation_inference_calls": 0
+    },
+    {
+      "name": "email_redacted",
+      "passed": true,
+      "decision": "redacted",
+      "reason": "privacy_redacted",
+      "upstream_executed": true,
+      "request_id": "12793b77ea124b90a6d12b5ff09ce6ba"
+    },
+    {
+      "name": "other_pii_still_blocked",
+      "passed": true,
+      "decision": "blocked",
+      "reason": "input_sensitive_data",
+      "upstream_executed": false,
+      "request_id": "5d9daa04a7b645129c3226f0740a4568"
+    },
+    {
+      "name": "restrict_tool_roles",
+      "passed": true,
+      "source": "real_laya",
+      "model": "qwen3:4b",
+      "operations": [
+        {
+          "type": "restrict_tool_roles",
+          "tool": "knowledge.search",
+          "roles": [
+            "operator"
+          ]
+        }
+      ],
+      "inference_ms": 2500,
+      "preview_status": 200,
+      "activation_status": 200,
+      "activation_inference_calls": 0
+    },
+    {
+      "name": "excluded_role_denied",
+      "passed": true,
+      "decision": "blocked",
+      "reason": "role_not_allowed",
+      "upstream_executed": false,
+      "request_id": "6bcb423b3f904af392f8d2e42a0ac90a"
+    },
+    {
+      "name": "retained_role_allowed",
+      "passed": true,
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "upstream_executed": true,
+      "request_id": "441dc18bb0404b87a515ef526b0e1a14"
+    },
+    {
+      "name": "sanitized_audit",
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "scope": "Actual pinned Laya/local Qwen management authoring; isolated gateway, real deterministic controls, simulated business tools. No activation inference."
+}

@@ -1,0 +1,434 @@
+{
+  "created_at": "2026-10-03T13:53:13.375974+00:00",
+  "corpus": "evaluation/historical_attacks.json",
+  "feed_version": 2,
+  "signature_count": 5,
+  "scope": "Historical signature component only; synthetic inert strings/JSON, no code execution, no model inference, no claim that encoded text itself executes",
+  "corpus_scope": "Synthetic inert text representing documented historical exploit families; no payload code executed or unpickled; bounded text decoding only. Some markers are intentionally benign quoted examples to quantify false positives. Not a CVE reproduction or production exploit benchmark.",
+  "sources": [
+    "https://docs.python.org/3/library/pickle.html",
+    "https://pytorch.org/docs/stable/generated/torch.load.html",
+    "https://github.com/safetensors/safetensors"
+  ],
+  "sample_count": 38,
+  "summary": {
+    "true_positive": 30,
+    "false_negative": 0,
+    "true_negative": 6,
+    "false_positive": 2
+  },
+  "results": [
+    {
+      "id": "unsafe_pickle_deserialization-exact",
+      "family": "unsafe_pickle_deserialization",
+      "variant": "exact",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "python_pickle_rce"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_pickle_deserialization-whitespace",
+      "family": "unsafe_pickle_deserialization",
+      "variant": "whitespace",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "python_pickle_rce"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_pickle_deserialization-unicode_nfkc",
+      "family": "unsafe_pickle_deserialization",
+      "variant": "unicode_nfkc",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "python_pickle_rce"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_pickle_deserialization-encoded_percent",
+      "family": "unsafe_pickle_deserialization",
+      "variant": "encoded_percent",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "python_pickle_rce"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_pickle_deserialization-encoded_base64",
+      "family": "unsafe_pickle_deserialization",
+      "variant": "encoded_base64",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "python_pickle_rce"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_pickle_deserialization-split_fields",
+      "family": "unsafe_pickle_deserialization",
+      "variant": "split_fields",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "python_pickle_rce"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_model_loading-exact",
+      "family": "unsafe_model_loading",
+      "variant": "exact",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "torch_unsafe_loader"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_model_loading-whitespace",
+      "family": "unsafe_model_loading",
+      "variant": "whitespace",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "torch_unsafe_loader"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_model_loading-unicode_nfkc",
+      "family": "unsafe_model_loading",
+      "variant": "unicode_nfkc",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "torch_unsafe_loader"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_model_loading-encoded_percent",
+      "family": "unsafe_model_loading",
+      "variant": "encoded_percent",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "torch_unsafe_loader"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_model_loading-encoded_base64",
+      "family": "unsafe_model_loading",
+      "variant": "encoded_base64",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "torch_unsafe_loader"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "unsafe_model_loading-split_fields",
+      "family": "unsafe_model_loading",
+      "variant": "split_fields",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "torch_unsafe_loader"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "remote_shell_marker-exact",
+      "family": "remote_shell_marker",
+      "variant": "exact",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "shell_remote_execution"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "remote_shell_marker-whitespace",
+      "family": "remote_shell_marker",
+      "variant": "whitespace",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "shell_remote_execution"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "remote_shell_marker-unicode_nfkc",
+      "family": "remote_shell_marker",
+      "variant": "unicode_nfkc",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "shell_remote_execution"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "remote_shell_marker-encoded_percent",
+      "family": "remote_shell_marker",
+      "variant": "encoded_percent",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "shell_remote_execution"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "remote_shell_marker-encoded_base64",
+      "family": "remote_shell_marker",
+      "variant": "encoded_base64",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "shell_remote_execution"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "remote_shell_marker-split_fields",
+      "family": "remote_shell_marker",
+      "variant": "split_fields",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "shell_remote_execution"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "instruction_override-exact",
+      "family": "instruction_override",
+      "variant": "exact",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "instruction_override"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "instruction_override-whitespace",
+      "family": "instruction_override",
+      "variant": "whitespace",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "instruction_override"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "instruction_override-unicode_nfkc",
+      "family": "instruction_override",
+      "variant": "unicode_nfkc",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "instruction_override"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "instruction_override-encoded_percent",
+      "family": "instruction_override",
+      "variant": "encoded_percent",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "instruction_override"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "instruction_override-encoded_base64",
+      "family": "instruction_override",
+      "variant": "encoded_base64",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "instruction_override"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "instruction_override-split_fields",
+      "family": "instruction_override",
+      "variant": "split_fields",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "instruction_override"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "pickle_reducer_marker-exact",
+      "family": "pickle_reducer_marker",
+      "variant": "exact",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "pickle_reduce_payload"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "pickle_reducer_marker-whitespace",
+      "family": "pickle_reducer_marker",
+      "variant": "whitespace",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "pickle_reduce_payload"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "pickle_reducer_marker-unicode_nfkc",
+      "family": "pickle_reducer_marker",
+      "variant": "unicode_nfkc",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "pickle_reduce_payload"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "pickle_reducer_marker-encoded_percent",
+      "family": "pickle_reducer_marker",
+      "variant": "encoded_percent",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "pickle_reduce_payload"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "pickle_reducer_marker-encoded_base64",
+      "family": "pickle_reducer_marker",
+      "variant": "encoded_base64",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "pickle_reduce_payload"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "pickle_reducer_marker-split_fields",
+      "family": "pickle_reducer_marker",
+      "variant": "split_fields",
+      "expected_block": true,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "pickle_reduce_payload"
+      ],
+      "expectation_met": true
+    },
+    {
+      "id": "trusted_json_format",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": false,
+      "matched_signature_ids": [],
+      "expectation_met": true
+    },
+    {
+      "id": "safe_weights_mode",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": false,
+      "matched_signature_ids": [],
+      "expectation_met": true
+    },
+    {
+      "id": "pickle_named_topic",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": false,
+      "matched_signature_ids": [],
+      "expectation_met": true
+    },
+    {
+      "id": "shell_without_pipe",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": false,
+      "matched_signature_ids": [],
+      "expectation_met": true
+    },
+    {
+      "id": "near_pickle_method",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": false,
+      "matched_signature_ids": [],
+      "expectation_met": true
+    },
+    {
+      "id": "near_reducer_method",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": false,
+      "matched_signature_ids": [],
+      "expectation_met": true
+    },
+    {
+      "id": "quoted_pickle_education",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "python_pickle_rce"
+      ],
+      "expectation_met": false
+    },
+    {
+      "id": "quoted_override_education",
+      "family": "benign_near_match",
+      "variant": "benign",
+      "expected_block": false,
+      "actual_signature_block": true,
+      "matched_signature_ids": [
+        "instruction_override"
+      ],
+      "expectation_met": false
+    }
+  ],
+  "limitations": [
+    "Literal markers are contextual clues rather than proof of exploit execution",
+    "Decoding is bounded to one layer and 4096-character base64 tokens; nested/long encodings and nonconfigured patterns remain outside coverage",
+    "Quoted educational examples can trigger false positives; semantic context is not assessed here",
+    "This report does not evaluate full pipeline privacy, authorization or semantic mitigation"
+  ]
+}

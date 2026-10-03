@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The authored-rule checkpoint passes **271 tests**, with **94.52%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The policy-studio and bounded-signature integration checkpoint passes **391 tests**, with **94.90%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -41,7 +41,7 @@ uv run python evaluation/smoke_hybrid.py \
   --output evaluation/results/local-hybrid.json
 ```
 
-The recorded binary-schema Qwen3:4b development run classified 20 synthetic probes correctly: 10 benign and 10 attack cases. Its median was 343 ms and p95 1,384 ms on the development machine. This small development sample does not establish general detection accuracy. The earlier numeric-score prompt missed all 10 attacks; its report remains available alongside the improved run.
+The historical binary-schema Qwen3:4b development run classified 20 synthetic probes correctly: 10 benign and 10 attack cases. Its median was 343 ms and p95 1,384 ms on the development machine. This small development sample does not establish general detection accuracy. The earlier numeric-score prompt missed all 10 attacks; its report remains available alongside the improved run.
 
 The recorded memory-runtime hybrid smoke and original actual Laya integration each passed five cases. These historical checks predate the detector and authored-rule changes; they establish those integration checkpoints, not a fresh combined run of all current controls. They use actual local model inference; business tools remain simulated. The Laya runner and prerequisites are described in [integrations](integrations.md).
 
@@ -51,6 +51,30 @@ Public source reports:
 - [Original numeric-schema probes](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/qwen3-4b-initial-numeric-schema.json)
 - [Memory-runtime hybrid smoke](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/hybrid-gateway-memory-smoke.json)
 - [Actual Laya report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/results/live.json)
+
+## Current semantic severity and real threshold changes
+
+```sh
+uv run python evaluation/run_severity.py --split holdout --output evaluation/results/local-severity.json
+uv run python evaluation/smoke_semantic_strictness.py --output evaluation/results/local-strictness.json
+```
+
+The `severity-v1` rubric maps `benign`, `suspicious`, and `malicious` to ordinal codes 0, 0.6, and 1. These are not calibrated probabilities. Prompt and corpus digests accompany the reports; the prompt and all labels were frozen before the holdout run. This is a self-authored synthetic PL/EN set, not an external benchmark.
+
+The [60-case holdout](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-severity-holdout.json) had zero provider errors and 46 exact category matches. All 20 clearly malicious cases were classified malicious; 12 expected-suspicious cases were classified benign. Threshold 0.5 produced two false positives and twelve false negatives under the predeclared labels; threshold 0.8 produced one false positive and zero false negatives. The higher threshold's definition permits the suspicious category, so these figures describe different policies and are not interchangeable accuracy claims.
+
+The separate [six-case strictness smoke](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-strictness-live.json) uses actual Ollama assessment through HTTP handlers and versioned policy updates. The identical suspicious development example is blocked at 0.5 and allowed at 0.8; benign and malicious examples retain their expected decisions. This proves configurable behavior, not independent accuracy. Business-tool data is simulated and audit metadata is sanitized.
+
+## Policy studio and selective controls
+
+For a real browser walkthrough, install the optional test browser and run:
+
+```sh
+uv run --with playwright python -m playwright install chromium
+uv run --with playwright python evaluation/smoke_policy_studio.py --live --output evaluation/results/local-policy-studio.json
+```
+
+The test starts an isolated gateway and temporary credentials. Actual Laya drafts a Polish text policy through the dashboard, examples are previewed, changing examples invalidates review, and explicit activation publishes the stored proposal. The model playground proves denial before upstream execution and displays the correlated audit trail. The runner also checks the model completion MCP tool with a bounded actual Qwen response. Browser-contract fixtures are reported separately and never labeled model inference.
 
 ## Operational benchmark
 
@@ -94,3 +118,28 @@ uv run python evaluation/benchmark_text_rules.py \
 ```
 
 The [recorded local matching benchmark](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/authored-text-rules-benchmark.json) uses 2,000 measured iterations plus 100 warmups for each combination of 1/16/64 rules and 128 B/4 KiB/64 KiB content. All predicates miss; case handling is mixed. At 4 KiB, p95 was 0.002625 ms for one rule, 0.031166 ms for 16 rules and 0.075 ms for 64 rules. This measures the matcher only, excluding transport, other controls, accounting, auditing and inference. Fixed ASCII inputs and uncontrolled machine load make it development evidence, not a universal latency guarantee.
+
+## Historical exploit variants
+
+```sh
+uv run python evaluation/validate_historical_attacks.py --output evaluation/results/local-historical.json
+```
+
+The same 38-case inert corpus is retained for the [before](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/historical-attack-validation-before.json) and [after](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/historical-attack-validation.json) reports. Detection improved from 10/30 to 30/30 desired attack variants, including whitespace, Unicode, bounded encoding and adjacent list fragments. Six benign near-matches pass; two quoted dangerous patterns remain conservative false positives. Nothing is executed or unpickled. The matcher decodes bounded text views only, and the corpus is not an external exploit benchmark.
+
+## Actual HTTP and MCP transport
+
+```sh
+uv run python evaluation/benchmark_transport.py --samples 100 --warmup 20 --output evaluation/results/local-transport.json
+```
+
+The [transport report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/transport-benchmark.json) exercises isolated uvicorn processes over loopback TCP with actual HTTP and JSON-RPC MCP requests, offline secret detection and the bounded signature matcher. It covers 0/1/64 authored rules, short/8 KiB payloads and concurrency 1/8. All 76 groups passed their expected outcomes with zero transport errors or unexpected verdicts. Warmups are excluded from timing and included in budget/audit reconciliation.
+
+Across configurations, 7,680 business invocations produced 2,880 allowed and 4,800 blocked decisions, exactly 7,680 audit entries, 23,466,240 settled token units and 288,000 configured micro-USD cost. No semantic model ran and no reservations remained in flight. Allowed calls include the simulated business backend's intentional 15 ms delay.
+
+| Measured scope | Allowed-call p95 range | Blocked-call p95 range |
+| --- | --- | --- |
+| HTTP, across all payload/rule/concurrency groups | 20.7–110.1 ms | 1.13–17.09 ms |
+| MCP, across all payload/rule/concurrency groups | 24.8–131.1 ms | 1.92–40.17 ms |
+
+These ranges span different workloads; the report retains every group. They are not pure guardrail overhead and do not establish a universal latency SLA. Health and authenticated MCP ping are labeled non-equivalent transport baselines and are never subtracted from business-call measurements. Client serialization, transport, response decoding and server execution are included; the local machine is not a controlled production benchmark environment.
