@@ -1,0 +1,46 @@
+id: FF-013
+title: Validated authored text rules with local enforcement
+status: verified
+problem: Users cannot express a bounded custom text restriction independently of structural JSON keys or activate it through existing hot reload.
+scope:
+  - Add immutable Pydantic text rules with contains, word_contains and equals operators.
+  - Enforce block rules locally for model/tool textual content with explicit direction and case handling.
+  - Add authenticated schema and sample-preview endpoints for external rule authors.
+  - Verify input blocking precedes upstream execution and output blocking suppresses delivery.
+constraints:
+  - No dataclasses, generated Python, arbitrary regex, eval, database or request-path network I/O.
+  - Rule literals are prepared at validation time; bounded rule count and value length.
+  - Model rules inspect prompt, message content, stop strings and generated text, excluding roles/model IDs/structural keys.
+  - Tool rules inspect recursive string values, excluding dictionary keys.
+  - Unicode NFKC and optional casefold; diacritics stay distinct; word means Unicode letters.
+  - Existing policy snapshots, version checks and last-good retention remain authoritative.
+  - Only management identities may access authoring endpoints.
+change_paths:
+  - src/fastfence/modules/control/domain/**
+  - src/fastfence/modules/control/application/services/inspection.py
+  - src/fastfence/modules/control/application/services/execution.py
+  - src/fastfence/app/interfaces/http/**
+  - tests/**
+  - docs/policies.md
+  - README.md
+acceptance:
+  - Policy supports up to 64 unique text rules and remains backward compatible with existing policies.
+  - Rules support direction input/output/both, target model/tool/all, block action and case sensitivity.
+  - Word-containing-a examples distinguish innocent structural fields from actual content.
+  - Invalid operators, duplicate IDs, blank/oversized values and arbitrary extra fields are rejected.
+  - Schema/preview endpoints validate without executing a model or changing active policy.
+  - Hot reload changes future requests; malformed updates retain the last valid configuration.
+validation:
+  - command: uv run pytest -q
+    expected: Rule regressions and existing suite pass at required coverage.
+  - command: uv run pre-commit run --all-files
+    expected: All configured quality and architecture gates pass.
+evidence:
+  - command: uv run pre-commit run --all-files
+    result: All configured hooks passed including architecture, type checking, secret scanning and staged specifications.
+  - command: uv run pytest -q
+    result: 236 tests passed with 94.49 percent source coverage, including 62 new text-rule and authoring API cases.
+  - command: uv run basedpyright
+    result: Zero errors or warnings.
+  - command: node --check src/fastfence/app/interfaces/http/web/rules.js
+    result: Dashboard rule editor JavaScript syntax valid; validated preview precedes versioned activation.

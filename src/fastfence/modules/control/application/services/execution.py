@@ -106,7 +106,11 @@ class Executor:
 
     async def inspect_output(self, state: InvocationState, output: Any) -> Any:
         output, findings = inspect_payload(
-            output, state.snapshot, "output", self.secrets
+            output,
+            state.snapshot,
+            "output",
+            self.secrets,
+            target="tool" if isinstance(state.call, ToolCall) else "model",
         )
         state.findings.update(findings)
         config = state.snapshot.policy.semantic

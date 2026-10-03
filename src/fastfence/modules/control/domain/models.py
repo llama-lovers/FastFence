@@ -9,6 +9,7 @@ from fastfence.modules.control.domain.frozen import (
     FrozenMap,
     Roles,
 )
+from fastfence.modules.control.domain.text_rules import TextRule
 from fastfence.shared.models import StrictModel
 
 
@@ -65,6 +66,7 @@ class Policy(FrozenControlModel):
     signatures_enabled: bool = True
     max_input_bytes: int = Field(default=16_384, ge=64, le=65_536)
     max_output_bytes: int = Field(default=16_384, ge=64, le=65_536)
+    text_rules: tuple[TextRule, ...] = Field(default=(), max_length=64)
 
     @model_validator(mode="after")
     def valid_roles(self) -> Policy:
@@ -73,6 +75,18 @@ class Policy(FrozenControlModel):
             if not set(control.roles).issubset(roles):
                 raise ValueError("Every permitted role needs a budget")
         return self
+
+    @model_validator(mode="after")
+    def unique_text_rules(self) -> Policy:
+        if len({rule.id for rule in self.text_rules}) != len(self.text_rules):
+            raise ValueError("Text rule IDs must be unique")
+        return self
+
+    @field_serializer("text_rules")
+    def serialize_text_rules(
+        self, value: tuple[TextRule, ...]
+    ) -> list[dict[str, Any]]:
+        return [rule.model_dump(mode="json") for rule in value]
 
     def editable(self) -> dict[str, Any]:
         """Return independent JSON data for constructing a validated new version."""

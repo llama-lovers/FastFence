@@ -5,6 +5,9 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, Response
 
+from fastfence.app.interfaces.http.rule_authoring import (
+    configure_rule_authoring,
+)
 from fastfence.modules.control.application.facade import ControlRuntime
 from fastfence.modules.control.contracts.dto import (
     Identity,
@@ -20,6 +23,7 @@ def configure_http(app: FastAPI, runtime: ControlRuntime) -> None:
     actor, admin = _authentication(runtime)
     _configure_public(app, runtime, actor)
     _configure_management(app, runtime, admin)
+    configure_rule_authoring(app, admin)
 
 
 def _configure_safety(app: FastAPI) -> None:
@@ -74,6 +78,13 @@ def _configure_public(
     @app.get("/")
     def dashboard() -> FileResponse:
         return FileResponse(Path(__file__).parent / "web/index.html")
+
+    @app.get("/assets/rules.js")
+    def rule_editor_script() -> FileResponse:
+        return FileResponse(
+            Path(__file__).parent / "web/rules.js",
+            media_type="text/javascript",
+        )
 
     @app.get("/health")
     def health() -> dict[str, str | int]:

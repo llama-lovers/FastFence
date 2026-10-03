@@ -20,6 +20,10 @@ from fastfence.modules.control.domain.models import (
     ToolCall,
     ToolPolicy,
 )
+from fastfence.modules.control.domain.text_rules import (
+    Target,
+    text_rule_findings,
+)
 
 
 def encode(value: Any) -> str:
@@ -41,6 +45,8 @@ def inspect_payload(
     snapshot: Snapshot,
     direction: Literal["input", "output"],
     secrets: SecretsPort | None = None,
+    *,
+    target: Target = "tool",
 ) -> tuple[Any, list[str]]:
     policy = snapshot.policy
     maximum = (
@@ -49,6 +55,11 @@ def inspect_payload(
         else policy.max_output_bytes
     )
     check_size(value, maximum, direction)
+    rule_findings = text_rule_findings(
+        policy.text_rules, value, direction, target
+    )
+    if rule_findings:
+        raise RejectedError(f"{direction}_text_rule", rule_findings)
     if policy.signatures_enabled:
         attacks = signature_findings(value, snapshot.feed)
         if attacks:
@@ -122,7 +133,11 @@ class InputInspector:
             else self._model_payload(call)
         )
         payload, findings = inspect_payload(
-            original, state.snapshot, "input", self.secrets
+            original,
+            state.snapshot,
+            "input",
+            self.secrets,
+            target="tool" if isinstance(call, ToolCall) else "model",
         )
         state.findings.update(findings)
         if isinstance(call, ToolCall):

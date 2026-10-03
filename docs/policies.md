@@ -86,8 +86,29 @@ Token units are conservative accounting estimates, not an exact tokenizer count 
 
 Counters and bounded audit reset on restart. Multiple instances have independent allowances, with no global coordination. Output blocking cannot roll back upstream side effects. The [deployment guide](deployment.md) explains these operational boundaries.
 
-## Planned natural-language rule authoring
+## Authored text rules
 
-Natural-language-to-compiled-rule authoring is planned and is not implemented by the current policy editor or secret detector. Instructions such as “ban every word containing a” cannot currently be entered as an executable policy. A one-character signature is rejected by validation, and simply lowering that limit would also match structural keys containing `a`.
+Add bounded local rules to `policy.text_rules`. They use literal operators, never generated Python or arbitrary regular expressions:
 
-Use supported structured controls and literal signatures today. Do not treat an agent's instruction to obey a rule as equivalent to gateway enforcement.
+```yaml
+text_rules:
+  - id: no-letter-a
+    operator: word_contains
+    value: a
+    direction: both
+    target: model
+    action: block
+    case_sensitive: false
+```
+
+This blocks a model request or response containing a word with `a`, including uppercase `A` and Unicode compatibility forms. NFKC normalization and optional casefold apply; accents stay distinct, so `ą` does not match `a`. Words consist of Unicode letters and combining marks. `contains` checks a literal substring of a scalar string; `equals` checks the entire scalar. A `word_contains` value must itself contain only letters or combining marks.
+
+Choose `input`, `output`, or `both`, and `model`, `tool`, or `all`. Model inputs include prompt, message content and stop strings; model outputs include generated text. Roles, model identifiers and structural JSON keys are excluded. Tool rules inspect recursive string values, excluding dictionary keys. Existing signature and privacy controls keep their broader inspection scope.
+
+At most 64 rules are permitted, each with a unique ID and a nonblank value of at most 128 characters. Literal preparation happens during validation. Matching needs no compiler, model, filesystem, or network call. Input blocks precede execution; output blocks suppress delivery after execution. Findings contain rule IDs, never matched content.
+
+In the dashboard, select **Text rule**, set its scope and samples, then **Preview** and **Activate rule**. Preview evaluates only the candidate predicate: `NO MATCH` is not a promise that all other security controls will allow the request. Activation adds the rule to the current policy with a new version. Duplicate IDs, invalid rules and version conflicts are rejected. A remote configuration source must be updated at that source.
+
+Management clients can retrieve `GET /api/admin/rules/schema`, then call `POST /api/admin/rules/preview` with a `rule` object and up to 16 `samples`, each at most 4,096 characters. Preview neither changes policy nor invokes a model. Publish a validated proposal through the existing versioned `PUT /api/admin/policy` endpoint.
+
+Natural-language drafting through Laya is being integrated separately. The structured rule editor itself does not interpret unrestricted instructions or provide a general compliance engine.

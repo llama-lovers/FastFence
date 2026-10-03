@@ -23,6 +23,14 @@ policy reload, resource limits, and input/output filtering are real. The default
 **deterministic controls only**. Hybrid mode uses a real separately hosted Ollama or Kev model;
 there is no pretend classifier or fabricated semantic score in the application.
 
+## Custom local text rules
+
+The dashboard's **Text rule** editor previews and activates literal `contains`,
+`word_contains`, or `equals` restrictions. For example, block words containing `a`
+on model input/output, without matching structural JSON keys or model identifiers.
+Rules are validated, versioned and enforced locally without LLM calls.
+See [rule semantics and management endpoints](docs/policies.md#authored-text-rules).
+
 ## Run
 
 Requirements: macOS or Linux, Python 3.12, and [uv](https://docs.astral.sh/uv/).
