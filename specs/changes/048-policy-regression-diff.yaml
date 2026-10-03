@@ -1,0 +1,44 @@
+id: FF-048
+title: Generated policy regression cases and before-after behavioral diff
+status: planned
+problem: Users need to review both the configuration change and its observable effect on synthetic cases before activating a natural-language-authored policy.
+scope:
+  - Extend the existing Laya draft and preview workflow with bounded generated positive, negative and boundary test cases plus editable expected local outcomes.
+  - Preserve the existing structured configuration diff and add a readable YAML diff from the exact validated base and candidate snapshots.
+  - Evaluate the same cases against the base and candidate policies using the same pinned threat feed and deterministic content inspection path.
+  - Show a before-after results table with changed decisions, rule findings, safe transformed text and pass/fail against reviewed expectations.
+  - Store reviewed synthetic regression cases in a separate local YAML file beside the policy; keep runtime secrets in deployment environment or .env.
+constraints:
+  - This is a planned enhancement; existing configuration diff and candidate-only manual preview already work.
+  - Policy remains in config/policy.yaml; propose config/policy-tests.yaml for test cases so normal request processing does not load or generate tests.
+  - Generated expected outcomes are proposals for human review, not independent proof that the policy is safe; do not rewrite expectations to make failing tests pass.
+  - Use bounded Pydantic test schemas and YAML safe loading, never generated executable Python or shell commands.
+  - Generate synthetic fixtures only; do not persist captured production inputs, credentials or personal documents as tests.
+  - Scope initial comparison to local deterministic content controls, with no upstream calls, tool side effects, semantic inference or budget mutations.
+  - Label no_local_match accurately; content preview is not full authorization, budget or semantic approval.
+  - Bind comparison and activation to the exact reviewed base/candidate policy and feed; source changes require another review/preview.
+  - Before-after inspection must use isolated request-local transformation state and must not consult a conversation database or alias vault.
+  - No signed decision receipts, additional export service, database or mandatory configuration format beyond YAML and deployment environment.
+change_paths:
+  - src/fastfence/app/interfaces/http/authoring*.py
+  - src/fastfence/app/interfaces/http/web/policy-studio.js
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/modules/control/application/use_cases/policy_preview.py
+  - src/fastfence/modules/control/domain/policy_authoring.py
+  - integrations/laya/draft_policy.py
+  - config/policy-tests.yaml
+  - tests/unit/test_policy_regression*.py
+  - tests/integration/test_policy_regression*.py
+  - docs/policies.md
+acceptance:
+  - A supported rule draft includes reviewable allow-like, blocked and relevant boundary cases with bounded structured expectations.
+  - YAML diff and behavioral diff derive from the same exact candidate that will be activated.
+  - Comparison exposes changed outcomes on identical cases without executing models/tools or consuming runtime budgets.
+  - Reviewed cases can be reloaded and run against subsequent configuration changes; failed expectations remain visible.
+  - The UI distinguishes local no-match from a full runtime ALLOW and identifies uncovered semantic/permission/budget behavior.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_policy_regression.py tests/integration/test_policy_regression_diff.py
+    expected: Future generation validation, exact-snapshot comparison and regression checks pass; these test files are not implemented yet.
+  - command: uv run pre-commit run --all-files
+    expected: Future implementation satisfies typing, architecture and specification gates.
+evidence: []
