@@ -1,0 +1,41 @@
+id: FF-002
+title: Executable quality gates and specification-driven commits
+status: planned
+problem: Quality and architectural conventions are not yet enforced automatically.
+scope:
+  - Python 3.12 and public development and test dependency groups
+  - Ruff, BasedPyright, Pylint module-size rule, import-linter and pyscn
+  - Pre-commit file hygiene, lock consistency and generated settings documentation
+  - Structured specifications checked against implementation paths staged in each commit
+constraints:
+  - Do not copy unrelated LFAPI packages or private package indexes.
+  - Direct commits and pushes to main are explicitly authorized by the user.
+  - Hooks must execute successfully rather than use blanket diagnostic suppressions.
+change_paths:
+  - pyproject.toml
+  - uv.lock
+  - .python-version
+  - _version.py
+  - .pre-commit-config.yaml
+  - .importlinter
+  - .gitignore
+  - scripts/**
+  - docs/**
+  - .env.example
+  - README.md
+acceptance:
+  - A clean checkout resolves and runs using Python 3.12.
+  - All configured quality hooks pass for the complete repository.
+  - Missing or malformed specifications fail the spec gate.
+  - A staged implementation change requires a staged specification covering its paths.
+  - Generated settings documentation reflects the actual AppSettings model.
+validation:
+  - command: uv sync --locked --all-groups
+    expected: Public dependency resolution installs successfully.
+  - command: uv run pre-commit run --all-files
+    expected: Every configured hook passes.
+  - command: uv run python scripts/check_specs.py
+    expected: All specification schemas and staged coverage checks pass.
+  - command: uv build
+    expected: Build includes the relocated dashboard and CLI entry point.
+evidence: []

@@ -1,0 +1,29 @@
+id: FF-003
+title: Test layers and enforcement regression preservation
+status: planned
+problem: Tests need to follow the migrated architecture and protect Pydantic invariants.
+scope:
+  - Separate unit and integration checks with reusable fixtures.
+  - Preserve all existing 60 behavior checks and real-model evaluation scripts.
+  - Verify Settings, Assessment and Snapshot validation and immutable snapshot boundaries.
+  - Preserve isolated state, durable ledger cleanup and offline policy fixtures.
+constraints:
+  - Do not label mocked provider contracts as actual live inference.
+  - Live model availability must not be required for the normal test suite.
+  - Tests are independent consumers allowed to inspect private implementations.
+change_paths:
+  - tests/**
+  - evaluation/**
+acceptance:
+  - All baseline checks retain their original security assertions after import migration.
+  - Test imports obey downward unit/integration/fixture boundaries.
+  - Invalid Pydantic models raise explicit validation errors.
+  - Real hybrid evaluation remains runnable and records actual results.
+validation:
+  - command: uv run pytest -q
+    expected: At least the original 60 meaningful checks pass along with new invariant checks.
+  - command: uv run ruff check tests evaluation
+    expected: Tests and evaluation obey the configured lint rules.
+  - command: uv run lint-imports
+    expected: Test-layer contracts are kept.
+evidence: []
