@@ -33,6 +33,8 @@ Polling, timeout, size, identity, and upstream settings are documented in [setti
 | `semantic` | Select `disabled`, `ollama`, or `kev`; configure assessor model, threshold, timeout, and output scanning. |
 | `max_input_bytes`, `max_output_bytes` | Bound serialized UTF-8 payload sizes, including sanitized payloads. |
 
+Management writes also validate the exact serialized YAML size against the configuration source byte limit before replacing the file or active snapshot. An oversized candidate leaves the last valid source intact, so refresh and restart can still read it.
+
 Every permitted role needs a budget. Client-provided roles, tenants, or headers cannot grant access: trusted identity records define those claims at startup. A role grant cannot authorize a target omitted from the active allowlist.
 
 ## Block and redact

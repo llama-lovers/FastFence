@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 
+from fastfence.app.interfaces.http.ingress import ProtectedRestIngress
 from fastfence.app.interfaces.http.openai import create_router
 from fastfence.app.interfaces.http.routes import configure_http
 from fastfence.modules.control.application.facade import (
@@ -46,6 +47,11 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
     app.state.identities = runtime.identities
     app.state.settings = settings
     app.state.runtime = runtime
+    app.add_middleware(
+        ProtectedRestIngress,
+        runtime=runtime,
+        management_limit=settings.max_config_source_bytes,
+    )
     configure_http(app, runtime)
     app.include_router(create_router(runtime))
     app.mount("/mcp", mcp_app)

@@ -48,6 +48,7 @@ class PolicyStore:
     ) -> None:
         self.policy_path, self.feed_path = policy_path, feed_path
         self.poll_interval = poll_interval
+        self.max_source_bytes = max_source_bytes
         self.provider: ConfigProvider = (
             HttpConfigProvider(config_url, fetch_timeout, max_source_bytes)
             if config_url
@@ -130,9 +131,14 @@ class PolicyStore:
     def _persist_policy(self, policy: Policy) -> None:
         if self.provider.kind != "local_files":
             return
+        content = yaml.safe_dump(
+            policy.model_dump(mode="json"), sort_keys=False
+        )
+        if len(content.encode("utf-8")) > self.max_source_bytes:
+            raise ConfigSourceError("source_too_large")
         temporary = self.policy_path.with_suffix(".yaml.tmp")
         temporary.write_text(
-            yaml.safe_dump(policy.model_dump(mode="json"), sort_keys=False),
+            content,
             encoding="utf-8",
         )
         temporary.replace(self.policy_path)

@@ -1,0 +1,52 @@
+id: FF-036
+title: Authenticate and bound protected REST bodies before JSON parsing
+status: verified
+problem: Typed REST endpoints let the framework parse unauthenticated arbitrary-size JSON before their authentication dependency; a bounded two-megabyte request demonstrates this resource gap.
+scope:
+  - Add local ASGI ingress authentication for body-bearing protected REST routes before reading request bytes.
+  - Bound streamed invocation envelopes to 512 KiB and management envelopes to at least 512 KiB, using the trusted configuration source limit when larger.
+  - Preserve existing downstream authorization, schema validation, execution controls and browser safety headers.
+constraints:
+  - No request-time filesystem, database, configuration fetch or model invocation in ingress.
+  - Limits apply to actual streamed bytes independently of absent, false or chunked Content-Length headers.
+  - Do not reduce the existing 64 KiB logical payload capability through JSON escaping overhead.
+  - OpenAI and MCP transports retain their existing authentication and protocol behavior.
+  - Raw request bytes remain local to the request and never enter audit, logs or shared caches.
+change_paths:
+  - src/fastfence/app/interfaces/http/ingress.py
+  - src/fastfence/app/factory.py
+  - tests/integration/test_http_ingress.py
+  - tests/integration/test_http_ingress_mounts.py
+  - docs/testing.md
+  - docs/integrations.md
+  - docs/challenge-readiness.md
+  - README.md
+  - specs/requirements.yaml
+acceptance:
+  - Missing or invalid credentials reject malformed and oversized bodies before any receive or JSON parse.
+  - Non-management identities cannot submit management bodies before parsing.
+  - Authorized oversized streamed bodies return sanitized 413 before JSON parsing or upstream execution, including deceptive Content-Length.
+  - A valid escaped model prompt exceeding the OpenAI wire cap remains supported through REST when within policy limits.
+  - Ordinary calls, policy changes, health and existing OpenAI/MCP regressions remain functional.
+  - Mounted application root paths cannot bypass ingress authentication or limits and lookalike prefixes are not stripped.
+validation:
+  - command: uv run pytest -q --no-cov tests/integration/test_http_ingress.py
+    expected: Ingress authentication, stream limits, escaped-payload compatibility and no-upstream regressions pass.
+  - command: uv run pytest -q
+    expected: Full security and transport suite passes with required coverage.
+  - command: uv run pre-commit run --all-files
+    expected: Typing, linting, architecture and specification checks pass.
+evidence:
+  - result: Before the change, unauthenticated two-megabyte valid JSON was parsed before authentication; malformed input returned 422 and deeply nested input returned 400 without authentication, while OpenAI rejected before parsing.
+  - command: uv run pytest -q --no-cov tests/integration/test_http_ingress.py tests/integration/test_http_ingress_mounts.py
+    result: Eighteen new cases pass, including no receive or JSON parse before authorization, false or absent Content-Length, exact wire boundary, escaped model input, configurable management limit, disconnect and mounted-path enforcement.
+  - command: Targeted existing gateway, OpenAI and MCP regressions alongside initial ingress tests
+    result: Fifty-three cases passed before the additional disconnect, configured-cap and mounting checks were added.
+  - command: uv run basedpyright src
+    result: Zero errors, warnings or notes.
+  - command: uv run lint-imports
+    result: All sixteen architecture contracts kept.
+  - command: Ruff check and format check for owned Python files
+    result: All four files pass lint and formatting checks.
+  - command: uv run pytest -q
+    result: Full combined checkpoint passes 474 tests with 95.88% first-party source coverage. Strict MkDocs build passes.

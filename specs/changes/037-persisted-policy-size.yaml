@@ -1,0 +1,33 @@
+id: FF-037
+title: Reject policy writes that the configured source reader cannot reload
+status: verified
+problem: Management can save a valid policy whose serialized YAML exceeds the configured source byte limit, leaving the active process running but breaking subsequent refresh and startup.
+scope:
+  - Check the exact UTF-8 serialized policy size before writing or publishing a management candidate.
+  - Use the same trusted byte limit as the configuration provider.
+constraints:
+  - Rejection preserves the previous policy file and immutable active snapshot.
+  - Do not create an oversized temporary file or change source limits implicitly.
+  - Keep the existing sanitized source_too_large diagnostic and management error response.
+  - This check runs only during configuration publication, outside request enforcement.
+change_paths:
+  - src/fastfence/modules/control/persistence/policy.py
+  - tests/unit/test_policy_persistence_bounds.py
+  - docs/policies.md
+  - docs/testing.md
+  - specs/requirements.yaml
+acceptance:
+  - An oversized authored-rule policy is rejected before any file or snapshot replacement.
+  - The previous policy still refreshes and can boot a new store after the rejected write.
+  - A candidate exactly at the serialized byte limit is accepted and remains reloadable.
+  - A candidate one byte over the limit is rejected, including Unicode serialization expansion.
+validation:
+  - command: uv run pytest -q --no-cov tests/unit/test_policy_persistence_bounds.py
+    expected: Persistence size, unchanged-source and restart invariants pass.
+  - command: uv run pre-commit run --all-files
+    expected: All configured quality and architecture gates pass.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_policy_persistence_bounds.py
+    result: Five tests pass for oversized authored-rule policies, exact and one-byte-over boundaries, Unicode serialization, unchanged files/snapshots, refresh and fresh startup.
+  - command: uv run pytest -q
+    result: Full combined checkpoint passes 474 tests with 95.88% first-party source coverage. Strict MkDocs build passes.

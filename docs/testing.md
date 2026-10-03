@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The redaction-composition checkpoint passes **451 tests**, with **95.69%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The bounded-ingress and reloadable-policy checkpoint passes **474 tests**, with **95.88%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -204,3 +204,9 @@ The [audit browser fixtures](https://github.com/llama-lovers/HackYeah2026-challe
 Regression tests cover redaction introducing a forbidden literal or signature on model/tool input and output. They verify input denial before execution, output suppression after execution, settled reservations, retained sanitized findings and agreement with policy preview. Non-conflicting redaction still forwards useful sanitized content. Original content is also inspected, so redaction cannot erase a pre-existing denial. The recorded performance checkpoints above predate this added check on redacted payloads; clean payloads keep one restriction pass.
 
 The [post-fix HTTP/MCP soak](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/transport-soak-composition.json) passes **39,221 mixed calls over 60 seconds**, including input/output redaction under changing policy/feed versions and failed refreshes. Budget settlement and bounded audit reconcile with no pending reservations. This verifies runtime behavior under this bounded workload; it is not a controlled throughput comparison with the earlier run.
+
+## Bounded REST ingress and reloadable policy writes
+
+Ingress regressions check authentication before any body consumption or JSON parsing, including malformed/deep JSON, management-role separation, actual streamed-byte limits with misleading or missing length headers, and valid escaped payloads. These transport checks precede the normal policy, budget and audit pipeline.
+
+Policy persistence tests verify exact serialized byte boundaries, Unicode expansion and preservation of both the original file and active snapshot after an oversized management write. The retained configuration is then reloaded and used to construct a fresh policy store.

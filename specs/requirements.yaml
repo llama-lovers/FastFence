@@ -44,10 +44,10 @@ validation:
 - command: uv run pytest -q
   expected: Functional and nonfunctional acceptance tests pass.
 evidence:
-- specifications: FF-001 through FF-035
+- specifications: FF-001 through FF-037
   mapping: docs/challenge-readiness.md links the six formal requirement areas to delivered behavior; docs/testing.md records the current verification checkpoint and its scope.
 - command: uv run pytest -q
-  result: Current local checkpoint passed 451 tests with 95.69% source coverage, above the enforced 85% gate; previous hosted Ubuntu CI passed on commit 9340b40.
+  result: Current local checkpoint passed 474 tests with 95.88% source coverage, above the enforced 85% gate; previous hosted Ubuntu CI passed on commit b1cf17e.
 - artifacts: evaluation/results/transport-optimized.json; evaluation/results/historical-attack-validation.json
   result: 76 real HTTP/MCP groups reconciled 7680 invocations; bounded inert attack corpus records 30 true positives, zero false negatives, six true negatives and two false positives.
 - artifacts: evaluation/results/policy-studio-live.json; evaluation/results/policy-operation-live.json; evaluation/results/semantic-strictness-v2-live.json; evaluation/results/semantic-severity-v2-blind-holdout.json
@@ -56,3 +56,5 @@ evidence:
   result: Sixty seconds and 40919 actual HTTP/MCP calls across five atomic policy/feed generations; invalid, rollback and oversized updates retain last good state. Budgets reconcile, bounded audit eviction is exact, and no pending reservations remain.
 - artifact: evaluation/results/hybrid-v2-rehearsal.json
   result: Five actual Qwen3:4b hybrid cases pass with sanitized export; separate fresh blind semantic corpus records 54/60 exact categories, with all six errors preserved.
+- command: uv run pytest -q --no-cov tests/integration/test_http_ingress.py tests/integration/test_http_ingress_mounts.py tests/unit/test_policy_persistence_bounds.py
+  result: Twenty-three new ingress and persistence regressions cover pre-parse authentication, byte bounds independent of length headers, mounted routes, disconnects and reloadable configuration writes.

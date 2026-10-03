@@ -6,6 +6,8 @@ FastFence protects operations routed through its gateway. Existing agent connect
 
 Agent routes require a provisioned agent bearer credential. Management routes require a separate management credential. The interactive local API schema is available at `http://127.0.0.1:8000/docs`.
 
+Protected REST writes authenticate before consuming or parsing their body. Invocation envelopes are limited to **512 KiB** of actual streamed bytes, including chunked requests and JSON escaping. Management envelopes use the larger of 512 KiB and the trusted `FASTFENCE_MAX_CONFIG_SOURCE_BYTES` setting (at most 2 MiB). Oversized bodies receive a sanitized `413`; these transport denials do not execute upstream calls or reserve budgets. The active policy still independently bounds the logical input payload to at most 64 KiB. The OpenAI-compatible adapter retains its separate 64 KiB envelope limit.
+
 | Route | Purpose |
 | --- | --- |
 | `POST /api/invoke` | Invoke an allowlisted business tool with validated arguments |
@@ -36,6 +38,8 @@ The Streamable HTTP MCP endpoint is `http://127.0.0.1:8000/mcp/`. It accepts ver
 - The `invoke` tool, which accepts an allowlisted business-tool name and arguments.
 - The `complete` tool, which accepts `model`, `prompt` and bounded `max_output_tokens`, and invokes the same model control path as HTTP.
 - The `memory://{tenant}/{key}` resource, which calls the guarded `memory.read` operation.
+
+The pinned MCP transport authenticates before JSON parsing and caps HTTP request bodies at 4 MiB. That protocol-envelope limit is separate from the smaller active-policy limit on actual model/tool input; protocol messages such as `ping` do not invoke a business operation.
 
 Model completion through MCP requires an installed allowlisted model. Authored input/output rules, privacy, semantic checks, budgets and audit apply identically to HTTP. This server exposes registered operations rather than an unrestricted proxy for arbitrary MCP servers.
 
