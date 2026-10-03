@@ -14,8 +14,8 @@ from fastfence.cli import initialize
 @pytest.fixture
 def project(tmp_path):
     (tmp_path / "config").mkdir()
-    for name in ["policy.yaml", "signatures.json"]:
-        shutil.copy(Path("config") / name, tmp_path / "config" / name)
+    shutil.copy(Path("config/policy.offline.yaml"), tmp_path / "config/policy.yaml")
+    shutil.copy(Path("config/signatures.json"), tmp_path / "config/signatures.json")
     initialize(tmp_path / "state")
     return tmp_path
 

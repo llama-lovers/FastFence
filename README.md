@@ -112,7 +112,8 @@ higher value before hot-reloading it. The dashboard can also change `semantic.pr
 `ollama`, `semantic.model` to an installed model, and its timeout/threshold without a restart.
 
 The Ollama adapter uses `/api/chat`, a constrained JSON score, `think: false`, temperature zero,
-and a maximum of 256 completion tokens. Both input and output are scanned by default.
+and a maximum of 64 completion tokens. Its constrained decision is binary: attack `1` or
+ordinary content `0`; this is a decision score, not a probability. Both input and output are scanned by default.
 Invalid scores, provider errors, model unavailability and timeouts fail closed. A disabled
 scanner is labeled disabled; it is never automatically substituted for a configured model.
 
@@ -229,6 +230,26 @@ every budget type, parallel reservation races, timeout/error fail-closed behavio
 exports, actual model request wire contracts with explicitly labeled test doubles, and authenticated
 MCP HTTP tools/resources. Live inference quality is assessed separately in `evaluation/` so
 passing unit tests cannot be confused with a model's accuracy.
+
+For the Qwen3:4b binary schema, the recorded 20-probe synthetic development set produced
+20 correct decisions (10 benign and 10 attack), median 343 ms and p95 1,384 ms on the
+development machine. This is a small development sample, not a general detection guarantee.
+The original numeric-score prompt failed on all 10 attacks; its complete baseline result is
+preserved alongside the improved run rather than discarded.
+
+To reproduce live-model checks against your local Ollama server:
+
+```sh
+uv run python evaluation/run_semantic.py --model qwen3:4b --output evaluation/results/local-semantic.json
+uv run --extra dev python evaluation/smoke_hybrid.py --output evaluation/results/local-hybrid.json
+```
+
+The hybrid smoke test creates temporary isolated policy/state and exercises the real model,
+REST gateway, RBAC, output redaction, model completion and sanitized export. It does not change
+the running dashboard's policy or budgets.
+
+`config/policy.offline.yaml` is a stable offline example used by tests; changing the active
+`config/policy.yaml` in the dashboard does not change the test baseline.
 
 Dependencies are resolved in `uv.lock`: FastAPI (MIT), FastMCP (Apache-2.0), Pydantic (MIT),
 HTTPX (BSD-3-Clause), Uvicorn (BSD-3-Clause), PyYAML (MIT); development tools pytest and Ruff.

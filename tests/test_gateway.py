@@ -32,6 +32,15 @@ def test_happy_path_and_redacted_output(client, tokens):
     assert "REDACTED" in output
 
 
+def test_dashboard_budget_limits_come_from_trusted_roles(client, tokens):
+    invoke(client, tokens)
+    status = client.get("/api/admin/status", headers=headers(tokens, "security-admin")).json()
+    row = next(b for b in status["budgets"] if b["subject"] == "analyst-blue")
+    assert row["roles"] == ["analyst"]
+    assert row["limits"] == status["policy"]["budgets"]["analyst"]
+    assert {"calls", "tokens", "cost_microusd", "compute_ms", "inflight"}.issubset(row)
+
+
 @pytest.mark.parametrize(
     "tool,args,reason",
     [

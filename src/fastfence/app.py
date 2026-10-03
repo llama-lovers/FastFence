@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastfence.actions.tools import DemoTools
 from fastfence.adapters.mcp import create_mcp
 from fastfence.adapters.models import OllamaModels, SemanticScanner
-from fastfence.core.engine import Engine
+from fastfence.core.engine import Engine, effective_limits
 from fastfence.core.identity import IdentityStore
 from fastfence.core.policy import PolicyStore
 from fastfence.core.schema import Identity, ModelCall, Policy, ToolCall, Verdict
@@ -128,11 +128,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/admin/status", dependencies=[Depends(admin)])
     def status():
         snapshot = policies.snapshot()
+        budgets = []
+        for row in ledger.budgets():
+            identity = identities.by_subject(row["subject"])
+            limits = effective_limits(identity, snapshot.policy) if identity else None
+            budgets.append(
+                {
+                    **row,
+                    "limits": limits.model_dump() if limits else None,
+                    "roles": identity.roles if identity else [],
+                }
+            )
         return {
             "policy": snapshot.policy.model_dump(),
             "feed": snapshot.feed.model_dump(),
             "metrics": ledger.stats(),
-            "budgets": ledger.budgets(),
+            "budgets": budgets,
             "audit": ledger.audit(),
             "business_backend": "simulated",
             "budget_window": "UTC day; per trusted subject",

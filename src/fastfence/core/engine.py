@@ -11,7 +11,7 @@ from fastfence.actions.tools import DemoTools, ResourceDenied
 from fastfence.adapters.models import ModelUnavailable, OllamaModels, SemanticScanner
 from fastfence.core.controls import privacy_filter, signature_findings
 from fastfence.core.policy import PolicyStore
-from fastfence.core.schema import Identity, Limits, ModelCall, ToolCall, Verdict
+from fastfence.core.schema import Identity, Limits, ModelCall, Policy, ToolCall, Verdict
 from fastfence.data.ledger import BudgetExceeded, Ledger
 
 
@@ -22,6 +22,15 @@ class Rejected(Exception):
 
 def encode(value) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
+def effective_limits(identity: Identity, policy: Policy) -> Limits | None:
+    budgets = [policy.budgets[r] for r in identity.roles if r in policy.budgets]
+    if not budgets:
+        return None
+    return Limits(
+        **{field: min(getattr(b, field) for b in budgets) for field in Limits.model_fields}
+    )
 
 
 class Engine:
@@ -73,12 +82,9 @@ class Engine:
                 raise Rejected("tool_not_implemented")
             if not set(identity.roles).intersection(rule.roles):
                 raise Rejected("role_not_allowed")
-            budgets = [policy.budgets[r] for r in identity.roles if r in policy.budgets]
-            if not budgets:
+            limits = effective_limits(identity, policy)
+            if limits is None:
                 raise Rejected("role_budget_missing")
-            limits = Limits(
-                **{field: min(getattr(b, field) for b in budgets) for field in Limits.model_fields}
-            )
             payload = call.arguments if isinstance(call, ToolCall) else {"prompt": call.prompt}
             text = encode(payload)
             if len(text.encode()) > policy.max_input_bytes:

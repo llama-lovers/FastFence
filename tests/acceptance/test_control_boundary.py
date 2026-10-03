@@ -36,7 +36,7 @@ class RecordingTools(DemoTools):
 def boundary(tmp_path):
     policy_file = tmp_path / "policy.yaml"
     feed_file = tmp_path / "signatures.json"
-    policy_file.write_text((ROOT / "config/policy.yaml").read_text())
+    policy_file.write_text((ROOT / "config/policy.offline.yaml").read_text())
     feed_file.write_text((ROOT / "config/signatures.json").read_text())
     tools = RecordingTools()
     store = PolicyStore(policy_file, feed_file)
