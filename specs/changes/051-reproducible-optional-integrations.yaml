@@ -1,0 +1,31 @@
+id: FF-051
+title: Reproducible isolated OCR and Laya installation for fresh checkouts
+status: verified
+problem: OCR setup used a manually assembled dependency list and required undocumented local environment state to enable the provider.
+scope:
+- Provide an executable OCR setup command using the committed dependency lock and optional OCR extra.
+- Keep OCR packages isolated from the gateway virtual environment and preload the fixed local models.
+- Produce a private shell environment file with absolute interpreter and model paths, including correct quoting.
+- Check required installation tools before Laya setup and create private local integration state.
+constraints:
+- Never overwrite or print existing .env secrets.
+- Do not download OCR models during document requests.
+- Preserve locked upstream Laya revision and hash-verified dependencies.
+change_paths:
+- scripts/setup-ocr.sh
+- integrations/laya/setup.sh
+- tests/integration/test_optional_setup.py
+acceptance:
+- OCR setup selects an isolated environment, uses uv.lock, preloads models and produces usable settings from a clean tree.
+- Repeating setup preserves unrelated .env contents and the gateway environment.
+- Paths containing whitespace or shell metacharacters remain literal settings.
+validation:
+- command: uv run pytest --no-cov tests/integration/test_optional_setup.py
+  expected: Setup subprocess regression checks pass with isolated installation tooling and no network/model dependency.
+evidence:
+- command: uv run pytest --no-cov tests/integration/test_optional_setup.py
+  result: Two subprocess cases passed for default and custom state directories, including repeated setup, literal whitespace/metacharacter paths and environment preservation.
+- command: sh -n scripts/setup-ocr.sh integrations/laya/setup.sh
+  result: Both POSIX shell scripts parse successfully.
+- command: Targeted pre-commit hooks
+  result: Ruff, typing, architecture and complexity gates pass. Settings documentation and secret-baseline line numbers regenerated for concurrent startup changes.

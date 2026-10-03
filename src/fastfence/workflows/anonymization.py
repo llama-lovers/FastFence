@@ -34,12 +34,28 @@ def model_content(value: Any) -> tuple[Any, list[tuple[Any, Any]], list[Any]]:
 
 
 def build_anonymization(settings: AppSettings) -> "AnonymizationWorkflow":
-    if settings.anonymization_keys_json is None:
+    if (
+        settings.anonymization_keys_json is not None
+        and settings.anonymization_keys_file is not None
+    ):
+        raise ValueError("Choose one private anonymization key source")
+    path = (
+        settings.anonymization_keys_file
+        or settings.state_path / "anonymization-keys.json"
+    )
+    if settings.anonymization_keys_json is None and not path.exists():
+        if settings.anonymization_keys_file is not None:
+            raise ValueError("Private anonymization key file is missing")
         return AnonymizationWorkflow()
     try:
-        entries = json.loads(
-            settings.anonymization_keys_json.get_secret_value()
-        )
+        if settings.anonymization_keys_json is not None:
+            raw = settings.anonymization_keys_json.get_secret_value()
+        else:
+            with path.open("rb") as stream:
+                raw = stream.read(65537)
+            if len(raw) > 65536:
+                raise ValueError("Private anonymization key file is too large")
+        entries = json.loads(raw)
         if not isinstance(entries, dict) or not entries:
             raise ValueError
         keys = {

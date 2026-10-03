@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "signatures": [
+    {
+      "id": "python_pickle_rce",
+      "pattern": "pickle.loads(",
+      "description": "Unsafe Python pickle deserialization instruction; bounded normalized text signature"
+    },
+    {
+      "id": "torch_unsafe_loader",
+      "pattern": "weights_only=False",
+      "description": "Unsafe model checkpoint loader option; bounded normalized text signature"
+    },
+    {
+      "id": "shell_remote_execution",
+      "pattern": "curl | sh",
+      "description": "Known remote shell execution pattern; bounded normalized text signature",
+      "match_mode": "token_sequence",
+      "max_gap": 128
+    },
+    {
+      "id": "instruction_override",
+      "pattern": "ignore all previous instructions",
+      "description": "Common prompt-injection phrase; bounded normalized text signature"
+    },
+    {
+      "id": "pickle_reduce_payload",
+      "pattern": "__reduce__",
+      "description": "Pickle reducer payload marker; bounded normalized text signature"
+    }
+  ]
+}

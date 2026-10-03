@@ -1,19 +1,52 @@
 # Manual acceptance test
 
-Run from the `HackYeah2026-challenge-second` repository. Your existing private
-credentials stay in `state/demo-tokens.json`. Never put them into a policy file.
+## Install from a fresh clone
 
-## Start and connect
+Prerequisites: Git, Python 3.12, [uv](https://docs.astral.sh/uv/), and
+[Ollama](https://ollama.com/) for the model features. Start the Ollama application
+(or run `ollama serve` in a separate terminal). The steps below create new local
+credentials and encryption keys; they do not depend on the maintainer's `.env`
+or private state.
 
 ```sh
+git clone https://github.com/llama-lovers/HackYeah2026-challenge-second.git
+cd HackYeah2026-challenge-second
 uv sync --locked
+uv run fastfence init --anonymization
+sh integrations/laya/setup.sh
+sh scripts/setup-ocr.sh
+ollama pull qwen3:4b
+ollama pull qwen3:0.6b
+uv run fastfence doctor --full
 uv run fastfence serve
 ```
 
+**Wait for `doctor --full` to pass before starting the scenarios below.** It
+checks the core configuration, private keyring, Laya environment, OCR interpreter
+and models, and both Qwen models. It prints the setup command for any missing
+prerequisite. Model downloads require an internet connection; OCR inference
+uses only the downloaded local files.
+
+`init --anonymization` creates `state/identities.json`, `state/demo-tokens.json`
+and `state/anonymization-keys.json` with private permissions. Repeating it
+preserves existing valid credentials and keys. Keep these files out of Git.
+The startup reads the keyring automatically, and detects the OCR environment
+created by `scripts/setup-ocr.sh`. No manually invented absolute paths or copied
+private `.env` are required for this setup.
+
+If you want to verify core controls first, run only `uv sync --locked`,
+`uv run fastfence init --anonymization`, `uv run fastfence doctor`, then
+`uv run fastfence serve`. Laya, model completion and OCR need the full setup above.
+
+## Connect
+
 Open <http://127.0.0.1:8000>. Click **Connect identities**, then copy
-`analyst-blue` and `security-admin` from your local `state/demo-tokens.json` into
+`analyst-blue` and `security-admin` from your own `state/demo-tokens.json` into
 the matching fields. Tokens stay in page memory. Reloading the page clears them.
-If this is a fresh checkout, run `uv run fastfence init` once first.
+
+If another gateway already uses port 8000, stop that instance or use
+`uv run fastfence serve --port 8002` and open <http://127.0.0.1:8002>.
+Use the selected port in MCP/client URLs too.
 
 Run automatic checks separately:
 
@@ -96,28 +129,28 @@ AEAD-encrypted originals and expire; randomized full tokens can differ between
 requests while their stable IDs remain equal. Changing rule text, losing the
 key, expiration or using another identity prevents recovery.
 
-A private 32-byte keyring must be configured as
-`FASTFENCE_ANONYMIZATION_KEYS_JSON` in `.env`, with active key ID
-`FASTFENCE_ANONYMIZATION_KEY_ID` (default `local-v1`). These are symmetric encryption
-keys, not a public/private key pair. The local development setup has its own
-private key; keys are never committed or returned by the dashboard.
+`init --anonymization` provisions the private 32-byte keyring automatically.
+For a managed installation, use `FASTFENCE_ANONYMIZATION_KEYS_FILE` or
+`FASTFENCE_ANONYMIZATION_KEYS_JSON`, with active key ID
+`FASTFENCE_ANONYMIZATION_KEY_ID` (default `local-v1`). Do not set both explicit
+key sources. Environment JSON overrides the automatically discovered default
+file. These are symmetric encryption keys; keep and back them up privately.
+Keys are never returned by the dashboard.
 
 ## Images and multipage PDFs
 
-The local development setup uses an isolated OCR interpreter and downloaded
-models configured through `FASTFENCE_OCR_PYTHON` and `FASTFENCE_OCR_MODELS` in `.env`.
-Fresh OCR setup:
+The full installation above already prepares OCR. To add it later:
 
 ```sh
-uv venv state/private/ocr-env --python 3.12
-uv pip install --python state/private/ocr-env/bin/python \
-  paddlepaddle==3.3.0 paddleocr==3.4.0 pypdfium2==5.13.0 pillow==12.3.0 pydantic==2.12.5
-PYTHONPATH=src state/private/ocr-env/bin/python \
-  -m fastfence.modules.ocr.persistence.bootstrap state/private/ocr-models
+sh scripts/setup-ocr.sh
+uv run fastfence doctor --full
 ```
 
-Set the two OCR settings to the absolute paths of that interpreter and model
-directory; restart the gateway after changing startup settings.
+Restart the gateway after installing OCR or changing startup settings. The
+installer uses the locked `ocr` dependency extra in a separate environment and
+preloads the model files. Advanced deployments can set `FASTFENCE_OCR_PYTHON`
+and `FASTFENCE_OCR_MODELS`; preserve the virtual environment interpreter path
+rather than resolving its symlink to the base Python.
 
 1. Choose `examples/documents/two-pages.pdf` in **Document → protected Markdown**.
 2. Choose **Inspect and export Markdown**, then **Process document**.
@@ -170,3 +203,22 @@ decision, findings and whether upstream executed. Audit contains metadata only;
 it must not contain prompts, OCR text, original names or recovery tokens.
 The local suite is reproducible without downloading OCR weights or calling Qwen;
 real-model and real-OCR checks are separate from offline CI.
+
+## Reproduce the clean-install acceptance check
+
+This creates a new clone of the committed source, strips inherited FastFence
+settings, creates a fresh virtual environment and new private state, and starts
+a gateway on a free local port. It does not modify the configuration or
+credentials of your working checkout.
+
+```sh
+# No model service required; this also runs in GitHub Actions.
+uv run python scripts/smoke_clean_install.py
+
+# Installs isolated Laya/OCR, pulls models, and tests the real feature paths.
+# Requires a running Ollama service.
+uv run python scripts/smoke_clean_install.py --full
+```
+
+Public package/model download caches may be reused. Existing FastFence keys,
+credentials, `.env`, feature installations and policy edits are never copied.

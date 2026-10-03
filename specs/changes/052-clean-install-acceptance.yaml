@@ -1,0 +1,35 @@
+id: FF-052
+title: Test the complete documented local installation from a fresh clone
+status: implemented
+problem: The manual assumed private development state and omitted initialization and feature prerequisites, so the advertised clean-start sequence failed.
+scope:
+  - Make README, getting-started and manual instructions ordered and self-contained.
+  - Clone the committed repository into an empty directory and install locked dependencies without inherited FastFence environment settings.
+  - Verify missing-state diagnostics, idempotent initialization, generated keys, HTTP authentication, protection and optional restoration.
+  - Offer a full acceptance mode that installs Laya and OCR, checks Qwen and executes the documented real-model and document paths.
+  - Require offline clean-clone acceptance in GitHub Actions before documentation deployment.
+constraints:
+  - Do not copy existing state, .env, .venv or credentials into the fresh clone.
+  - No model downloads or external model service required by the ordinary CI clean-start check.
+  - Preserve the user's existing checkout and private configuration.
+  - Full local acceptance may reuse public dependency and model download caches, but must create new credentials, keys and feature installations.
+change_paths:
+  - scripts/smoke_clean_install.py
+  - .github/workflows/ci.yml
+  - README.md
+  - docs/manual-testing.md
+  - docs/getting-started.md
+  - docs/testing.md
+  - evaluation/results/clean-install-*.json
+  - .secrets.baseline
+acceptance:
+  - The documented startup command sequence works from a fresh clone with no previous private state.
+  - A serve attempt before initialization gives an actionable error without traceback.
+  - Repeated init preserves credential and key file bytes exactly.
+  - Full feature acceptance generates and tests a real Laya rule and processes a two-page PDF through the installed local OCR.
+validation:
+  - command: uv run python scripts/smoke_clean_install.py
+    expected: Fresh-clone offline acceptance passes.
+  - command: uv run python scripts/smoke_clean_install.py --full
+    expected: Fresh-clone full feature acceptance passes with local Ollama available.
+evidence: []

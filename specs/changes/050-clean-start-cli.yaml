@@ -1,0 +1,36 @@
+id: FF-050
+title: Safe repeatable initialization and actionable startup diagnostics
+status: implemented
+problem: A fresh checkout crashes with an unhandled missing identity file and CLI defaults override dotenv state configuration.
+scope:
+- Initialize credentials idempotently without replacing existing valid credentials.
+- Refuse partial or corrupt credential state without overwriting files.
+- Resolve dotenv settings consistently and validate startup before binding a server.
+- Generate an optional private anonymization keyring without printing keys.
+- Provide a read-only doctor with optional full-feature readiness checks.
+constraints:
+- No automatic demo credential creation when serving.
+- Diagnostics must never print credential values, key material or configuration validation inputs.
+- Preserve module and transport boundaries; no dataclasses.
+change_paths:
+- src/fastfence/app/interfaces/cli/**
+- src/fastfence/shared/settings/app_settings.py
+- src/fastfence/workflows/anonymization.py
+- tests/unit/test_cli_startup.py
+- tests/unit/test_anonymization_key_file.py
+- docs/settings.md
+- .env.example
+acceptance:
+- A fresh serve exits with an actionable initialization command and no traceback.
+- Repeated init preserves credentials and optional keyring bytes exactly.
+- Partial and malformed state is never overwritten.
+- Dotenv state is honored unless explicitly overridden by --state.
+- Doctor reports missing core and optional prerequisites without modifying files or exposing secrets.
+validation:
+- command: uv run pytest -q --no-cov tests/unit/test_cli_startup.py tests/unit/test_anonymization_key_file.py tests/unit/test_cli_demo.py
+  expected: Clean-start and credential preservation checks pass.
+evidence:
+- command: uv run pytest -q --no-cov tests/unit/test_cli_startup.py tests/unit/test_anonymization_key_file.py tests/unit/test_cli_demo.py
+  result: 35 regression checks cover cold start, dotenv precedence, credential preservation, secret-safe errors and keyring sources.
+- command: uv run lint-imports
+  result: All 16 architecture contracts pass.

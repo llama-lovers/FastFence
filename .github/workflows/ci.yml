@@ -32,6 +32,8 @@ jobs:
         run: uv sync --locked
       - name: Run offline tests and coverage gate
         run: uv run --locked pytest -q --tb=short
+      - name: Exercise a fresh clone without private state
+        run: uv run --locked python scripts/smoke_clean_install.py
       - name: Run all configured quality gates
         run: uv run --locked pre-commit run --all-files --show-diff-on-failure
       - name: Reject files rewritten by quality hooks

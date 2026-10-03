@@ -46,7 +46,8 @@ The repository includes `uv.lock` and selects Python 3.12.
 
 ```sh
 uv sync --locked
-uv run fastfence init
+uv run fastfence init --anonymization
+uv run fastfence doctor
 uv run fastfence serve
 ```
 
@@ -54,6 +55,21 @@ Open **http://127.0.0.1:8000**. In **Connect identities**, paste the `analyst-bl
 `security-admin` values from `state/demo-tokens.json`. They are randomly generated locally,
 stored with private permissions, and ignored by Git. Dashboard tokens stay in page memory.
 There is no public default password. Management credentials cannot execute agent tools.
+
+To enable all local features before starting the gateway, start Ollama and run:
+
+```sh
+sh integrations/laya/setup.sh
+sh scripts/setup-ocr.sh
+ollama pull qwen3:4b
+ollama pull qwen3:0.6b
+uv run fastfence doctor --full
+```
+
+Restart the gateway after optional installation. Follow the complete
+[fresh-install manual](docs/manual-testing.md) for Laya, anonymization, MCP and
+multipage OCR. Initialization is repeatable and preserves valid existing keys
+and credentials; serving never silently creates identities.
 
 In another terminal:
 
@@ -92,13 +108,14 @@ flowchart LR
     L --> V[Management dashboard + JSONL export]
 ```
 
-The package follows `app → workflows → modules → shared`. One `modules/control` feature
-contains `interfaces → application → persistence → contracts → domain`. Its application
+The package follows `app → workflows → modules → shared`. The independent
+`control`, `anonymization` and `ocr` features each follow `interfaces → application → persistence → contracts → domain`. Its application
 services depend on narrow ports; the facade composes concrete storage and model adapters.
 Domain rules and Pydantic models have no FastAPI, FastMCP, HTTPX, or SQLite dependencies.
 HTTP and CLI live in `app/interfaces`; MCP lives in the control feature's interface layer.
-`app/factory.py` composes the feature and transports. The workflows package is reserved for
-future cross-feature orchestration; no artificial workflow is needed for the current MVP.
+`app/factory.py` composes features and transports. Workflows connect stateless
+anonymization and document extraction to the control pipeline through public
+facades and shared contracts.
 
 All records, settings, snapshots and model assessments use Pydantic; there are no dataclasses.
 `shared/settings/app_settings.py` defines environment-backed application settings.

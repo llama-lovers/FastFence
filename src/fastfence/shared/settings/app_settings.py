@@ -71,6 +71,10 @@ class AppSettings(BaseSettings):
         description="Private JSON keyring: key ID to base64-encoded 32-byte key; required for stateless anonymization",
         repr=False,
     )
+    anonymization_keys_file: Path | None = Field(
+        default=None,
+        description="Private JSON keyring file; defaults to state/anonymization-keys.json when present",
+    )
     anonymization_key_id: str = Field(
         default="local-v1",
         pattern=r"^[a-zA-Z0-9_-]{1,16}$",
@@ -119,6 +123,14 @@ class AppSettings(BaseSettings):
             self.authoring_root = self.authoring_root.resolve()
         if self.identity_config_file is not None:
             self.identity_config_file = self.identity_config_file.resolve()
+        ocr_root = self.state_path / "private"
+        if (
+            self.ocr_python is None
+            and (ocr_root / "ocr-env/bin/python").is_file()
+        ):
+            self.ocr_python = ocr_root / "ocr-env/bin/python"
+        if self.ocr_models is None and (ocr_root / "ocr-models").is_dir():
+            self.ocr_models = ocr_root / "ocr-models"
         return self
 
     @property

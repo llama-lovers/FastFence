@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
-import secrets
 from pathlib import Path
 from typing import Any
 
@@ -12,48 +10,17 @@ import httpx
 import uvicorn
 from pydantic import BaseModel
 
-
-def initialize(state: Path) -> None:
-    if (state / "identities.json").exists():
-        raise SystemExit(
-            "State already initialized. Keep your existing credentials."
-        )
-    state.mkdir(parents=True, exist_ok=True)
-    state.chmod(0o700)
-    records, tokens = [], {}
-    for subject, tenant, roles, admin in [
-        ("analyst-blue", "blue", ["analyst"], False),
-        ("operator-blue", "blue", ["operator"], False),
-        ("analyst-green", "green", ["analyst"], False),
-        ("security-admin", "management", [], True),
-    ]:
-        token = secrets.token_urlsafe(32)
-        tokens[subject] = token
-        records.append(
-            {
-                "token_sha256": hashlib.sha256(token.encode()).hexdigest(),
-                "identity": {
-                    "subject": subject,
-                    "tenant": tenant,
-                    "roles": roles,
-                    "admin": admin,
-                },
-            }
-        )
-    for name, data in [
-        ("identities.json", records),
-        ("demo-tokens.json", tokens),
-    ]:
-        path = state / name
-        descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-        with os.fdopen(descriptor, "w") as file:
-            json.dump(data, file, indent=2)
-    print(
-        f"Initialized {state}. Credentials: {state / 'demo-tokens.json'} (private, gitignored)."
-    )
-    print(
-        "Dashboard: copy analyst-blue and security-admin tokens into Connect."
-    )
+from fastfence.app.interfaces.cli.bootstrap_config import initialize_config
+from fastfence.app.interfaces.cli.initialize import (
+    initialize,
+    initialize_anonymization,
+)
+from fastfence.app.interfaces.cli.startup import (
+    doctor,
+    preflight,
+    startup_error,
+)
+from fastfence.shared.settings.app_settings import AppSettings
 
 
 class DemoCase(BaseModel):
@@ -183,27 +150,55 @@ def demo(state: Path, url: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="FastFence AI Control Layer")
-    parser.add_argument("command", choices=["init", "serve", "demo"])
+    parser.add_argument("command", choices=["init", "serve", "demo", "doctor"])
     parser.add_argument(
-        "--state", default=os.environ.get("FASTFENCE_STATE", "state")
+        "--state", help="Private state directory (overrides .env)"
+    )
+    parser.add_argument(
+        "--anonymization",
+        action="store_true",
+        help="Provision a private anonymization keyring during init",
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Doctor: require Laya, OCR, Qwen and anonymization readiness",
     )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--url", default="http://127.0.0.1:8000")
     args = parser.parse_args()
-    state = Path(args.state).resolve()
-    if args.command == "init":
-        initialize(state)
-    elif args.command == "demo":
-        demo(state, args.url)
-    else:
-        os.environ["FASTFENCE_STATE"] = str(state)
-        uvicorn.run(
-            "fastfence.app.factory:create_app",
-            factory=True,
-            host=args.host,
-            port=args.port,
-        )
+    previous_state = os.environ.get("FASTFENCE_STATE")
+    if args.state is not None:
+        os.environ["FASTFENCE_STATE"] = str(Path(args.state).resolve())
+    try:
+        settings = AppSettings.environment()
+        if args.command == "init":
+            initialize_config(
+                settings.root, max_source_bytes=settings.max_config_source_bytes
+            )
+            initialize(settings.state_path)
+            if args.anonymization:
+                initialize_anonymization(settings)
+        elif args.command == "demo":
+            demo(settings.state_path, args.url)
+        elif args.command == "doctor":
+            doctor(settings, full=args.full)
+        else:
+            preflight(settings)
+            uvicorn.run(
+                "fastfence.app.factory:create_app",
+                factory=True,
+                host=args.host,
+                port=args.port,
+            )
+    except (OSError, ValueError, TypeError, KeyError):
+        raise SystemExit(startup_error()) from None
+    finally:
+        if previous_state is None:
+            os.environ.pop("FASTFENCE_STATE", None)
+        else:
+            os.environ["FASTFENCE_STATE"] = previous_state
 
 
 if __name__ == "__main__":

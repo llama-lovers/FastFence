@@ -8,13 +8,14 @@ Use macOS or Linux, Python 3.12, and [uv](https://docs.astral.sh/uv/). Run these
 git clone https://github.com/llama-lovers/HackYeah2026-challenge-second.git
 cd HackYeah2026-challenge-second
 uv sync --locked
-uv run fastfence init
+uv run fastfence init --anonymization
+uv run fastfence doctor
 uv run fastfence serve
 ```
 
 Open **http://127.0.0.1:8000**. In **Connect identities**, enter the locally generated `analyst-blue` and `security-admin` tokens from `state/demo-tokens.json`. The file is private and Git-ignored. Tokens stay in dashboard page memory; there is no public default credential.
 
-Initialization creates startup identity records and demo tokens once. If the state already exists, keep those credentials and skip `init`. Management tokens can inspect and edit policy but cannot invoke agent tools.
+Initialization creates startup identity records, demo tokens and an optional private anonymization keyring. Repeating `init --anonymization` validates and preserves existing valid credentials and keys. Management tokens can inspect and edit policy but cannot invoke agent tools.
 
 In a second terminal, run:
 
@@ -23,6 +24,24 @@ uv run fastfence demo
 ```
 
 The demo exercises allowed search, blocked injection and sensitive input, role denial, cross-tenant denial, output redaction, and authorized simulated payment preparation. Requests consume the real instance budget, so repeated demonstrations can exhaust the configured allowance.
+
+## Enable all local features
+
+Use the [fresh-install manual](manual-testing.md) for the complete ordered setup.
+After starting Ollama, install feature dependencies and model files:
+
+```sh
+sh integrations/laya/setup.sh
+sh scripts/setup-ocr.sh
+ollama pull qwen3:4b
+ollama pull qwen3:0.6b
+uv run fastfence doctor --full
+```
+
+Restart the gateway after setup. The standard OCR interpreter/models and private
+keyring are discovered automatically; the install does not require someone
+else's `.env` or private state. If `doctor --full` fails, follow its specific
+prerequisite command before proceeding.
 
 ## Try a request
 

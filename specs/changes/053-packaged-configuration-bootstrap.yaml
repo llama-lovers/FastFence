@@ -1,0 +1,33 @@
+id: FF-053
+title: Initialize standalone installations from packaged configuration
+status: implemented
+problem: Installed wheels omit the repository configuration, so initializing identities alone cannot produce a running gateway outside a checkout.
+scope:
+  - Distribute reviewed offline policy and signature feed as package resources.
+  - Initialize missing configuration without overwriting existing operator files.
+  - Validate existing or partially initialized configuration before creating files.
+constraints:
+  - No credentials are packaged and initialization never prints configuration contents.
+  - Configuration defaults remain synchronized with the reviewed repository offline profile.
+  - Publishing defaults uses exclusive atomic file creation.
+change_paths:
+  - src/fastfence/app/interfaces/cli/bootstrap_config.py
+  - src/fastfence/shared/defaults/**
+  - tests/unit/test_packaged_bootstrap.py
+acceptance:
+  - Empty installation roots receive a valid deterministic policy and feed.
+  - Existing valid files remain byte-for-byte unchanged; missing counterparts are initialized.
+  - Invalid existing files are rejected before any missing counterpart is created.
+  - Built wheels contain the default policy and signature resources.
+validation:
+  - command: uv run pytest -q --no-cov tests/unit/test_packaged_bootstrap.py
+    expected: Bootstrap, preservation, rejection and default drift regressions pass.
+  - command: uv build --wheel
+    expected: Wheel includes fastfence/shared/defaults/policy.yaml and signatures.json.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_packaged_bootstrap.py
+    result: All 12 bootstrap, preservation, invalid-source, publication and resource-drift regressions pass.
+  - command: uv build --wheel
+    result: Built wheel contains both configuration resources and dashboard assets; isolated temporary-directory subprocess loads defaults directly from the wheel and initializes both files successfully.
+  - command: uv run lint-imports
+    result: All 16 architecture contracts pass.
