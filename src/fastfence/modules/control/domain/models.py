@@ -254,6 +254,7 @@ class InvocationState(StrictModel):
     tokens: int = 0
     cost: int = 0
     cancelled: bool = False
+    preparing_document: bool = False
     findings: set[str] = Field(default_factory=set)
 
 

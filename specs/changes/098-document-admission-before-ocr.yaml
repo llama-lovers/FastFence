@@ -1,0 +1,38 @@
+id: FF-098
+title: Admit and account document extraction before starting OCR
+status: implemented
+problem: Document requests performed OCR before model authorization and budget admission, allowing denied or exhausted identities to consume extraction compute.
+scope:
+  - Add a public control facade operation that accepts deferred bounded document extraction.
+  - Pin the policy snapshot and authorize the requested model and restoration before OCR.
+  - Atomically reserve maximum accepted input tokens, downstream allocations and extraction timeout in one invocation.
+  - Reuse the reservation through the existing input, semantic, model and output controls without a second call debit.
+  - Include real extraction elapsed time in settlement and release unused token, cost and concurrency capacity on failure or cancellation.
+constraints:
+  - The workflow composes only public feature facades and contracts.
+  - No database, raw document persistence or new external service is introduced.
+  - A started extraction still consumes one request and its measured compute time when it fails.
+  - Admission uses conservative maximum permitted input size; actual successful usage settles normally.
+change_paths:
+  - src/fastfence/modules/control/application/facade.py
+  - src/fastfence/modules/control/application/use_cases/content.py
+  - src/fastfence/modules/control/application/services/engine.py
+  - src/fastfence/modules/control/application/services/inspection.py
+  - src/fastfence/modules/control/domain/models.py
+  - src/fastfence/workflows/document_markdown.py
+  - tests/integration/test_document_admission.py
+acceptance:
+  - Forbidden targets, unauthorized roles and exhausted call, token, compute or cost budgets cause no OCR invocation.
+  - An in-flight extraction holds the identity's atomic concurrency slot.
+  - Cancellation and timeout stop awaited extraction, settle once and release unused resource reservations.
+  - OCR time is charged using actual invocation elapsed time, without trusting the provider's elapsed metadata.
+  - A policy reload during extraction cannot replace the request's admitted snapshot.
+  - Existing document privacy, anonymization, semantic and output protections remain in the same pipeline.
+validation:
+  - command: uv run pytest tests/integration/test_document_admission.py tests/integration/test_document_markdown.py --no-cov -q
+    expected: Pre-admission resource tests and existing end-to-end document controls pass.
+  - command: uv run python scripts/check_architecture.py
+    expected: Public module boundary and Pydantic architecture checks pass.
+evidence:
+  - check: Real control engine with explicit fixture OCR
+    result: All 26 document tests passed, including zero OCR calls on denial, atomic concurrency, cancellation refunds, timeout cleanup, one-call accounting, measured extraction time and snapshot pinning. Existing privacy and anonymization tests remain green.

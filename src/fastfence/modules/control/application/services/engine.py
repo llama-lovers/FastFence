@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from pydantic import ValidationError
@@ -60,6 +60,8 @@ class Engine:
         *,
         inspect_only: bool = False,
         input_sink: Callable[[dict[str, Any]], None] | None = None,
+        prompt_source: Callable[[], Awaitable[str]] | None = None,
+        preparation_timeout_ms: int = 0,
     ) -> Verdict:
         snapshot = self.policies.snapshot()
         verdict = Verdict(
@@ -83,7 +85,11 @@ class Engine:
         )
         try:
             await self._run(
-                state, inspect_only=inspect_only, input_sink=input_sink
+                state,
+                inspect_only=inspect_only,
+                input_sink=input_sink,
+                prompt_source=prompt_source,
+                preparation_timeout_ms=preparation_timeout_ms,
             )
         except (Exception, asyncio.CancelledError) as error:
             self._mark_failure(state, error)
@@ -99,6 +105,8 @@ class Engine:
         *,
         inspect_only: bool,
         input_sink: Callable[[dict[str, Any]], None] | None,
+        prompt_source: Callable[[], Awaitable[str]] | None,
+        preparation_timeout_ms: int,
     ) -> None:
         inspector = InputInspector(self.tools, self.secrets, self.anonymization)
         executor = Executor(
@@ -109,16 +117,33 @@ class Engine:
             self.secrets,
             self.anonymization,
         )
-        prepared = inspector.prepare(state)
+        if prompt_source is not None:
+            if not 1 <= preparation_timeout_ms <= 180_000:
+                raise RejectedError("invalid_document_timeout")
+            prepared = inspector.admit_document(state)
+        else:
+            prepared = inspector.prepare(state)
         self.ledger.reserve(
             state.verdict.request_id,
             state.identity.subject,
             prepared.limits,
             prepared.reserved_tokens,
             prepared.rule.cost_microusd,
-            prepared.allocated_ms,
+            prepared.allocated_ms + preparation_timeout_ms,
         )
         state.reserved, state.reserved_tokens = True, prepared.reserved_tokens
+        if prompt_source is not None:
+            state.preparing_document = True
+            markdown = await asyncio.wait_for(
+                prompt_source(), timeout=preparation_timeout_ms / 1000
+            )
+            state.call = ModelCall.model_validate(
+                state.call.model_dump() | {"prompt": markdown}
+            )
+            state.preparing_document = False
+            prepared = inspector.prepare(state)
+            if prepared.reserved_tokens > state.reserved_tokens:
+                raise RejectedError("document_reservation_exceeded")
         state.tokens = prepared.input_units
         if state.snapshot.policy.semantic.provider != "disabled":
             await executor.scan(
@@ -146,6 +171,21 @@ class Engine:
 
     @staticmethod
     def _mark_failure(state: InvocationState, error: BaseException) -> None:
+        if state.preparing_document:
+            state.verdict.decision = "error"
+            state.cancelled = isinstance(error, asyncio.CancelledError)
+            state.verdict.reason = (
+                "request_cancelled"
+                if state.cancelled
+                else (
+                    "document_preparation_timeout"
+                    if isinstance(error, TimeoutError)
+                    else "document_preparation_failed"
+                )
+            )
+            # Extraction consumed compute time, but no text/model tokens or cost.
+            state.tokens = 0
+            return
         if isinstance(error, RejectedError):
             state.verdict.reason = error.reason
             state.findings.update(error.findings)

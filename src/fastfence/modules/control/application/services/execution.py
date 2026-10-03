@@ -143,10 +143,23 @@ class Executor:
                 "output",
             )
         if state.call.restore_originals:
+            masked = output
             output = aliases.restore(output)
             check_size(output, state.snapshot.policy.max_output_bytes, "output")
             inspect_restrictions(
                 output, state.snapshot, "output", aliases.target
             )
             inspect_privacy(output, state.snapshot, "output", self.secrets)
+            if (
+                output != masked
+                and config.provider != "disabled"
+                and config.scan_output
+            ):
+                await self.scan(
+                    state,
+                    encode(output),
+                    state.snapshot.policy.max_output_bytes
+                    + config.token_allowance,
+                    "output",
+                )
         return output

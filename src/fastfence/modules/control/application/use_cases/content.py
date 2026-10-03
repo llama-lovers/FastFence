@@ -1,5 +1,7 @@
 """Inspect or complete a document using one policy snapshot and reservation."""
 
+from collections.abc import Awaitable, Callable
+
 from fastfence.modules.control.application.services.engine import Engine
 from fastfence.modules.control.domain.models import Identity, ModelCall, Verdict
 
@@ -52,6 +54,37 @@ class ContentUseCases:
                 restore_originals=restore_originals,
             ),
             input_sink=lambda payload: captured.append(payload["prompt"]),
+        )
+        safe = (
+            captured[0]
+            if captured and verdict.decision in {"allowed", "redacted"}
+            else None
+        )
+        return verdict, safe
+
+    async def process(
+        self,
+        identity: Identity,
+        source: Callable[[], Awaitable[str]],
+        timeout_ms: int,
+        model: str | None,
+        complete: bool,
+        max_output_tokens: int,
+        restore_originals: bool,
+    ) -> tuple[Verdict, str | None]:
+        captured: list[str] = []
+        verdict = await self.engine.invoke(
+            identity,
+            ModelCall(
+                model=self.model(identity, model),
+                prompt="",
+                max_output_tokens=max_output_tokens if complete else 1,
+                restore_originals=restore_originals,
+            ),
+            inspect_only=not complete,
+            input_sink=lambda payload: captured.append(payload["prompt"]),
+            prompt_source=source,
+            preparation_timeout_ms=timeout_ms,
         )
         safe = (
             captured[0]

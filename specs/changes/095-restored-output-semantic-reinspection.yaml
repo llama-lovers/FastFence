@@ -1,0 +1,29 @@
+id: FF-095
+title: Apply semantic output controls to restored plaintext before delivery
+status: implemented
+problem: Reversible anonymization could hide forbidden content from semantic output scanning and then restore that content in the delivered response without semantic reinspection.
+scope:
+  - Reinspect changed restored output using the same scoped semantic output policy before returning it.
+  - Reserve the additional maximum output assessment tokens and timeout allowance before execution.
+  - Preserve fail-closed timeout, cancellation, usage validation and audit privacy behavior.
+constraints:
+  - Default anonymized output and unchanged restoration do not trigger another assessment.
+  - Existing local text and privacy restrictions still run before semantic restoration checks.
+  - The change does not promise perfect model classification or reveal original input to the business upstream.
+change_paths:
+  - src/fastfence/modules/control/application/services/execution.py
+  - src/fastfence/modules/control/application/services/inspection.py
+  - tests/unit/test_semantic_restoration.py
+acceptance:
+  - A model or tool response forbidden by a named semantic output rule cannot escape by masking then restoring its original text.
+  - Insufficient token or compute budget prevents all provider execution before the extra assessment is needed.
+  - Failed, over-budget, cancelled or timed-out restoration assessments return no original text and settle the reservation.
+  - Successful restoration accounts for the extra assessment while audit records contain no payload.
+validation:
+  - command: uv run pytest tests/unit/test_semantic_restoration.py tests/unit/test_anonymization_reinspection.py tests/unit/test_named_semantic_rules.py --no-cov -q
+    expected: Real Engine and reversible crypto regressions and existing semantic scope checks pass.
+evidence:
+  - check: Independent deterministic reproduction
+    result: Before the fix, an output-only named rule rejected ProjectHazel without anonymization but a reversible alias plus restore_originals returned it with semantic output marked passed; the output assessor never saw the original.
+  - check: Real Engine and real reversible token regression
+    result: Model and tool responses now undergo semantic reinspection after restoration. All 24 focused tests passed, including budget reservation, successful charging, timeout, cancellation, scanner errors, excessive usage, unchanged output and audit privacy.

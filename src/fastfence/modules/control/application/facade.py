@@ -1,5 +1,6 @@
 import json
 import uuid
+from collections.abc import Awaitable, Callable
 from typing import Any, Literal
 
 from fastfence.modules.control.application.services.engine import Engine
@@ -88,6 +89,28 @@ class ControlRuntime:
     ) -> tuple[Verdict, str | None]:
         return await ContentUseCases(self.engine).complete(
             identity, markdown, model, max_output_tokens, restore_originals
+        )
+
+    async def process_document(
+        self,
+        identity: Identity,
+        source: Callable[[], Awaitable[str]],
+        *,
+        timeout_ms: int,
+        model: str | None = None,
+        complete: bool = False,
+        max_output_tokens: int = 256,
+        restore_originals: bool = False,
+    ) -> tuple[Verdict, str | None]:
+        """Admit document work before extraction, using one bounded reservation."""
+        return await ContentUseCases(self.engine).process(
+            identity,
+            source,
+            timeout_ms,
+            model,
+            complete,
+            max_output_tokens,
+            restore_originals,
         )
 
     async def preview_semantic_rule(

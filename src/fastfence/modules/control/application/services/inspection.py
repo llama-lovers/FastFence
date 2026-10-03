@@ -203,6 +203,23 @@ class InputInspector:
             payload = self.tools.validate(call.tool, payload, state.identity)
         return self._allocation(state, rule, limits, payload)
 
+    def admit_document(self, state: InvocationState) -> PreparedInvocation:
+        """Reserve the maximum permitted extracted input before creating it."""
+        if not isinstance(state.call, ModelCall):
+            raise RejectedError("invalid_document_target")
+        rule = self._authorize(state)
+        AliasSession(state, self.anonymization).validate_restore()
+        limits = effective_limits(state.identity, state.snapshot.policy)
+        if limits is None:
+            raise RejectedError("role_budget_missing")
+        return self._allocation(
+            state,
+            rule,
+            limits,
+            {},
+            input_units=state.snapshot.policy.max_input_bytes,
+        )
+
     @staticmethod
     def _model_payload(call: ModelCall) -> dict[str, Any]:
         payload: dict[str, Any] = (
@@ -222,9 +239,12 @@ class InputInspector:
         rule: ToolPolicy | ModelPolicy,
         limits: Limits,
         payload: dict[str, Any],
+        *,
+        input_units: int | None = None,
     ) -> PreparedInvocation:
         policy, call = state.snapshot.policy, state.call
-        input_units = len(encode(payload).encode())
+        if input_units is None:
+            input_units = len(encode(payload).encode())
         maximum = (
             min(call.max_output_tokens, rule.max_output_tokens)
             if isinstance(call, ModelCall) and isinstance(rule, ModelPolicy)
@@ -238,9 +258,13 @@ class InputInspector:
         enabled = policy.semantic.provider != "disabled"
         allowance = policy.semantic.token_allowance
         semantic_reserve = input_units + allowance if enabled else 0
-        if enabled and policy.semantic.scan_output:
-            semantic_reserve += policy.max_output_bytes + allowance
-        scans = int(enabled) * (2 if policy.semantic.scan_output else 1)
+        output_scans = (
+            (1 + int(call.restore_originals))
+            if (enabled and policy.semantic.scan_output)
+            else 0
+        )
+        semantic_reserve += output_scans * (policy.max_output_bytes + allowance)
+        scans = int(enabled) + output_scans
         return PreparedInvocation(
             rule=rule,
             limits=limits,
