@@ -1,0 +1,65 @@
+id: FF-029
+title: Distinguish sensitive-action uncertainty from benign explanations
+status: verified
+problem: Severity-v1 labels twelve of twenty known suspicious proposals benign and over-blocks two benign quoted-threat explanations.
+scope:
+  - Clarify the semantic triage rubric with explicit sensitive-action uncertainty and safe explanatory contrasts.
+  - Keep categorical output, ordinal codes, threshold behavior and fail-closed validation unchanged.
+  - Evaluate a development corpus containing explicitly relabeled known evidence plus new contrast cases.
+  - Freeze the candidate before opening an independently authored new blind synthetic holdout.
+constraints:
+  - Old holdout reports remain unchanged and become known development evidence for this iteration.
+  - Ordinary requests are not suspicious merely because authorization evidence is absent.
+  - Executable bypass or exfiltration remains malicious despite educational wording or JSON quotation.
+  - No deterministic classifier bypass, fabricated probabilities, hidden provider errors or claims of external benchmark independence.
+  - Development selection considers benign overblocking, explicit malicious misses and uncertainty recall together.
+  - The new blind holdout cannot be inspected before the selected candidate prompt digest is frozen; no tuning after its results without a new dataset.
+  - Sequential actual-model inference is coordinated with other agents.
+change_paths:
+  - src/fastfence/modules/control/persistence/semantic_severity.py
+  - evaluation/run_severity.py
+  - evaluation/severity_v2_development.jsonl
+  - evaluation/severity_v2_candidate.json
+  - evaluation/results/semantic-severity-v2-development.json
+  - evaluation/results/semantic-severity-v2-development-initial.json
+  - evaluation/results/semantic-severity-v2-development-refinement-rejected.json
+  - evaluation/results/semantic-severity-v2-blind-holdout.json
+  - evaluation/results/semantic-strictness-v2-live.json
+  - evaluation/results/hybrid-v2-rehearsal.json
+  - tests/unit/test_semantic_v2_protocol.py
+  - docs/testing.md
+  - docs/policies.md
+  - docs/challenge-readiness.md
+  - README.md
+  - .secrets.baseline
+acceptance:
+  - The rubric explicitly distinguishes a real sensitive-action proposal with unresolved safeguards from a pure review, safety question or threat explanation.
+  - Development and new blind results report all confusion, threshold FP/FN and fail-closed provider errors with source and corpus digests.
+  - Candidate freeze records selection criteria and prompt digest before the blind corpus is opened.
+  - Prior severity-v1 artifacts are preserved without relabeling them as fresh blind evidence.
+validation:
+  - command: uv run pytest -q --no-cov tests/unit/test_semantic_v2_protocol.py tests/unit/test_semantic_severity.py tests/integration/test_semantic_severity.py
+    expected: Wire, category, failure and threshold behavior remain valid.
+  - command: uv run python -m evaluation.run_severity --split development --corpus evaluation/severity_v2_development.jsonl --corpus-role reused_and_new_development --output evaluation/results/semantic-severity-v2-development.json
+    expected: Honest development confusion and errors are retained before candidate freeze.
+  - command: uv run pre-commit run --all-files
+    expected: Quality, typing, architecture and specification gates pass.
+evidence:
+  - command: uv run pytest -q --no-cov tests/unit/test_semantic_v2_protocol.py tests/unit/test_semantic_severity.py tests/integration/test_semantic_severity.py
+    result: Twenty-four focused tests pass, including categorical wire/threshold/fail-closed behavior and rejection of mismatched candidate or changed corpus before inference; three owned Python files pass Ruff check and format check.
+  - artifact: evaluation/results/semantic-severity-v2-development-initial.json
+    result: Initial v2 actual Qwen3:4b development run 85/96 exact, zero provider errors; benign 29/32, suspicious 24/32, malicious 32/32. All 72 old cases are known development evidence plus 24 new contrast cases.
+  - artifact: evaluation/results/semantic-severity-v2-development-refinement-rejected.json
+    result: One permitted development-only refinement improved exact accuracy to 87/96 and benign 31/32 but reduced malicious recall to 31/32; rejected under the preselected safety criterion. Initial prompt restored, all outputs retained.
+  - artifact: evaluation/severity_v2_candidate.json
+    result: Initial v2 prompt frozen before the independent new corpus was opened; SHA256 90557a5db9367356c9fd9cef55608efc79ff9b54d23c0dcc37fd8eb526b8e8c5 records model, selection criteria and development report digests.
+  - artifact: evaluation/results/semantic-severity-v2-blind-holdout.json
+    result: One independently authored frozen synthetic 60-case PL/EN run, actual Qwen3:4b, 54/60 exact 90%, zero provider errors. Benign 18/20, suspicious 16/20, malicious 20/20; all six errors retained, no post-holdout tuning.
+  - result: Blind threshold 0.5 TP38/TN18/FP2/FN2, precision and recall 0.95; threshold 0.8 TP20/TN38/FP2/FN0. Two suspicious cases classified malicious remain errors rather than being counted as correct categories.
+  - result: Fresh corpus SHA256 0bf738d27a112e830d447067d5bfaf1d18a6cb21f002e007827479f9f7e1b7a5 verified before parsing/inference; old severity-v1 reports and rejected refinement preserved unchanged. Different datasets are not a controlled v1-versus-v2 accuracy comparison.
+  - artifact: evaluation/results/semantic-strictness-v2-live.json
+    result: Six live Qwen3:4b requests verify suspicious severity 0.6 blocks at threshold 0.5 and allows at 0.8 after hot reload; benign and malicious controls behave consistently and audit is sanitized.
+  - artifact: evaluation/results/hybrid-v2-rehearsal.json
+    result: Five actual Qwen3:4b REST cases pass including allowed completion, semantic denial, output redaction and role denial; business tools remain simulated.
+  - command: uv run pytest -q
+    result: Full suite passes 441 tests with 95.59% first-party source coverage; strict MkDocs build also passes.

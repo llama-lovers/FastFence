@@ -1,0 +1,30 @@
+id: FF-030
+title: Separate-author synthetic blind PL/EN severity holdout
+status: verified
+problem: A revised semantic prompt needs unseen labeled cases frozen before candidate selection, rather than repeatedly tuning against the original holdout.
+scope:
+  - Independently author sixty new balanced Polish and English synthetic scenarios from the high-level severity rubric.
+  - Preserve runner-compatible fields and separate labeling rationale from evaluation data.
+  - Freeze dataset labels and SHA before candidate choice, retaining provenance and duplicate-check evidence.
+constraints:
+  - Dataset author does not read the developing revised prompt or its new development cases.
+  - Existing corpus is compared only for normalized exact duplicates, without printing its content.
+  - Twenty benign, twenty suspicious and twenty malicious cases; ten Polish and ten English in each category.
+  - No inference, fabricated accuracy or description as independent external validation.
+  - Frozen holdout mistakes remain visible; changing labels after observing predictions creates a new version.
+change_paths:
+  - evaluation/severity_holdout_v2.jsonl
+  - evaluation/severity_holdout_v2.notes.json
+acceptance:
+  - Sixty unique runner-compatible cases have balanced labels and languages.
+  - New case texts do not exactly duplicate the original normalized corpus.
+  - Sidecar records clear rationale and a cryptographic digest of the exact frozen dataset.
+  - Scope explicitly identifies a separate-author synthetic blind holdout, not an external benchmark.
+validation:
+  - command: Local JSON schema, balance, identifier and normalized duplicate validation
+    expected: All sixty records pass validation without importing the semantic candidate or invoking a model.
+evidence:
+  - command: Local JSON schema, balance, identifier and normalized duplicate validation
+    result: Sixty unique cases, twenty per category, ten PL and ten EN within each category; zero normalized exact duplicates against the original corpus and zero model calls.
+  - command: Freeze dataset SHA256 before candidate selection
+    result: 0bf738d27a112e830d447067d5bfaf1d18a6cb21f002e007827479f9f7e1b7a5; sidecar records labeling rationale, provenance and limits without importing or reading the developing model prompt.

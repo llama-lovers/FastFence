@@ -38,6 +38,9 @@ function renderVerdict(verdict) {
     el('pre', JSON.stringify({output: verdict.output, findings: verdict.findings,
       semantic_score: verdict.semantic_score, tokens: verdict.tokens}, null, 2))
   );
+  const inspect = el('button', 'View this decision in audit', 'btn');
+  inspect.onclick = () => focusAudit(verdict.request_id);
+  $('result').append(inspect);
 }
 
 $('invokeBtn').onclick = async () => {

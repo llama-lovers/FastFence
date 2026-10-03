@@ -1,0 +1,37 @@
+id: FF-033
+title: Correlate decisions and inspect matched controls in the dashboard
+status: verified
+problem: The decision table omits request IDs and matched rule IDs, so users cannot follow the documented request-to-audit investigation without exporting JSONL.
+scope:
+  - Add local search and decision filtering over the loaded recent audit window.
+  - Expand sanitized metadata including request ID, matched controls and upstream execution.
+  - Link playground verdicts directly to their corresponding audit record.
+constraints:
+  - Render all metadata as text and never add prompt or response bodies to audit.
+  - Clearly identify the loaded recent-event window rather than implying complete history.
+  - Keep filters and expanded records in bounded page memory only.
+  - Preserve expanded rows across refresh when their records remain loaded.
+change_paths:
+  - src/fastfence/app/interfaces/http/routes.py
+  - src/fastfence/app/interfaces/http/web/**
+  - tests/integration/test_policy_studio_ui.py
+  - evaluation/smoke_playground_models.py
+  - evaluation/smoke_audit_ui.py
+  - evaluation/results/audit-ui.json
+  - docs/testing.md
+  - docs/integrations.md
+acceptance:
+  - A verdict request ID locates its record and shows the matched rule without exporting logs.
+  - Decision and free-text filters do not send search content to the server.
+  - Untrusted metadata cannot create HTML elements or execute script.
+  - Empty and filtered-out states are distinguishable from an unconnected dashboard.
+validation:
+  - command: uv run --with playwright python evaluation/smoke_audit_ui.py --output evaluation/results/audit-ui.json
+    expected: Correlation, filtering, safe metadata rendering and refresh persistence pass in explicit browser fixtures.
+  - command: uv run pytest tests/integration/test_policy_studio_ui.py -q --no-cov
+    expected: Asset allowlist serves the new script and still rejects unknown paths.
+evidence:
+  - command: uv run --with playwright python evaluation/smoke_audit_ui.py --output evaluation/results/audit-ui.json
+    result: Nine browser fixture checks passed, including request/rule correlation, verdict navigation, local filtering, refresh persistence and inert metadata rendering; no model calls.
+  - command: uv run pytest tests/integration/test_policy_studio_ui.py -q --no-cov
+    result: Seven asset and boundary checks passed.

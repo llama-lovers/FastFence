@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-10-03T14:47:08.642406+00:00",
+  "mode": "UI_contract_fixtures_only_no_inference",
+  "all_passed": true,
+  "checks": [
+    "request_and_rule_correlation",
+    "decision_filter",
+    "local_search",
+    "expanded_record_survives_refresh",
+    "untrusted_metadata_is_text",
+    "unexpected_payload_fields_not_rendered",
+    "verdict_links_to_audit",
+    "bounded_window_and_empty_state",
+    "mobile_no_page_overflow"
+  ],
+  "actual_model_calls": 0
+}

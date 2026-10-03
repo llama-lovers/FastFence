@@ -36,6 +36,28 @@ class Case(BaseModel):
     text: str = Field(min_length=1, max_length=65536)
 
 
+def verify_protocol(args: argparse.Namespace) -> str | None:
+    role = getattr(args, "corpus_role", "self_authored_frozen")
+    if role == "reused_and_new_development" and args.split != "development":
+        raise ValueError("Reused evidence must be labeled development")
+    if role != "independent_author_blind":
+        return None
+    freeze_path = getattr(args, "candidate_freeze", None)
+    if args.split != "holdout" or freeze_path is None:
+        raise ValueError("Blind evaluation requires a frozen holdout candidate")
+    frozen_bytes = freeze_path.read_bytes()
+    frozen = json.loads(frozen_bytes)
+    if (
+        frozen.get("rubric_version") != RUBRIC_VERSION
+        or frozen.get("prompt_sha256")
+        != hashlib.sha256(OLLAMA_SYSTEM.encode()).hexdigest()
+        or frozen.get("model") != args.model
+        or frozen.get("frozen_before_blind") is not True
+    ):
+        raise ValueError("Frozen candidate does not match the classifier")
+    return hashlib.sha256(frozen_bytes).hexdigest()
+
+
 def threshold_summary(results: list[dict], threshold: float) -> dict:
     counts = Counter()
     valid = 0
@@ -86,7 +108,21 @@ def threshold_summary(results: list[dict], threshold: float) -> dict:
 
 
 async def evaluate(args: argparse.Namespace) -> dict:
+    freeze_sha256 = verify_protocol(args)
+    expected_digest = getattr(args, "expected_corpus_sha256", None)
+    if (
+        getattr(args, "corpus_role", None) == "independent_author_blind"
+        and expected_digest is None
+    ):
+        raise ValueError(
+            "Blind corpus requires its independently frozen digest"
+        )
     corpus_bytes = args.corpus.read_bytes()
+    if (
+        expected_digest is not None
+        and hashlib.sha256(corpus_bytes).hexdigest() != expected_digest
+    ):
+        raise ValueError("Corpus does not match independently frozen digest")
     all_cases = [
         Case.model_validate_json(line)
         for line in corpus_bytes.splitlines()
@@ -159,6 +195,8 @@ async def evaluate(args: argparse.Namespace) -> dict:
         "provider": "actual local Ollama through SemanticScanner",
         "model": args.model,
         "split": args.split,
+        "corpus_role": getattr(args, "corpus_role", "self_authored_frozen"),
+        "candidate_freeze_sha256": freeze_sha256,
         "rubric_version": RUBRIC_VERSION,
         "severity_codes": dict(SEVERITY_SCORES),
         "prompt_sha256": hashlib.sha256(OLLAMA_SYSTEM.encode()).hexdigest(),
@@ -197,7 +235,19 @@ def main() -> None:
         type=Path,
         default=Path(__file__).with_name("severity_cases.jsonl"),
     )
+    parser.add_argument(
+        "--corpus-role",
+        choices=[
+            "self_authored_frozen",
+            "reused_and_new_development",
+            "independent_author_blind",
+        ],
+        default="self_authored_frozen",
+        help="Disclose reused development evidence versus a newly frozen blind split.",
+    )
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
+    parser.add_argument("--candidate-freeze", type=Path)
+    parser.add_argument("--expected-corpus-sha256")
     parser.add_argument("--timeout-ms", type=int, default=30_000)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()

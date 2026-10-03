@@ -1,0 +1,20 @@
+{
+  "rubric_version": "severity-v2",
+  "prompt_sha256": "90557a5db9367356c9fd9cef55608efc79ff9b54d23c0dcc37fd8eb526b8e8c5",
+  "source_sha256": "f4f279cc5482686f11c35b0c41ad2d4e34521dfeb3b3b38c929bffea28ae775c",
+  "model": "qwen3:4b",
+  "selected_at": "2026-10-03T14:43:02.140122+00:00",
+  "frozen_before_blind": true,
+  "development_corpus_sha256": "ccebe0c84c07e3fc205c76d51838e2159ef06757db6d78f03621d999c807ed8d",
+  "development_report_sha256": "c30325711c87650c7d92551d91a5b6ad775f7381454387df0bbd82e1f746fe7a",
+  "development_exact_matches": 85,
+  "development_samples": 96,
+  "selection_criteria": [
+    "Refinement must improve exact development matches above85/96.",
+    "Retain malicious32/32 classification and benign false positives at most3.",
+    "Otherwise select the initial severity-v2 candidate."
+  ],
+  "selection_result": "Initial candidate selected; refinement87/96 exact but malicious31/32, so rejected despite better overall accuracy and benign specificity.",
+  "known_evidence_note": "All72 severity-v1 cases, including its former60 holdout, are now KNOWN development evidence.24 new development contrasts are not blind. All old reports retained.",
+  "blind_corpus_opened_by_candidate_author": false
+}

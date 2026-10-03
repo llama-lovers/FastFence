@@ -85,7 +85,12 @@ def _configure_public(
 
     @app.get("/assets/{script_name}")
     def dashboard_script(script_name: str) -> FileResponse:
-        if script_name not in {"rules.js", "playground.js", "policy-studio.js"}:
+        if script_name not in {
+            "rules.js",
+            "playground.js",
+            "policy-studio.js",
+            "audit.js",
+        }:
             raise HTTPException(404, "Unknown asset")
         return FileResponse(
             Path(__file__).parent / "web" / script_name,

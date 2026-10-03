@@ -111,3 +111,7 @@ This is management-side authoring, separate from the protected agent demonstrati
 The current knowledge, contact, memory and payment-preparation handlers are simulated. To connect a real backend, implement its validated allowlisted handler behind the tools port and keep backend credentials on the gateway side. Callers cannot select upstream URLs or supply upstream credentials.
 
 Output blocking cannot reverse an executed business operation. Irreversible operations need their own transaction or approval design in addition to gateway policy checks.
+
+## Trace a protected call
+
+Every gateway verdict carries a request ID. In the dashboard, paste it into the decision-trail search and open **Details** to inspect matched rule IDs, policy/feed versions and whether the upstream executed. Playground results offer **View this decision in audit** directly. The UI searches its latest loaded 200 events; use the management audit export for the complete retained ring. Audit details contain sanitized metadata, not prompt or response bodies.

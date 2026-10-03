@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The optimized gateway and reproducible-demo checkpoint passes **413 tests**, with **95.59%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The severity-v2, transport-soak and dashboard checkpoint passes **441 tests**, with **95.59%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -52,18 +52,38 @@ Public source reports:
 - [Memory-runtime hybrid smoke](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/hybrid-gateway-memory-smoke.json)
 - [Actual Laya report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/results/live.json)
 
-## Current semantic severity and real threshold changes
+## Current severity-v2 and frozen blind evaluation
+
+With the pinned Qwen3:4b model available through local Ollama:
 
 ```sh
-uv run python evaluation/run_severity.py --split holdout --output evaluation/results/local-severity.json
+uv run python evaluation/run_severity.py --split holdout \
+  --corpus evaluation/severity_holdout_v2.jsonl \
+  --corpus-role independent_author_blind \
+  --candidate-freeze evaluation/severity_v2_candidate.json \
+  --expected-corpus-sha256 0bf738d27a112e830d447067d5bfaf1d18a6cb21f002e007827479f9f7e1b7a5 \
+  --output evaluation/results/local-v2-holdout.json
 uv run python evaluation/smoke_semantic_strictness.py --output evaluation/results/local-strictness.json
 ```
 
-The `severity-v1` rubric maps `benign`, `suspicious`, and `malicious` to ordinal codes 0, 0.6, and 1. These are not calibrated probabilities. Prompt and corpus digests accompany the reports; the prompt and all labels were frozen before the holdout run. This is a self-authored synthetic PL/EN set, not an external benchmark.
+The candidate was selected on known development evidence and frozen before opening the new corpus. Its separate author used only the high-level severity definitions, without reading the developing prompt or new development cases. Dataset labels were frozen before candidate selection and before inference on that dataset. The runner verifies the selected prompt/model and expected corpus digests before inference. This is a separately authored synthetic blind holdout, not an external benchmark or representative production distribution.
 
-The [60-case holdout](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-severity-holdout.json) had zero provider errors and 46 exact category matches. All 20 clearly malicious cases were classified malicious; 12 expected-suspicious cases were classified benign. Threshold 0.5 produced two false positives and twelve false negatives under the predeclared labels; threshold 0.8 produced one false positive and zero false negatives. The higher threshold's definition permits the suspicious category, so these figures describe different policies and are not interchangeable accuracy claims.
+The [v2 report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-severity-v2-blind-holdout.json) records **54/60 exact categories**, zero provider errors and all 20 clearly malicious cases detected. The 20 benign cases produced 18 benign and two suspicious classifications; the 20 suspicious cases produced 16 suspicious, two benign and two malicious classifications.
 
-The separate [six-case strictness smoke](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-strictness-live.json) uses actual Ollama assessment through HTTP handlers and versioned policy updates. The identical suspicious development example is blocked at 0.5 and allowed at 0.8; benign and malicious examples retain their expected decisions. This proves configurable behavior, not independent accuracy. Business-tool data is simulated and audit metadata is sanitized.
+| Policy threshold | True positives | True negatives | False positives | False negatives |
+| --- | ---: | ---: | ---: | ---: |
+| 0.5: block suspicious and malicious | 38 | 18 | 2 | 2 |
+| 0.8: block malicious | 20 | 38 | 2 | 0 |
+
+The two missed suspicious cases concern internal sharing of a production connection string and retrying a payment whose earlier outcome is unknown. Overblocking includes two benign Polish metadata/reporting requests and two suspicious cases classified malicious. These mistakes remain in the report; the prompt was not tuned after seeing them. The thresholds define different expected-positive sets, so their counts are not interchangeable accuracy claims. Codes `0`, `0.6` and `1` are ordinal, not calibrated probabilities.
+
+One development refinement was rejected despite higher overall exact accuracy because it missed a clearly malicious case. The [candidate freeze](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/severity_v2_candidate.json) and both development reports retain that decision. The original 72 cases are now known development evidence for v2; they must not be presented as a fresh v2 holdout.
+
+The [v2 six-case strictness smoke](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-strictness-v2-live.json) uses actual Ollama through HTTP handlers. The same suspicious development example blocks at 0.5 and passes at 0.8 after a versioned live update; benign and malicious examples preserve their expected decisions. This proves configurable behavior, with sanitized audit, rather than independent accuracy.
+
+### Historical severity-v1 checkpoint
+
+The [original 60-case report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-severity-holdout.json) had 46 exact categories, zero provider errors and all 20 clearly malicious cases detected; 12 suspicious cases were classified benign. It remains unchanged. Because the v2 blind corpus is different, 46/60 versus 54/60 is not a controlled before/after accuracy comparison. The earlier [v1 strictness smoke](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/semantic-strictness-live.json) is retained separately.
 
 ## Policy studio and selective controls
 
@@ -161,4 +181,20 @@ The subsequent [optimized transport report](https://github.com/llama-lovers/Hack
 
 Across the optimized matrix, allowed HTTP p95 spans 22.90–41.43 ms and MCP 24.62–44.30 ms. Blocked HTTP p95 spans 1.06–27.48 ms and MCP 1.63–35.79 ms. These remain full transport measurements including the allowed demo backend's intentional 15 ms wait, on one development machine; they are not a universal latency guarantee.
 
-The [final combined hybrid rehearsal](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/hybrid-final-rehearsal.json) also passed five cases using actual Qwen3:4b with the current detector and feed: allowed business input, semantic attack denial, output redaction, role denial and an allowed real completion. Audit export remained sanitized. Business handlers are simulated, and this live check is separate from deterministic timing.
+The [severity-v2 combined hybrid rehearsal](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/hybrid-v2-rehearsal.json) also passed five cases using actual Qwen3:4b with the current detector and feed: allowed business input, semantic attack denial, output redaction, role denial and an allowed real completion. Audit export remained sanitized. Business handlers are simulated, and this live check is separate from deterministic timing.
+
+## Dynamic configuration under sustained traffic
+
+```sh
+uv run python evaluation/soak_gateway.py --seconds 60 --output evaluation/results/local-soak.json
+```
+
+The [recorded soak](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/transport-soak.json) ran for 60.019 seconds with eight concurrent workers: 21,654 HTTP and 19,265 MCP requests. All 40,919 decisions were checked against their returned policy/feed snapshot. Every combination of five valid generations, six workloads and two protocols was exercised. Four valid updates changed privacy actions and signatures; invalid, rollback and oversized bundles preserved the last valid generation while background refresh continued.
+
+Final accounting reconciled 20,464 charged calls, 3,253,839 token units and 2,046,400 estimated micro-USD, with zero pending reservations. The deliberately small audit ring retained exactly 128 records and evicted 40,791; its final sequence and request IDs matched returned decisions. The latency ring stayed at 2,048 samples. Server RSS sampled every two seconds ranged from 108.6 to 114.3 MiB. This single-process, one-minute development check uses a simulated 15 ms business backend and an atomic trusted HTTP configuration bundle; it does not establish long-term leak freedom or multi-instance quota coordination.
+
+## Investigate a decision in the dashboard
+
+From a playground result, choose **View this decision in audit**, or paste a request/rule ID into the decision-trail search. Filter by decision and open **Details** to inspect matched controls, upstream execution, policy/feed versions and sanitized identity metadata. Search stays in page memory and covers the latest loaded 200 events; the export contains the retained audit history. Expanded records survive refresh while they remain loaded.
+
+The [audit browser fixtures](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/audit-ui.json) verify correlation, every decision-filter option, inert untrusted metadata, omission of unexpected payload fields, local search and mobile layout. Policy-review fixtures separately verify plain-language operation summaries, exact scope/case and the explicit limitation that content examples do not test role restrictions. These browser fixtures perform no model inference.

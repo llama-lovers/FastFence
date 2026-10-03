@@ -78,7 +78,7 @@ The supplied patterns cover representative pickle/PyTorch loading, remote-shell 
 
 ## Semantic controls
 
-The default policy disables semantic checks. The hybrid profile enables a real separately hosted Ollama assessor. The current Ollama assessor returns one constrained severity category: `benign` maps to `0`, `suspicious` to `0.6`, and `malicious` to `1`. These are ordinal policy codes, not calibrated probabilities. A threshold of `0.5` blocks suspicious and malicious content; `0.8` blocks malicious content. Actual-model threshold behavior is recorded in the testing evidence. Invalid responses, timeouts, or configured provider failures fail closed.
+The default policy disables semantic checks. The hybrid profile enables a real separately hosted Ollama assessor. The current `severity-v2` Ollama rubric distinguishes explicit attacks, sensitive actions with unresolved safeguards, and benign explanations or authorized requests. It returns one constrained severity category: `benign` maps to `0`, `suspicious` to `0.6`, and `malicious` to `1`. These are ordinal policy codes, not calibrated probabilities. A threshold of `0.5` blocks suspicious and malicious content; `0.8` blocks malicious content. The supplied hybrid profile uses `0.7`, which also blocks only the malicious category; set `0.5` to block the suspicious category as well. Actual-model threshold behavior is recorded in the testing evidence. Invalid responses, timeouts, or configured provider failures fail closed.
 
 Semantic checks supplement authentication, authorization, signatures, and budgets. They do not replace deterministic enforcement. The completion model and the assessor model are independently configured. See [testing](testing.md) for real-model evidence and its limits.
 

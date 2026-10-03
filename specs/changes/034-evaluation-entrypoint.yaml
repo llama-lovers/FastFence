@@ -1,0 +1,19 @@
+id: FF-034
+title: Run the scan benchmark directly from its documented command
+status: verified
+problem: The scan benchmark imports the evaluation namespace unconditionally, which fails when Python runs the file directly without a custom PYTHONPATH.
+scope:
+  - Support both direct script execution and package-module imports using the same conditional import pattern as the transport runner.
+constraints:
+  - Do not change measurement logic, fixtures or historical reports.
+  - Do not require undocumented environment-variable setup.
+change_paths:
+  - evaluation/benchmark_scan_optimization.py
+acceptance:
+  - The documented uv run python evaluation/benchmark_scan_optimization.py command starts and reconciles all eight configurations.
+validation:
+  - command: uv run python evaluation/benchmark_scan_optimization.py --phase after --samples 2 --warmup 1 --output state/private/scan-entrypoint-check.json
+    expected: Eight configurations pass verdict and accounting checks without PYTHONPATH changes; this tiny run is not performance evidence.
+evidence:
+  - command: uv run python evaluation/benchmark_scan_optimization.py --phase after --samples 2 --warmup 1 --output state/private/scan-entrypoint-check.json
+    result: All eight configurations completed with expected verdicts and reconciled accounting without PYTHONPATH; timings are excluded from published performance evidence.

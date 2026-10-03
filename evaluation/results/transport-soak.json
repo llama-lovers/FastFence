@@ -1,0 +1,271 @@
+{
+  "created_at": "2026-10-03T14:49:41.560444+00:00",
+  "environment": {
+    "operating_system": "macOS-27.0.1-arm64-arm-64bit",
+    "architecture": "arm64",
+    "python": "3.12.12",
+    "logical_cpus": 11,
+    "cpu": "Apple M3 Pro",
+    "model": "Mac15,6",
+    "memory_bytes": 19327352832
+  },
+  "scope": "Real loopback TCP HTTP/MCP, trusted local HTTP atomic bundle source, background refresh, actual deterministic controls; simulated15ms business backend; no LLM",
+  "requested_duration_seconds": 60.0,
+  "actual_duration_seconds": 60.019,
+  "concurrency": 8,
+  "total_invocations": 40919,
+  "decisions": {
+    "blocked": 20455,
+    "allowed": 10225,
+    "redacted": 10239
+  },
+  "workloads": {
+    "sensitive_input": 6820,
+    "rbac": 6820,
+    "signature": 6820,
+    "allowed": 6819,
+    "output_redaction": 6819,
+    "dynamic_signature": 6821
+  },
+  "protocols": {
+    "http": 21654,
+    "mcp": 19265
+  },
+  "throughput_rps": 681.772,
+  "allowed_budget_calls": 20464,
+  "settled_token_units": 3253839,
+  "settled_cost_microusd": 2046400,
+  "verified_snapshot_workload_protocol_groups": 60,
+  "observed_snapshots": [
+    {
+      "policy_version": 1,
+      "feed_version": 2,
+      "input_action": "block",
+      "dynamic_signature": false
+    },
+    {
+      "policy_version": 2,
+      "feed_version": 3,
+      "input_action": "redact",
+      "dynamic_signature": true
+    },
+    {
+      "policy_version": 3,
+      "feed_version": 4,
+      "input_action": "block",
+      "dynamic_signature": false
+    },
+    {
+      "policy_version": 4,
+      "feed_version": 5,
+      "input_action": "redact",
+      "dynamic_signature": true
+    },
+    {
+      "policy_version": 5,
+      "feed_version": 6,
+      "input_action": "block",
+      "dynamic_signature": false
+    }
+  ],
+  "configuration_updates": [
+    {
+      "step": 1,
+      "candidate": "valid",
+      "policy_version": 2,
+      "feed_version": 3,
+      "last_error": null,
+      "generation": 2
+    },
+    {
+      "step": 2,
+      "candidate": "invalid",
+      "policy_version": 2,
+      "feed_version": 3,
+      "last_error": "invalid_or_unavailable_bundle",
+      "generation": 2
+    },
+    {
+      "step": 3,
+      "candidate": "valid",
+      "policy_version": 3,
+      "feed_version": 4,
+      "last_error": null,
+      "generation": 3
+    },
+    {
+      "step": 4,
+      "candidate": "rollback",
+      "policy_version": 3,
+      "feed_version": 4,
+      "last_error": "version_conflict",
+      "generation": 3
+    },
+    {
+      "step": 5,
+      "candidate": "valid",
+      "policy_version": 4,
+      "feed_version": 5,
+      "last_error": null,
+      "generation": 4
+    },
+    {
+      "step": 6,
+      "candidate": "oversize",
+      "policy_version": 4,
+      "feed_version": 5,
+      "last_error": "source_too_large",
+      "generation": 4
+    },
+    {
+      "step": 7,
+      "candidate": "valid",
+      "policy_version": 5,
+      "feed_version": 6,
+      "last_error": null,
+      "generation": 5
+    }
+  ],
+  "configuration_fetches": 545,
+  "configuration_refresh_successes": 338,
+  "configuration_refresh_failures": 204,
+  "final_configuration_error": null,
+  "engine_tail_p95_latency_ms": 15,
+  "audit_capacity": 128,
+  "audit_retained": 128,
+  "audit_dropped": 40791,
+  "latency_sample_size": 2048,
+  "final_inflight": 0,
+  "semantic_calls": 0,
+  "rss_samples": [
+    {
+      "elapsed_seconds": 0.0,
+      "rss_bytes": 114556928
+    },
+    {
+      "elapsed_seconds": 2.007,
+      "rss_bytes": 118341632
+    },
+    {
+      "elapsed_seconds": 4.012,
+      "rss_bytes": 118423552
+    },
+    {
+      "elapsed_seconds": 6.016,
+      "rss_bytes": 118456320
+    },
+    {
+      "elapsed_seconds": 8.022,
+      "rss_bytes": 118571008
+    },
+    {
+      "elapsed_seconds": 10.026,
+      "rss_bytes": 119308288
+    },
+    {
+      "elapsed_seconds": 12.03,
+      "rss_bytes": 119357440
+    },
+    {
+      "elapsed_seconds": 14.036,
+      "rss_bytes": 119422976
+    },
+    {
+      "elapsed_seconds": 16.042,
+      "rss_bytes": 119488512
+    },
+    {
+      "elapsed_seconds": 18.047,
+      "rss_bytes": 119488512
+    },
+    {
+      "elapsed_seconds": 20.053,
+      "rss_bytes": 119554048
+    },
+    {
+      "elapsed_seconds": 22.059,
+      "rss_bytes": 119685120
+    },
+    {
+      "elapsed_seconds": 24.064,
+      "rss_bytes": 119799808
+    },
+    {
+      "elapsed_seconds": 26.069,
+      "rss_bytes": 115359744
+    },
+    {
+      "elapsed_seconds": 28.075,
+      "rss_bytes": 114409472
+    },
+    {
+      "elapsed_seconds": 30.08,
+      "rss_bytes": 114491392
+    },
+    {
+      "elapsed_seconds": 32.085,
+      "rss_bytes": 113934336
+    },
+    {
+      "elapsed_seconds": 34.089,
+      "rss_bytes": 113934336
+    },
+    {
+      "elapsed_seconds": 36.094,
+      "rss_bytes": 113934336
+    },
+    {
+      "elapsed_seconds": 38.099,
+      "rss_bytes": 113934336
+    },
+    {
+      "elapsed_seconds": 40.104,
+      "rss_bytes": 113901568
+    },
+    {
+      "elapsed_seconds": 42.109,
+      "rss_bytes": 113901568
+    },
+    {
+      "elapsed_seconds": 44.114,
+      "rss_bytes": 113901568
+    },
+    {
+      "elapsed_seconds": 46.118,
+      "rss_bytes": 115130368
+    },
+    {
+      "elapsed_seconds": 48.124,
+      "rss_bytes": 115179520
+    },
+    {
+      "elapsed_seconds": 50.129,
+      "rss_bytes": 115474432
+    },
+    {
+      "elapsed_seconds": 52.134,
+      "rss_bytes": 115539968
+    },
+    {
+      "elapsed_seconds": 54.139,
+      "rss_bytes": 115556352
+    },
+    {
+      "elapsed_seconds": 56.143,
+      "rss_bytes": 115572736
+    },
+    {
+      "elapsed_seconds": 58.149,
+      "rss_bytes": 115605504
+    }
+  ],
+  "rss_min_bytes": 113901568,
+  "rss_max_bytes": 119799808,
+  "all_outcomes_accounting_audit_verified": true,
+  "limitations": [
+    "Bounded development soak, not proof of leak freedom, production scalability or long-duration stability",
+    "RSS includes interpreter/framework caches and is sampled every2seconds; no isolated per-control allocation claim",
+    "Single uvicorn worker and local HTTP source; machine power state/other processes uncontrolled",
+    "Atomic HTTP bundles do not establish transactional publication by independent file writers"
+  ]
+}

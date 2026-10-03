@@ -14,12 +14,21 @@ from tempfile import TemporaryDirectory
 
 import yaml
 
-from evaluation.benchmark_gateway import (
-    engine_for,
-    hardware,
-    percentiles,
-    prepare_configuration,
-)
+if __package__:
+    from evaluation.benchmark_gateway import (
+        engine_for,
+        hardware,
+        percentiles,
+        prepare_configuration,
+    )
+else:
+    from benchmark_gateway import (
+        engine_for,
+        hardware,
+        percentiles,
+        prepare_configuration,
+    )
+
 from fastfence.modules.control.domain.models import Identity, ToolCall
 
 

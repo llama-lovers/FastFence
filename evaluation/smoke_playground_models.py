@@ -53,6 +53,7 @@ def install_fixture(page, root, status, calls):
             "playground.js",
             "rules.js",
             "policy-studio.js",
+            "audit.js",
         }:
             route.fulfill(
                 body=(web / path.rsplit("/", 1)[1]).read_text(),

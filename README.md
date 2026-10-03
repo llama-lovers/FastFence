@@ -343,13 +343,23 @@ exports, actual model request wire contracts with explicitly labeled test double
 MCP HTTP tools/resources. Live inference quality is assessed separately in `evaluation/` so
 passing unit tests cannot be confused with a model's accuracy.
 
-The current severity rubric has a frozen, self-authored 60-case PL/EN holdout separate
-from development: 46/60 exact categories, all 20 clearly malicious cases detected.
-At threshold 0.8 there was one false positive and no false negatives under the
-predeclared labels; at 0.5 there were two false positives and twelve missed suspicious
-cases. All errors are retained in [the report](evaluation/results/semantic-severity-holdout.json).
-A separate [six-case actual HTTP check](evaluation/results/semantic-strictness-live.json)
-proves threshold changes affect real model decisions.
+The current severity-v2 rubric was frozen before a separate author’s new 60-case
+PL/EN synthetic holdout: **54/60 exact categories**, all **20 clearly malicious cases**
+detected, zero provider errors. At threshold 0.5, the run had two false positives and
+two missed suspicious cases; at 0.8, two suspicious cases were overblocked and no
+malicious cases were missed. Full labels and mistakes remain in the
+[blind report](evaluation/results/semantic-severity-v2-blind-holdout.json).
+A [six-case actual HTTP check](evaluation/results/semantic-strictness-v2-live.json)
+proves live threshold changes. Earlier v1 evidence remains available; its corpus
+became known development data for v2, so scores on these different datasets are not
+a controlled accuracy comparison.
+
+The [60-second HTTP/MCP soak](evaluation/results/transport-soak.json) reconciled
+40,919 requests while policies and threat feeds changed under load. Invalid,
+rollback and oversized updates retained the last valid snapshot. All budgets,
+128 retained audit entries and bounded telemetry reconciled with zero in-flight
+reservations at completion. The dashboard now searches request/rule IDs, expands
+sanitized decision details and links playground results to their audit records.
 
 For the earlier Qwen3:4b binary schema, the recorded 20-probe synthetic development set produced
 20 correct decisions (10 benign and 10 attack), median 343 ms and p95 1,384 ms on the

@@ -9,6 +9,7 @@ const studioErrors = {
   policy_base_version_conflict: 'The active policy changed. Draft again against the latest version.',
   policy_activation_conflict: 'The policy changed before activation. Draft and review it again.',
   proposal_expired_redraft: 'This proposal expired. Draft it again before activation.',
+  proposal_feed_changed_preview_again: 'The threat feed changed after preview. Test the examples again before activation.',
   proposal_preview_required: 'Test examples before activating this proposal.',
   proposal_already_activated: 'This proposal was already activated. Inspect the current policy.',
   proposal_not_found: 'This proposal is no longer available for this management identity. Draft again.',
@@ -80,6 +81,28 @@ document.querySelectorAll('[data-policy-example]').forEach((button) => {
     studioMessage('Describe the intended change, then draft it with Laya.');
   };
 });
+function policyEffect(operation) {
+  const directions = {input: 'inputs', output: 'outputs', both: 'inputs and outputs'};
+  const targets = {model: 'model', tool: 'tool', all: 'model and tool'};
+  if (operation.type === 'upsert_text_rule') {
+    const rule = operation.rule;
+    const predicate = {contains: 'the content contains', word_contains: 'a word contains', equals: 'the content equals'}[rule.operator];
+    return 'Block ' + targets[rule.target] + ' ' + directions[rule.direction] + ' when ' + predicate +
+      ' ' + JSON.stringify(rule.value) + ' (' + (rule.case_sensitive ? 'case sensitive' : 'case insensitive') + ').';
+  }
+  if (operation.type === 'set_privacy' || operation.type === 'set_privacy_detector') {
+    const detector = {pii_email: 'email addresses', pii_polish_id: 'eleven-digit Polish ID matches'};
+    const subject = operation.type === 'set_privacy' ? 'detected personal data and secrets' : detector[operation.detector];
+    return (operation.action === 'block' ? 'Block content containing ' : 'Redact ') + subject +
+      ' in all ' + directions[operation.direction] + '.' +
+      (operation.type === 'set_privacy' ? ' Individual detector exceptions for these directions are reset.' : ' Other detectors keep their configured actions.');
+  }
+  if (operation.type === 'restrict_tool_roles') {
+    return 'Allow ' + operation.tool + ' only for these roles: ' + operation.roles.join(', ') + '.';
+  }
+  return 'Inspect the exact operation below before activation.';
+}
+
 function showProposal(proposal) {
   studioProposal = proposal;
   $('policyDraftSection').classList.remove('hidden');
@@ -87,6 +110,8 @@ function showProposal(proposal) {
     ' · drafted in ' + (proposal.inference_ms / 1000).toFixed(2) + ' s · expires ' +
     new Date(proposal.expires_at).toLocaleTimeString();
   $('policyOperations').textContent = JSON.stringify(proposal.operations, null, 2);
+  $('policyEffects').replaceChildren(...proposal.operations.map((operation) => el('li', policyEffect(operation))));
+  $('policyRolePreviewNote').classList.toggle('hidden', !proposal.operations.some((operation) => operation.type === 'restrict_tool_roles'));
   $('policyDiff').replaceChildren(...proposal.changes.map((change) => {
     const row = document.createElement('tr');
     [change.path, JSON.stringify(change.before), JSON.stringify(change.after)].forEach((value) => {
@@ -97,7 +122,7 @@ function showProposal(proposal) {
     });
     return row;
   }));
-  $('policyDraftWarnings').textContent = proposal.warnings.join(' ');
+  $('policyDraftWarnings').textContent = proposal.warnings.map((warning) => warning === 'privacy_was_disabled_enabling_existing_detectors' ? 'Privacy checks were disabled. This proposal also enables the existing privacy detectors; inspect the full diff below.' : warning).join(' ');
   $('policyDraftWarnings').classList.toggle('hidden', !proposal.warnings.length);
 }
 $('draftPolicy').onclick = async () => {

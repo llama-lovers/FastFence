@@ -1,0 +1,55 @@
+id: FF-031
+title: Bounded real transport soak with atomic background configuration updates
+status: verified
+problem: Short workload matrices do not demonstrate sustained mixed traffic while
+  invalid and valid configuration updates race with ongoing interactions.
+scope:
+- Run an isolated real TCP HTTP/MCP gateway for a default60-second mixed concurrent
+  workload.
+- Publish validated versioned policy/feed bundles and invalid candidates from a local
+  trusted HTTP source while background polling serves traffic.
+- Verify immutable per-request snapshot versions, expected decisions, settlement and
+  bounded metrics/audit retention.
+- Sample actual gateway-process RSS without claiming general memory or production
+  guarantees.
+constraints:
+- No model inference, user-state changes, real external accounts or executable exploit
+  payloads.
+- Use concurrency8 with four HTTP and four MCP workers; label simulated15ms business
+  backend.
+- Register complete expected snapshots before publishing each atomic bundle; unexpected
+  pairs or decisions invalidate the report.
+- Keep provider/body/traversal bounds and last-good failure semantics intact; no runtime
+  source changes without coordination.
+- Run final soak separately from other agents model/performance work and report environment/sample
+  limitations.
+change_paths:
+- evaluation/soak_gateway.py
+- evaluation/soak_harness.py
+- evaluation/soak_proof.py
+- evaluation/results/transport-soak.json
+- tests/unit/test_soak_proof.py
+acceptance:
+- Valid updates activate without restart while invalid/rollback/oversize candidates
+  preserve last good snapshots.
+- Every completed invocation matches its actual policy/feed versions and verified
+  expected decision/reason/execution.
+- Metrics reconcile all outcomes, retained audit is bounded and nonduplicated, evictions
+  are explicit, and final budget charges/inflight totals reconcile.
+- RSS measurements are actual process samples with honest uncontrolled-workload limitations.
+validation:
+- command: uv run python evaluation/soak_gateway.py --seconds 60 --output evaluation/results/transport-soak.json
+  expected: Bounded real HTTP/MCP soak report validates dynamic configuration and
+    accounting under mixed sustained traffic.
+- command: uv run pytest -q --no-cov tests/unit/test_soak_proof.py
+  expected: Invariant regressions reject mixed snapshots, wrong decisions, accounting
+    drift and audit retention failures.
+evidence:
+- command: uv run pytest -q --no-cov --tb=short tests/unit/test_soak_proof.py
+  result: 19 invariant tests passed; own Ruff lint/format clean.
+- command: uv run python evaluation/soak_gateway.py --seconds 60 --output evaluation/results/transport-soak.json
+  result: PASS 40919 invocations in 60.019seconds;60snapshot/workload/protocol groups,5valid
+    coherent snapshots,all7update steps checked; exactsettlement/noinflight.
+- artifact: evaluation/results/transport-soak.json
+  result: Auditcapacity128,retained128,dropped40791; latencyring2048;RSSmin113901568/max119799808bytes
+    sampled,notproof ofleakfreedom.

@@ -4,7 +4,7 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "name", ["rules.js", "playground.js", "policy-studio.js"]
+    "name", ["rules.js", "playground.js", "policy-studio.js", "audit.js"]
 )
 def test_dashboard_scripts_have_security_headers_and_expected_mime_type(
     client, name

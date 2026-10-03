@@ -1,0 +1,30 @@
+id: FF-032
+title: Explain compiled policy changes before activation
+status: verified
+problem: Reviewing a natural-language policy currently requires interpreting internal operation fields and setting paths, which makes model misinterpretation harder to spot.
+scope:
+  - Render plain-language effects for text, privacy and tool-role operations alongside exact diffs.
+  - State explicitly when content examples cannot verify a role restriction.
+  - Translate feed-change and privacy-enabling messages into actionable review guidance.
+constraints:
+  - Derive summaries from the validated operations, never from the original instruction or a second model call.
+  - Render every dynamic value as text, including literals and role names.
+  - Preserve exact operations, diff, preview and explicit activation requirements.
+change_paths:
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/app/interfaces/http/web/policy-studio.js
+  - evaluation/results/policy-review-ui.json
+acceptance:
+  - A reviewer can see scope, literal, case sensitivity and action without decoding JSON.
+  - Role-change proposals do not imply that text examples tested authorization.
+  - Markup in a compiled literal remains inert text.
+validation:
+  - command: Isolated Chromium fixture review of all supported operation types
+    expected: Summaries reflect actual operations, role-preview limitation is visible and injected markup remains inert.
+  - command: uv run --with playwright python evaluation/smoke_policy_studio.py --output state/private/policy-studio-review-check.json
+    expected: Existing review and activation gating remains intact.
+evidence:
+  - command: Isolated Chromium fixture review of six operations
+    result: Correct text scope/case, privacy and role summaries, role-preview limitation, inert markup and human-readable warnings passed; desktop/mobile screenshots inspected.
+  - command: uv run --with playwright python evaluation/smoke_policy_studio.py --output state/private/policy-studio-review-check.json
+    result: Existing preview/activation gating, editing invalidation and browser safety checks passed with zero model calls.
