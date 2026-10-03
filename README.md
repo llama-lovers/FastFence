@@ -2,8 +2,8 @@
 
 **Security policies between your agents and their models or tools.**
 
-FastFence is a local AI control layer with authenticated HTTP, OpenAI-compatible
-and MCP interfaces. It combines deterministic rules with real Laya/Qwen text
+FastFence is a local AI control layer with authenticated HTTP, OpenAI-compatible,
+MCP and synchronous text ACP interfaces. It combines deterministic rules with real Laya/Qwen text
 assessment, applies input and output controls, reserves per-identity resource
 budgets, and records sanitized decisions. The management console lets you review
 policy changes, test requests and inspect activity.
@@ -92,6 +92,10 @@ are approximate and need evaluation for your policy.
 The active policy is `config/policy.yaml`; valid higher versions hot-reload without
 restarting. `.env` contains deployment settings. Reviewed generated tests are saved
 in `config/policy-tests.yaml`. Invalid updates retain the last valid snapshot.
+
+For peer-agent communication, configure a trusted ACP agent and use
+`http://127.0.0.1:8000/acp`. The [ACP example](https://fastfence.dev/examples/acp/)
+includes an official SDK client and a separate local agent.
 
 ## Connect business tools
 

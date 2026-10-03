@@ -53,6 +53,15 @@ jobs:
         run: uvx --from twine==7.0.0 twine check dist/*
       - name: Install and exercise the wheel outside the checkout
         run: uv run --locked python scripts/smoke_wheel.py dist/*.whl
+      - name: Exercise official ACP peers against the installed wheel
+        run: uv run --no-project python scripts/smoke_acp_package.py --wheel dist/*.whl --output acp-wheel-verification.json
+      - name: Retain ACP package verification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: acp-wheel-verification
+          path: acp-wheel-verification.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Retain the exact verified artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -80,3 +89,55 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           attestations: true
+
+  verify-pypi:
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+    steps:
+      - name: Check out verification code from the exact release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+          persist-credentials: false
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.8.10"
+          python-version: "3.12"
+      - name: Download the verified build for hash comparison
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: python-distributions
+          path: verified-dist/
+      - name: Install exact public PyPI release and exercise the product
+        run: |
+          RELEASE_VERSION="${RELEASE_TAG#v}"
+          uv run --no-project python scripts/smoke_pypi.py "$RELEASE_VERSION" \
+            --expected-wheel "verified-dist/fastfence-${RELEASE_VERSION}-py3-none-any.whl" \
+            --output pypi-verification.json
+      - name: Exercise official ACP peers against the public package
+        run: uv run --no-project python scripts/smoke_acp_package.py --pypi-version "${RELEASE_TAG#v}" --output acp-pypi-verification.json
+      - name: Retain public-index verification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pypi-verification
+          path: |
+            pypi-verification.json
+            acp-pypi-verification.json
+          if-no-files-found: error
+          retention-days: 14
+
+  documentation:
+    needs: verify-pypi
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs.yml
+    with:
+      release_tag: ${{ inputs.tag || github.event.release.tag_name }}

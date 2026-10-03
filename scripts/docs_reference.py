@@ -15,6 +15,11 @@ REPOSITORY = (
 )
 PAGES = (
     (
+        "examples/acp.md",
+        "Agent Communication Protocol",
+        "Protect real synchronous agent-to-agent ACP calls with shared input/output policies.",
+    ),
+    (
         "examples/custom-detectors.md",
         "Custom Python text detectors",
         "Add trusted literal and regex detect-secrets plugins at startup.",
@@ -100,6 +105,10 @@ PAGES = (
 )
 
 EXAMPLE_FILES = (
+    "acp_server.py",
+    "acp_gateway.py",
+    "acp_client.py",
+    "acp_policy.yaml",
     "custom_detector.py",
     "asymmetric_keys.py",
     "protected_request.py",

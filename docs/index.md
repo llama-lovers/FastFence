@@ -4,7 +4,7 @@
 
 **Security policies for agents. Local enforcement for every call.**
 
-FastFence checks AI requests and responses against your access, privacy, text and resource policies. Connect through REST, an OpenAI-compatible endpoint or MCP. Describe a rule with Laya, review its changes and tests, then activate it without restarting the gateway.
+FastFence checks AI requests and responses against your access, privacy, text and resource policies. Connect through REST, an OpenAI-compatible endpoint, MCP or a configured ACP peer. Describe a rule with Laya, review its changes and tests, then activate it without restarting the gateway.
 
 [Get started](getting-started.md){ .md-button .md-button--primary }
 [Follow a tutorial](learn.md){ .md-button }
@@ -37,6 +37,7 @@ Open **http://127.0.0.1:8000** and connect with your generated local credentials
 | Run a protected model request | [Learn: your first request](learn.md#1-send-a-protected-model-request) |
 | Describe a rule and understand how it changes behavior | [Policies and review](policies.md) |
 | Connect an existing agent or MCP client | [Integration contract](integration-reference.md) |
+| Connect a peer agent through ACP | [ACP agent-to-agent example](examples/acp.md) |
 | Configure privacy, anonymization or budgets | [Policy configuration](policies.md) |
 | Find an endpoint or request schema | [Source-backed HTTP reference](reference/http-api.md) |
 | Configure a local installation | [Environment settings](settings.md) |

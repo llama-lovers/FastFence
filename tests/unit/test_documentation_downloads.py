@@ -18,7 +18,13 @@ def test_example_archive_is_complete_deterministic_and_source_identical():
             sources
         )
         assert "custom_detector.py" in sources
-        assert len(sources) == 14
+        assert {
+            "acp_server.py",
+            "acp_gateway.py",
+            "acp_client.py",
+            "acp_policy.yaml",
+        } <= set(sources)
+        assert len(sources) == 18
         assert {f"documents/{name}" for name in HOOK["DOCUMENT_FILES"]} <= set(
             sources
         )

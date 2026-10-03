@@ -1,0 +1,42 @@
+id: FF-084
+title: Protected native ACP HTTP ingress and runnable agent-to-agent examples
+status: implemented
+problem: ACP peers and official SDK clients could not invoke registered agents through FastFence's shared policy pipeline.
+scope:
+  - Authenticated discovery and synchronous stateless text-only ACP runs mapped to configured policy tools.
+  - Text-only projection before input/output rules to avoid classifying transport metadata as content.
+  - Downloadable official SDK peer, isolated gateway and official SDK client examples.
+constraints:
+  - No dynamic upstream URLs, caller-selected credentials, remote resource fetches or uninspected streaming.
+  - Authentication precedes bounded body parsing; SDK null fields and valid timestamps are supported without preserving untrusted metadata.
+  - No FastFence ACP session, run or conversation store; unsupported protocol operations fail explicitly.
+  - Policy failures return empty-output failed runs; no raw input or provider error leakage.
+  - Describe archived ACP compatibility honestly and do not claim complete ACP or A2A conformance.
+change_paths:
+  - src/fastfence/app/interfaces/http/acp.py
+  - tests/integration/test_acp_http.py
+  - tests/unit/test_documentation_downloads.py
+  - examples/docs/acp_server.py
+  - examples/docs/acp_gateway.py
+  - examples/docs/acp_client.py
+  - examples/docs/acp_policy.yaml
+  - docs/examples/acp.md
+  - scripts/docs_reference.py
+  - mkdocs.yml
+acceptance:
+  - Official ACP client invokes a real upstream agent through the gateway, with both input and output checks.
+  - Input/output letter-a rules inspect content without matching text/plain or other transport metadata.
+  - Missing/admin credentials, oversized/malformed JSON, unsupported modes/content/session fields never execute upstream.
+  - Native ACP and existing REST invocations share subject budgets and audit.
+validation:
+  - command: uv run pytest --no-cov -q tests/integration/test_acp_http.py
+    expected: Native ingress, shared controls and bounded protocol regressions pass.
+  - command: uv run mkdocs build --strict
+    expected: Exact downloadable examples and documentation sources build.
+evidence:
+  - command: Native HTTP integration suite
+    result: Sixteen tests passed through actual gateway and ACP transport adapter with explicitly controlled provider responses, including metadata-free input/output literal rules, redaction and shared budgets.
+  - command: Official SDK 1.0.3 inspection and compatibility probe
+    result: Verified actual SDK timestamp/null serialization and pinned Uvicorn 0.35.0 in a separate example SDK environment for server compatibility; newer Uvicorn removes a type referenced by the archived SDK.
+  - command: Native ACP, outbound adapter and downloadable-source regressions
+    result: 63 tests passed; basedpyright, all 16 import contracts, architecture AST and strict MkDocs build passed.

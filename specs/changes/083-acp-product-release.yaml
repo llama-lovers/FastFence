@@ -1,0 +1,31 @@
+id: FF-083
+title: Wire protected ACP transport and publish package verification
+status: implemented
+problem: Agent-to-agent ACP traffic needs the same control pipeline and an installable product entry point.
+scope:
+  - Register the ACP compatibility router with only operator-configured agent aliases.
+  - Report the installed package version in the API schema.
+  - Release ACP and public PyPI verification as version 0.1.3.
+constraints:
+  - Preserve the published 0.1.1 and tagged 0.1.2 distributions.
+  - Keep ACP examples outside the product runtime.
+  - Reject unsupported ACP modes rather than bypass input or output controls.
+change_paths:
+  - src/fastfence/app/factory.py
+  - _version.py
+  - docs/publishing.md
+  - README.md
+  - docs/index.md
+  - docs/integrations.md
+acceptance:
+  - Configured ACP agents use the control engine for input and output decisions.
+  - A fresh installed package can run the documented agent-to-agent example.
+  - Package tests use installed distributions outside the checkout.
+validation:
+  - command: uv run --locked pytest -q
+    expected: Full regression suite passes.
+  - command: uv run --locked pre-commit run --all-files
+    expected: All quality gates pass.
+evidence:
+  - check: Public PyPI upgrade verification before ACP integration
+    result: Installed 0.1.1 from public PyPI in a fresh external environment, initialized configuration and anonymization keyring, upgraded from public PyPI to 0.1.2, reran init and doctor, and verified configuration, identity records, credentials and keyring remained byte-for-byte unchanged. The published custom detector example blocked a real HTTP request before upstream execution.

@@ -4,6 +4,7 @@ from typing import Literal, Self
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from fastfence.shared.acp import ACPAgentSettings, ACPName
 from fastfence.shared.settings.upstream_url import validate_openai_base_url
 
 
@@ -11,7 +12,7 @@ class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FASTFENCE_", extra="forbid")
 
     root: Path = Field(
-        default_factory=lambda: Path.cwd(), description="Repository/config root"
+        default_factory=lambda: Path.cwd(), description="Installation/configuration root"
     )
     state: Path | None = Field(
         default=None,
@@ -19,7 +20,7 @@ class AppSettings(BaseSettings):
     )
     authoring_root: Path | None = Field(
         default=None,
-        description="Trusted repository root for the isolated Laya authoring installation",
+        description="Trusted working directory for the isolated Laya installation",
     )
     identity_config_json: str | None = Field(
         default=None, description="Trusted startup identity records as JSON"
@@ -76,6 +77,11 @@ class AppSettings(BaseSettings):
         default=None,
         description="Server-only upstream bearer credential; independent of gateway caller tokens",
         repr=False,
+    )
+    acp_agents: dict[ACPName, ACPAgentSettings] = Field(
+        default_factory=dict,
+        max_length=32,
+        description="Trusted ACP agent registry as a JSON object: alias to base_url, agent_name, optional server-only api_key and timeout_seconds",
     )
     secret_plugin_files: list[Path] = Field(
         default_factory=list,

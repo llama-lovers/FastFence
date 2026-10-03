@@ -18,7 +18,7 @@ From a clean source checkout:
 ```sh
 uv build
 uvx --from twine==7.0.0 twine check dist/*
-uv run python scripts/smoke_wheel.py dist/fastfence-0.1.2-py3-none-any.whl
+uv run python scripts/smoke_wheel.py dist/fastfence-0.1.3-py3-none-any.whl
 ```
 
 The smoke script creates a fresh Python 3.12 environment and installs the wheel
@@ -31,7 +31,7 @@ For release acceptance with Ollama and both default Qwen models already running,
 also execute the full installed-package path:
 
 ```sh
-uv run python scripts/smoke_wheel.py dist/fastfence-0.1.2-py3-none-any.whl --full
+uv run python scripts/smoke_wheel.py dist/fastfence-0.1.3-py3-none-any.whl --full
 ```
 
 This additionally runs the installed `setup-laya` command, downloads and installs
@@ -45,7 +45,7 @@ environment:
 ```sh
 python3.12 -m venv .venv
 . .venv/bin/activate
-python -m pip install /absolute/path/to/fastfence-0.1.2-py3-none-any.whl
+python -m pip install /absolute/path/to/fastfence-0.1.3-py3-none-any.whl
 fastfence init --anonymization
 python -m pip install uv
 fastfence setup-laya
@@ -87,7 +87,7 @@ large optional OCR downloads are not performed by the default wheel smoke test.
 Verify the installed OCR setup and actual synthetic image recognition separately:
 
 ```sh
-uv run python scripts/smoke_wheel.py dist/fastfence-0.1.2-py3-none-any.whl --ocr
+uv run python scripts/smoke_wheel.py dist/fastfence-0.1.3-py3-none-any.whl --ocr
 ```
 
 ## Configure the trusted publisher
@@ -118,12 +118,12 @@ trusted identity.
 ## Publish the reviewed version
 
 Set the version in `_version.py`, merge the reviewed changes to `main`, and ensure
-the verification workflow passes. For version `0.1.2`:
+the verification workflow passes. For version `0.1.3`:
 
 ```sh
-git tag v0.1.2
-git push origin v0.1.2
-gh release create v0.1.2 --title 'FastFence 0.1.2' --generate-notes
+git tag v0.1.3
+git push origin v0.1.3
+gh release create v0.1.3 --title 'FastFence 0.1.3' --generate-notes
 ```
 
 Publishing the GitHub release starts `.github/workflows/publish.yml`. The workflow
@@ -135,12 +135,40 @@ separate publication job.
 For an existing reviewed tag, the same workflow can be launched explicitly:
 
 ```sh
-gh workflow run publish.yml --ref main -f tag=v0.1.2
+gh workflow run publish.yml --ref main -f tag=v0.1.3
 gh run list --workflow publish.yml
 ```
 
-After success, verify both files and their hashes at the public PyPI project,
-then perform a fresh index installation outside the checkout. Only then update
-the main installation instructions to use the published version. PyPI release
+After publication, the `verify-pypi` job checks out the same release tag with read-only repository permission. It reads [exact-version public PyPI metadata](https://docs.pypi.org/api/json/#get-a-release), downloads the wheel from `files.pythonhosted.org`, and verifies its length and SHA256 against both that metadata and the pre-publication build artifact. Missing public metadata/files are retried up to twelve times with ten-second delays; each network operation has a fifteen-second timeout.
+
+It then installs **`fastfence==VERSION` from `https://pypi.org/simple`** in a new Python 3.12 environment outside the checkout. User index configuration, inherited FastFence settings and `PYTHONPATH` are excluded; install caching is disabled. Installation gets at most three attempts for index propagation. The script checks the installed version, import location and every packaged `fastfence/` file against the verified public wheel before running the same CLI, initialization, helpers, HTTP assets and fail-closed invocation checks as the pre-publication smoke. It does not claim live model or OCR inference.
+
+Successful evidence is retained as the `pypi-verification` Actions artifact. Reproduce the public-package check for a released version without building or installing source:
+
+```sh
+python3.12 scripts/smoke_pypi.py 0.1.3 --output pypi-verification.json
+```
+
+The script requires `uv` on `PATH`; it uses only the Python standard library before creating the isolated environment. Add `--expected-wheel /path/to/verified.whl` to compare against your reviewed build as the workflow does. A failed post-publication check fails the workflow; it cannot remove an already published release. Investigate and release a corrected version before announcing success. PyPI release
 files cannot be replaced in place; use a new version for corrected artifacts.
 The workflow intentionally does not skip existing artifacts silently.
+
+## Verify Agent Communication Protocol from the package
+
+The release workflow also runs actual official ACP SDK peers against the installed gateway, both before publication and after the public-index installation:
+
+```sh
+python3.12 scripts/smoke_acp_package.py --wheel dist/fastfence-0.1.3-py3-none-any.whl --output acp-wheel-verification.json
+python3.12 scripts/smoke_acp_package.py --pypi-version 0.1.3 --output acp-pypi-verification.json
+```
+
+The script creates two fresh environments outside the checkout. The gateway installs the FastFence distribution with its normal dependencies. A separate peer/client environment installs `acp-sdk==1.0.3` and its compatible `uvicorn==0.35.0`; that SDK constraint does not downgrade the gateway. Only explicit public example files and synthetic test inputs are staged into the temporary working directory.
+
+The actual loopback HTTP path checks authenticated discovery, a real uppercase operation, input and output denials, output redaction, reversible output with explicit restoration, and sanitized audit. Direct access to the peer requires a separate private token. These checks need neither Ollama nor a model; they test ACP protocol and policy enforcement, not inference quality. Reports are retained as Actions artifacts alongside the public-package verification result.
+
+## Documentation follows the published package
+
+Ordinary CI builds the documentation with strict validation. Public Pages deploys
+only after the release workflow verifies the exact package from PyPI, including
+its ACP integration. The documentation job checks out that same release tag, so
+new examples are published together with the package that supports them.

@@ -1,9 +1,11 @@
 import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
+from importlib.metadata import version
 
 from fastapi import FastAPI
 
+from fastfence.app.interfaces.http.acp import create_router as create_acp_router
 from fastfence.app.interfaces.http.documents import configure_documents
 from fastfence.app.interfaces.http.ingress import ProtectedRestIngress
 from fastfence.app.interfaces.http.openai import create_router
@@ -49,7 +51,9 @@ def create_app(
                     await watcher
                 await runtime.aclose()
 
-    app = FastAPI(title="FastFence", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="FastFence", version=version("fastfence"), lifespan=lifespan
+    )
     app.state.engine = runtime.engine
     app.state.identities = runtime.identities
     app.state.settings = settings
@@ -62,5 +66,10 @@ def create_app(
     configure_http(app, runtime)
     configure_documents(app, runtime, settings)
     app.include_router(create_router(runtime))
+    app.include_router(
+        create_acp_router(
+            runtime, {alias: "acp." + alias for alias in settings.acp_agents}
+        )
+    )
     app.mount("/mcp", mcp_app)
     return app

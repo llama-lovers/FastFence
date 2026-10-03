@@ -14,6 +14,8 @@ Protected REST writes authenticate before consuming or parsing their body. Invoc
 | `POST /api/models/complete` | Invoke an allowlisted Ollama model with a plain prompt or native messages |
 | `GET /v1/models` | List model identifiers permitted for the verified role |
 | `POST /v1/chat/completions` | Bounded OpenAI-compatible chat interface |
+| `GET /acp/agents` | Discover configured ACP peers permitted for the caller |
+| `POST /acp/runs` | Run a synchronous plain-text ACP peer through input/output controls |
 | `GET /api/me` | Return trusted server-side identity claims |
 | `GET /api/admin/status` | Management policy, budgets, telemetry and sanitized audit |
 | `GET /api/admin/audit.jsonl` | Export retained sanitized records |
@@ -74,6 +76,19 @@ asyncio.run(main())
 Existing installations retain their original credential file and identity names. If initialization reports the legacy `state/demo-tokens.json`, use its agent credential instead; do not rotate or overwrite credentials merely to rename them.
 
 Tenant resources must match the verified identity. The policy pipeline runs before FastMCP creates its text and structured result representations, so both contain the filtered output.
+
+## ACP peer agents
+
+The Agent Communication Protocol compatibility endpoint is `/acp`. Configure
+trusted peer addresses in `FASTFENCE_ACP_AGENTS`, then allowlist the corresponding
+`acp.<alias>` tools and roles in policy. The [complete ACP example](examples/acp.md)
+uses the official SDK to call a separate agent through FastFence.
+
+This adapter supports synchronous, stateless, inline plain-text messages. It
+rejects sessions, streaming and attachments. Message text crosses the same input
+and output controls as other tools; caller credentials never become peer credentials.
+ACP has moved into A2A; this adapter preserves the documented ACP compatibility
+profile and does not implement A2A.
 
 ## Actual Laya integration
 

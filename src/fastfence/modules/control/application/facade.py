@@ -28,6 +28,7 @@ from fastfence.modules.control.domain.models import (
     Verdict,
 )
 from fastfence.modules.control.domain.semantic_rules import SemanticRule
+from fastfence.modules.control.persistence.acp_tools import ACPTools
 from fastfence.modules.control.persistence.identity import IdentityStore
 from fastfence.modules.control.persistence.ledger import Ledger
 from fastfence.modules.control.persistence.models import (
@@ -161,6 +162,19 @@ def build_runtime(
     anonymization: AnonymizationPort | None = None,
     tools: ToolsPort | None = None,
 ) -> ControlRuntime:
+    if tools is not None and settings.acp_agents:
+        raise ValueError(
+            "Choose ACP agents or an explicit tool provider, not both"
+        )
+    connected_tools = (
+        tools
+        if tools is not None
+        else (
+            ACPTools(settings.acp_agents)
+            if settings.acp_agents
+            else UnconfiguredTools()
+        )
+    )
     identities = (
         IdentityStore(records=json.loads(settings.identity_config_json))
         if settings.identity_config_json is not None
@@ -184,7 +198,7 @@ def build_runtime(
     engine = Engine(
         policies=policies,
         ledger=ledger,
-        tools=tools if tools is not None else UnconfiguredTools(),
+        tools=connected_tools,
         scanner=SemanticScanner(
             settings.ollama_url,
             settings.kev_url,

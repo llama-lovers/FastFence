@@ -1,0 +1,27 @@
+id: FF-085
+title: Publish documentation from the verified PyPI release tag
+status: implemented
+problem: Deploying documentation on each main push exposes instructions for features not yet available in the public package.
+scope:
+  - Keep strict documentation builds in ordinary CI without deployment.
+  - Deploy Pages only after exact-version public package verification succeeds.
+  - Check out the same release tag for documentation and downloadable examples.
+constraints:
+  - Do not publish documentation for a failed package release.
+  - Preserve static documentation validation on pull requests and main pushes.
+change_paths:
+  - .github/workflows/ci.yml
+  - .github/workflows/docs.yml
+  - .github/workflows/publish.yml
+  - docs/publishing.md
+acceptance:
+  - The publishing workflow passes its release tag to the reusable documentation job.
+  - The reusable job builds and deploys that tag after the PyPI verification job.
+validation:
+  - command: uv run --locked pre-commit run --all-files
+    expected: Workflow syntax and specification checks pass.
+  - command: uv run --locked mkdocs build --strict
+    expected: Documentation and downloadable examples build successfully.
+evidence:
+  - check: Independent workflow review and repository deployment policy
+    result: Reusable workflow permissions and exact-tag dependency gate reviewed; github-pages environment retains main branch permission and now permits v* release tags so release-triggered deployment can complete.

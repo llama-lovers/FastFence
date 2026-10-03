@@ -1,0 +1,41 @@
+id: FF-082
+title: Connect trusted ACP agents through the protected tool pipeline
+status: implemented
+problem: Agent callers need real Agent Communication Protocol forwarding with the same input and output controls as existing tool calls.
+scope:
+  - Describe startup roots as installation directories in package-first settings guidance.
+  - Add bounded ACP text message contracts compatible with official SDK null fields and timestamps.
+  - Configure at most thirty-two named ACP agents through trusted startup settings with server-only credentials.
+  - Implement synchronous POST runs transport using fixed configured endpoints and a bounded response and deadline.
+  - Project protocol messages into content-only internal messages for policy checks and reconstruct wire fields afterward.
+  - Wire ACP as the default tool provider only when explicitly configured and reject conflicting custom provider configuration.
+constraints:
+  - Remote HTTP origins, inline credentials, URL queries and fragments are rejected; HTTPS and loopback HTTP are supported.
+  - No environment proxies, redirects, streaming, asynchronous runs, sessions, binary parts or content URLs.
+  - Only completed replies from the configured upstream agent are accepted; unchecked metadata is stripped.
+  - HTTP callers cannot select endpoints or upstream credentials; claimed message roles never establish caller authorization.
+  - Internal role codes are strict integers and agent-name roles normalize to agent; only text values reach literal rule matching.
+  - Transport errors are static and never expose upstream body text or credentials; cancellation propagates.
+change_paths:
+  - src/fastfence/shared/acp.py
+  - src/fastfence/shared/settings/app_settings.py
+  - src/fastfence/modules/control/persistence/acp_tools.py
+  - src/fastfence/modules/control/application/facade.py
+  - tests/unit/test_acp_tools.py
+  - docs/settings.md
+  - .env.example
+acceptance:
+  - The ACP provider sends a real synchronous HTTP run with configured agent name and optional server credential.
+  - Malformed, unsupported, oversized and incomplete upstream responses fail closed.
+  - SDK timestamps and null defaults do not break supported plain-text requests and never enter policy text scans.
+  - Registry configuration preserves default tool denial when absent and cannot silently replace an explicit tool provider.
+validation:
+  - command: uv run pytest --no-cov -q tests/unit/test_acp_tools.py
+    expected: Mock transport, schema, startup composition, deadline, cancellation and actual loopback HTTP checks pass.
+  - command: uv run basedpyright src
+    expected: Shared contracts, settings and persistence adapter pass typing.
+evidence:
+  - check: Outbound ACP transport and shared contracts
+    result: 45 tests passed, including actual loopback HTTP, server-only credential routing, malformed and unsupported replies, aggregate UTF-8 limits, timeout and cancellation.
+  - check: Architecture and typing
+    result: Full src basedpyright zero errors, all sixteen import contracts kept, pyscn and Ruff passed.

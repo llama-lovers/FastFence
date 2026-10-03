@@ -1,0 +1,45 @@
+id: FF-081
+title: Verify the published PyPI product through an isolated exact-version installation
+status: verified
+problem: Release checks test built wheels before publishing but do not prove the actual public package installs and runs afterward.
+scope:
+- Add a read-only post-publication job using verification scripts from the same release tag.
+- Retrieve exact-version public PyPI metadata and distribution with bounded propagation retries, verify size/SHA256 and equality
+  to the verified build artifact.
+- Install fastfence at the exact version using only public PyPI in a new environment outside the checkout and reuse existing
+  package runtime checks.
+- Verify installed package version, import isolation and package files against the public wheel; retain sanitized evidence.
+- Exercise actual official ACP SDK peers against both built and public packages using separate SDK and gateway environments.
+constraints:
+- No publication credential or write permission in the verification job.
+- No editable install, inherited PYTHONPATH, operator configuration, private state or alternate package index.
+- Preserve pre-publication wheel acceptance; distinguish default offline checks from actual model/OCR inference.
+change_paths:
+- .github/workflows/publish.yml
+- scripts/smoke_pypi.py
+- scripts/smoke_wheel.py
+- tests/unit/test_pypi_verification.py
+- docs/publishing.md
+- scripts/smoke_acp_package.py
+- scripts/acp_package_checks.py
+acceptance:
+- Verification runs after build and publication and uses the same release tag.
+- Missing releases are retried within explicit bounds; wrong version, yanked or untrusted artifact, wrong size/hash and mismatch
+  against the release build fail.
+- Installed package files match verified public wheel bytes and are imported only from the new environment.
+- CLI initialization, bundled helpers, console routes and fail-closed invocation are exercised through the installed product.
+- Actual ACP client -> gateway -> agent checks authentication, input/output decisions, redaction, explicit restoration and
+  audit without a model service.
+validation:
+- command: uv run pytest --no-cov tests/unit/test_pypi_verification.py
+  expected: Metadata, propagation, integrity and package-isolation regressions pass.
+- command: python scripts/smoke_pypi.py VERSION
+  expected: Exact public release installs in isolation and passes reused product smoke checks.
+evidence:
+- command: uv run pytest --no-cov --confcutdir=tests/unit tests/unit/test_pypi_verification.py -q
+  result: 20 passed; metadata, transient publication, integrity, build comparison, exact public-index installation and bounded
+    install retry checked.
+- command: uv run --no-project python scripts/smoke_pypi.py 0.1.1 --attempts 1 --output state/private/pypi-verification-0.1.1.json
+  result: Actual public PyPI 0.1.1 installed in new external Python3.12 environment; package bytes, CLI initialization, doctor,
+    Laya helpers, console HTTP assets and fail-closed invocation passed. No model/OCR inference.
+  sha256: 5cb6365176b8a6e4c8b89278b83a6f34b62f27c1f6f2cf791d1a9be8a977042c # pragma: allowlist secret

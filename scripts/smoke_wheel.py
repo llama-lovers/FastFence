@@ -95,7 +95,69 @@ def verify_ocr(executable, python, root, environment):
     )
 
 
-def smoke(wheel: Path, *, full: bool = False, ocr: bool = False) -> None:
+def verify_installed(python, wheel, root, environment, version):
+    run(
+        [
+            str(python),
+            "-c",
+            """import importlib.metadata, pathlib, sys, zipfile
+import fastfence
+package = pathlib.Path(fastfence.__file__).resolve().parent
+assert package.is_relative_to(pathlib.Path(sys.prefix).resolve()), package
+assert 'site-packages' in package.parts, package
+assert not any(pathlib.Path(p or '.').resolve().is_relative_to(pathlib.Path(sys.argv[3])) for p in sys.path)
+if sys.argv[2]:
+    assert importlib.metadata.version('fastfence') == sys.argv[2]
+with zipfile.ZipFile(sys.argv[1]) as wheel:
+    for name in wheel.namelist():
+        if name.startswith('fastfence/') and not name.endswith('/'):
+            assert (package.parent / name).read_bytes() == wheel.read(name), name
+print('Installed package version, source isolation and wheel content verified')
+""",
+            str(wheel),
+            version or "",
+            str(Path(__file__).resolve().parents[1]),
+        ],
+        root,
+        environment,
+    )
+
+
+def install_package(python, wheel, root, environment, pypi_version):
+    command = [
+        "uv",
+        "--native-tls",
+        "--no-config",
+        "pip",
+        "install",
+        "--python",
+        str(python),
+        "--default-index",
+        "https://pypi.org/simple",
+        "--no-cache",
+        f"fastfence=={pypi_version}" if pypi_version else str(wheel),
+    ]
+    attempts = 3 if pypi_version else 1
+    for attempt in range(attempts):
+        try:
+            run(command, root, environment)
+            return
+        except subprocess.CalledProcessError:
+            if attempt + 1 == attempts:
+                raise
+            print(
+                "Retrying exact-version public index installation after propagation delay"
+            )
+            time.sleep(10)
+
+
+def smoke(
+    wheel: Path,
+    *,
+    full: bool = False,
+    ocr: bool = False,
+    pypi_version: str | None = None,
+) -> None:
     with tempfile.TemporaryDirectory(prefix="fastfence-wheel-") as temporary:
         root = Path(temporary)
         environment = {
@@ -106,25 +168,21 @@ def smoke(wheel: Path, *, full: bool = False, ocr: bool = False) -> None:
         }
         environment["PYTHONDONTWRITEBYTECODE"] = "1"
         run(
-            ["uv", "venv", "--python", "3.12", str(root / "venv")],
+            [
+                "uv",
+                "--no-config",
+                "venv",
+                "--python",
+                "3.12",
+                str(root / "venv"),
+            ],
             root,
             environment,
         )
         python = root / "venv/bin/python"
         executable = root / "venv/bin/fastfence"
-        run(
-            [
-                "uv",
-                "--native-tls",
-                "pip",
-                "install",
-                "--python",
-                str(python),
-                str(wheel),
-            ],
-            root,
-            environment,
-        )
+        install_package(python, wheel, root, environment, pypi_version)
+        verify_installed(python, wheel, root, environment, pypi_version)
         run([str(executable), "init", "--anonymization"], root, environment)
         run([str(executable), "doctor"], root, environment)
         run(

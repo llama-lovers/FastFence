@@ -41,6 +41,8 @@ jobs:
           uv run --locked --with playwright==1.63.0 python evaluation/smoke_console.py --output state/private/console-browser.json
           uv run --locked --with playwright==1.63.0 python evaluation/smoke_playground_models.py --output state/private/model-browser.json
           uv run --locked --with playwright==1.63.0 python evaluation/smoke_audit_ui.py --output state/private/audit-browser.json
+      - name: Build documentation without publishing unreleased changes
+        run: uv run --locked mkdocs build --strict
       - name: Run all configured quality gates
         run: uv run --locked pre-commit run --all-files --show-diff-on-failure
       - name: Reject files rewritten by quality hooks
@@ -59,12 +61,3 @@ jobs:
             base="$(git rev-parse HEAD^)"
           fi
           uv run --locked python scripts/check_specs.py --base "$base"
-
-  documentation:
-    needs: verify
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/docs.yml
