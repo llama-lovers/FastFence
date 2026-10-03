@@ -1,43 +1,22 @@
 # Manual acceptance test
 
-## Install from a fresh clone
+## Install the package in a fresh directory
 
-Prerequisites: Git, Python 3.12, [uv](https://docs.astral.sh/uv/), and
-[Ollama](https://ollama.com/) for the model features. Start the Ollama application
-(or run `ollama serve` in a separate terminal). The steps below create new local
-credentials and encryption keys; they do not depend on the maintainer's `.env`
-or private state.
+Complete [Getting started](getting-started.md) in a new directory with Python 3.12, the installed `fastfence` package, and a running Ollama service. No source checkout or maintainer state is needed. For all checks including OCR:
 
 ```sh
-git clone https://github.com/llama-lovers/HackYeah2026-challenge-second.git
-cd HackYeah2026-challenge-second
-uv sync --locked
-uv run fastfence init --anonymization
-sh integrations/laya/setup.sh
-sh scripts/setup-ocr.sh
+fastfence init --anonymization
+fastfence setup-laya
+fastfence setup-ocr
 ollama pull qwen3:4b
 ollama pull qwen3:0.6b
-uv run fastfence doctor --full
-uv run fastfence serve
+fastfence doctor --full
+fastfence serve
 ```
 
-**Wait for `doctor --full` to pass before starting the scenarios below.** It
-checks the core configuration, private keyring, Laya environment, OCR interpreter
-and models, and both Qwen models. It prints the setup command for any missing
-prerequisite. Model downloads require an internet connection; OCR inference
-uses only the downloaded local files.
+Wait for `doctor --full` to pass. It checks private initialization, Laya, the isolated OCR interpreter and models, and both Qwen models. Model downloads require a network connection; OCR inference uses downloaded local files.
 
-`init --anonymization` creates `state/identities.json`, `state/credentials.json`
-and `state/anonymization-keys.json` with private permissions. Repeating it
-preserves existing valid credentials and keys. Keep these files out of Git.
-The startup reads the keyring automatically, and detects the OCR environment
-created by `scripts/setup-ocr.sh`. No manually invented absolute paths or copied
-private `.env` are required for this setup.
-
-The default policy requires Laya/Qwen3:4b for text assessment. A missing assessor
-fails closed. For offline development checks, explicitly select
-`config/policy.offline.yaml` in a separate test checkout as described in
-[Getting started](getting-started.md#explicit-offline-checks).
+Initialization preserves existing valid credentials and keys. New `state/identities.json`, `state/credentials.json` and `state/anonymization-keys.json` are private. The default policy requires Laya/Qwen3:4b; an unavailable assessor fails closed.
 
 ## Connect
 
@@ -48,15 +27,10 @@ For an existing installation with `state/demo-tokens.json`, use its original
 `security-admin` and `analyst-blue` credentials; upgrades preserve that state.
 
 If another gateway already uses port 8000, stop that instance or use
-`uv run fastfence serve --port 8002` and open <http://127.0.0.1:8002>.
+`fastfence serve --port 8002` and open <http://127.0.0.1:8002>.
 Use the selected port in MCP/client URLs too.
 
-Run automatic checks separately:
-
-```sh
-uv run pytest -q
-uv run pre-commit run --all-files
-```
+Developer suites and reproducible source acceptance checks are documented in [Contributing](contributing.md).
 
 ## Check actual text assessment
 
@@ -108,6 +82,8 @@ The activated policy lives in `config/policy.yaml`; reviewed regression cases
 are stored separately in `config/policy-tests.yaml`.
 
 ## Stateless anonymization and optional restoration
+
+For public/private-key encryption, first follow the [RSA envelope setup](examples/asymmetric-anonymization.md). It issues FFR2 tokens using the configured public key, with private-key recovery and an issuer-authentication keyring. The flow below works with either RSA-backed FFR2 or existing symmetric FFR1 tokens.
 
 First remove the letter-a rule: it would intentionally block many names and
 email addresses before anonymization. Use **Policies → Edit configuration** to increase `version`
@@ -172,15 +148,17 @@ Keys are never returned by the dashboard.
 
 ## Images and multipage PDFs
 
-The full installation above already prepares OCR. To add it later:
+The full installation above already prepares OCR. Download the [complete examples archive](downloads/fastfence-examples.zip) and extract it into `examples/` as described in [Getting started](getting-started.md#download-runnable-examples). It includes five synthetic OCR fixtures under `examples/documents/`; you can also download [two-pages.pdf](downloads/documents/two-pages.pdf) directly.
+
+To add OCR later:
 
 ```sh
-sh scripts/setup-ocr.sh
-uv run fastfence doctor --full
+fastfence setup-ocr
+fastfence doctor --full
 ```
 
 Restart the gateway after installing OCR or changing startup settings. The
-installer uses the locked `ocr` dependency extra in a separate environment and
+installer uses the bundled hash-locked OCR requirements in a separate environment and
 preloads the model files. Advanced deployments can set `FASTFENCE_OCR_PYTHON`
 and `FASTFENCE_OCR_MODELS`; preserve the virtual environment interpreter path
 rather than resolving its symlink to the base Python.
@@ -200,10 +178,10 @@ it does not edit source image/PDF pixels or produce a redacted PDF.
 
 ## Try it through MCP
 
-With the gateway running and your policy activated, run this from the repository:
+With the gateway running and your policy activated, run this from your installation directory:
 
 ```sh
-uv run python - <<'PYCODE'
+python - <<'PYCODE'
 import asyncio
 import json
 from pathlib import Path
@@ -238,21 +216,6 @@ it must not contain prompts, OCR text, original names or recovery tokens.
 The local suite uses explicit test adapters and is reproducible without downloading OCR weights or calling Qwen;
 real-model and real-OCR checks are separate from offline CI.
 
-## Reproduce the clean-install acceptance check
+## Developer acceptance evidence
 
-This creates a new clone of the committed source, strips inherited FastFence
-settings, creates a fresh virtual environment and new private state, and starts
-a gateway on a free local port. It does not modify the configuration or
-credentials of your working checkout.
-
-```sh
-# No model service required; this also runs in GitHub Actions.
-uv run python scripts/smoke_clean_install.py
-
-# Installs isolated Laya/OCR, pulls models, and tests the real feature paths.
-# Requires a running Ollama service.
-uv run python scripts/smoke_clean_install.py --full
-```
-
-Public package/model download caches may be reused. Existing FastFence keys,
-credentials, `.env`, feature installations and policy edits are never copied.
+See [Contributing](contributing.md) for clean-install and repository regression commands. These are separate from the product scenarios above.

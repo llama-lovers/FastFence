@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The earlier clean-installation checkpoint passed **659 tests** with **91.40%** coverage. The current console, named-rule and model-upstream checkpoint passes **778 tests** with **91.90%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The earlier clean-installation checkpoint passed **659 tests** with **91.40%** coverage. The console, named-rule and model-upstream checkpoint passed **778 tests** with **91.90%** coverage. The package, asymmetric anonymization and accounting checkpoint passes **820 tests** with **92.02%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -48,6 +48,8 @@ require private credentials. Real OCR and Qwen checks run locally as separate
 integration evidence.
 
 ## Fresh-clone installation evidence
+
+The current product checkpoint `40e63e7` also passed a fresh clone with actual Laya, Qwen and OCR: **22 checks**, including semantic input/output assessment, generated rule cases, MCP letter-rule enforcement, multipage OCR and protected OCR-to-model completion. No private configuration or state was inherited. See the [current full installation report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/clean-install-product-full.json). The older reports below describe earlier configurations.
 
 The [core acceptance report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/clean-install-core.json)
 records a fresh clone of commit `fc4cddc36718d07fccd27a40f02cef44a1bcc71f`,

@@ -6,10 +6,10 @@ The private FastMCP backend is in-process and has no unprotected listening port.
 
 ## Run
 
-From the repository, after `uv sync --locked`:
+After [installing the package](../getting-started.md), extract the [examples archive](../downloads/fastfence-examples.zip) into `examples/` in your installation directory. Keep `policy.yaml` and `signatures.json` next to `fastmcp_server.py`. Then run:
 
 ```sh
-uv run python -m examples.docs.fastmcp_server
+python examples/fastmcp_server.py
 ```
 
 The application listens on `http://127.0.0.1:8010`. It initializes a separate policy and credentials in `state/examples/fastmcp-integration/`; it does not change the main installation. Open this console and connect the `local-agent` and `local-admin` credentials from that directory's `state/credentials.json`.

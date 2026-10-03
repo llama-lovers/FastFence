@@ -1,0 +1,43 @@
+id: FF-076
+title: Package-first product documentation and downloadable runnable examples
+status: implemented
+problem: Public installation and example instructions require a source checkout instead of the installed FastFence product.
+scope:
+- Make Python 3.12 virtualenv and pip installation the primary operator workflow.
+- Document packaged setup commands, upgrades and local working-directory configuration.
+- Publish exact example source files and a complete downloadable archive including supporting policy and signatures.
+- Keep source checkout and developer test instructions in contributing documentation.
+- Include five explicit synthetic OCR fixture downloads under documents/ so installed-package manual checks need no checkout.
+constraints:
+- Do not claim a PyPI release was published before it is verified.
+- Example source embedded in HTML and LLM corpus must match download content.
+- Do not modify private operator state or require Git cloning the FastFence repository.
+change_paths:
+- README.md
+- docs/index.md
+- docs/getting-started.md
+- docs/learn.md
+- docs/integrations.md
+- docs/manual-testing.md
+- docs/contributing.md
+- docs/examples/*.md
+- scripts/docs_reference.py
+- tests/unit/test_documentation_downloads.py
+- mkdocs.yml
+- docs/policies.md
+- docs/integration-reference.md
+- docs/deployment.md
+acceptance:
+- Operators can install a release wheel or PyPI package and follow startup commands without a checkout.
+- The downloadable examples contain all Python, YAML and JSON source dependencies and exclude generated state and credentials.
+- HTML, download and LLM corpus sources agree exactly.
+validation:
+- command: uv run mkdocs build --strict
+  expected: All public documentation and generated downloads build successfully.
+evidence:
+- result: 'Two source-download parity tests passed; deterministic ZIP contains thirteen explicit public files: eight executable/configuration
+    examples and five synthetic document fixtures.'
+- result: Strict MkDocs build passed; generated downloads and full-source LLM corpus created.
+- result: 'Fresh temporary Python3.12 environment installed built0.1.0 wheel; extracted published ZIP; ran three client parsers,
+    RSA generator and real FastMCP tool through installed gateway handlers: hello allowed/HELLO, forbidden blocked before
+    execution. No source import path.'

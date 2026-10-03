@@ -100,6 +100,14 @@ class AppSettings(BaseSettings):
         le=86400,
         description="Maximum lifetime of reversible text tokens in seconds",
     )
+    anonymization_public_key_file: Path | None = Field(
+        default=None,
+        description="Trusted RSA-3072 public PEM for FFR2 encryption; requires matching private PEM and issuer keyring",
+    )
+    anonymization_private_key_file: Path | None = Field(
+        default=None,
+        description="Private RSA-3072 PEM for FFR2 recovery and security reinspection; both RSA paths are required together",
+    )
 
     ocr_python: Path | None = Field(
         default=None, description="Trusted isolated OCR Python interpreter"
@@ -142,6 +150,19 @@ class AppSettings(BaseSettings):
             self.authoring_root = self.authoring_root.resolve()
         if self.identity_config_file is not None:
             self.identity_config_file = self.identity_config_file.resolve()
+        if (self.anonymization_public_key_file is None) != (
+            self.anonymization_private_key_file is None
+        ):
+            raise ValueError(
+                "Both anonymization public and private key files are required"
+            )
+        for name in (
+            "anonymization_public_key_file",
+            "anonymization_private_key_file",
+        ):
+            path = getattr(self, name)
+            if path is not None:
+                setattr(self, name, (self.root / path).resolve())
         ocr_root = self.state_path / "private"
         if (
             self.ocr_python is None

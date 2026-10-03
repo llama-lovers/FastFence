@@ -18,6 +18,9 @@ from fastfence.modules.anonymization.domain.tokens import (
     VerifiedToken,
     parse_token,
 )
+from fastfence.modules.anonymization.persistence.asymmetric import (
+    AsymmetricEnvelope,
+)
 from fastfence.shared.anonymization import (
     AnonymizationContext,
     AnonymizationError,
@@ -69,6 +72,7 @@ class StatelessTokenCodec:
         ttl_seconds: int = 1800,
         max_value_bytes: int = 4096,
         max_token_bytes: int = 8192,
+        asymmetric_envelope: AsymmetricEnvelope | None = None,
         clock: Callable[[], float] = time.time,
     ) -> None:
         if not keyring or current_key_id not in keyring or len(keyring) > 16:
@@ -103,15 +107,22 @@ class StatelessTokenCodec:
                     b"identifier/v1",
                     b"label-auth/v1",
                     b"value-aead/v1",
+                    b"envelope-auth/v2",
                 )
             ]
-            prepared[key_id] = (material[0], material[1], AESGCM(material[2]))
+            prepared[key_id] = (
+                material[0],
+                material[1],
+                AESGCM(material[2]),
+                material[3],
+            )
         self._keys = MappingProxyType(prepared)
         self.current_key_id = current_key_id
         self.ttl_seconds = ttl_seconds
         self.max_value_bytes = max_value_bytes
         self.max_token_bytes = max_token_bytes
         self.clock = clock
+        self._asymmetric = asymmetric_envelope
 
     @staticmethod
     def _identifier(
@@ -136,9 +147,11 @@ class StatelessTokenCodec:
         raw = original.encode()
         if len(raw) > self.max_value_bytes:
             raise AnonymizationError("anonymization_value_too_large")
-        id_key, mac_key, cipher = self._keys[self.current_key_id]
+        id_key, mac_key, cipher, envelope_key = self._keys[self.current_key_id]
         identifier = self._identifier(id_key, raw, context, rule)
         version = "FFI1" if mode == "irreversible" else "FFR1"
+        if mode == "reversible" and self._asymmetric is not None:
+            version = "FFR2"
         fields = [
             version,
             self.current_key_id,
@@ -152,6 +165,8 @@ class StatelessTokenCodec:
         aad = _aad(header, context, rule)
         if mode == "irreversible":
             payload = _encoded(hmac.digest(mac_key, aad, "sha256")[:16])
+        elif self._asymmetric is not None:
+            payload = _encoded(self._asymmetric.encrypt(raw, aad, envelope_key))
         else:
             nonce = os.urandom(12)
             payload = _encoded(nonce + cipher.encrypt(nonce, raw, aad))
@@ -159,6 +174,20 @@ class StatelessTokenCodec:
         if len(token) > self.max_token_bytes:
             raise AnonymizationError("anonymization_token_too_large")
         return token
+
+    def _decrypt(
+        self,
+        version: str,
+        payload: bytes,
+        aad: bytes,
+        cipher: AESGCM,
+        envelope_key: bytes,
+    ) -> bytes:
+        if version == "FFR2":
+            if self._asymmetric is None:
+                raise AnonymizationError("anonymization_invalid_token")
+            return self._asymmetric.decrypt(payload, aad, envelope_key)
+        return cipher.decrypt(payload[:12], payload[12:], aad)
 
     def verify(
         self, token: str, rule: AnonymizationRule, context: AnonymizationContext
@@ -173,7 +202,7 @@ class StatelessTokenCodec:
             or fields.prefix != rule.replacement
         ):
             raise AnonymizationError("anonymization_invalid_token")
-        id_key, mac_key, cipher = material
+        id_key, mac_key, cipher, envelope_key = material
         header = token[1:-1].rsplit(".", 1)[0]
         aad = _aad(header, context, rule)
         payload = _decoded(fields.payload)
@@ -188,7 +217,9 @@ class StatelessTokenCodec:
                 mode="irreversible",
             )
         try:
-            raw = cipher.decrypt(payload[:12], payload[12:], aad)
+            raw = self._decrypt(
+                fields.version, payload, aad, cipher, envelope_key
+            )
             if len(raw) > self.max_value_bytes:
                 raise AnonymizationError("anonymization_value_too_large")
             original = raw.decode("utf-8")

@@ -1,0 +1,82 @@
+name: Publish FastFence to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag on main, for example v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pypi-publication
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.8.10"
+          python-version: "3.12"
+      - name: Require a version tag on main
+        run: |
+          uv run --no-project python -c 'import ast, os, pathlib; version = ast.literal_eval(ast.parse(pathlib.Path("_version.py").read_text()).body[0].value); assert os.environ["RELEASE_TAG"] == "v" + version, "Release tag must match package version"'
+          git show-ref --verify "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
+          git merge-base --is-ancestor HEAD origin/main
+      - name: Run release tests
+        run: uv run --locked pytest -q --tb=short
+      - name: Run configured quality gates before release
+        run: |
+          uv run --locked pre-commit run --all-files
+          git diff --exit-code
+      - name: Build source distribution and wheel
+        run: uv build
+      - name: Check package metadata
+        run: uvx --from twine==7.0.0 twine check dist/*
+      - name: Install and exercise the wheel outside the checkout
+        run: uv run --locked python scripts/smoke_wheel.py dist/*.whl
+      - name: Retain the exact verified artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: python-distributions
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/project/fastfence/
+    permissions:
+      id-token: write
+    steps:
+      - name: Download the verified artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: python-distributions
+          path: dist/
+      - name: Publish with PyPI Trusted Publishing and attestations
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          attestations: true

@@ -74,7 +74,7 @@ with httpx.Client(base_url="http://127.0.0.1:8000", headers=headers, timeout=65)
     print(json.dumps(result.json(), indent=2))
 ```
 
-Save this as a local Python file and execute it with `uv run python <file>`. The response includes `decision` (`blocked` or `no_semantic_block`), `semantic_score`, `provider`, `model`, `rule_applied`, `base_version` and `latency_ms`. The sample is limited to 4,096 characters. Change the outer `direction`/`target` to test other combinations; `rule_applied: false` means this candidate was outside that scope, while the existing applicable security instructions can still produce a block.
+Save this as a local Python file and execute it with `python <file>` in your activated FastFence virtual environment. The response includes `decision` (`blocked` or `no_semantic_block`), `semantic_score`, `provider`, `model`, `rule_applied`, `base_version` and `latency_ms`. The sample is limited to 4,096 characters. Change the outer `direction`/`target` to test other combinations; `rule_applied: false` means this candidate was outside that scope, while the existing applicable security instructions can still produce a block.
 
 A stale base version returns `409`; invalid candidate configuration returns `422`; unavailable or busy analysis returns `503`. Refresh the active version and retry deliberately. The score reflects the combined semantic context rather than a matched-rule attribution. `no_semantic_block` is not a full runtime allow decision: this endpoint does not test agent permissions, budgets, local privacy controls or upstream behavior. It does count the assessment in semantic-call telemetry.
 

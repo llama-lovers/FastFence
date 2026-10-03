@@ -1,0 +1,28 @@
+id: FF-075
+title: Retain token reservations after failed upstream execution
+status: implemented
+problem: A malformed or unavailable model response after upstream execution released the reserved model allowance and charged only input bytes, permitting repeated calls beyond the configured token budget.
+scope:
+  - Charge the full reservation when an attempted upstream operation fails without trustworthy usage.
+  - Preserve pre-upstream semantic failure accounting and ordinary validated usage settlement.
+constraints:
+  - Do not retry the provider or infer usage from malformed responses.
+  - Preserve sanitized failure reasons and existing per-instance in-memory limits.
+  - Keep pre-upstream semantic failure and successful usage settlement unchanged.
+change_paths:
+  - src/fastfence/modules/control/application/services/engine.py
+  - tests/integration/test_failed_provider_accounting.py
+  - docs/security-review.md
+acceptance:
+  - An actual loopback HTTP provider returning excessive or absent usage fails closed and retains the full 1103 token reservation for a short prompt and 64 output tokens.
+  - A second invocation under a 1150 token budget is rejected before another provider request.
+  - HTTP provider errors follow the same conservative accounting rule.
+  - Failures before business upstream execution preserve existing semantic accounting.
+validation:
+  - command: uv run pytest --no-cov -q tests/integration/test_failed_provider_accounting.py tests/unit/test_model_template_reservation.py tests/unit/test_laya_semantic_runtime.py tests/integration/test_gateway.py
+    expected: All accounting and semantic regressions pass.
+evidence:
+  - command: Focused accounting, gateway, semantic and asymmetric unit/REST suite
+    result: 81 tests passed. Real loopback failures retained 1103 tokens and rejected the second invocation under a 1150-token budget without a second provider request.
+  - command: OpenAI adapter, legacy token and reinspection suite
+    result: 64 tests passed. Independent crypto review found no confirmed blocker within the documented single-recipient, preloaded-key scope.

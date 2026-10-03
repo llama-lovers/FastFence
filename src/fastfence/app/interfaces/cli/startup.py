@@ -15,7 +15,7 @@ from fastfence.workflows.anonymization import build_anonymization
 def startup_error() -> str:
     return (
         "FastFence startup/configuration failed. No credentials were changed. "
-        "Run `uv run fastfence doctor` to check prerequisites. "
+        "Run `fastfence doctor` to check prerequisites. "
         "Check private identity/key configuration and config/policy.yaml; "
         "validation input is omitted to protect secrets."
     )
@@ -28,7 +28,7 @@ def preflight(settings: AppSettings) -> None:
             or settings.state_path / "identities.json"
         )
         if not path.is_file():
-            command = f"uv run fastfence init --state {shlex.quote(str(settings.state_path))} --anonymization"
+            command = f"fastfence init --state {shlex.quote(str(settings.state_path))} --anonymization"
             hint = (
                 "Provision FASTFENCE_IDENTITY_CONFIG_FILE at the configured location."
                 if settings.identity_config_file
@@ -58,7 +58,7 @@ def preflight(settings: AppSettings) -> None:
                 )
                 if not key_file.is_file():
                     raise SystemExit(
-                        "Anonymization is enabled but no keyring is configured. Run `uv run fastfence init --anonymization` before serving."
+                        "Anonymization is enabled but no keyring is configured. Run `fastfence init --anonymization` before serving."
                     )
     finally:
         runtime.close()
@@ -137,7 +137,7 @@ def doctor(settings: AppSettings, *, full: bool = False) -> None:
     )
     if not full:
         print(
-            "Run `uv run fastfence doctor --full` to check optional feature prerequisites."
+            "Run `fastfence doctor --full` to check optional feature prerequisites."
         )
         return
     checks = [
@@ -163,7 +163,7 @@ def doctor(settings: AppSettings, *, full: bool = False) -> None:
                 settings.anonymization_keys_file
                 or settings.state_path / "anonymization-keys.json"
             ).is_file(),
-            "uv run fastfence init --anonymization",
+            "fastfence init --anonymization",
         ),
     ]
     for label, ready, fix in checks:

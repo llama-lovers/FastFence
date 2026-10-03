@@ -1,0 +1,52 @@
+id: FF-073
+title: Build an installable product wheel and publish through PyPI trusted identity
+status: implemented
+problem: Publishing the existing wheel would omit Laya runtime helpers and leave default protection unusable without a source checkout.
+scope:
+  - Bundle an explicit whitelist of Laya worker and authoring helper resources in wheels and source distributions.
+  - Add an explicit setup-laya CLI that stages packaged helpers and runs the existing pinned, hash-locked dependency installation.
+  - Add a setup-ocr CLI using packaged hash-locked requirements and the installed package's OCR model bootstrap in an isolated environment.
+  - Verify wheel-only installation, initialization, HTTP assets and default fail-closed behavior outside the checkout.
+  - Add a version-tag-checked GitHub Actions workflow using PyPI Trusted Publishing and attestations.
+constraints:
+  - Never overwrite customized local helpers or include private state, credentials, model files or evaluation outputs in distributions.
+  - Keep model installation explicit and preserve dependency failure as a closed gateway verdict.
+  - Limit OIDC publishing permission to the publication job and publish only previously verified artifacts.
+  - Do not claim PyPI publication until the public artifact is verified.
+change_paths:
+  - pyproject.toml
+  - src/fastfence/app/interfaces/cli/main.py
+  - src/fastfence/app/interfaces/cli/startup.py
+  - src/fastfence/app/interfaces/cli/laya_install.py
+  - src/fastfence/app/interfaces/cli/ocr_install.py
+  - src/fastfence/shared/defaults/ocr-requirements.txt
+  - tests/unit/test_packaged_laya.py
+  - tests/unit/test_packaged_ocr.py
+  - scripts/smoke_wheel.py
+  - .github/workflows/publish.yml
+  - docs/publishing.md
+acceptance:
+  - Installed wheels serve the console and bootstrap valid configuration in an empty working directory.
+  - Wheel users can install the reviewed Laya integration without checking out FastFence source.
+  - The exact tag version must match package metadata and belong to main before upload.
+  - PyPI receives the tested wheel and source distribution through the configured pypi environment.
+validation:
+  - command: uv build
+    expected: Wheel and source distribution build successfully.
+  - command: uv run python scripts/smoke_wheel.py dist/fastfence-0.1.0-py3-none-any.whl
+    expected: Fresh isolated installation, CLI and HTTP verification pass.
+  - command: uv run python scripts/smoke_wheel.py dist/fastfence-0.1.0-py3-none-any.whl --full
+    expected: Installed setup-laya and actual protected benign and attack requests pass outside the checkout.
+  - command: uv run pytest --no-cov -q tests/unit/test_packaged_laya.py tests/unit/test_packaged_ocr.py tests/unit/test_packaged_bootstrap.py tests/unit/test_cli_demo.py tests/unit/test_cli_startup.py
+    expected: Package resource, safe staging, setup, initialization and CLI checks pass.
+  - command: uv run python scripts/smoke_wheel.py dist/fastfence-0.1.0-py3-none-any.whl --ocr
+    expected: Installed setup-ocr downloads isolated dependencies and models, then actual synthetic recognition passes.
+evidence:
+  - check: Focused packaging and CLI tests
+    result: 47 tests passed; subsequent package-first CLI diagnostic edits passed 26 adjacent tests.
+  - check: Actual installed wheel Laya setup and inference
+    result: Fresh external wheel install, pinned Laya setup, packaged HTTP assets, Hi allowed with input/output semantic scans passed, and exact secrets/env attack blocked before upstream execution.
+  - check: Actual installed wheel OCR setup and recognition
+    result: Fresh external wheel install, hash-locked OCR dependency installation, mobile model downloads and synthetic FastFence OCR sample recognition passed.
+  - check: Distribution metadata and typing
+    result: Wheel and sdist passed Twine 7 checks; new installers passed basedpyright with zero errors or warnings.

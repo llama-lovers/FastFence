@@ -1,0 +1,87 @@
+{
+  "scope": "Synthetic single-process preloaded token codec only; not gateway latency or throughput/SLA. No key generation, file/network I/O, model, OCR, matching or audit in timed operations.",
+  "environment": {
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.12.12",
+    "cryptography": "50.0.2"
+  },
+  "limits": {
+    "max_value_bytes": 4096,
+    "max_token_bytes": 8192
+  },
+  "results": {
+    "FFR1": [
+      {
+        "original_bytes": 16,
+        "token_bytes": 123,
+        "samples": 100,
+        "issue": {
+          "mean_ms": 0.008434,
+          "p95_ms": 0.00925
+        },
+        "verify": {
+          "mean_ms": 0.010936,
+          "p95_ms": 0.011292
+        },
+        "issue_and_verify": {
+          "mean_ms": 0.01937,
+          "p95_ms": 0.0205
+        }
+      },
+      {
+        "original_bytes": 4096,
+        "token_bytes": 5563,
+        "samples": 100,
+        "issue": {
+          "mean_ms": 0.017355,
+          "p95_ms": 0.017666
+        },
+        "verify": {
+          "mean_ms": 0.039877,
+          "p95_ms": 0.041
+        },
+        "issue_and_verify": {
+          "mean_ms": 0.057232,
+          "p95_ms": 0.058458
+        }
+      }
+    ],
+    "FFR2": [
+      {
+        "original_bytes": 16,
+        "token_bytes": 720,
+        "samples": 100,
+        "issue": {
+          "mean_ms": 0.04113,
+          "p95_ms": 0.043667
+        },
+        "verify": {
+          "mean_ms": 1.234981,
+          "p95_ms": 1.24
+        },
+        "issue_and_verify": {
+          "mean_ms": 1.276111,
+          "p95_ms": 1.2825
+        }
+      },
+      {
+        "original_bytes": 4096,
+        "token_bytes": 6160,
+        "samples": 100,
+        "issue": {
+          "mean_ms": 0.065818,
+          "p95_ms": 0.199667
+        },
+        "verify": {
+          "mean_ms": 1.479695,
+          "p95_ms": 3.362666
+        },
+        "issue_and_verify": {
+          "mean_ms": 1.545513,
+          "p95_ms": 3.614416
+        }
+      }
+    ]
+  }
+}

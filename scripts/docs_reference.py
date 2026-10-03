@@ -1,7 +1,9 @@
 """Build public source references and LLM-readable docs without runtime state."""
 
 import ast
+import io
 import re
+import zipfile
 from pathlib import Path
 
 from mkdocs.structure.files import File
@@ -12,6 +14,11 @@ REPOSITORY = (
     "https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/"
 )
 PAGES = (
+    (
+        "examples/asymmetric-anonymization.md",
+        "Public/private-key anonymization",
+        "Generate RSA keys and run authenticated stateless recovery envelopes.",
+    ),
     (
         "examples/openai-upstream.md",
         "Model upstreams",
@@ -87,6 +94,52 @@ PAGES = (
     ),
 )
 
+EXAMPLE_FILES = (
+    "asymmetric_keys.py",
+    "protected_request.py",
+    "semantic_policy.py",
+    "mcp_client.py",
+    "fastmcp_server.py",
+    "openai_client.py",
+    "policy.yaml",
+    "signatures.json",
+)
+
+
+DOCUMENT_FILES = (
+    "english.png",
+    "polish.jpg",
+    "rotated.png",
+    "two-pages.pdf",
+    "mixed.pdf",
+)
+
+
+def example_downloads():
+    sources = {
+        name: (ROOT / "examples/docs" / name).read_bytes()
+        for name in EXAMPLE_FILES
+    }
+    sources.update(
+        {
+            f"documents/{name}": (
+                ROOT / "examples/documents" / name
+            ).read_bytes()
+            for name in DOCUMENT_FILES
+        }
+    )
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(
+        buffer, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
+        for name, content in sources.items():
+            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o644 << 16
+            archive.writestr(info, content)
+    return sources, buffer.getvalue()
+
+
 SOURCE_MARKER = re.compile(
     r"<!-- source: (examples/docs/[a-z_]+\.(?:py|yaml)) -->"
 )
@@ -97,7 +150,7 @@ def embed_sources(markdown):
         relative = match.group(1)
         source = (ROOT / relative).read_text().rstrip()
         language = "python" if relative.endswith(".py") else "yaml"
-        return f"```{language}\n{source}\n```\n\n[View source]({REPOSITORY}{relative})"
+        return f"```{language}\n{source}\n```\n\n[Download {Path(relative).name}](https://fastfence.dev/downloads/{Path(relative).name}) · [View source]({REPOSITORY}{relative})"
 
     return SOURCE_MARKER.sub(embed, markdown)
 
@@ -179,6 +232,16 @@ def endpoint_reference():
 
 
 def on_files(files, config):
+    sources, archive = example_downloads()
+    for name, content in sources.items():
+        files.append(
+            File.generated(config, f"downloads/{name}", content=content)
+        )
+    files.append(
+        File.generated(
+            config, "downloads/fastfence-examples.zip", content=archive
+        )
+    )
     for file in list(files):
         if file.src_uri.endswith(".md") and SOURCE_MARKER.search(
             file.content_string
@@ -196,7 +259,7 @@ def on_files(files, config):
         "",
         "> Local security policy enforcement for AI agents, models and tools.",
         "",
-        "FastFence is installed from its source repository with Python 3.12 and uv. Do not invent a published pip install command. Policies and identities are local configuration; budgets and audit are process-local. Laya authoring produces a reviewed proposal, never implicit activation.",
+        "FastFence is installed as a Python 3.12 package with pip install fastfence uv, followed by fastfence init --anonymization and fastfence setup-laya. No FastFence checkout is required. Runnable example source and its ZIP archive are available under /downloads/. Policies and identities are local configuration; budgets and audit are process-local. Laya authoring produces a reviewed proposal, never implicit activation.",
         "",
         "## Documentation",
         "",

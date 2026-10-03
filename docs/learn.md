@@ -2,6 +2,10 @@
 
 Use these tasks in order on your own local installation. Each task has one observable outcome. The [manual verification guide](manual-testing.md) contains the longer end-to-end checklist.
 
+## Runnable code first
+
+Install the [package](getting-started.md), download its [complete runnable examples](downloads/fastfence-examples.zip), and extract them into your installation's `examples/` directory. Start with the full [REST client](examples/protected-request.md), [named Laya rule](examples/semantic-policy.md), [MCP client](examples/mcp-client.md), or [FastMCP server](examples/fastmcp-server.md). Every page embeds the executable source.
+
 ## 1. Send a protected model request
 
 Complete [Getting started](getting-started.md), including the Laya setup and the local assessment and completion models. Open the console, connect your agent and management identities, and choose **Test requests**. Select the model, enter a short prompt and send the request.

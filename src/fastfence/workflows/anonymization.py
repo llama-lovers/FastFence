@@ -4,6 +4,7 @@ import base64
 import json
 from collections.abc import Callable
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, Literal
 
 from fastfence.modules.anonymization.application.facade import (
@@ -44,7 +45,10 @@ def build_anonymization(settings: AppSettings) -> "AnonymizationWorkflow":
         or settings.state_path / "anonymization-keys.json"
     )
     if settings.anonymization_keys_json is None and not path.exists():
-        if settings.anonymization_keys_file is not None:
+        if (
+            settings.anonymization_keys_file is not None
+            or settings.anonymization_public_key_file is not None
+        ):
             raise ValueError("Private anonymization key file is missing")
         return AnonymizationWorkflow()
     try:
@@ -66,12 +70,24 @@ def build_anonymization(settings: AppSettings) -> "AnonymizationWorkflow":
             keyring=keys,
             current_key_id=settings.anonymization_key_id,
             ttl_seconds=settings.anonymization_ttl_seconds,
+            public_key_pem=_read_pem(settings.anonymization_public_key_file),
+            private_key_pem=_read_pem(settings.anonymization_private_key_file),
         )
     except Exception:
         raise ValueError(
             "Invalid private anonymization key configuration"
         ) from None
     return AnonymizationWorkflow(runtime)
+
+
+def _read_pem(path: Path | None) -> bytes | None:
+    if path is None:
+        return None
+    with path.open("rb") as stream:
+        value = stream.read(16385)
+    if len(value) > 16384:
+        raise ValueError("Anonymization PEM file is too large")
+    return value
 
 
 class AnonymizationWorkflow:
@@ -82,7 +98,10 @@ class AnonymizationWorkflow:
     def _unavailable(
         value: Any, config: AnonymizationConfig
     ) -> AnonymizationResult:
-        if config.enabled or "FFI1." in str(value) or "FFR1." in str(value):
+        if config.enabled or any(
+            marker in str(value).upper()
+            for marker in ("FFI1.", "FFR1.", "FFR2.")
+        ):
             raise AnonymizationError("anonymization_unavailable")
         return AnonymizationResult(value=value)
 

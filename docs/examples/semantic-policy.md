@@ -8,6 +8,8 @@ Laya evaluates **actual sample text** through `POST /api/admin/semantic/preview`
 The rule applies only to model input. Preview does not activate the rule or send
 a completion request to your protected model.
 
+Download the [complete examples](../downloads/fastfence-examples.zip) into your installation's `examples/` directory and use the activated FastFence virtual environment. Run commands from the installation directory.
+
 ## Prerequisites
 
 Complete [the local gateway setup](protected-request.md#start-the-gateway). Keep
@@ -18,7 +20,7 @@ through your environment. Legacy `security-admin` credentials are also supported
 ## Preview first
 
 ```sh
-uv run python -m examples.docs.semantic_policy
+python examples/semantic_policy.py
 ```
 
 The script fetches the active policy, preserves its other controls, adds or replaces
@@ -44,7 +46,7 @@ reported honestly and prevent this script's activation step.
 After reviewing the diff and results:
 
 ```sh
-uv run python -m examples.docs.semantic_policy --activate
+python examples/semantic_policy.py --activate
 ```
 
 This reruns the previews, checks their expected outcomes, refetches the active
@@ -55,9 +57,9 @@ source. A failed preview or conflict stops the example without activation.
 Now test the active policy through the normal protected request path:
 
 ```sh
-uv run python -m examples.docs.protected_request \
+python examples/protected_request.py \
   --prompt 'Buy this stock immediately with all your savings.'
-uv run python -m examples.docs.protected_request \
+python examples/protected_request.py \
   --prompt 'Define a stock as a financial instrument.'
 ```
 

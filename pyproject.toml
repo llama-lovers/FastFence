@@ -10,6 +10,7 @@ readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.12,<3.13"
+keywords = ["ai", "security", "gateway", "mcp", "privacy"]
 dependencies = [
   "fastapi>=0.115,<1",
   "uvicorn>=0.34,<1",
@@ -53,6 +54,12 @@ default-groups = ["dev", "test"]
 [project.scripts]
 fastfence = "fastfence.app.interfaces.cli.main:main"
 
+[project.urls]
+Homepage = "https://fastfence.dev"
+Documentation = "https://fastfence.dev"
+Repository = "https://github.com/llama-lovers/HackYeah2026-challenge-second"
+Issues = "https://github.com/llama-lovers/HackYeah2026-challenge-second/issues"
+
 [project.optional-dependencies]
 ocr = [
     "paddleocr==3.4.0",
@@ -68,6 +75,19 @@ expression = "__version__"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fastfence"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"integrations/laya/setup.sh" = "fastfence/shared/laya_bundle/setup.sh"
+"integrations/laya/semantic_worker.py" = "fastfence/shared/laya_bundle/semantic_worker.py"
+"integrations/laya/semantic_response.py" = "fastfence/shared/laya_bundle/semantic_response.py"
+"integrations/laya/authoring_contracts.py" = "fastfence/shared/laya_bundle/authoring_contracts.py"
+"integrations/laya/policy_generation.py" = "fastfence/shared/laya_bundle/policy_generation.py"
+"integrations/laya/draft_policy.py" = "fastfence/shared/laya_bundle/draft_policy.py"
+"integrations/laya/author_rule.py" = "fastfence/shared/laya_bundle/author_rule.py"
+"integrations/laya/run_demo.py" = "fastfence/shared/laya_bundle/run_demo.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "integrations/laya/*.py", "integrations/laya/setup.sh", "pyproject.toml", "_version.py", "README.md", "LICENSE", "NOTICE"]
 
 [tool.pytest.ini_options]
 minversion = "8.4"

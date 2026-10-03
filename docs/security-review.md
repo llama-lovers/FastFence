@@ -2,13 +2,14 @@
 
 Reviewed on 3 October 2026 against the working-tree changes since `5c225e9`,
 including the subsequent FF-062 and FF-063 fixes and the FF-065/FF-066 scoped-rule
-and semantic-preview additions. The review covered the console,
+and semantic-preview additions, followed by the FF-070 upstream adapter,
+FF-071 asymmetric tokens and FF-075 accounting correction. The review covered the console,
 management authorization and policy updates, default runtime separation, and the
 new Laya semantic worker. It was performed independently of implementation, using
 synthetic credentials, temporary configuration and local fixture servers. Private
 deployment credentials and configuration were not inspected or modified.
 
-No confirmed P0 or P1 issue was found in the reviewed scope. Three confirmed P2
+No confirmed P0 or P1 issue was found in the reviewed scope. Four confirmed P2
 issues were reproduced, fixed and independently retested. This is a scoped review,
 not a security certification or a guarantee that semantic classification detects
 every attack.
@@ -20,6 +21,7 @@ every attack.
 | P2: stale management save overwrote an unseen source update | Start with an active v1, write v2 with a stricter semantic threshold directly to the temporary policy file, then submit a stale v2 candidate. The old implementation accepted the save and erased the stricter source setting. | FF-062 pins the active base under the refresh lock and compares the actual persisted policy before substitution. The HTTP regression now returns 409, preserves the external file and permits a new save after explicit reload. |
 | P2: missing completion state became an allowed classifier response | Return a valid benign severity object with `finish_reason: null` from an isolated HTTP model fixture. The actual installed Laya/LiteLLM path normalized the missing state to `stop`, and the worker accepted it. | FF-063 checks the original OpenAI SDK completion before LiteLLM and Laya normalize it. It requires one explicit stopped completion, a strict severity object and no tool, function or refusal mode. |
 | P2: dependency dotenv loading defeated the worker environment allowlist | Import the installed LiteLLM initialization code from a temporary package tree containing a synthetic `.env`. A marker absent from the filtered child environment reappeared because LiteLLM defaulted to development mode and loaded dotenv. | The child environment now sets `LITELLM_MODE=PRODUCTION` and `PYTHON_DOTENV_DISABLED=1`. The same synthetic fixture no longer imports the marker. |
+| P2: failed provider replies released the model token reservation | A provider returned malformed usage after processing a request. Under a 1150-token budget, two calls with a 1103-token reservation each executed and charged only 15 input units each. | FF-075 retains the full reservation after an attempted upstream operation fails without trustworthy usage. Real loopback HTTP regressions cover excessive usage, missing usage and provider errors; a second call is denied before another upstream request. |
 
 The relevant implementation locations are
 `src/fastfence/modules/control/persistence/policy.py`,
@@ -93,6 +95,44 @@ applicable rules, rather than authorizing a protected invocation. Management
 previews share the bounded single-flight worker and increment semantic-call
 metrics, but are not charged to an agent's invocation budget. Their result neither
 identifies which individual rule matched nor guarantees full runtime acceptance.
+
+## Upstream and asymmetric-token addendum
+
+The FF-070 adapter review checked fixed trusted upstream URLs, remote HTTPS and
+loopback HTTP restrictions, secret settings, disabled redirects/environment
+proxies, total deadlines, response byte bounds and strict usage validation. The
+accounting issue above was found independently, reproduced and corrected before
+publication. Validated successful usage still releases unused reservation;
+unverifiable usage conservatively consumes the reservation, which can overcharge
+an operation that failed before the provider performed inference.
+
+The FF-071 review inspected RSA-3072 OAEP/SHA-256 key wrapping, fresh AES-256-GCM
+content keys/nonces, distinct derived issuer authentication keys, authenticated
+owner/rule/header scope, bounded canonical token parsing and constant-time issuer
+HMAC validation **before RSA private-key operations**. Wrong owners, changed
+rules, missing or rotated keys, altered tokens and expired tokens fail closed.
+Token operations use preloaded keys without conversation storage. REST tests
+exercise hidden-by-default output, permitted restoration, original-text hard-rule
+reinspection, and no original/token material in audit output. The gateway requires
+the private key for policy reinspection; this is not a public-key-only gateway.
+
+Independent verification ran 81 tests covering the accounting correction,
+semantic failure behavior, existing gateway behavior and new asymmetric unit/REST
+cases, plus another 64 adapter, legacy-token and reinspection tests. All passed.
+The real HTTP accounting fixtures use synthetic provider responses, and crypto
+REST tests use a labeled echo backend; neither claims model-quality coverage.
+
+```sh
+uv run pytest --no-cov -q tests/integration/test_failed_provider_accounting.py tests/unit/test_model_template_reservation.py tests/unit/test_laya_semantic_runtime.py tests/integration/test_gateway.py tests/unit/test_asymmetric_anonymization.py tests/integration/test_asymmetric_anonymization.py
+uv run pytest --no-cov -q tests/unit/test_openai_upstream.py tests/integration/test_openai_upstream_transport.py tests/unit/test_anonymization_tokens.py tests/unit/test_anonymization_reinspection.py
+```
+
+Only one RSA recipient pair is loaded: replacing it makes previously issued FFR2
+tokens unreadable. Issuer-key rotation is separately bounded by the configured
+keyring. Authenticated aliases preserve linkability within their owner/rule scope;
+they are pseudonymization, not a claim of anonymous data. Deterministic output
+restrictions and privacy block checks run again after restoration. Semantic
+assessment receives protected text before restoration, not the recovered original.
 
 ## Remaining limits and trust assumptions
 

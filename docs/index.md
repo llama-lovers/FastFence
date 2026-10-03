@@ -12,21 +12,23 @@ FastFence checks AI requests and responses against your access, privacy, text an
 
 ## Start locally
 
-Python 3.12 and [uv](https://docs.astral.sh/uv/) are required. Install from the repository:
+Use Python 3.12 and a running [Ollama](https://ollama.com/) service. Install the package into a virtual environment in your own working directory:
 
 ```sh
-git clone https://github.com/llama-lovers/HackYeah2026-challenge-second.git
-cd HackYeah2026-challenge-second
-uv sync --locked
-uv run fastfence init --anonymization
-sh integrations/laya/setup.sh
+mkdir fastfence-local
+cd fastfence-local
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install fastfence uv
+fastfence init --anonymization
+fastfence setup-laya
 ollama pull qwen3:4b
 ollama pull qwen3:0.6b
-uv run fastfence doctor
-uv run fastfence serve
+fastfence doctor
+fastfence serve
 ```
 
-Install and start [Ollama](https://ollama.com/) before running the model commands above. Open **http://127.0.0.1:8000**. Connect a management identity to inspect and change policies, and an agent identity to send protected requests. Initialization creates your private local credentials; the [quickstart](getting-started.md) explains where to find them. Document recognition has a separate OCR installation step.
+Open **http://127.0.0.1:8000** and connect with your generated local credentials. The [installation guide](getting-started.md) covers prerequisites and private configuration. No FastFence source checkout is required.
 
 ## Choose your task
 

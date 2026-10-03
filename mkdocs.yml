@@ -74,6 +74,7 @@ nav:
       - FastMCP server: examples/fastmcp-server.md
       - OpenAI SDK client: examples/openai-client.md
       - OpenAI-compatible upstream: examples/openai-upstream.md
+      - Public/private-key anonymization: examples/asymmetric-anonymization.md
   - Reference:
       - Integration contracts: integration-reference.md
       - HTTP API from source: reference/http-api.md
@@ -83,7 +84,9 @@ nav:
       - Testing and evidence: testing.md
       - Independent security review: security-review.md
       - Documentation deployment: deployment.md
+      - PyPI releases: publishing.md
   - Project:
+      - Contributing: contributing.md
       - Requirements and evidence: requirements.md
       - Challenge readiness: challenge-readiness.md
       - Stateless anonymization and OCR plan: anonymization-plan.md

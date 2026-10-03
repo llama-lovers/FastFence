@@ -167,7 +167,7 @@ Management clients can retrieve `GET /api/admin/rules/schema`, then call `POST /
 
 ## Describe a policy in the dashboard
 
-Install the pinned Laya engine once with `integrations/laya/setup.sh`, start Ollama with `qwen3:4b` installed, and connect the console with your management identity. In **Policies**, choose **Describe a fast rule**:
+Install the pinned Laya engine once with `fastfence setup-laya`, start Ollama with `qwen3:4b` installed, and connect the console with your management identity. In **Policies**, choose **Describe a fast rule**:
 
 1. Write a specific instruction in Polish or English and select **Draft with Laya**.
 2. Inspect the before/after changes and exact operations. Drafting does not activate anything.
@@ -181,36 +181,16 @@ For example, selective email redaction changes `privacy.detector_actions.pii_ema
 
 A proposal is bound to its management identity and original policy version, expires after ten minutes, and can be activated once. The server requires a preview before activation. Editing examples invalidates the browser's review state; editing the instruction discards the draft. Activation publishes the exact stored candidate without another model call. Preview checks local content controls only: role authorization, budget limits, semantic assessment and upstream behavior still run on an actual invocation.
 
-The management endpoints are `POST /api/admin/policies/draft`, `/preview` and `/activate`. Authoring inference uses a bounded isolated local Laya process outside the deterministic rule matcher. Runtime semantic inspection is a separate stage and may call a model on each inspected interaction. A deployment with a separate configuration root can point the trusted `FASTFENCE_AUTHORING_ROOT` setting at its Laya-enabled checkout. Paths and model endpoints cannot be supplied by browser users.
+The management endpoints are `POST /api/admin/policies/draft`, `/preview` and `/activate`. Authoring inference uses a bounded isolated local Laya process outside the deterministic rule matcher. Runtime semantic inspection is a separate stage and may call a model on each inspected interaction. A deployment with a separate configuration root can point the trusted `FASTFENCE_AUTHORING_ROOT` setting at its Laya-enabled installation directory. Paths and model endpoints cannot be supplied by browser users.
 
 ## Draft a rule in natural language with Laya
 
-The authoring CLI uses the pinned **actual Laya engine** and a real local Qwen model to produce an untrusted proposal in the rule schema above. This happens in the management plane. Once activated, the gateway performs only local literal matching for that rule.
+The installed product's **Describe a fast rule** workflow uses the pinned actual Laya engine and a local Qwen model to produce a bounded proposal. Follow the dashboard steps above, or call the documented management draft, preview and activation endpoints. Once activated, the specific compiled text rule runs locally; separately enabled semantic inspection still calls its assessor.
 
-Start the gateway and Ollama, install `qwen3:4b`, and run `integrations/laya/setup.sh` once. Then draft and preview:
+For an exact example, describe: `Block each word containing the letter a, case insensitive, on model input only.` Inspect `word_contains`, value `a`, model target and input direction. Preview `Hello` (no local match) and `Cat` (blocked), review the diff and activate. Test again through the [downloadable MCP client](examples/mcp-client.md).
 
-```sh
-integrations/laya/author-rule.sh \
-  --instruction 'Blokuj każde słowo zawierające literę a, bez rozróżniania wielkości liter.' \
-  --direction both --target model \
-  --sample Hello --sample Cat \
-  --save-proposal state/no-letter-a.json
-```
+For a meaning-based rule that should be evaluated on each interaction, use the complete [named Laya policy script](examples/semantic-policy.md). It tests real sample content and shows a versioned diff before optional activation. This is a separate workflow from compiling an exact literal rule.
 
-The samples should return `[false, true]`: no match for `Hello`, match for `Cat`. Read the exact proposed rule locally before activation:
-
-```sh
-cat state/no-letter-a.json
-integrations/laya/author-rule.sh \
-  --proposal state/no-letter-a.json \
-  --sample Hello --sample Cat \
-  --activate
-```
-
-Saved-proposal activation revalidates and publishes **the same rule without a second model call**. It preserves other controls, increases the current policy version and rejects duplicate rule IDs or concurrent version conflicts. A saved proposal uses private file permissions (`0600`); do not publish files containing private policy literals. Reports omit instruction, literal value, samples and bearer credentials.
-
-`--direction output` restricts responses only; `input` blocks before generation. Use `--target tool` for tool argument/result string values, or `all` for both. The model cannot widen the explicitly requested direction or target during drafting. Supported values are literal `contains`, `word_contains`, and `equals`; this is not a general compliance compiler. Unsupported or invalid proposals are rejected. A model can still misunderstand your intent: inspect the saved rule and preview representative allowed and forbidden examples.
-
-Compilation connects directly to a separately trusted **loopback Ollama endpoint** using management-side Laya. It is outside the protected agent's quota and policy path so existing content restrictions cannot prevent authorized policy maintenance. Credentials, activation and preview use management-authenticated gateway endpoints. The local-only compiler integration uses isolated Laya settings/storage and a narrow Ollama compatibility adapter; it does not alter your normal Laya configuration.
+Broad legal guidance is not a deterministic compliance compiler. Model assessments and drafts can misunderstand intent; choose independent expected examples and inspect failures. The source repository retains advanced authoring tools for [contributors](contributing.md), but product use does not require those scripts.
 
 To remove or change a rule, use its **Edit rule** or **Remove…** action in **Policies**, review the candidate, and explicitly activate it. Advanced JSON editing is available under **Edit configuration**. Alternatively, update the configured central source with a higher version. Changes apply to subsequent invocations.

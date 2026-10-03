@@ -1,0 +1,32 @@
+{
+  "source_commit": "40e63e7",
+  "fresh_clone": true,
+  "inherited_private_state": false,
+  "full_features": true,
+  "profile": "default_laya",
+  "checks": [
+    "missing_identity_actionable",
+    "repeat_init_preserves_private_files",
+    "doctor_passes",
+    "unauthenticated_denied",
+    "no_simulated_default_tools",
+    "verified_local_identity",
+    "injection_blocked",
+    "sensitive_input_blocked",
+    "rule_preview",
+    "policy_hot_reload",
+    "anonymization_configuration",
+    "audit_has_no_originals",
+    "real_mcp_input_guard",
+    "real_laya_input_risk",
+    "real_laya_input_output_assessment",
+    "real_laya_generated_cases",
+    "real_mcp_letter_rule",
+    "reviewed_policy_activation",
+    "qwen_input_block",
+    "real_qwen_allowed",
+    "real_multipage_ocr",
+    "real_ocr_to_qwen"
+  ],
+  "passed": true
+}

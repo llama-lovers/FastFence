@@ -167,7 +167,11 @@ class Engine:
             asyncio.CancelledError: "request_cancelled",
         }
         state.verdict.reason = reasons.get(type(error), "upstream_failure")
-        if not isinstance(error, ModelUnavailableError):
+        if state.verdict.upstream_executed or not isinstance(
+            error, ModelUnavailableError
+        ):
+            # A failed provider reply cannot establish actual usage. Retain the
+            # reservation once execution was attempted, including invalid usage.
             state.tokens = state.reserved_tokens
         state.cancelled = isinstance(error, asyncio.CancelledError)
 

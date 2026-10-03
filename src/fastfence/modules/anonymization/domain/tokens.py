@@ -15,7 +15,7 @@ class TokenSpan(StrictModel):
 
 
 class TokenFields(StrictModel):
-    version: Literal["FFI1", "FFR1"]
+    version: Literal["FFI1", "FFR1", "FFR2"]
     key_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,16}$")
     rule_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
     prefix: str = Field(pattern=r"^[A-Z][A-Z0-9_]{0,31}$")
@@ -66,13 +66,15 @@ def parse_token(token: str) -> TokenFields:
             raise ValueError
         parts = token[1:-1].split(".")
         if len(parts) == 6 and parts[0] == "FFI1":
+            version = "FFI1"
             expiry = None
-        elif len(parts) == 7 and parts[0] == "FFR1":
+        elif len(parts) == 7 and parts[0] in {"FFR1", "FFR2"}:
+            version = "FFR1" if parts[0] == "FFR1" else "FFR2"
             expiry = parts[5]
         else:
             raise ValueError
         return TokenFields(
-            version=parts[0],
+            version=version,
             key_id=parts[1],
             rule_id=parts[2],
             prefix=parts[3],

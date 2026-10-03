@@ -45,7 +45,7 @@ The pinned MCP transport authenticates before JSON parsing and caps HTTP request
 
 Model completion through MCP requires an installed allowlisted model. Authored input/output rules, privacy, semantic checks, budgets and audit apply identically to HTTP. This server exposes registered operations rather than an unrestricted proxy for arbitrary MCP servers.
 
-From a locally initialized checkout:
+From your initialized package installation directory, save and run this complete Python client:
 
 ```python
 import asyncio
@@ -77,39 +77,18 @@ Tenant resources must match the verified identity. The policy pipeline runs befo
 
 ## Actual Laya integration
 
-The repository runs the real upstream [Laya Python engine](https://github.com/aayushch/laya) at a pinned revision. Setup retains upstream license notices and installs hash-verified dependencies into gitignored local state; it does not vendor the engine into FastFence.
+The installed product uses the upstream [Laya Python engine](https://github.com/aayushch/laya) at a pinned revision. Run `fastfence setup-laya` in your installation directory. This fetches the external engine, retains license notices and installs hash-verified dependencies into private local state. It requires Git, `sh` and `uv`; you do not need the FastFence repository.
 
-The standalone Laya/business-tool demonstration is an explicit example. Start its isolated backend using the [business-tool example instructions](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/examples/business_tools), then supply that example's base URL and credentials to the runner. It must not be pointed at the default product gateway expecting simulated business handlers.
+Laya has two independent roles:
 
-With the example backend, a running Ollama model and its [hybrid policy](policies.md) active:
+- **Runtime assessment:** named natural-language rules and security guidance inspect input/output content through the actual assessment model. Follow the complete [semantic policy client](examples/semantic-policy.md), which tests samples, displays a diff and activates only with explicit `--activate`.
+- **Fast rule authoring:** **Describe a fast rule** drafts a bounded deterministic proposal, with content preview and generated regression cases. Review and activate it; later literal matching does not call Laya.
 
-```sh
-integrations/laya/setup.sh
-integrations/laya/run-demo.sh --url http://127.0.0.1:8001 \
-  --credentials state/examples/business-tools/demo-tokens.json
-```
+The default assessor is Qwen3:4b through local Ollama. Your protected completion model is configured independently. A precise letter restriction should use a literal/text rule; model judgment is approximate. See [policies](policies.md) for scope and failure behavior.
 
-The runner invokes Laya's actual `llm_call` through its custom OpenAI-compatible provider, then registers a `fastfence_invoke` handler in Laya's actual tool-dispatch registry. That handler sends business operations to `/api/invoke`.
+To connect an external agent, route its model client to the [OpenAI-compatible endpoint](examples/openai-client.md) and its registered operations through [FastMCP](examples/fastmcp-server.md). Installing a gateway does not intercept connectors that continue calling upstream services directly.
 
-| Path | Demonstrated protection |
-| --- | --- |
-| Laya model client → FastFence chat route → Ollama | Actual model inference with gateway input/output controls |
-| Laya `fastfence_invoke` handler → FastFence tool route | Allowed search, RBAC denial and cross-tenant denial |
-| Other native Laya connectors | Not automatically intercepted by this demonstration |
-
-All five recorded cases passed: a real model response, model-injection denial, allowed business search, unauthorized payment-preparation denial and cross-tenant memory denial. Business handlers use simulated gateway data; the demo performs no real payments or external account operations.
-
-The runner creates temporary Laya configuration and audit storage without changing the user's Laya configuration or connecting Gmail, Slack or n8n accounts. Laya's temporary SQLite usage belongs to the external agent; FastFence's enforcement ledger remains memory-only. Generated reports omit prompts, generated text, credentials and request bodies.
-
-See the [full integration instructions](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/README.md) and [sanitized live report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/integrations/laya/results/live.json), subject to the project repository's access permissions. A full deployment must route relevant native handlers through the gateway and control network egress so an agent cannot bypass it.
-
-## Laya as a rule author
-
-The dashboard now provides [natural-language policy drafting](policies.md#describe-a-policy-in-the-dashboard), including text restrictions, selective privacy actions and tool-role restrictions. It requires exact review, content preview and explicit activation.
-
-The separate `integrations/laya/author-rule.sh` CLI uses actual Laya model inference to draft bounded text restrictions. It validates and previews the result through management endpoints, then optionally saves a private proposal. Activate that exact proposal with `--proposal ... --activate`; the activation step makes no model call.
-
-This is management-side authoring, separate from the protected agent example above. It uses a trusted local Ollama endpoint and a process-local compatibility adapter for structured output. Read the [complete natural-language authoring workflow](policies.md#draft-a-rule-in-natural-language-with-laya). Compiled text-rule matching is local and model-independent. Semantic inspection is a separate configurable runtime stage and can call a model for each inspected interaction; broad legal or compliance interpretation is outside the authored text-rule DSL.
+Historical standalone Laya/business-tool demonstrations and their recorded results remain in the [source repository](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/integrations/laya). They are developer examples, not prerequisites for package installation or policy assessment.
 
 ## Real business backends
 

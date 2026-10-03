@@ -11,6 +11,8 @@ from fastfence.app.interfaces.cli.initialize import (
     initialize,
     initialize_anonymization,
 )
+from fastfence.app.interfaces.cli.laya_install import setup_laya
+from fastfence.app.interfaces.cli.ocr_install import setup_ocr
 from fastfence.app.interfaces.cli.startup import (
     doctor,
     preflight,
@@ -21,7 +23,10 @@ from fastfence.shared.settings.app_settings import AppSettings
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="FastFence AI Control Layer")
-    parser.add_argument("command", choices=["init", "serve", "doctor"])
+    parser.add_argument(
+        "command",
+        choices=["init", "serve", "doctor", "setup-laya", "setup-ocr"],
+    )
     parser.add_argument(
         "--state", help="Private state directory (overrides .env)"
     )
@@ -50,6 +55,10 @@ def main() -> None:
             initialize(settings.state_path)
             if args.anonymization:
                 initialize_anonymization(settings)
+        elif args.command == "setup-laya":
+            setup_laya(settings.authoring_root or settings.root)
+        elif args.command == "setup-ocr":
+            setup_ocr(settings.state_path)
         elif args.command == "doctor":
             doctor(settings, full=args.full)
         else:

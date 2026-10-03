@@ -1,0 +1,61 @@
+id: FF-071
+title: Stateless public-key envelope encryption for reversible anonymization
+status: implemented
+problem: Reversible tokens currently use a symmetric keyring; the requested public/private-key recovery mode is not implemented.
+scope:
+- Add FFR2 tokens using RSA-3072 OAEP-SHA256 public-key wrapping of a fresh AES-256-GCM content key.
+- Authenticate the complete envelope and scoped token header with a separate issuer key derived from the existing keyring
+  before private-key decryption.
+- Load a matching trusted public/private PEM pair once at startup; preserve FFR1 and irreversible compatibility.
+- Provide exclusive private-permission key generation and a complete documented setup example.
+constraints:
+- Use cryptography library primitives, Pydantic contracts and existing authenticated tenant/subject/rule/expiry semantics.
+- No conversation database, plaintext map, request-path file reads or network calls.
+- Both key files and the issuer keyring are required for a full gateway because security reinspection decrypts tokens internally.
+- Public-key possession alone must not permit forging an accepted token.
+- Restoration still requires explicit request opt-in and active rule permission; invalid tokens fail closed without content
+  leakage.
+change_paths:
+- .secrets.baseline
+- src/fastfence/modules/anonymization/persistence/asymmetric.py
+- src/fastfence/modules/anonymization/persistence/crypto.py
+- src/fastfence/modules/anonymization/domain/tokens.py
+- src/fastfence/modules/anonymization/application/facade.py
+- src/fastfence/workflows/anonymization.py
+- src/fastfence/shared/settings/app_settings.py
+- tests/unit/test_asymmetric_anonymization.py
+- tests/integration/test_asymmetric_anonymization.py
+- examples/docs/asymmetric_keys.py
+- docs/examples/asymmetric-anonymization.md
+- docs/settings.md
+- docs/requirements.md
+- docs/challenge-readiness.md
+- evaluation/benchmark_asymmetric.py
+- evaluation/results/asymmetric-crypto.json
+- docs/manual-testing.md
+- mkdocs.yml
+- scripts/docs_reference.py
+- .env.example
+acceptance:
+- FFR2 round-trips through independent instances with the same trusted keys while equal values retain stable scoped IDs and
+  randomized ciphertext.
+- Tampering, wrong issuer/recipient, altered tenant/subject/rule, expiration and missing keys fail closed.
+- An invalid envelope MAC never reaches RSA decryption.
+- FFR1 remains readable with an RSA pair configured and irreversible behavior remains unchanged.
+- REST responses keep originals hidden by default and restore only with permission plus request opt-in; reinspection prevents
+  encoded-token bypass.
+- Key generation never overwrites existing files and private files have mode 0600.
+validation:
+- command: uv run pytest --no-cov tests/unit/test_asymmetric_anonymization.py tests/integration/test_asymmetric_anonymization.py
+    tests/unit/test_anonymization_tokens.py
+  expected: Cryptographic, statelessness, compatibility, provisioning and REST security regressions pass.
+evidence:
+- result: 76 tests passed across new asymmetric unit/REST tests and existing core/legacy token tests; 27 additional key-file,
+    operations, reinspection and UI regressions passed (103 total).
+- result: basedpyright reported zero errors, warnings or notes; all 16 import contracts and architecture AST checks passed.
+- result: Ruff lint/format and pyscn complexity, dead-code and dependency checks passed.
+- result: Strict MkDocs build passed with public/private-key setup, exact embedded key-generator source and LLM corpus inclusion.
+- result: evaluation/results/asymmetric-crypto.json records 100 samples per mode and payload size using preloaded keys, excluding
+    key generation and gateway/model work.
+- result: FFR2 16-byte issue-plus-verify measured mean 1.276 ms and p95 1.283 ms; 4096-byte payload remained within the default
+    8192-byte token limit.

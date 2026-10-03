@@ -1,0 +1,23 @@
+id: FF-074
+title: Record fresh installation evidence for the real Laya product profile
+status: verified
+problem: Earlier installation reports described the previous simulated tool profile and did not prove the current default Laya product starts cleanly.
+scope:
+  - Run the committed product in a fresh clone without private state.
+  - Record actual semantic input and output, authoring, MCP, Qwen and multipage OCR checks.
+constraints:
+  - Reports contain no credentials, private paths or user content.
+  - Historical reports remain identified with their original configuration and scope.
+change_paths:
+  - evaluation/results/clean-install-product-full.json
+  - docs/testing.md
+acceptance:
+  - All twenty-two full installation checks pass using actual local model and OCR dependencies.
+validation:
+  - command: uv run python scripts/smoke_clean_install.py --full
+    expected: Fresh-clone report records default_laya, no inherited private state and all checks passing.
+evidence:
+  - report: evaluation/results/clean-install-product-full.json
+    source_commit: 40e63e7
+    checks: 22
+    result: Actual pinned Laya, Qwen and multipage OCR installation and invocation checks passed.

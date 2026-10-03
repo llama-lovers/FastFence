@@ -6,23 +6,22 @@ GitHub Pages hosts the static documentation. Run the FastFence API, dashboard an
 
 ## Run the gateway
 
-From the repository root, with Python 3.12 and uv installed:
+Install the [Python package](getting-started.md), initialize your working directory and set up the required Laya/model services. Then run:
 
 ```sh
-uv sync --locked
-uv run fastfence init
-uv run fastfence serve --host 127.0.0.1 --port 8000
+fastfence doctor
+fastfence serve --host 127.0.0.1 --port 8000
 ```
 
-Initialization creates private local demo credentials. For deployment, provision token hashes and verified claims through `FASTFENCE_IDENTITY_CONFIG_FILE` or `FASTFENCE_IDENTITY_CONFIG_JSON`. The running gateway needs no writable state directory or application database. See [settings](settings.md) for available environment variables.
+Initialization creates private local agent and management credentials. Provision token hashes and verified claims through `FASTFENCE_IDENTITY_CONFIG_FILE` or `FASTFENCE_IDENTITY_CONFIG_JSON` for managed deployments. The runtime uses configuration and private keys rather than a conversation database. Policy editing and optional local setup require writable files; a read-only deployment must provision those inputs separately. See [settings](settings.md).
 
-Keep model servers and upstream credentials behind the gateway. Expose the API through your infrastructure's HTTPS termination and route protected agent traffic through it. The default bind address is loopback. Business handlers are simulated until you replace them with real validated adapters.
+Keep model servers and upstream credentials behind the gateway. Expose the API through your infrastructure's HTTPS termination and route protected agent traffic through it. The default bind address is loopback. The default product has no business handlers; register your validated adapters explicitly.
 
 Independent instances can run in parallel, each with a trusted `FASTFENCE_INSTANCE_ID` and local budgets/audit. Accounting resets on restart. Several workers or replicas do not share quotas; deployments requiring a global spending cap need external coordination or consistent subject routing.
 
 ## Preview and build documentation
 
-Serve the documentation locally:
+The remaining sections concern maintaining the documentation site from a [contributor checkout](contributing.md). Serve it locally:
 
 ```sh
 uv run --group docs mkdocs serve --dev-addr 127.0.0.1:8001

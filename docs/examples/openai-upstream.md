@@ -23,19 +23,20 @@ require HTTPS; HTTP is accepted only for loopback addresses. Inline URL credenti
 query strings, fragments, redirects and environment proxy settings are rejected
 or disabled.
 
+Download the [complete examples](../downloads/fastfence-examples.zip) into your installation's `examples/` directory and use the activated FastFence virtual environment. Run commands from the installation directory.
+
 ## Run against Ollama's compatible API
 
-From the repository root, with `ollama serve` running in another terminal:
+After [installing the package](../getting-started.md), run from your installation directory with `ollama serve` running in another terminal:
 
 ```sh
-uv sync --locked
-uv run fastfence init --anonymization
-sh integrations/laya/setup.sh
+fastfence init --anonymization
+fastfence setup-laya
 ollama pull qwen3:4b
 ollama pull qwen3:0.6b
 FASTFENCE_MODEL_PROVIDER=openai \
 FASTFENCE_OPENAI_BASE_URL=http://127.0.0.1:11434/v1 \
-uv run fastfence serve --port 8002
+fastfence serve --port 8002
 ```
 
 Ollama exposes its compatible Chat Completions route beneath `/v1`; its native
@@ -47,7 +48,7 @@ agent credential without printing it, requests a 256-token completion, and check
 the gateway verdict as well as upstream execution:
 
 ```sh
-uv run python - <<'PY'
+python - <<'PY'
 import json
 import os
 from pathlib import Path
@@ -108,7 +109,7 @@ start the gateway:
 ```sh
 FASTFENCE_MODEL_PROVIDER=openai \
 FASTFENCE_OPENAI_BASE_URL=http://127.0.0.1:8001/v1 \
-uv run fastfence serve --port 8002
+fastfence serve --port 8002
 ```
 
 For an authenticated server, configure its credential using vLLM's `--api-key`
@@ -135,7 +136,7 @@ Start FastFence with:
 ```sh
 FASTFENCE_MODEL_PROVIDER=openai \
 FASTFENCE_OPENAI_BASE_URL=http://127.0.0.1:8080/v1 \
-uv run fastfence serve --port 8002
+fastfence serve --port 8002
 ```
 
 ## Allow and call the served model
@@ -158,7 +159,7 @@ Use roles with budgets in your actual installation. Review the complete change
 and activate the next policy version. Then call the executable client:
 
 ```sh
-uv run python -m examples.docs.protected_request \
+python examples/protected_request.py \
   --url http://127.0.0.1:8002 --model business-model --prompt 'Hello'
 ```
 
@@ -187,8 +188,4 @@ test suite also performs real loopback HTTP exchanges with synthetic replies and
 adversarial transport fixtures. vLLM and llama.cpp commands were checked against
 their official documentation; those engines were not run during this validation.
 
-```sh
-uv run pytest --no-cov -q \
-  tests/unit/test_openai_upstream.py \
-  tests/integration/test_openai_upstream_transport.py
-```
+Developer transport regression commands are in [Contributing](../contributing.md).

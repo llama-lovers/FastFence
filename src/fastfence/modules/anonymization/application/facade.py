@@ -7,6 +7,9 @@ from typing import Any
 from fastfence.modules.anonymization.application.services.transform import (
     AnonymizationService,
 )
+from fastfence.modules.anonymization.persistence.asymmetric import (
+    AsymmetricEnvelope,
+)
 from fastfence.modules.anonymization.persistence.crypto import (
     StatelessTokenCodec,
 )
@@ -29,8 +32,19 @@ class AnonymizationRuntime:
         max_value_bytes: int = 4096,
         max_token_bytes: int = 8192,
         max_replacements: int = 256,
+        public_key_pem: bytes | None = None,
+        private_key_pem: bytes | None = None,
         clock: Callable[[], float] = time.time,
     ) -> None:
+        if (public_key_pem is None) != (private_key_pem is None):
+            raise ValueError(
+                "Both anonymization public and private keys are required"
+            )
+        envelope = (
+            AsymmetricEnvelope(public_key_pem, private_key_pem)
+            if public_key_pem is not None and private_key_pem is not None
+            else None
+        )
         self._codec = StatelessTokenCodec(
             keyring=keyring,
             current_key_id=current_key_id,
@@ -38,6 +52,7 @@ class AnonymizationRuntime:
             max_value_bytes=max_value_bytes,
             max_token_bytes=max_token_bytes,
             clock=clock,
+            asymmetric_envelope=envelope,
         )
         self._service = AnonymizationService(
             self._codec, max_replacements=max_replacements
