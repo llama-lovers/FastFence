@@ -39,6 +39,7 @@ docs = [
     "mkdocs-material>=9.6,<10",
 ]
 test = [
+  {include-group = "docs"},
   "pytest>=8.4.1,<9",
   "pytest-asyncio>=1,<2",
   "pytest-cov>=6.1,<8",

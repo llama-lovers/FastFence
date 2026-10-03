@@ -579,6 +579,8 @@ docs = [
 ]
 test = [
     { name = "httpx" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
     { name = "pillow" },
     { name = "pypdfium2" },
     { name = "pytest" },
@@ -622,6 +624,8 @@ docs = [
 ]
 test = [
     { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "mkdocs", specifier = ">=1.6,<2" },
+    { name = "mkdocs-material", specifier = ">=9.6,<10" },
     { name = "pillow", specifier = "==12.3.0" },
     { name = "pypdfium2", specifier = "==5.13.0" },
     { name = "pytest", specifier = ">=8.4.1,<9" },

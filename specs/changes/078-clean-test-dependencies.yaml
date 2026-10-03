@@ -1,0 +1,26 @@
+id: FF-078
+title: Declare documentation test dependencies in the default test environment
+status: implemented
+problem: Documentation download tests import the MkDocs hook during collection, but the default test dependency group omitted MkDocs; a previously populated local environment hid the clean CI failure.
+scope:
+  - Include the docs dependency group from the test dependency group.
+  - Verify collection and tests in a new default-groups environment.
+  - Advance the unpublished release candidate to version 0.1.1 without rewriting the failed v0.1.0 tag.
+constraints:
+  - Keep documentation tooling out of installed product runtime dependencies.
+  - Do not skip documentation tests to make CI pass.
+change_paths:
+  - pyproject.toml
+  - uv.lock
+  - _version.py
+  - docs/publishing.md
+acceptance:
+  - A fresh uv sync --locked default environment includes MkDocs and collects the documentation tests successfully.
+  - The product wheel retains its runtime dependency set and publishes as 0.1.1.
+validation:
+  - command: uv sync --locked
+    expected: A new isolated project environment installs default test and development groups including the documentation test dependency.
+  - command: uv run pytest -q
+    expected: Tests collect and pass in the newly provisioned environment.
+evidence:
+  - result: A fresh isolated environment installed default groups with uv sync --locked and both documentation tests collected and passed.
