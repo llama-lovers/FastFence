@@ -31,9 +31,6 @@ After [installing the package](../getting-started.md), run from your installatio
 
 ```sh
 fastfence init --anonymization
-fastfence setup-laya
-ollama pull qwen3:4b
-ollama pull qwen3:0.6b
 FASTFENCE_MODEL_PROVIDER=openai \
 FASTFENCE_OPENAI_BASE_URL=http://127.0.0.1:11434/v1 \
 fastfence serve --port 8002
@@ -66,7 +63,7 @@ with httpx.Client(timeout=120, trust_env=False) as client:
         "http://127.0.0.1:8002/api/models/complete",
         headers={"Authorization": "Bearer " + token},
         json={
-            "model": "qwen3:0.6b",
+            "model": "qwen3:4b",
             "prompt": "Say hello in one sentence.",
             "max_output_tokens": 256,
         },
@@ -181,11 +178,3 @@ Response JSON is limited to 262,144 bytes and text to 65,536 UTF-8 bytes; the
 policy's smaller output bound still applies. The entire exchange uses the model
 policy deadline. This interface does not implement provider tool execution,
 streaming, multimodal messages or the Responses API.
-
-The actual Ollama `/v1` path was checked with `qwen3:0.6b`: a 256-token request
-returned nonempty text, explicit `stop` and 156 total provider token units. The
-test suite also performs real loopback HTTP exchanges with synthetic replies and
-adversarial transport fixtures. vLLM and llama.cpp commands were checked against
-their official documentation; those engines were not run during this validation.
-
-Developer transport regression commands are in [Contributing](../contributing.md).

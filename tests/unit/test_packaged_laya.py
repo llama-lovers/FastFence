@@ -13,7 +13,9 @@ def test_stage_helpers_is_complete_and_repeatable(tmp_path):
     assert {p.name for p in script.parent.iterdir()} == set(
         laya_install.LAYA_FILES
     )
-    assert b"b3b998c03dc44076675305581eb4640b9bf6ff8f" in script.read_bytes()  # pragma: allowlist secret - public upstream commit
+    assert (
+        b"b3b998c03dc44076675305581eb4640b9bf6ff8f" in script.read_bytes()  # pragma: allowlist secret - public upstream commit
+    )
     before = {p.name: p.read_bytes() for p in script.parent.iterdir()}
     laya_install.stage_laya(tmp_path)
     assert before == {p.name: p.read_bytes() for p in script.parent.iterdir()}
@@ -50,6 +52,7 @@ def test_setup_executes_only_staged_pinned_installer(tmp_path, monkeypatch):
         ["sh", str(tmp_path / "integrations/laya/setup.sh")],
         cwd=tmp_path,
         check=False,
+        timeout=900,
     )
 
 

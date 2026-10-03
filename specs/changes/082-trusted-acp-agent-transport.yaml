@@ -11,7 +11,8 @@ scope:
   - Wire ACP as the default tool provider only when explicitly configured and reject conflicting custom provider configuration.
 constraints:
   - Remote HTTP origins, inline credentials, URL queries and fragments are rejected; HTTPS and loopback HTTP are supported.
-  - No environment proxies, redirects, streaming, asynchronous runs, sessions, binary parts or content URLs.
+  - No environment proxies, redirects, streaming, asynchronous runs, requested or resumed sessions, binary parts or content URLs.
+  - The official upstream may create its own session; its UUID-only response identifier is validated then discarded, never retained, returned or reused by the gateway.
   - Only completed replies from the configured upstream agent are accepted; unchecked metadata is stripped.
   - HTTP callers cannot select endpoints or upstream credentials; claimed message roles never establish caller authorization.
   - Internal role codes are strict integers and agent-name roles normalize to agent; only text values reach literal rule matching.
@@ -39,3 +40,5 @@ evidence:
     result: 45 tests passed, including actual loopback HTTP, server-only credential routing, malformed and unsupported replies, aggregate UTF-8 limits, timeout and cancellation.
   - check: Architecture and typing
     result: Full src basedpyright zero errors, all sixteen import contracts kept, pyscn and Ruff passed.
+  - check: Actual official SDK compatibility mismatch
+    result: Inspected installed acp-sdk 1.0.3 source proving Session() and uuid4 creation for requests without session fields. Accepted only valid UUID response identifiers as discarded transport metadata; two-call regression proves no session is sent, reused or returned. Nonnull session context and inbound session selection remain rejected.

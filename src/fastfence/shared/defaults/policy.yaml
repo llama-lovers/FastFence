@@ -15,7 +15,7 @@ semantic:
   scan_output: true
 tools: {}
 models:
-  qwen3:0.6b:
+  qwen3:4b:
     roles: [analyst, operator]
     max_output_tokens: 256
     timeout_ms: 30000

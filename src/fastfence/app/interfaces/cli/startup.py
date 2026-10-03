@@ -117,11 +117,20 @@ def _laya_ready(settings: AppSettings) -> bool:
 
 def _ollama_ready(settings: AppSettings) -> bool:
     try:
+        runtime = build_runtime(
+            settings, anonymization=build_anonymization(settings)
+        )
+        try:
+            semantic = runtime.snapshot().policy.semantic
+        finally:
+            runtime.close()
+        if semantic.provider not in {"laya", "ollama"}:
+            return True
         with httpx.Client(timeout=3, trust_env=False) as client:
             response = client.get(settings.ollama_url.rstrip("/") + "/api/tags")
             response.raise_for_status()
             names = {item["name"] for item in response.json()["models"]}
-        return {"qwen3:0.6b", "qwen3:4b"} <= names
+        return semantic.model in names
     except (httpx.HTTPError, ValueError, KeyError, TypeError):
         return False
 
@@ -144,17 +153,17 @@ def doctor(settings: AppSettings, *, full: bool = False) -> None:
         (
             "Laya authoring and text-assessment installation",
             _laya_ready(settings),
-            "bash integrations/laya/setup.sh",
+            "fastfence setup-laya",
         ),
         (
             "OCR interpreter and model files",
             _ocr_ready(settings),
-            "bash scripts/setup-ocr.sh",
+            "fastfence setup-ocr",
         ),
         (
-            "Qwen model availability",
+            "Configured semantic assessor availability",
             _ollama_ready(settings),
-            "ollama serve; ollama pull qwen3:0.6b; ollama pull qwen3:4b",
+            "ollama serve; fastfence init",
         ),
         (
             "anonymization keyring",

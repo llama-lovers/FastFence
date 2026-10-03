@@ -172,3 +172,57 @@ def test_index_installation_uses_public_exact_version_and_bounded_retries(
         calls[0][calls[0].index("--default-index") + 1]
         == "https://pypi.org/simple"
     )
+
+
+def test_acp_startup_diagnostics_hide_generated_private_credentials(tmp_path):
+    from scripts.smoke_acp_package import sanitized_startup_log
+
+    state = tmp_path / "state/examples/acp-gateway/state"
+    state.mkdir(parents=True)
+    (state / "credentials.json").write_text(
+        json.dumps(
+            {
+                "local-agent": "synthetic-agent-token",
+                "local-admin": "synthetic-admin-token",
+            }
+        )
+    )
+    (tmp_path / "state/examples/acp-upstream-token.txt").write_text(
+        "synthetic-peer-token\n"
+    )
+    log = tmp_path / "peer.log"
+    log.write_text(
+        "x" * 20000
+        + "\nfailed synthetic-agent-token synthetic-admin-token synthetic-peer-token\n"
+    )
+    result = sanitized_startup_log(log, tmp_path)
+    assert "failed" in result and result.count("[REDACTED]") == 3
+    assert "synthetic-" not in result and len(result) < 8300
+
+
+@pytest.mark.parametrize("supports_runtime_init", [False, True])
+@pytest.mark.parametrize("full", [False, True])
+def test_package_initialization_preserves_offline_and_legacy_modes(
+    monkeypatch, tmp_path, supports_runtime_init, full
+):
+    from scripts import smoke_wheel
+
+    monkeypatch.setattr(
+        smoke_wheel.subprocess,
+        "check_output",
+        lambda *args, **kwargs: "--config-only"
+        if supports_runtime_init
+        else "init",
+    )
+    calls = []
+    monkeypatch.setattr(
+        smoke_wheel,
+        "run",
+        lambda command, directory, environment: calls.append(command),
+    )
+    executable = tmp_path / "fastfence"
+    smoke_wheel.initialize_package(executable, tmp_path, {}, full)
+    assert ("--config-only" in calls[0]) is (supports_runtime_init and not full)
+    assert len(calls) == (2 if full and not supports_runtime_init else 1)
+    if len(calls) == 2:
+        assert calls[1] == [str(executable), "setup-laya"]

@@ -21,14 +21,11 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install fastfence uv
 fastfence init --anonymization
-fastfence setup-laya
-ollama pull qwen3:4b
-ollama pull qwen3:0.6b
 fastfence doctor
 fastfence serve
 ```
 
-Open **http://127.0.0.1:8000** and connect with your generated local credentials. The [installation guide](getting-started.md) covers prerequisites and private configuration. No FastFence source checkout is required.
+`init` prepares private configuration, installs Laya and downloads the configured assessor if needed. The fresh default uses Qwen3:4b for both assessment and completion in separate calls; no second model is required. Open **http://127.0.0.1:8000** and connect with your generated local credentials. The [installation guide](getting-started.md) covers prerequisites and private configuration. No FastFence source checkout is required.
 
 ## Choose your task
 
@@ -49,7 +46,7 @@ Open **http://127.0.0.1:8000** and connect with your generated local credentials
 
 An authenticated request passes through access checks, input controls and budget reservation before the upstream operation runs. FastFence then checks the response and records a sanitized decision. Fast deterministic checks run locally. The default product configuration also uses Laya for semantic input and output inspection of content that reaches that stage; unavailable analysis fails closed.
 
-Laya has two separate roles. On the management path it drafts bounded rules that become fast local checks after review. On the runtime path it assesses content against security guidance and your natural-language semantic policy. Compiled text matching itself needs no model call, while enabled semantic inspection does. The explicit offline profile disables semantic analysis for deterministic-only operation.
+Laya has two separate roles. On the management path it drafts bounded rules that become fast local checks after review. On the runtime path it assesses content against security guidance and your natural-language semantic policy. Compiled text matching itself needs no model call, while enabled semantic inspection does.
 
 Policies can reload from local files or a trusted HTTP configuration source. Invalid updates keep the last valid configuration. A proposed change is separate from an active policy: inspect the diff, verify expectations and explicitly publish it.
 
@@ -59,4 +56,4 @@ The local product starts without simulated business tools. Runnable business-too
 
 Budgets and bounded audit logs are process-local and reset on restart. Reversible anonymization uses authenticated tokens and local keys, with explicit permission to restore originals. An output denial cannot undo an upstream operation that has already run. See [architecture](architecture.md) for the trust and deployment boundaries.
 
-FastFence is Apache-2.0 licensed. [Source and specifications](https://github.com/llama-lovers/HackYeah2026-challenge-second) are public. Historical challenge assessments and measurements are preserved under [validation evidence](testing.md).
+FastFence is Apache-2.0 licensed.

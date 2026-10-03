@@ -1,0 +1,42 @@
+id: FF-086
+title: Initialize the complete configured semantic runtime in one command
+status: verified
+problem: Users had to separately install Laya and were incorrectly told a second business model was mandatory for initialization.
+scope:
+  - Default init preserves or creates configuration, credentials and keys, then provisions the active semantic assessor and Laya runtime.
+  - Explicit config-only initialization keeps CI and offline setup network-free.
+  - Separate mandatory assessment prerequisites from independently configured business models.
+constraints:
+  - Never overwrite existing valid policy, credentials, keys or customized Laya helpers.
+  - Download only the configured missing semantic model; never pull a business model implicitly.
+  - Ollama inventory requests have a five-second deadline, provisioning a fifteen-minute deadline and one-megabyte response bounds; provider error bodies are omitted.
+  - Preserve setup-laya as an advanced repair command and keep an explicit finite installer timeout.
+  - Keep Laya input/output assessment enabled in the default product policy.
+change_paths:
+  - src/fastfence/app/interfaces/cli/bootstrap_runtime.py
+  - src/fastfence/app/interfaces/cli/main.py
+  - src/fastfence/app/interfaces/cli/laya_install.py
+  - src/fastfence/app/interfaces/cli/startup.py
+  - tests/unit/test_runtime_bootstrap.py
+  - tests/unit/test_cli_startup.py
+  - tests/unit/test_packaged_laya.py
+  - scripts/smoke_clean_install.py
+  - scripts/smoke_wheel.py
+  - tests/unit/test_pypi_verification.py
+acceptance:
+  - Default init installs the configured semantic runtime after local state is safely provisioned.
+  - Repeated initialization skips installed components and preserves private state and custom policy bytes.
+  - Config-only does not invoke model or Laya setup and creates a usable offline configuration.
+  - Unavailable Ollama, malformed or oversized responses and failed model pulls produce actionable sanitized errors.
+  - Read-only doctor checks the actual configured assessor without requiring qwen3:0.6b or any business model.
+validation:
+  - command: uv run pytest --no-cov -q tests/unit/test_runtime_bootstrap.py tests/unit/test_cli_startup.py tests/unit/test_packaged_laya.py tests/unit/test_product_runtime.py tests/unit/test_pypi_verification.py
+    expected: Bootstrap, state preservation, readiness and offline package compatibility pass.
+  - command: uv run basedpyright src
+    expected: No type errors.
+evidence:
+  - command: Bootstrap and existing CLI regression suites
+    result: 67 bootstrap, CLI, packaged Laya, product-runtime and public-package verification tests passed; basedpyright, all 16 import contracts and architecture AST checks passed.
+  - command: Fresh installed 0.1.3 candidate wheel smoke with --full
+    result: Independent external Python 3.12 installation verified wheel bytes and source isolation; ordinary init installed pinned Laya automatically and found the configured Qwen4b assessor already available. Core doctor and HTTP assets passed. Actual benign request was allowed with input and output semantic checks passed; the user attack was blocked before business upstream execution. No duplicate setup-laya command was used. This runtime proof predates the subsequent 1.0.0 version change.
+    limitation: Actual setup reused an existing local Ollama assessor model; missing-model download is covered by bounded HTTP transport unit tests, not claimed as a fresh live model download.

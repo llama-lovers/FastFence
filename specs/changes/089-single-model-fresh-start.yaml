@@ -1,0 +1,29 @@
+id: FF-089
+title: Remove the mandatory second model from a fresh installation
+status: implemented
+problem: Fresh installation examples required qwen3:0.6b for business calls in addition to the Laya assessor, although that second model is only an example choice.
+scope:
+  - Fresh packaged policy permits qwen3:4b as its initial protected model.
+  - Set the semantic fallback model to qwen3:4b.
+  - Align downloaded REST, MCP and OpenAI clients with the fresh installation.
+constraints:
+  - Keep the assessment model and protected business model independently configurable.
+  - Never replace operator policies or pull arbitrary business models during initialization.
+  - Preserve historical and opt-in examples that explicitly choose other models.
+change_paths:
+  - src/fastfence/shared/defaults/policy.yaml
+  - src/fastfence/modules/control/domain/models.py
+  - examples/docs/protected_request.py
+  - examples/docs/mcp_client.py
+  - examples/docs/openai_client.py
+  - examples/docs/policy.yaml
+  - tests/unit/test_product_runtime.py
+  - tests/unit/test_packaged_bootstrap.py
+  - tests/integration/test_documentation_examples.py
+acceptance:
+  - A fresh initialized policy permits the same installed model for an initial protected request.
+  - No qwen3:0.6b download is required to run the default product.
+validation:
+  - command: uv run --locked pytest -q
+    expected: Fresh default and existing policy regression checks pass.
+evidence: []

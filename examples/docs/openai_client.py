@@ -32,7 +32,7 @@ def main() -> None:
             print(
                 complete(
                     client,
-                    os.getenv("FASTFENCE_MODEL", "qwen3:0.6b"),
+                    os.getenv("FASTFENCE_MODEL", "qwen3:4b"),
                     args.prompt,
                 )
             )

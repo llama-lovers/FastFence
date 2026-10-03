@@ -78,7 +78,7 @@ Patterns are 4–256 characters; the feed supports up to 200 signatures. The opt
 
 Input matches block before upstream execution. Output matches suppress delivery after execution; audit retains signature IDs and the `upstream_executed` flag. The same normalized matcher runs on a versioned external feed updated outside the request path.
 
-The supplied patterns cover representative pickle/PyTorch loading, remote-shell and instruction-override strings. Quoted descriptions containing an exact dangerous pattern are conservatively blocked too. These are bounded text controls, not model-binary inspection or comprehensive exploit prevention. Before/after variant results are documented in [testing](testing.md).
+The supplied patterns cover representative pickle/PyTorch loading, remote-shell and instruction-override strings. Quoted descriptions containing an exact dangerous pattern are conservatively blocked too. These are bounded text controls, not model-binary inspection or comprehensive exploit prevention.
 
 ## Semantic controls
 
@@ -89,8 +89,6 @@ In **Policies → Edit configuration → Semantic analysis**, choose the provide
 Use deterministic content rules for exact requirements such as “no word containing the letter a.” Semantic models can miss exact character constraints. Natural-language semantic instructions are suited to meaning-based restrictions; their results still require evaluation on your intended inputs.
 
 Severity categories map `benign` to `0`, `suspicious` to `0.6`, and `malicious` to `1`. These are ordinal policy codes, not probabilities. Threshold `0.5` blocks suspicious and malicious content; `0.7` or `0.8` blocks the malicious category. Semantic inspection supplements authentication, access rules, privacy, signatures and budgets.
-
-The explicit `config/policy.offline.yaml` profile disables semantic inspection. It provides local deterministic checks only; unmatched wording can pass. The `ollama` and `kev` providers remain available for their built-in security assessment. Historical `severity-v2` Ollama measurements in [testing](testing.md) are separate from Laya runtime results and do not establish accuracy for custom semantic instructions.
 
 ## Named Laya rules
 
@@ -138,7 +136,7 @@ Budgets are local to an instance, trusted subject, and UTC day. Atomic reservati
 
 Token units are conservative accounting estimates, not an exact tokenizer count or provider invoice. Model reservations include 1,024 units for provider prompt-template overhead in addition to input bytes and bounded completion tokens; settlement releases unused capacity. `cost_microusd` is a configured per-call estimate; one micro-USD is $0.000001. Local models may use zero financial cost while retaining runtime and token limits.
 
-Counters and bounded audit reset on restart. Multiple instances have independent allowances, with no global coordination. Output blocking cannot roll back upstream side effects. The [deployment guide](deployment.md) explains these operational boundaries.
+Counters and bounded audit reset on restart. Multiple instances have independent allowances, with no global coordination. Output blocking cannot roll back upstream side effects.
 
 ## Authored text rules
 
@@ -191,6 +189,6 @@ For an exact example, describe: `Block each word containing the letter a, case i
 
 For a meaning-based rule that should be evaluated on each interaction, use the complete [named Laya policy script](examples/semantic-policy.md). It tests real sample content and shows a versioned diff before optional activation. This is a separate workflow from compiling an exact literal rule.
 
-Broad legal guidance is not a deterministic compliance compiler. Model assessments and drafts can misunderstand intent; choose independent expected examples and inspect failures. The source repository retains advanced authoring tools for [contributors](contributing.md), but product use does not require those scripts.
+Broad legal guidance is not a deterministic compliance compiler. Model assessments and drafts can misunderstand intent; choose independent expected examples and inspect failures.
 
 To remove or change a rule, use its **Edit rule** or **Remove…** action in **Policies**, review the candidate, and explicitly activate it. Advanced JSON editing is available under **Edit configuration**. Alternatively, update the configured central source with a higher version. Changes apply to subsequent invocations.

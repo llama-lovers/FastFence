@@ -62,6 +62,27 @@ def wait_ready(process, url, expected):
     raise RuntimeError("Package example process did not become ready")
 
 
+def sanitized_startup_log(path, root):
+    size = path.stat().st_size
+    with path.open("rb") as stream:
+        stream.seek(max(0, size - 16384))
+        raw = stream.read(16384)
+    if size > 16384:
+        raw = raw.partition(b"\n")[2]
+    content = raw.decode("utf-8", errors="replace")
+    token = root / "state/examples/acp-upstream-token.txt"
+    if token.is_file():
+        value = token.read_text().strip()
+        if value:
+            content = content.replace(value, "[REDACTED]")
+    credentials = root / "state/examples/acp-gateway/state/credentials.json"
+    if credentials.is_file():
+        for value in json.loads(credentials.read_text()).values():
+            if isinstance(value, str) and value:
+                content = content.replace(value, "[REDACTED]")
+    return f"{path.name} (bounded diagnostic tail):\n{content[-8192:]}"
+
+
 def smoke(wheel=None, *, pypi_version=None, output=None):
     environment = {
         key: value
@@ -118,9 +139,9 @@ def smoke(wheel=None, *, pypi_version=None, output=None):
                 str(sdk_python),
                 "--default-index",
                 "https://pypi.org/simple",
-                "--no-cache",
                 "acp-sdk==1.0.3",
                 "uvicorn==0.35.0",
+                "requests==2.34.2",
             ],
             cwd=root,
             env=environment,
@@ -151,7 +172,12 @@ def smoke(wheel=None, *, pypi_version=None, output=None):
         upstream_url = f"http://127.0.0.1:{server_port}"
         gateway_url = f"http://127.0.0.1:{gateway_port}"
         processes = []
+        logs = []
         try:
+            peer_log = (root / "peer-startup.log").open("wb")
+            logs.append(peer_log)
+            gateway_log = (root / "gateway-startup.log").open("wb")
+            logs.append(gateway_log)
             server = subprocess.Popen(
                 [
                     str(sdk_python),
@@ -161,8 +187,8 @@ def smoke(wheel=None, *, pypi_version=None, output=None):
                 ],
                 cwd=root,
                 env=environment,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=peer_log,
+                stderr=peer_log,
             )
             processes.append(server)
             wait_ready(server, upstream_url + "/agents", 401)
@@ -177,8 +203,8 @@ def smoke(wheel=None, *, pypi_version=None, output=None):
                 ],
                 cwd=root,
                 env=environment,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=gateway_log,
+                stderr=gateway_log,
             )
             processes.append(gateway)
             wait_ready(gateway, gateway_url + "/health", 200)
@@ -189,6 +215,11 @@ def smoke(wheel=None, *, pypi_version=None, output=None):
                 check=True,
             )
             result = json.loads((root / "acp-package-report.json").read_text())
+        except Exception:
+            for log in logs:
+                log.flush()
+                print(sanitized_startup_log(Path(log.name), root))
+            raise
         finally:
             for process in reversed(processes):
                 process.terminate()
@@ -197,6 +228,8 @@ def smoke(wheel=None, *, pypi_version=None, output=None):
                 except subprocess.TimeoutExpired:
                     process.kill()
                     process.wait(timeout=5)
+            for log in logs:
+                log.close()
         result["package_source"] = (
             "public_pypi" if pypi_version else "built_wheel"
         )

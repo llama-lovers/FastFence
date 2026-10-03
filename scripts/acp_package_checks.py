@@ -40,12 +40,14 @@ async def verify(url, upstream_url):
             assert agents == ["uppercase"], agents
 
             async def invoke(text):
-                return await client.run_sync(
+                response = await client.run_sync(
                     agent="uppercase",
                     input=[
                         Message(role="user", parts=[MessagePart(content=text)])
                     ],
                 )
+                assert response.session_id is None
+                return response
 
             result = await invoke("hello")
             assert result.status.value == "completed", result
@@ -56,8 +58,16 @@ async def verify(url, upstream_url):
 
             result = await invoke("forbidden")
             assert result.status.value == "failed" and not result.output
-            assert result.error.data["reason"] == "input_text_rule"
-            assert result.error.data["upstream_executed"] is False
+            assert (
+                result.model_dump(mode="json")["error"]["data"]["reason"]
+                == "input_text_rule"
+            )
+            assert (
+                result.model_dump(mode="json")["error"]["data"][
+                    "upstream_executed"
+                ]
+                is False
+            )
             observations.append(
                 "input denial is failed ACP run with no output and no upstream execution"
             )
@@ -99,8 +109,16 @@ async def verify(url, upstream_url):
             await update(output_rule)
             result = await invoke("hello")
             assert result.status.value == "failed" and not result.output
-            assert result.error.data["reason"] == "output_text_rule"
-            assert result.error.data["upstream_executed"] is True
+            assert (
+                result.model_dump(mode="json")["error"]["data"]["reason"]
+                == "output_text_rule"
+            )
+            assert (
+                result.model_dump(mode="json")["error"]["data"][
+                    "upstream_executed"
+                ]
+                is True
+            )
             observations.append(
                 "output denial withholds actual upstream result and reports execution"
             )

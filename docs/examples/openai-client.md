@@ -6,7 +6,7 @@ Download the [complete examples](../downloads/fastfence-examples.zip) into your 
 
 ## Run with Ollama
 
-Follow [installation](../getting-started.md), start Ollama, pull `qwen3:4b` for Laya and `qwen3:0.6b` for completion, then run `fastfence serve`. Set `FASTFENCE_AGENT_TOKEN` to your provisioned agent credential.
+Follow [installation](../getting-started.md): start Ollama, run `fastfence init --anonymization`, then `fastfence serve`. Initialization installs Laya and prepares the default Qwen3:4b model. Set `FASTFENCE_AGENT_TOKEN` to your provisioned agent credential.
 
 ```sh
 python -m pip install openai

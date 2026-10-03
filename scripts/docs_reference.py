@@ -92,16 +92,6 @@ PAGES = (
         "Manual verification",
         "Verify behavior on your own local installation.",
     ),
-    (
-        "security-review.md",
-        "Independent security review",
-        "Scoped findings, fixes and remaining evaluation limits.",
-    ),
-    (
-        "requirements.md",
-        "Requirements and evidence",
-        "Partner-task and submitted-feature mapping with current boundaries.",
-    ),
 )
 
 EXAMPLE_FILES = (
@@ -274,7 +264,7 @@ def on_files(files, config):
         "",
         "> Local security policy enforcement for AI agents, models and tools.",
         "",
-        "FastFence is installed as a Python 3.12 package with pip install fastfence uv, followed by fastfence init --anonymization and fastfence setup-laya. No FastFence checkout is required. Runnable example source and its ZIP archive are available under /downloads/. Policies and identities are local configuration; budgets and audit are process-local. Laya authoring produces a reviewed proposal, never implicit activation.",
+        "FastFence is installed as a Python 3.12 package with pip install fastfence uv, followed by fastfence init --anonymization. Initialization prepares the configured Laya assessor; fastfence init --config-only explicitly skips component and model downloads. No FastFence checkout is required. Runnable example source and its ZIP archive are available under /downloads/. Policies and identities are local configuration; budgets and audit are process-local. Laya authoring produces a reviewed proposal, never implicit activation.",
         "",
         "## Documentation",
         "",
@@ -282,7 +272,7 @@ def on_files(files, config):
     full = [
         "# FastFence documentation",
         "",
-        "Generated from the same Markdown and route source as the public documentation site. Source pages below are authoritative; historical evaluation reports are intentionally excluded.",
+        "Generated from the same Markdown and route source as the public documentation site. The pages cover installation, configuration, protocols and executable examples.",
         "",
     ]
     for path, title, description in PAGES:

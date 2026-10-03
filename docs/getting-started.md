@@ -14,22 +14,27 @@ python -m pip install fastfence uv
 
 ## Initialize and start
 
-Install and start [Ollama](https://ollama.com/). The Laya installer also needs Git and `sh` on your machine to fetch its pinned external engine; it does not require cloning FastFence.
+Install [Ollama](https://ollama.com/) and start its service before initialization (`ollama serve` in another terminal, or the running desktop app). Keep Git and `sh` available so initialization can fetch the pinned Laya engine.
 
 ```sh
 fastfence init --anonymization
-fastfence setup-laya
-ollama pull qwen3:4b
-ollama pull qwen3:0.6b
 fastfence doctor
 fastfence serve
 ```
 
 Open **http://127.0.0.1:8000**. In **Connection**, enter the `local-agent` and `local-admin` tokens from your private `state/credentials.json`. Agent credentials send protected requests; management credentials review and change policies. Tokens stay in dashboard page memory.
 
-Initialization creates `config/`, private credentials and the optional anonymization issuer keyring in your working directory. Repeating `init --anonymization` preserves valid existing credentials, policies and keys. Keep this directory when upgrading. Older installations with `state/demo-tokens.json` retain their `security-admin` and `analyst-blue` identities.
+Initialization creates `config/`, private credentials and the optional anonymization issuer keyring in your working directory. It also installs the pinned Laya engine and checks Ollama for the active policy's assessment model, downloading that model only when missing. Repeating `init --anonymization` preserves valid existing credentials, policies and keys. Keep this directory when upgrading. Older installations with `state/demo-tokens.json` retain their `security-admin` and `analyst-blue` identities.
 
-The default policy uses **Laya/Qwen3:4b for input and output assessment** and **Qwen3:0.6b for the protected completion**. These are separate model calls. Missing assessment fails closed. Precise literal rules run locally before model assessment.
+There are three separate roles:
+
+- **Laya** is the Python engine that runs security assessments and helps draft rules. `init` installs it.
+- **The assessment model** interprets the text being checked. The default is **Qwen3:4b**, served by Ollama. `init` checks and downloads the configured assessor.
+- **Your application's model or tool** performs the requested work after input checks. The fresh policy also allows Qwen3:4b for completions, so the quickstart needs one model download. Choose another allowlisted model or an [OpenAI-compatible upstream](examples/openai-upstream.md) when your application needs it.
+
+Assessment and completion are separate calls even when they use the same model. An agent that only calls tools or ACP peers does not need a separate completion model. Initialization preserves an existing model choice and does not download an extra business model. Missing assessment fails closed; precise literal rules run locally before it.
+
+For offline configuration provisioning, run `fastfence init --config-only --anonymization`. This writes configuration and private state without installing Laya or contacting Ollama. Run normal `init` when the prerequisites are available. `setup-laya` remains an advanced engine installation/repair command; it is not a separate quickstart step.
 
 ## Send a protected request
 
@@ -47,7 +52,7 @@ with httpx.Client(timeout=120, trust_env=False) as client:
     response = client.post(
         "http://127.0.0.1:8000/api/models/complete",
         headers={"Authorization": "Bearer " + credentials["local-agent"]},
-        json={"model": "qwen3:0.6b", "prompt": "Hello", "max_output_tokens": 128},
+        json={"model": "qwen3:4b", "prompt": "Hello", "max_output_tokens": 256},
     )
     response.raise_for_status()
     print(response.json())
@@ -107,5 +112,3 @@ fastfence serve
 Reload the console after restart. Your working directory's `config/` and `state/` are separate from the installed package. Back them up and preserve them during upgrades. If a release updates pinned Laya helpers, follow that release's setup instructions; the installer refuses to overwrite modified helper files.
 
 For policy-only updates, review and activate a higher version through **Policies**. Valid higher-version edits to `config/policy.yaml` also hot-reload. Invalid changes retain the last valid snapshot. `.env` changes require a restart.
-
-For application development and repository test commands, see [Contributing](contributing.md).

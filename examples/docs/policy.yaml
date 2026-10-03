@@ -9,7 +9,7 @@ max_input_bytes: 16384
 max_output_bytes: 16384
 semantic:
   provider: disabled
-  model: qwen3:0.6b
+  model: qwen3:4b
   threshold: 0.7
   timeout_ms: 10000
   scan_output: true
@@ -19,7 +19,7 @@ tools:
     - analyst
     timeout_ms: 5000
 models:
-  qwen3:0.6b:
+  qwen3:4b:
     roles:
     - analyst
     - operator

@@ -54,11 +54,18 @@ def setup_laya(root: Path) -> None:
         script = stage_laya(root)
     except ValueError as error:
         raise SystemExit(str(error)) from None
-    result = subprocess.run(["sh", str(script)], cwd=root, check=False)
+    try:
+        result = subprocess.run(
+            ["sh", str(script)], cwd=root, check=False, timeout=900
+        )
+    except subprocess.TimeoutExpired:
+        raise SystemExit(
+            "Laya setup exceeded 15 minutes; check connectivity and rerun `fastfence init`."
+        ) from None
     if result.returncode:
         raise SystemExit(
             "Laya setup failed; resolve the installer error and retry."
         )
     print(
-        "Laya installed. Start Ollama and run `ollama pull qwen3:4b` and `ollama pull qwen3:0.6b`."
+        "Laya installed. Run `fastfence init` to verify the configured semantic assessor. Business models are configured independently."
     )

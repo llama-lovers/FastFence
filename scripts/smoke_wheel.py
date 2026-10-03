@@ -18,11 +18,17 @@ def run(command, directory, environment):
 
 def verify_invocations(client, base, root, full):
     credentials = json.loads((root / "state/credentials.json").read_text())
+    request = urllib.request.Request(
+        base + "/api/admin/status",
+        headers={"Authorization": "Bearer " + credentials["local-admin"]},
+    )
+    with client.open(request, timeout=5) as response:
+        model = next(iter(json.load(response)["policy"]["models"]))
 
     def invoke(prompt):
         request = urllib.request.Request(
             base + "/api/models/complete",
-            data=json.dumps({"model": "qwen3:0.6b", "prompt": prompt}).encode(),
+            data=json.dumps({"model": model, "prompt": prompt}).encode(),
             headers={
                 "Authorization": "Bearer " + credentials["local-agent"],
                 "Content-Type": "application/json",
@@ -151,6 +157,22 @@ def install_package(python, wheel, root, environment, pypi_version):
             time.sleep(10)
 
 
+def initialize_package(executable, root, environment, full):
+    help_text = subprocess.check_output(
+        [str(executable), "init", "--help"],
+        cwd=root,
+        env=environment,
+        text=True,
+    )
+    runtime_init = "--config-only" in help_text
+    command = [str(executable), "init", "--anonymization"]
+    if runtime_init and not full:
+        command.append("--config-only")
+    run(command, root, environment)
+    if full and not runtime_init:
+        run([str(executable), "setup-laya"], root, environment)
+
+
 def smoke(
     wheel: Path,
     *,
@@ -183,7 +205,7 @@ def smoke(
         executable = root / "venv/bin/fastfence"
         install_package(python, wheel, root, environment, pypi_version)
         verify_installed(python, wheel, root, environment, pypi_version)
-        run([str(executable), "init", "--anonymization"], root, environment)
+        initialize_package(executable, root, environment, full)
         run([str(executable), "doctor"], root, environment)
         run(
             [
@@ -196,8 +218,6 @@ def smoke(
         )
         assert (root / "integrations/laya/semantic_worker.py").is_file()
         assert (root / "integrations/laya/semantic_response.py").is_file()
-        if full:
-            run([str(executable), "setup-laya"], root, environment)
         if ocr:
             verify_ocr(executable, python, root, environment)
         with socket.socket() as port_socket:

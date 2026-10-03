@@ -21,7 +21,7 @@ def complete(client: httpx.Client, token: str, model: str, prompt: str) -> dict:
     response = client.post(
         "/api/models/complete",
         headers={"Authorization": "Bearer " + token},
-        json={"model": model, "prompt": prompt, "max_output_tokens": 128},
+        json={"model": model, "prompt": prompt, "max_output_tokens": 256},
     )
     response.raise_for_status()
     return response.json()
@@ -33,7 +33,7 @@ def main() -> None:
     parser.add_argument(
         "--credentials", type=Path, default=Path("state/credentials.json")
     )
-    parser.add_argument("--model", default="qwen3:0.6b")
+    parser.add_argument("--model", default="qwen3:4b")
     parser.add_argument("--prompt", default="Hello")
     args = parser.parse_args()
     with httpx.Client(

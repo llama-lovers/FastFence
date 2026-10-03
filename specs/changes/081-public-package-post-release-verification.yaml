@@ -37,9 +37,14 @@ validation:
   expected: Exact public release installs in isolation and passes reused product smoke checks.
 evidence:
 - command: uv run pytest --no-cov --confcutdir=tests/unit tests/unit/test_pypi_verification.py -q
-  result: 20 passed; metadata, transient publication, integrity, build comparison, exact public-index installation and bounded
+  result: 25 passed; backward-compatible offline/runtime initialization, metadata, transient publication, integrity, build comparison, exact public-index installation and bounded
     install retry checked.
 - command: uv run --no-project python scripts/smoke_pypi.py 0.1.1 --attempts 1 --output state/private/pypi-verification-0.1.1.json
   result: Actual public PyPI 0.1.1 installed in new external Python3.12 environment; package bytes, CLI initialization, doctor,
     Laya helpers, console HTTP assets and fail-closed invocation passed. No model/OCR inference.
-  sha256: 5cb6365176b8a6e4c8b89278b83a6f34b62f27c1f6f2cf791d1a9be8a977042c # pragma: allowlist secret
+  sha256: 5cb6365176b8a6e4c8b89278b83a6f34b62f27c1f6f2cf791d1a9be8a977042c # pragma: allowlist secret - public wheel digest
+- result: A real fresh two-environment ACP probe caught the archived SDK undeclared requests import; explicitly add requests2.34.2
+    only to SDK peer/client environment. Bounded startup diagnostics redact generated credentials; corresponding regression
+    passes.
+- command: uv run --no-project python scripts/smoke_acp_package.py --wheel TEMP/fastfence-0.1.3-py3-none-any.whl --output state/private/acp-package-wheel.json
+  result: Eight actual official ACP SDK client/gateway/peer HTTP acceptance groups passed from two new external environments with verified installed wheel bytes and no source imports. Tests cover authentication, real execution, input/output denial, output custom-detector redaction, explicit restoration and audit privacy; gateway and archived SDK dependencies remain separate.

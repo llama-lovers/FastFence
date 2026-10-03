@@ -48,6 +48,8 @@ def test_default_runtime_rejects_stale_example_allowlists(tmp_path):
     policy_path = tmp_path / "config/policy.yaml"
     policy = yaml.safe_load(policy_path.read_text())
     assert policy["tools"] == {}
+    assert set(policy["models"]) == {"qwen3:4b"}
+    assert policy["semantic"]["model"] == "qwen3:4b"
     policy["tools"] = {
         "knowledge.search": {
             "roles": ["analyst"],

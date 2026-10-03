@@ -3,9 +3,10 @@
 import asyncio
 import json
 from typing import Any, Literal
+from uuid import UUID
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from fastfence.modules.control.domain.exceptions import ResourceDeniedError
 from fastfence.modules.control.domain.models import Identity
@@ -43,10 +44,21 @@ class ProviderRun(BaseModel):
     agent_name: str
     status: Literal["completed"]
     output: list[ProviderMessage] = Field(min_length=1, max_length=32)
-    session_id: None = None
+    session_id: UUID | None = Field(default=None, exclude=True)
     session: None = None
     await_request: None = None
     error: None = None
+
+    @field_validator("session_id", mode="before")
+    @classmethod
+    def discarded_session_identifier(cls, value: Any) -> UUID | None:
+        # Official SDK creates a fresh session even when none was requested.
+        # Validate its opaque identifier, then discard it without ever reusing it.
+        if value is None:
+            return None
+        if not isinstance(value, str) or len(value) != 36:
+            raise ValueError("Invalid ACP session identifier")
+        return UUID(value)
 
 
 def _unique_fields(pairs: list[tuple[str, Any]]) -> dict[str, Any]:

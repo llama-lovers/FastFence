@@ -1,4 +1,4 @@
-# Manual acceptance test
+# Check your installation
 
 ## Install the package in a fresh directory
 
@@ -6,17 +6,14 @@ Complete [Getting started](getting-started.md) in a new directory with Python 3.
 
 ```sh
 fastfence init --anonymization
-fastfence setup-laya
 fastfence setup-ocr
-ollama pull qwen3:4b
-ollama pull qwen3:0.6b
 fastfence doctor --full
 fastfence serve
 ```
 
-Wait for `doctor --full` to pass. It checks private initialization, Laya, the isolated OCR interpreter and models, and both Qwen models. Model downloads require a network connection; OCR inference uses downloaded local files.
+Wait for `doctor --full` to pass. It checks private initialization, Laya, the isolated OCR interpreter and models, and the configured assessment model. It does not require a second, hardcoded completion model. Model downloads require a network connection; OCR inference uses downloaded local files.
 
-Initialization preserves existing valid credentials and keys. New `state/identities.json`, `state/credentials.json` and `state/anonymization-keys.json` are private. The default policy requires Laya/Qwen3:4b; an unavailable assessor fails closed.
+Normal `init` installs Laya and downloads only a missing configured assessment model. It preserves existing valid credentials, policies and keys. New `state/identities.json`, `state/credentials.json` and `state/anonymization-keys.json` are private. The default policy requires Laya/Qwen3:4b; an unavailable assessor fails closed.
 
 ## Connect
 
@@ -30,7 +27,6 @@ If another gateway already uses port 8000, stop that instance or use
 `fastfence serve --port 8002` and open <http://127.0.0.1:8002>.
 Use the selected port in MCP/client URLs too.
 
-Developer suites and reproducible source acceptance checks are documented in [Contributing](contributing.md).
 
 ## Check actual text assessment
 
@@ -193,7 +189,7 @@ async def main():
     async with Client("http://127.0.0.1:8000/mcp/", auth=BearerAuth(token)) as client:
         for restore in (False, True):
             result = await client.call_tool("complete", {
-                "model": "qwen3:0.6b",
+                "model": "qwen3:4b",
                 "prompt": "Repeat this text exactly: Anna Kowalska",
                 "max_output_tokens": 256,
                 "restore_originals": restore,
@@ -205,17 +201,11 @@ PYCODE
 ```
 
 This uses the reversible person rule above. For the letter-a rule, call the MCP
-`complete` tool with `{"model":"qwen3:0.6b","prompt":"Cat","max_output_tokens":16}`
+`complete` tool with `{"model":"qwen3:4b","prompt":"Cat","max_output_tokens":16}`
 and expect an input block before Qwen executes.
 
-## Check the evidence
+## Inspect request activity
 
 Open **Activity** and locate the result by request ID. Compare policy/feed version,
 decision, findings and whether upstream executed. Audit contains metadata only;
 it must not contain prompts, OCR text, original names or recovery tokens.
-The local suite uses explicit test adapters and is reproducible without downloading OCR weights or calling Qwen;
-real-model and real-OCR checks are separate from offline CI.
-
-## Developer acceptance evidence
-
-See [Contributing](contributing.md) for clean-install and repository regression commands. These are separate from the product scenarios above.

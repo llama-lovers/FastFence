@@ -337,3 +337,40 @@ def test_request_cannot_override_endpoint_or_wire_agent():
             provider().validate(
                 "acp.peer", INPUT | {field: "untrusted"}, IDENTITY
             )
+
+
+async def test_sdk_generated_session_uuid_is_discarded_and_never_reused(
+    monkeypatch,
+):
+    requests = []
+    body = response()
+    body["session_id"] = "48992bbe-0847-4a56-bbb8-310825ae616f"
+
+    def handle(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json=body)
+
+    transport(monkeypatch, handle)
+    client = provider()
+    for _ in range(2):
+        result = await client.call("acp.peer", INPUT, IDENTITY)
+        assert result == {"output": [{"role": 1, "parts": ["hello"]}]}
+        assert body["session_id"] not in json.dumps(result)
+    assert len(requests) == 2
+    assert all(
+        "session_id" not in request and "session" not in request
+        for request in requests
+    )
+
+
+@pytest.mark.parametrize(
+    "identifier", [123, {}, "x" * 36, "1" * 32]
+)
+async def test_malformed_sdk_session_identifiers_still_fail_closed(
+    monkeypatch, identifier
+):
+    body = response()
+    body["session_id"] = identifier
+    transport(monkeypatch, lambda _: httpx.Response(200, json=body))
+    with pytest.raises(RuntimeError, match="ACP agent unavailable"):
+        await provider().call("acp.peer", INPUT, IDENTITY)

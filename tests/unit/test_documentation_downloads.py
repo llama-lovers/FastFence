@@ -1,7 +1,10 @@
 """Published example downloads include only exact executable public sources."""
 
 import io
+import json
 import runpy
+import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -52,3 +55,50 @@ def test_embedded_source_and_download_are_the_same_public_file():
         )
         assert content.decode().rstrip() in rendered
         assert f"https://fastfence.dev/downloads/{name}" in rendered
+
+
+def test_public_build_excludes_internal_records_from_pages_search_and_llms(
+    tmp_path,
+):
+    site = tmp_path / "site"
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "mkdocs",
+            "build",
+            "--strict",
+            "--site-dir",
+            str(site),
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    internal = {
+        "anonymization-plan",
+        "challenge-readiness",
+        "contributing",
+        "deployment",
+        "publishing",
+        "requirements",
+        "security-review",
+        "testing",
+    }
+    search = json.loads((site / "search/search_index.json").read_text())
+    locations = [item["location"] for item in search["docs"]]
+    llms = (site / "llms.txt").read_text() + (
+        site / "llms-full.txt"
+    ).read_text()
+    for name in internal:
+        assert (ROOT / "maintainer" / f"{name}.md").is_file()
+        assert not (site / name).exists()
+        assert not any(
+            location.startswith(f"{name}/") for location in locations
+        )
+        assert f"https://fastfence.dev/{name}/" not in llms
+    assert not (site / "maintainer").exists()
+    assert (site / "examples/mcp-client/index.html").is_file()
+    assert "Source: https://fastfence.dev/getting-started/" in llms

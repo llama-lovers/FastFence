@@ -20,14 +20,12 @@ Protected REST writes authenticate before consuming or parsing their body. Invoc
 | `GET /api/admin/status` | Management policy, budgets, telemetry and sanitized audit |
 | `GET /api/admin/audit.jsonl` | Export retained sanitized records |
 
-A business-tool request has this shape:
-
-Business handlers are not installed in the default local runtime. The following shape applies when your application registers the named handler, or when you explicitly start the [business-tool example](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/examples/business_tools).
+Business handlers are registered by your application. Start the downloadable [FastMCP server example](examples/fastmcp-server.md) on port 8010, then send this body to its `/api/invoke` endpoint with that example's agent credential:
 
 ```json
 {
-  "tool": "knowledge.search",
-  "arguments": {"query": "Quarterly forecast"}
+  "tool": "text.uppercase",
+  "arguments": {"text": "hello"}
 }
 ```
 
@@ -65,7 +63,7 @@ async def main():
         auth=BearerAuth(credentials["local-agent"]),
     ) as client:
         completion = await client.call_tool(
-            "complete", {"model": "qwen3:0.6b", "prompt": "Cat", "max_output_tokens": 16}
+            "complete", {"model": "qwen3:4b", "prompt": "Cat", "max_output_tokens": 16}
         )
         print(completion.data)
 
@@ -85,14 +83,14 @@ trusted peer addresses in `FASTFENCE_ACP_AGENTS`, then allowlist the correspondi
 uses the official SDK to call a separate agent through FastFence.
 
 This adapter supports synchronous, stateless, inline plain-text messages. It
-rejects sessions, streaming and attachments. Message text crosses the same input
+rejects caller-selected sessions, streaming and attachments. Automatically generated peer session identifiers are discarded. Message text crosses the same input
 and output controls as other tools; caller credentials never become peer credentials.
 ACP has moved into A2A; this adapter preserves the documented ACP compatibility
 profile and does not implement A2A.
 
 ## Actual Laya integration
 
-The installed product uses the upstream [Laya Python engine](https://github.com/aayushch/laya) at a pinned revision. Run `fastfence setup-laya` in your installation directory. This fetches the external engine, retains license notices and installs hash-verified dependencies into private local state. It requires Git, `sh` and `uv`; you do not need the FastFence repository.
+The installed product uses the upstream [Laya Python engine](https://github.com/aayushch/laya) at a pinned revision. Normal `fastfence init` installs it in your installation directory and checks/downloads the configured assessment model through Ollama. Use `fastfence setup-laya` only for a separate engine installation or repair. This fetches the external engine, retains license notices and installs hash-verified dependencies into private local state. It requires Git, `sh` and `uv`; you do not need the FastFence repository.
 
 Laya has two independent roles:
 
@@ -102,15 +100,3 @@ Laya has two independent roles:
 The default assessor is Qwen3:4b through local Ollama. Your protected completion model is configured independently. A precise letter restriction should use a literal/text rule; model judgment is approximate. See [policies](policies.md) for scope and failure behavior.
 
 To connect an external agent, route its model client to the [OpenAI-compatible endpoint](examples/openai-client.md) and its registered operations through [FastMCP](examples/fastmcp-server.md). Installing a gateway does not intercept connectors that continue calling upstream services directly.
-
-Historical standalone Laya/business-tool demonstrations and their recorded results remain in the [source repository](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/integrations/laya). They are developer examples, not prerequisites for package installation or policy assessment.
-
-## Real business backends
-
-The separate business-tool example simulates knowledge, contact, memory and payment preparation. The default product runtime does not register those handlers. To connect a real backend, implement its validated allowlisted handler behind the tools port and keep backend credentials on the gateway side. Callers cannot select upstream URLs or supply upstream credentials.
-
-Output blocking cannot reverse an executed business operation. Irreversible operations need their own transaction or approval design in addition to gateway policy checks.
-
-## Trace a protected call
-
-Every gateway verdict carries a request ID. In the dashboard, paste it into the decision-trail search and open **Details** to inspect matched rule IDs, policy/feed versions and whether the upstream executed. Playground results offer **View this decision in audit** directly. The UI searches its latest loaded 200 events; use the management audit export for the complete retained ring. Audit details contain sanitized metadata, not prompt or response bodies.

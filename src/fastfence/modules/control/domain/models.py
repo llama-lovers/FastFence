@@ -39,7 +39,7 @@ class ToolPolicy(FrozenControlModel):
 
 class SemanticConfig(FrozenControlModel):
     provider: Literal["disabled", "ollama", "kev", "laya"] = "disabled"
-    model: str = "qwen3:0.6b"
+    model: str = "qwen3:4b"
     threshold: float = Field(default=0.7, ge=0, le=1)
     timeout_ms: int = Field(default=5000, ge=100, le=60_000)
     scan_output: bool = True

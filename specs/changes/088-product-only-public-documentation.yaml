@@ -1,0 +1,33 @@
+id: FF-088
+title: Publish product documentation without internal project records
+status: implemented
+problem: Public documentation mixed installation and integration guides with internal security reviews, competition requirements, historical assessments and maintainer procedures.
+scope:
+  - Move eight internal records outside the MkDocs source directory into maintainer.
+  - Keep navigation and the generated LLM corpus focused on installation, guides, examples and reference.
+  - Preserve product audit-log instructions and practical operational limitations.
+  - Verify that internal records are absent from rendered pages, search and LLM text.
+constraints:
+  - Preserve the internal evidence in version control.
+  - Keep executable example downloads identical to their public source.
+  - Publish documentation from the release verified against the public package.
+change_paths:
+  - docs/*.md
+  - docs/examples/asymmetric-anonymization.md
+  - docs/examples/openai-upstream.md
+  - maintainer/*.md
+  - mkdocs.yml
+  - scripts/docs_reference.py
+  - tests/unit/test_documentation_downloads.py
+acceptance:
+  - The site has Overview, Get started, Guides, Examples and Reference navigation.
+  - Internal records are absent from site files, search documents and both LLM text files.
+  - The site builds strictly without broken internal documentation links.
+validation:
+  - command: uv run pytest tests/unit/test_documentation_downloads.py --no-cov
+    expected: Exact example downloads and rendered publication boundaries pass.
+  - command: uv run mkdocs build --strict
+    expected: Product guides build without broken links.
+evidence:
+  - check: Published documentation boundary
+    result: Three documentation tests passed, including a strict temporary-site build proving internal report pages are absent from rendered files, search documents and both LLM corpora while executable examples remain source-identical.

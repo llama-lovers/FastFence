@@ -6,14 +6,14 @@ GitHub Pages hosts the static documentation. Run the FastFence API, dashboard an
 
 ## Run the gateway
 
-Install the [Python package](getting-started.md), initialize your working directory and set up the required Laya/model services. Then run:
+Install the [Python package](../docs/getting-started.md), initialize your working directory and set up the required Laya/model services. Then run:
 
 ```sh
 fastfence doctor
 fastfence serve --host 127.0.0.1 --port 8000
 ```
 
-Initialization creates private local agent and management credentials. Provision token hashes and verified claims through `FASTFENCE_IDENTITY_CONFIG_FILE` or `FASTFENCE_IDENTITY_CONFIG_JSON` for managed deployments. The runtime uses configuration and private keys rather than a conversation database. Policy editing and optional local setup require writable files; a read-only deployment must provision those inputs separately. See [settings](settings.md).
+Initialization creates private local agent and management credentials. Provision token hashes and verified claims through `FASTFENCE_IDENTITY_CONFIG_FILE` or `FASTFENCE_IDENTITY_CONFIG_JSON` for managed deployments. The runtime uses configuration and private keys rather than a conversation database. Policy editing and optional local setup require writable files; a read-only deployment must provision those inputs separately. See [settings](../docs/settings.md).
 
 Keep model servers and upstream credentials behind the gateway. Expose the API through your infrastructure's HTTPS termination and route protected agent traffic through it. The default bind address is loopback. The default product has no business handlers; register your validated adapters explicitly.
 

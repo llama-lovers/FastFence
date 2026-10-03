@@ -7,6 +7,7 @@ from pathlib import Path
 import uvicorn
 
 from fastfence.app.interfaces.cli.bootstrap_config import initialize_config
+from fastfence.app.interfaces.cli.bootstrap_runtime import initialize_runtime
 from fastfence.app.interfaces.cli.initialize import (
     initialize,
     initialize_anonymization,
@@ -33,7 +34,12 @@ def main() -> None:
     parser.add_argument(
         "--anonymization",
         action="store_true",
-        help="Provision a private anonymization keyring during init",
+        help="Compatibility flag: init always preserves or provisions the private keyring",
+    )
+    parser.add_argument(
+        "--config-only",
+        action="store_true",
+        help="Init: create local configuration and keys without network or model installation",
     )
     parser.add_argument(
         "--full",
@@ -53,8 +59,13 @@ def main() -> None:
                 settings.root, max_source_bytes=settings.max_config_source_bytes
             )
             initialize(settings.state_path)
-            if args.anonymization:
-                initialize_anonymization(settings)
+            initialize_anonymization(settings)
+            if args.config_only:
+                print(
+                    "Configuration initialized; runtime components were not installed (--config-only)."
+                )
+            else:
+                initialize_runtime(settings)
         elif args.command == "setup-laya":
             setup_laya(settings.authoring_root or settings.root)
         elif args.command == "setup-ocr":

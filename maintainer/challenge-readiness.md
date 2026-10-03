@@ -17,7 +17,7 @@ This page maps delivered behavior to evidence and identifies the remaining valid
 | Security reporting and auditing | Interactive dashboard shows controls, blocked decisions, budget use and configuration health, with request/rule search and expandable decision metadata. Sanitized decisions include request, policy/feed and execution metadata; management can export JSONL audit. | Automated dashboard, authorization and audit checks plus sanitized live reports. History is bounded in memory; restart and multiple instances limit retrospective visibility. |
 | Automated self-testing | Executable offline positive, negative, redaction, budget, configuration, protocol and failure tests; separate actual-inference and performance runners. | Offline suite, actual-model threshold evidence, real Laya operation probes, browser authoring and actual MCP completion are recorded separately. A 76-group real HTTP/MCP transport matrix verifies outcomes, budgets and audit. Development corpora do not establish universal detection quality. |
 
-Use the [testing guide](testing.md) for commands, report links, measured environments and exclusions. The detailed semantics and integration boundaries are documented in [policies](policies.md) and [integrations](integrations.md).
+Use the [testing guide](testing.md) for commands, report links, measured environments and exclusions. The detailed semantics and integration boundaries are documented in [policies](../docs/policies.md) and [integrations](../docs/integrations.md).
 
 ## Expected deliverables
 
@@ -27,7 +27,7 @@ Use the [testing guide](testing.md) for commands, report links, measured environ
 | Sample configuration | Deterministic and hybrid policy examples, threat feed, configurable privacy actions, thresholds and budgets, plus a generated settings reference. |
 | Interactive dashboard | Implemented: identity connection, trial requests, policies, text-rule preview/activation, metrics, budgets, configuration health and audit export. Real Chromium walkthrough validates natural-language drafting, preview, activation, input denial and visible audit; a real MCP Qwen completion is checked in the same isolated gateway. |
 | Executable test suite | Offline suite with an enforced coverage gate; reproducible live-model, Laya and local-performance runners. |
-| Architecture diagram | Available in the [architecture guide](architecture.md). |
+| Architecture diagram | Available in the [architecture guide](../docs/architecture.md). |
 
 ## Natural-language rules and local enforcement
 
@@ -61,4 +61,4 @@ The supplied documents differ in the last two weights. Both are recorded here wi
 
 Sources: the locally supplied `CRIETRIA AI Control Layer.pdf` (formal requirements, page 3; validation and weights, page 4) and `RULES AI Control Layer.pdf` (submission requirements, section 5; weights, section 11). Participant documents are not republished here.
 
-For the demonstration, start with the [quickstart](getting-started.md), then follow the [rule-authoring steps](policies.md#draft-a-rule-in-natural-language-with-laya). The strongest claim is the behavior a judge can reproduce from the supplied configuration, commands and reports.
+For the demonstration, start with the [quickstart](../docs/getting-started.md), then follow the [rule-authoring steps](../docs/policies.md#draft-a-rule-in-natural-language-with-laya). The strongest claim is the behavior a judge can reproduce from the supplied configuration, commands and reports.

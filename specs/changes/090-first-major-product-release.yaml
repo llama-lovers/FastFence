@@ -1,0 +1,27 @@
+id: FF-090
+title: Publish FastFence 1.0.0
+status: implemented
+problem: The project owner requests the first major product release with package-first verification and release-matched documentation.
+scope:
+  - Set the package version to 1.0.0 and align current release instructions.
+  - Release automatic initialization, protected ACP compatibility and focused product documentation together.
+constraints:
+  - Preserve already published distributions and historical test evidence.
+  - Run package and quality checks before publication; version numbering is not a security certification.
+change_paths:
+  - _version.py
+  - uv.lock
+  - maintainer/publishing.md
+  - docs/examples/acp.md
+acceptance:
+  - Package metadata reports 1.0.0.
+  - Release tagging and public-index verification use the exact version.
+  - Documentation is deployed only after the matching public package passes acceptance checks.
+validation:
+  - command: uv run pytest -q
+    expected: Regression tests pass.
+  - command: uv build
+    expected: Wheel and source distribution identify FastFence 1.0.0.
+evidence:
+  - check: Full regression and distribution build
+    result: 984 tests passed with 92.36 percent source coverage; wheel and source distribution built successfully with package version 1.0.0. Actual model and ACP package checks are recorded in FF-086 and FF-084.

@@ -468,7 +468,14 @@ def run_clone(root: Path, full: bool) -> dict[str, Any]:
         and "Traceback" not in missing.stderr
     )
     command(
-        root, environment, "uv", "run", "fastfence", "init", "--anonymization"
+        root,
+        environment,
+        "uv",
+        "run",
+        "fastfence",
+        "init",
+        "--config-only",
+        "--anonymization",
     )
     paths = [
         root / "state" / name
@@ -480,16 +487,22 @@ def run_clone(root: Path, full: bool) -> dict[str, Any]:
     ]
     before = [fingerprint(path) for path in paths]
     command(
-        root, environment, "uv", "run", "fastfence", "init", "--anonymization"
+        root,
+        environment,
+        "uv",
+        "run",
+        "fastfence",
+        "init",
+        "--config-only",
+        "--anonymization",
     )
     assert before == [fingerprint(path) for path in paths]
     command(root, environment, "uv", "run", "fastfence", "doctor")
     if full:
         command(
-            root, environment, "sh", "integrations/laya/setup.sh", timeout=600
+            root, environment, "uv", "run", "fastfence", "init", timeout=1200
         )
         command(root, environment, "sh", "scripts/setup-ocr.sh", timeout=900)
-        command(root, environment, "ollama", "pull", "qwen3:4b", timeout=600)
         command(root, environment, "ollama", "pull", "qwen3:0.6b", timeout=600)
         command(
             root,

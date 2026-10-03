@@ -10,14 +10,11 @@ After [installing the package](../getting-started.md), run from your installatio
 
 ```sh
 fastfence init --anonymization
-fastfence setup-laya
-ollama pull qwen3:4b
-ollama pull qwen3:0.6b
 fastfence serve
 ```
 
-The default profile uses Laya/Qwen3:4b for security assessment and Qwen3:0.6b for
-completion. They are separate calls. The script reads the locally generated agent
+Normal `init` installs Laya and prepares Qwen3:4b, the default assessment model.
+The fresh policy uses the same model for protected completions in separate calls. The script reads the locally generated agent
 credential from `state/credentials.json`, with support for older `demo-tokens.json`
 installations. You can instead supply `FASTFENCE_AGENT_TOKEN` through your existing
 secret-management environment; the example never prints it.

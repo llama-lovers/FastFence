@@ -1,6 +1,6 @@
 # Architecture
 
-FastFence is a gateway between an authenticated agent and an allowlisted business tool, tenant resource, or local model. The enforcement pipeline is shared by the REST, OpenAI-compatible and MCP adapters. Business implementations are supplied through the tool port; the default product starts without business handlers. Runnable examples are separate from the runtime.
+FastFence is a gateway between an authenticated agent and an allowlisted business tool, tenant resource, or configured model. The enforcement pipeline is shared by the REST, OpenAI-compatible, MCP and ACP adapters. Business implementations are supplied through the tool port; the default product starts without business handlers. Runnable examples are separate from the runtime.
 
 ## Invocation pipeline
 
@@ -29,30 +29,11 @@ Requests denied during input checks never reach the upstream. Output-time blocki
 
 Each invocation keeps the policy and signature-feed versions acquired at its start. A concurrent reload affects subsequent invocations, while the original request continues under its captured snapshot.
 
-## Package boundaries
-
-The top-level dependency direction is `app → workflows → modules → shared`. The control feature follows `interfaces → application → persistence → contracts → domain`.
-
-| Layer | Responsibility |
-| --- | --- |
-| `app` | Application factory, HTTP/CLI transports and lifecycle |
-| `workflows` | Cross-feature orchestration for stateless anonymization and model content |
-| `modules/control/interfaces` | Authenticated MCP tool and resource transport |
-| `modules/control/application` | Invocation services, management use cases and composition facade |
-| `modules/control/persistence` | Concrete memory accounting, identity/configuration, model, secret-detector and tool adapters |
-| `modules/control/contracts` | Narrow ports used by the application services |
-| `modules/control/domain` | Pydantic policy models, limits, privacy rules and signature checks |
-| `shared` | Common Pydantic model and environment-backed settings |
-
-The `persistence` package name identifies an implementation boundary; the runtime ledger stores nothing durably. Application services depend on ports. The facade composes concrete adapters, and the application factory composes the transports. Domain code has no HTTP, MCP or database dependency. Import-linter checks these boundaries.
-
-All first-party records use Pydantic. Policy models are frozen; role/signature collections use tuples and rule mappings are immutable. Acquiring the active policy/feed snapshot returns an existing reference in O(1).
-
 ## Configuration outside enforcement
 
 A background worker reads a trusted local policy/feed pair or one HTTP JSON bundle. It bounds reads, validates the complete candidate, checks version/content consistency and atomically publishes the immutable snapshot. Changed policy and feed content require their respective versions to increase. Invalid updates and source outages retain the last good snapshot; startup requires a valid source.
 
-Configuration parsing, fingerprinting and I/O stay outside invocation enforcement. The deterministic path uses local rules and memory counters. An approved upstream call or an explicitly enabled semantic model can perform network I/O.
+Configuration parsing, fingerprinting and I/O stay outside invocation enforcement. The deterministic path uses local rules and memory counters. An approved upstream call or the configured semantic assessor can perform network I/O.
 
 Provisioned bearer-token hashes and their subject, tenant, role and management claims are loaded from trusted startup configuration. Request fields and role/tenant headers cannot change those claims. Management credentials cannot invoke agent tools.
 

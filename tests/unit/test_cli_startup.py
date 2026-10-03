@@ -69,10 +69,10 @@ def test_dotenv_state_is_honored_and_explicit_flag_overrides(
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("FASTFENCE_STATE", raising=False)
     (tmp_path / ".env").write_text("FASTFENCE_STATE=private-state\n")
-    run_cli(monkeypatch, "init", "--anonymization")
+    run_cli(monkeypatch, "init", "--config-only", "--anonymization")
     assert (tmp_path / "private-state/anonymization-keys.json").is_file()
     assert "FASTFENCE_STATE" not in os.environ
-    run_cli(monkeypatch, "init", "--state", "other")
+    run_cli(monkeypatch, "init", "--config-only", "--state", "other")
     assert (tmp_path / "other/identities.json").is_file()
 
 
@@ -147,7 +147,7 @@ def test_doctor_full_reports_optional_failures_without_values(
     with pytest.raises(SystemExit) as caught:
         doctor(AppSettings(root=project), full=True)
     assert caught.value.code == 1
-    assert "scripts/setup-ocr.sh" in capsys.readouterr().out
+    assert "fastfence setup-ocr" in capsys.readouterr().out
 
 
 def test_auto_detects_ocr_paths_without_resolving_python_symlink(tmp_path):
@@ -176,7 +176,7 @@ def test_init_anonymization_preserves_valid_environment_keyring(
     monkeypatch.setenv(
         "FASTFENCE_ANONYMIZATION_KEYS_JSON", json.dumps({"local-v1": encoded})
     )
-    run_cli(monkeypatch, "init", "--anonymization")
+    run_cli(monkeypatch, "init", "--config-only", "--anonymization")
     assert not (tmp_path / "state/anonymization-keys.json").exists()
     output = capsys.readouterr().out
     assert "keyring validated and preserved" in output

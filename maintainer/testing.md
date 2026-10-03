@@ -26,7 +26,7 @@ uv run pre-commit run --all-files
 
 Pre-commit includes formatting, type checking, architecture checks, staged-specification coverage, and offline repository secret scanning. The reviewed `.secrets.baseline` contains known synthetic fixtures and public revision hashes. New findings require review; the hook does not regenerate the baseline automatically.
 
-Architectural checks enforce the layer boundaries and reject first-party dataclasses and database imports in the memory-only runtime. Changes must be covered by a staged implemented or verified specification. See the [architecture](architecture.md) for the source layout.
+Architectural checks enforce the layer boundaries and reject first-party dataclasses and database imports in the memory-only runtime. Changes must be covered by a staged implemented or verified specification. See the [architecture](../docs/architecture.md) for the source layout.
 
 ## GitHub Actions
 
@@ -114,7 +114,7 @@ simulated.
 - [Local OCR extraction](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/ocr-local.json): five synthetic PNG/JPEG/PDF fixtures, 22 expected-text/page checks; fresh-worker p50 3166 ms and p95 3732 ms. This tiny fixture set does not establish general recognition accuracy.
 - [Stateless token microbenchmark](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/stateless-token-benchmark.json): Apple M3 Pro, 1000 iterations per name/email workload, transform/restore p95 approximately 0.018 ms per operation. It excludes startup, transport and model latency. Recovery tokens expanded these short values by roughly 8–10 times in UTF-8 bytes; tokenization overhead is not measured.
 
-For hands-on steps, use the [manual acceptance test](manual-testing.md).
+For hands-on steps, use the [manual acceptance test](../docs/manual-testing.md).
 
 ## Real-model checks
 
@@ -131,7 +131,7 @@ uv run python evaluation/smoke_hybrid.py \
 
 The historical binary-schema Qwen3:4b development run classified 20 synthetic probes correctly: 10 benign and 10 attack cases. Its median was 343 ms and p95 1,384 ms on the development machine. This small development sample does not establish general detection accuracy. The earlier numeric-score prompt missed all 10 attacks; its report remains available alongside the improved run.
 
-The recorded memory-runtime hybrid smoke and original actual Laya integration each passed five cases. These historical checks predate the detector and authored-rule changes; they establish those integration checkpoints, not a fresh combined run of all current controls. They use actual local model inference; business tools remain simulated. The Laya runner and prerequisites are described in [integrations](integrations.md).
+The recorded memory-runtime hybrid smoke and original actual Laya integration each passed five cases. These historical checks predate the detector and authored-rule changes; they establish those integration checkpoints, not a fresh combined run of all current controls. They use actual local model inference; business tools remain simulated. The Laya runner and prerequisites are described in [integrations](../docs/integrations.md).
 
 Public source reports:
 
@@ -184,11 +184,11 @@ uv run --with playwright==1.63.0 python evaluation/smoke_playground_models.py --
 uv run --with playwright==1.63.0 python evaluation/smoke_audit_ui.py --output state/private/audit-browser.json
 ```
 
-The [console report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/console-browser.json) records 16 passing browser checks. The separate model-selection and audit suites cover seven and nine additional interaction contracts. To verify actual inference and your own environment, use [manual verification](manual-testing.md); fixture results are not inference evidence.
+The [console report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/console-browser.json) records 16 passing browser checks. The separate model-selection and audit suites cover seven and nine additional interaction contracts. To verify actual inference and your own environment, use [manual verification](../docs/manual-testing.md); fixture results are not inference evidence.
 
 ## Policy studio and selective controls
 
-First complete the [Laya and two-model setup](getting-started.md#describe-a-rule-then-test-it-through-mcp), with Ollama running. For a real browser walkthrough, install the optional test browser and run:
+First complete the [Laya and two-model setup](../docs/getting-started.md#describe-a-rule-then-test-it-through-mcp), with Ollama running. For a real browser walkthrough, install the optional test browser and run:
 
 ```sh
 uv run --with playwright python -m playwright install chromium

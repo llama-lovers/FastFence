@@ -5,7 +5,7 @@ problem: Agent-to-agent ACP traffic needs the same control pipeline and an insta
 scope:
   - Register the ACP compatibility router with only operator-configured agent aliases.
   - Report the installed package version in the API schema.
-  - Release ACP and public PyPI verification as version 0.1.3.
+  - Release ACP and public PyPI verification as version 1.0.0.
 constraints:
   - Preserve the published 0.1.1 and tagged 0.1.2 distributions.
   - Keep ACP examples outside the product runtime.
@@ -29,3 +29,5 @@ validation:
 evidence:
   - check: Public PyPI upgrade verification before ACP integration
     result: Installed 0.1.1 from public PyPI in a fresh external environment, initialized configuration and anonymization keyring, upgraded from public PyPI to 0.1.2, reran init and doctor, and verified configuration, identity records, credentials and keyring remained byte-for-byte unchanged. The published custom detector example blocked a real HTTP request before upstream execution.
+  - check: Published product with actual Laya and Ollama
+    result: Installed exact FastFence 0.1.2 from the public index in a new external environment; installed pinned Laya through the packaged setup-laya command; actual benign completion was allowed with input and output assessment, while the user's secret-extraction prompt was blocked before the completion model executed.

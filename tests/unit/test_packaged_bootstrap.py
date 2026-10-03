@@ -106,11 +106,11 @@ def test_atomic_publication_never_overwrites_existing_file(
         ("signatures.json", "signatures.json"),
     ],
 )
-def test_packaged_defaults_match_reviewed_repository_configuration(
-    resource: str, source: str
+def test_initialized_files_match_packaged_defaults(
+    tmp_path: Path, resource: str, source: str
 ) -> None:
-    root = Path(__file__).resolve().parents[2]
+    initialize_config(tmp_path)
     assert (
         files("fastfence.shared.defaults").joinpath(resource).read_bytes()
-        == (root / "config" / source).read_bytes()
+        == (tmp_path / "config" / source).read_bytes()
     )

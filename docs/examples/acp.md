@@ -18,15 +18,17 @@ ACP or A2A conformance.
 
 ## Run a real peer agent locally
 
-Install FastFence **0.1.3 or later** using [Getting started](../getting-started.md),
+Install FastFence **1.0.0 or later** using [Getting started](../getting-started.md),
 then extract the [complete examples archive](../downloads/fastfence-examples.zip)
 into `examples/`. Run all commands from the installation directory. Keep the
 gateway in your FastFence Python 3.12 environment. Create a separate environment
-for the archived SDK peer and client; its Uvicorn pin does not change your gateway:
+for the archived SDK peer and client; its Uvicorn pin does not change your gateway.
+The SDK also imports `requests` without declaring that dependency, so install it
+explicitly in this separate environment:
 
 ```sh
 python -m venv .acp-venv
-.acp-venv/bin/python -m pip install 'acp-sdk==1.0.3' 'uvicorn==0.35.0'
+.acp-venv/bin/python -m pip install 'acp-sdk==1.0.3' 'uvicorn==0.35.0' 'requests==2.34.2'
 .acp-venv/bin/python examples/acp_server.py
 ```
 
@@ -113,7 +115,7 @@ hidden internal token usage is not measured by this adapter.
 ## Supported content and execution
 
 - Only `mode: sync`, inline `text/plain`, and `content_encoding: plain` are
-  accepted. Binary/base64 parts, remote content URLs, non-null metadata, sessions,
+  accepted. Binary/base64 parts, remote content URLs, non-null metadata, caller-selected sessions,
   asynchronous jobs, streaming, polling, resume and remote cancellation are
   rejected explicitly. The gateway does not fetch attachments or persist runs.
 - Input bodies are bounded to 65,536 bytes; message and part counts and text
@@ -129,7 +131,7 @@ hidden internal token usage is not measured by this adapter.
   local request cannot guarantee that a remote agent stops its own work.
 - Stateless clients should send any necessary conversation text explicitly on
   each run. FastFence maintains no ACP conversation or result store. The example
-  SDK backend may maintain its own SDK-managed memory; that is outside FastFence.
+  SDK backend creates its own session even when none is requested. FastFence validates and discards the returned UUID: it never returns, retains or reuses that session identifier. The peer may retain its own state independently of the stateless gateway.
 
 The raw protected tool representation, also available through REST/MCP, is
 `{"tool":"acp.assistant","arguments":{"input":[{"role":0,"parts":["Hello"]}]}}`.

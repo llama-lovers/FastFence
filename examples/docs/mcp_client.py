@@ -23,7 +23,7 @@ async def call_gateway(
     url: str,
     token: str,
     *,
-    model: str = "qwen3:0.6b",
+    model: str = "qwen3:4b",
     prompt: str = "Hello",
     tool: str | None = None,
     arguments: dict | None = None,
@@ -34,7 +34,7 @@ async def call_gateway(
         if tool is None:
             result = await client.call_tool(
                 "complete",
-                {"model": model, "prompt": prompt, "max_output_tokens": 128},
+                {"model": model, "prompt": prompt, "max_output_tokens": 256},
             )
         else:
             result = await client.call_tool(
@@ -50,7 +50,7 @@ def main() -> None:
     parser.add_argument(
         "--credentials", type=Path, default=Path("state/credentials.json")
     )
-    parser.add_argument("--model", default="qwen3:0.6b")
+    parser.add_argument("--model", default="qwen3:4b")
     parser.add_argument("--prompt", default="Hello")
     parser.add_argument(
         "--tool",

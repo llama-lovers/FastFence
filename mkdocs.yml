@@ -64,9 +64,9 @@ nav:
       - Installation: getting-started.md
       - Learn by task: learn.md
       - Verify your installation: manual-testing.md
-  - Learn:
+  - Guides:
       - Policies and controls: policies.md
-      - Laya, MCP and models: integrations.md
+      - Connect agents and models: integrations.md
   - Examples:
       - Agent Communication Protocol: examples/acp.md
       - Custom Python detectors: examples/custom-detectors.md
@@ -82,13 +82,3 @@ nav:
       - HTTP API from source: reference/http-api.md
       - Runtime settings: settings.md
       - Architecture: architecture.md
-  - Operations:
-      - Testing and evidence: testing.md
-      - Independent security review: security-review.md
-      - Documentation deployment: deployment.md
-      - PyPI releases: publishing.md
-  - Project:
-      - Contributing: contributing.md
-      - Requirements and evidence: requirements.md
-      - Challenge readiness: challenge-readiness.md
-      - Stateless anonymization and OCR plan: anonymization-plan.md

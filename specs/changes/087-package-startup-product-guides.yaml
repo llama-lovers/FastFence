@@ -1,0 +1,49 @@
+id: FF-087
+title: Explain automatic initialization and keep public guides focused on product use
+status: implemented
+problem: Quickstarts required a separate Laya installation and a second completion model, obscuring what initialization should prepare and mixing product guidance with internal reports.
+scope:
+  - Document normal initialization as configuration plus pinned Laya setup and preparation of the configured assessment model.
+  - Use the fresh single-model Qwen3:4b default in public quickstarts and explain independently configurable business models.
+  - Keep configuration-only provisioning explicit and preserve default fail-closed Laya inspection.
+  - Update runnable REST and MCP documentation to match the fresh policy without editing client implementation defaults.
+  - Remove public links and sections devoted to internal reports, source test suites and benchmark evidence.
+  - Move source-layer architecture into maintainer documentation and link public extension tasks to the runnable FastMCP integration.
+  - Document the explicit isolated-policy and runtime settings required to enable Laya in a deterministic standalone example.
+  - Clarify that ACP peer-generated session identifiers are discarded while the peer may retain its own state.
+constraints:
+  - Ollama remains an external prerequisite; normal initialization does not imply starting its service.
+  - Existing valid policy, identity and key configuration remains preserved by initialization.
+  - Tool-only and ACP integrations do not require an extra business completion model.
+  - Product request activity and operator verification remain documented.
+change_paths:
+  - README.md
+  - docs/getting-started.md
+  - docs/index.md
+  - docs/learn.md
+  - docs/manual-testing.md
+  - docs/policies.md
+  - docs/integrations.md
+  - docs/examples/protected-request.md
+  - docs/examples/openai-client.md
+  - docs/examples/openai-upstream.md
+  - docs/examples/asymmetric-anonymization.md
+  - docs/examples/acp.md
+  - docs/examples/fastmcp-server.md
+  - docs/architecture.md
+  - maintainer/architecture-development.md
+acceptance:
+  - Fresh-install instructions need no separate setup-laya or second-model pull command.
+  - The guide distinguishes Laya's engine, its assessment model and the protected application's model or tool.
+  - Public guides do not link to maintainer audit, challenge, benchmark or development-report pages.
+  - Documentation builds with strict link and source-embedding validation.
+validation:
+  - command: uv run mkdocs build --strict
+    expected: Product pages, navigation and runnable example source render without broken links.
+evidence:
+  - check: Strict documentation rendering
+    result: MkDocs strict build passed after startup guide changes, public internal-report link cleanup and ACP session clarification.
+  - check: Main quickstart consistency
+    result: README, getting started, landing, learning and manual operator instructions use Qwen3:4b and contain no separate setup-laya command or manual model-pull requirement.
+  - check: Follow-up public documentation review
+    result: Removed the nonexistent packaged offline-profile reference, moved source layering to maintainer architecture documentation, replaced simulated-demo detours with the runnable FastMCP integration, and supplied explicit Laya provider and runtime configuration steps. Strict MkDocs build passed.

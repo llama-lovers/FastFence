@@ -14,7 +14,7 @@ python examples/fastmcp_server.py
 
 The application listens on `http://127.0.0.1:8010`. It initializes a separate policy and credentials in `state/examples/fastmcp-integration/`; it does not change the main installation. Open this console and connect the `local-agent` and `local-admin` credentials from that directory's `state/credentials.json`.
 
-The example uses deterministic checks so it runs without a model. This is an explicit example profile; the product's default policy enables Laya. To add semantic checking here, set up Laya for this installation and configure its trusted `authoring_root` as described in [installation](../getting-started.md).
+This standalone example deliberately uses deterministic checks so it runs without a model. The main product policy enables Laya by default. To enable the same semantic input and output checks in this isolated example, follow [Enable Laya](#enable-laya-in-this-example) below.
 
 ## Complete server and FastAPI integration
 
@@ -25,6 +25,38 @@ The example uses deterministic checks so it runs without a model. This is an exp
 ## Policy
 
 <!-- source: examples/docs/policy.yaml -->
+
+## Enable Laya in this example
+
+Stop the example server. From your main installation directory, with Ollama running and the FastFence virtual environment active, prepare the runtime:
+
+```sh
+fastfence init --anonymization
+export FASTFENCE_AUTHORING_ROOT="$PWD"
+```
+
+The environment variable lets the isolated example use the main installation's Laya engine. If you changed the Ollama endpoint, also export the same `FASTFENCE_OLLAMA_URL` in this shell; the example reads environment variables, not the main installation's `.env` file.
+
+Edit `state/examples/fastmcp-integration/config/policy.yaml`, which was created on the example's first start. Preserve its tools, budgets and other controls, increment its current top-level `version`, and replace its `semantic` section with:
+
+```yaml
+semantic:
+  provider: laya
+  model: qwen3:4b
+  threshold: 0.7
+  timeout_ms: 30000
+  scan_output: true
+```
+
+Use the assessment model prepared by your main installation if you changed it from Qwen3:4b. Installing Laya alone does not enable assessment: `provider: laya` in this example's own policy is required.
+
+Restart from the same shell:
+
+```sh
+python examples/fastmcp_server.py
+```
+
+Send `hello` again. For an allowed response, both `semantic_input_status` and `semantic_output_status` should be `passed`. Missing or failed assessment blocks the request. Input denied by an earlier local rule never reaches the assessor or tool.
 
 ## Invoke through REST
 

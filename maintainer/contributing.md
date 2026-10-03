@@ -1,6 +1,6 @@
 # Contributing
 
-This page is for changing FastFence source and running its development suites. Product installation uses the [Python package](getting-started.md) and does not require this checkout.
+This page is for changing FastFence source and running its development suites. Product installation uses the [Python package](../docs/getting-started.md) and does not require this checkout.
 
 ## Source environment
 

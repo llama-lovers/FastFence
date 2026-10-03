@@ -22,9 +22,6 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install fastfence uv
 fastfence init --anonymization
-fastfence setup-laya
-ollama pull qwen3:4b
-ollama pull qwen3:0.6b
 fastfence doctor
 fastfence serve
 ```
@@ -34,10 +31,17 @@ Open **http://127.0.0.1:8000**, then **Connection**. Use `local-admin` from
 requests. Tokens are randomly generated, private, and kept only in browser page
 memory after you enter them. Management credentials cannot invoke agent operations.
 
-The default policy uses **Laya with Qwen3:4b to assess input and output text**;
-Qwen3:0.6b is the separate protected completion model. Missing or failed assessment
-blocks the request. Nothing silently substitutes a deterministic-only classifier.
-Model assessment adds inference latency; local rules run before it.
+`init` creates your configuration and credentials, installs the pinned Laya engine,
+and downloads the configured assessment model if it is missing. The fresh default
+uses **Qwen3:4b** for assessment and protected completions, as separate calls, so
+one model download is enough. Your application's completion model can be changed
+independently. Tool-only and ACP integrations need no separate completion model.
+
+Laya checks input and output that reach semantic inspection. Missing or failed
+assessment blocks the request; local rules run before it. Repeating `init`
+preserves valid existing configuration and keys. For configuration provisioning
+without downloads, use `fastfence init --config-only --anonymization`; normal
+initialization must finish before model-backed protection is ready.
 
 For OCR of images and multipage PDFs:
 
@@ -63,7 +67,7 @@ credentials = json.loads(Path("state/credentials.json").read_text())
 response = httpx.post(
     "http://127.0.0.1:8000/api/models/complete",
     headers={"Authorization": "Bearer " + credentials["local-agent"]},
-    json={"model": "qwen3:0.6b", "prompt": "Hello", "max_output_tokens": 64},
+    json={"model": "qwen3:4b", "prompt": "Hello", "max_output_tokens": 256},
     timeout=120,
 )
 response.raise_for_status()
@@ -103,9 +107,9 @@ The product includes **no simulated business handlers**. Implement `ToolsPort`,
 inject the adapter with `create_app(settings, tools=adapter)`, and allowlist its
 operations and roles in policy. An allowlist without a connected adapter fails closed.
 
-[The opt-in business-tools example](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/examples/business_tools) runs simulated
-search, tenant memory and payment preparation in a separate server and state directory.
-It illustrates adapter composition and does not handle real payments.
+The downloadable [FastMCP server example](https://fastfence.dev/examples/fastmcp-server/)
+connects an actual uppercase tool through this port. It uses a separate server,
+policy and credentials; replace its operation with your application logic.
 
 ## Update and verify
 
@@ -121,7 +125,7 @@ Reload the browser. Your working directory's configuration and private state are
 
 Download [runnable examples](https://fastfence.dev/downloads/fastfence-examples.zip), extract them into `examples/` in your installation directory, and run `python examples/protected_request.py --prompt 'Hello'`. The documentation embeds the complete source for REST, named Laya policies, FastMCP, OpenAI SDK and public/private-key anonymization.
 
-Repository development and automated suite instructions belong in [Contributing](https://fastfence.dev/contributing/). For product verification follow [Manual testing](https://fastfence.dev/manual-testing/).
+Follow [the installation checks](https://fastfence.dev/manual-testing/) to verify your own models, policies and documents.
 
 ## Operating scope
 
@@ -135,7 +139,7 @@ Model judgments can miss attacks or block legitimate text. Deterministic checks 
 specific configured patterns, permissions and limits, not universal attack detection.
 Irreversible business actions require adapter-specific authorization and transaction
 controls. [Architecture](https://fastfence.dev/architecture/) · [Policies](https://fastfence.dev/policies/) ·
-[Settings](https://fastfence.dev/settings/) · [Evaluation](https://fastfence.dev/testing/).
+[Settings](https://fastfence.dev/settings/).
 
 Licensed under [Apache 2.0](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/LICENSE); see [NOTICE](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/NOTICE). Dependencies retain their
 own licenses. Documentation uses MkDocs Material and GitHub Pages at **fastfence.dev**.

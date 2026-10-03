@@ -8,7 +8,7 @@ Install the [package](getting-started.md), download its [complete runnable examp
 
 ## 1. Send a protected model request
 
-Complete [Getting started](getting-started.md), including the Laya setup and the local assessment and completion models. Open the console, connect your agent and management identities, and choose **Test requests**. Select the model, enter a short prompt and send the request.
+Complete [Getting started](getting-started.md). Normal `init` installs Laya and prepares the configured assessment model; the fresh default also uses that model for completions. Open the console, connect your agent and management identities, and choose **Test requests**. Select the model, enter a short prompt and send the request.
 
 The result shows the policy version, decision, reason and whether the upstream model ran. Open its audit link to inspect the same request in **Activity**. A denied input must show that the upstream operation did not run.
 
@@ -18,7 +18,7 @@ The equivalent REST request is:
 curl http://127.0.0.1:8000/api/models/complete \
   -H "Authorization: Bearer $FASTFENCE_AGENT_TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"model":"qwen3:0.6b","prompt":"Hi","max_output_tokens":16}'
+  -d '{"model":"qwen3:4b","prompt":"Hi","max_output_tokens":256}'
 ```
 
 Set `FASTFENCE_AGENT_TOKEN` to your provisioned agent credential in your own shell. Never commit it or substitute a management credential. Use the model identifier from your active policy if it differs from this example.
@@ -57,6 +57,6 @@ Anonymization applies through the same policy controls as other input and output
 
 ## 5. Extend with business tools
 
-The default local runtime contains no simulated business handlers. The repository's [business-tool example](https://github.com/llama-lovers/HackYeah2026-challenge-second/tree/main/examples/business_tools) is a separate runnable application. Use it to learn the tool port and policy contract before connecting your own implementation.
+Use the downloadable [FastMCP server example](examples/fastmcp-server.md) to register an actual tool through `ToolsPort` and protect it with FastFence. It runs in a separate directory with its own credentials and policy. Replace its uppercase operation with your own application logic.
 
-For adapter details, see the [integration reference](integration-reference.md). For source boundaries and extension points, see [architecture](architecture.md).
+For adapter details, see the [integration reference](integration-reference.md). For the enforcement pipeline and operating boundaries, see [architecture](architecture.md).
