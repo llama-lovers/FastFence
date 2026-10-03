@@ -1,6 +1,6 @@
 id: FF-027
 title: Reproducible CLI assertions and locked continuous verification
-status: implemented
+status: verified
 problem: The demonstration can exit successfully after unexpected decisions and only
   documentation currently has automated GitHub verification.
 scope:
@@ -46,3 +46,5 @@ evidence:
     actions; first hosted run awaits commit/push.
 - command: uv run fastfence demo
   result: Actual running local gateway returned all seven expected decision, reason and upstream-execution triples; zero errors.
+- command: GitHub Verify FastFence run 37129574853 on commit 12b403d
+  result: Hosted Ubuntu verification passed locked installation, offline coverage tests, Ruff lint/format, types, import boundaries, AST architecture and specification validation.
