@@ -1,0 +1,37 @@
+id: FF-035
+title: Enforce content restrictions after privacy transformations
+status: verified
+problem: Privacy redaction can introduce text forbidden by an active literal rule or threat signature after the original payload has passed those controls.
+scope:
+  - Recheck local text and signature restrictions on redacted content before forwarding input or delivering output.
+  - Keep original-content checks so transformation cannot erase evidence of an existing denial.
+  - Apply the same behavior to policy preview and all adapters using the shared inspector.
+constraints:
+  - Preserve the captured policy/feed snapshot and direction/target scopes.
+  - Do not add model calls, network I/O or an extra scan for content without privacy findings.
+  - Denied output remains suppressed and reports that upstream already executed.
+  - Preserve privacy and restriction finding identifiers without retaining payload text.
+change_paths:
+  - src/fastfence/modules/control/application/services/inspection.py
+  - tests/integration/test_redaction_composition.py
+  - evaluation/results/transport-soak-composition.json
+  - docs/policies.md
+  - docs/testing.md
+  - specs/requirements.yaml
+acceptance:
+  - A no-letter-a rule rejects a redaction marker containing A on both input and output.
+  - A signature introduced by redaction is blocked before input forwarding or output delivery.
+  - Input denial does not call upstream or reserve budget; output denial settles reservations and retains sanitized audit.
+  - Non-conflicting redaction still succeeds and policy preview agrees with enforcement.
+validation:
+  - command: uv run pytest -q --no-cov tests/integration/test_redaction_composition.py
+    expected: Transformation composition and scope regressions pass.
+  - command: uv run pre-commit run --all-files
+    expected: All quality, architecture and specification gates pass.
+evidence:
+  - command: uv run pytest -q --no-cov tests/integration/test_redaction_composition.py
+    result: Ten model/tool, input/output and text/signature composition regressions pass, including audit, reservation, preview and non-conflicting redaction checks.
+  - command: uv run pytest -q
+    result: Full suite passes 451 tests with 95.69% first-party source coverage.
+  - artifact: evaluation/results/transport-soak-composition.json
+    result: Post-fix sixty-second HTTP/MCP soak passes 39221 mixed calls, five atomic policy/feed generations, invalid-source retention, reconciled budgets and bounded sanitized audit with zero pending reservations.

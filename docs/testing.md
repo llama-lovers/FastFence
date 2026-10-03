@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The severity-v2, transport-soak and dashboard checkpoint passes **441 tests**, with **95.59%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The redaction-composition checkpoint passes **451 tests**, with **95.69%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -198,3 +198,9 @@ Final accounting reconciled 20,464 charged calls, 3,253,839 token units and 2,04
 From a playground result, choose **View this decision in audit**, or paste a request/rule ID into the decision-trail search. Filter by decision and open **Details** to inspect matched controls, upstream execution, policy/feed versions and sanitized identity metadata. Search stays in page memory and covers the latest loaded 200 events; the export contains the retained audit history. Expanded records survive refresh while they remain loaded.
 
 The [audit browser fixtures](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/audit-ui.json) verify correlation, every decision-filter option, inert untrusted metadata, omission of unexpected payload fields, local search and mobile layout. Policy-review fixtures separately verify plain-language operation summaries, exact scope/case and the explicit limitation that content examples do not test role restrictions. These browser fixtures perform no model inference.
+
+## Privacy and content-rule composition
+
+Regression tests cover redaction introducing a forbidden literal or signature on model/tool input and output. They verify input denial before execution, output suppression after execution, settled reservations, retained sanitized findings and agreement with policy preview. Non-conflicting redaction still forwards useful sanitized content. Original content is also inspected, so redaction cannot erase a pre-existing denial. The recorded performance checkpoints above predate this added check on redacted payloads; clean payloads keep one restriction pass.
+
+The [post-fix HTTP/MCP soak](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/transport-soak-composition.json) passes **39,221 mixed calls over 60 seconds**, including input/output redaction under changing policy/feed versions and failed refreshes. Budget settlement and bounded audit reconcile with no pending reservations. This verifies runtime behavior under this bounded workload; it is not a controlled throughput comparison with the earlier run.

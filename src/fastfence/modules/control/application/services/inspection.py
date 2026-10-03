@@ -42,6 +42,29 @@ def check_size(
         raise RejectedError(f"{direction}_too_large", findings)
 
 
+def inspect_restrictions(
+    value: Any,
+    snapshot: Snapshot,
+    direction: Literal["input", "output"],
+    target: Target,
+) -> None:
+    policy = snapshot.policy
+    rule_findings = text_rule_findings(
+        policy.text_rules, value, direction, target
+    )
+    if rule_findings:
+        raise RejectedError(f"{direction}_text_rule", rule_findings)
+    if policy.signatures_enabled:
+        attacks = signature_findings(value, snapshot.feed)
+        if attacks:
+            reason = (
+                "attack_signature"
+                if direction == "input"
+                else "output_attack_signature"
+            )
+            raise RejectedError(reason, attacks)
+
+
 def inspect_payload(
     value: Any,
     snapshot: Snapshot,
@@ -57,20 +80,7 @@ def inspect_payload(
         else policy.max_output_bytes
     )
     check_size(value, maximum, direction)
-    rule_findings = text_rule_findings(
-        policy.text_rules, value, direction, target
-    )
-    if rule_findings:
-        raise RejectedError(f"{direction}_text_rule", rule_findings)
-    if policy.signatures_enabled:
-        attacks = signature_findings(value, snapshot.feed)
-        if attacks:
-            reason = (
-                "attack_signature"
-                if direction == "input"
-                else "output_attack_signature"
-            )
-            raise RejectedError(reason, attacks)
+    inspect_restrictions(value, snapshot, direction, target)
     if not policy.privacy.enabled:
         return value, []
     safe, findings = privacy_filter(value)
@@ -88,6 +98,13 @@ def inspect_payload(
     ):
         raise RejectedError(f"{direction}_sensitive_data", findings)
     check_size(safe, maximum, direction, findings)
+    if findings:
+        try:
+            inspect_restrictions(safe, snapshot, direction, target)
+        except RejectedError as error:
+            raise RejectedError(
+                error.reason, sorted(set(findings).union(error.findings))
+            ) from None
     return safe, findings
 
 

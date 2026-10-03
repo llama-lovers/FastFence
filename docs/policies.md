@@ -48,6 +48,8 @@ privacy:
 
 Change `input` to `redact` to forward sanitized content to the upstream. Change `output` to `block` to suppress a sensitive result. Increase the policy version when editing the file.
 
+Redaction does not override content restrictions. The gateway checks the original content and then rechecks local text rules and signatures on a redacted result before forwarding or delivery. For example, a case-insensitive ban on `a` also rejects the `A` in `[REDACTED:pii_polish_id]`. Such an input is blocked before the upstream call; such an output is suppressed after execution. Preview uses the same order. Content without privacy findings does not incur this additional scan.
+
 Privacy combines existing heuristics with **detect-secrets 1.5.0** through 19 offline credential-format and keyword detectors. It covers representative GitHub, GitLab, Slack, AWS, Azure, JWT, and private-key formats, alongside email and other heuristic patterns. Nested keys and values are inspected. Findings contain fixed detector names, never detected secret values.
 
 Detector instances are constructed at startup. Runtime scanning makes no credential-verification requests, scans no files, and ignores repository baselines and caller-supplied allowlist comments. Detector failures block delivery with a sanitized reason. Disabling `privacy.enabled` disables both privacy components.

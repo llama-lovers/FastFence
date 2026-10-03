@@ -44,10 +44,10 @@ validation:
 - command: uv run pytest -q
   expected: Functional and nonfunctional acceptance tests pass.
 evidence:
-- specifications: FF-001 through FF-034
+- specifications: FF-001 through FF-035
   mapping: docs/challenge-readiness.md links the six formal requirement areas to delivered behavior; docs/testing.md records the current verification checkpoint and its scope.
 - command: uv run pytest -q
-  result: Current local checkpoint passed 441 tests with 95.59% source coverage, above the enforced 85% gate; previous hosted Ubuntu CI passed on commit 2fcf345.
+  result: Current local checkpoint passed 451 tests with 95.69% source coverage, above the enforced 85% gate; previous hosted Ubuntu CI passed on commit 9340b40.
 - artifacts: evaluation/results/transport-optimized.json; evaluation/results/historical-attack-validation.json
   result: 76 real HTTP/MCP groups reconciled 7680 invocations; bounded inert attack corpus records 30 true positives, zero false negatives, six true negatives and two false positives.
 - artifacts: evaluation/results/policy-studio-live.json; evaluation/results/policy-operation-live.json; evaluation/results/semantic-strictness-v2-live.json; evaluation/results/semantic-severity-v2-blind-holdout.json
