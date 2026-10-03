@@ -193,7 +193,10 @@ def build_runtime(
         models=OpenAIModels(settings.openai_base_url, settings.openai_api_key)
         if settings.model_provider == "openai"
         else OllamaModels(settings.ollama_url),
-        secrets=OfflineSecrets(),
+        secrets=OfflineSecrets(
+            tuple(settings.secret_plugin_files),
+            settings.secret_plugin_max_file_bytes,
+        ),
         anonymization=anonymization,
     )
     return ControlRuntime(

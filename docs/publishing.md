@@ -18,7 +18,7 @@ From a clean source checkout:
 ```sh
 uv build
 uvx --from twine==7.0.0 twine check dist/*
-uv run python scripts/smoke_wheel.py dist/fastfence-0.1.1-py3-none-any.whl
+uv run python scripts/smoke_wheel.py dist/fastfence-0.1.2-py3-none-any.whl
 ```
 
 The smoke script creates a fresh Python 3.12 environment and installs the wheel
@@ -31,7 +31,7 @@ For release acceptance with Ollama and both default Qwen models already running,
 also execute the full installed-package path:
 
 ```sh
-uv run python scripts/smoke_wheel.py dist/fastfence-0.1.1-py3-none-any.whl --full
+uv run python scripts/smoke_wheel.py dist/fastfence-0.1.2-py3-none-any.whl --full
 ```
 
 This additionally runs the installed `setup-laya` command, downloads and installs
@@ -45,7 +45,7 @@ environment:
 ```sh
 python3.12 -m venv .venv
 . .venv/bin/activate
-python -m pip install /absolute/path/to/fastfence-0.1.1-py3-none-any.whl
+python -m pip install /absolute/path/to/fastfence-0.1.2-py3-none-any.whl
 fastfence init --anonymization
 python -m pip install uv
 fastfence setup-laya
@@ -87,7 +87,7 @@ large optional OCR downloads are not performed by the default wheel smoke test.
 Verify the installed OCR setup and actual synthetic image recognition separately:
 
 ```sh
-uv run python scripts/smoke_wheel.py dist/fastfence-0.1.1-py3-none-any.whl --ocr
+uv run python scripts/smoke_wheel.py dist/fastfence-0.1.2-py3-none-any.whl --ocr
 ```
 
 ## Configure the trusted publisher
@@ -118,12 +118,12 @@ trusted identity.
 ## Publish the reviewed version
 
 Set the version in `_version.py`, merge the reviewed changes to `main`, and ensure
-the verification workflow passes. For version `0.1.1`:
+the verification workflow passes. For version `0.1.2`:
 
 ```sh
-git tag v0.1.1
-git push origin v0.1.1
-gh release create v0.1.1 --title 'FastFence 0.1.1' --generate-notes
+git tag v0.1.2
+git push origin v0.1.2
+gh release create v0.1.2 --title 'FastFence 0.1.2' --generate-notes
 ```
 
 Publishing the GitHub release starts `.github/workflows/publish.yml`. The workflow
@@ -135,7 +135,7 @@ separate publication job.
 For an existing reviewed tag, the same workflow can be launched explicitly:
 
 ```sh
-gh workflow run publish.yml --ref main -f tag=v0.1.1
+gh workflow run publish.yml --ref main -f tag=v0.1.2
 gh run list --workflow publish.yml
 ```
 

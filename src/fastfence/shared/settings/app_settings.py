@@ -77,6 +77,17 @@ class AppSettings(BaseSettings):
         description="Server-only upstream bearer credential; independent of gateway caller tokens",
         repr=False,
     )
+    secret_plugin_files: list[Path] = Field(
+        default_factory=list,
+        max_length=8,
+        description="Trusted local Python detect-secrets plugin files as a JSON list; loaded at startup, restart after edits",
+    )
+    secret_plugin_max_file_bytes: int = Field(
+        default=65_536,
+        ge=1024,
+        le=1_048_576,
+        description="Maximum bytes read from each trusted secret detector Python file",
+    )
     kev_url: str = Field(
         default="http://127.0.0.1:8009", description="Trusted Kev endpoint"
     )
@@ -145,6 +156,11 @@ class AppSettings(BaseSettings):
     @model_validator(mode="after")
     def resolve_paths(self) -> Self:
         self.root = self.root.resolve()
+        self.secret_plugin_files = [
+            (self.root / path).resolve() for path in self.secret_plugin_files
+        ]
+        if len(set(self.secret_plugin_files)) != len(self.secret_plugin_files):
+            raise ValueError("Duplicate trusted secret detector files")
         self.state = (self.state or self.root / "state").resolve()
         if self.authoring_root is not None:
             self.authoring_root = self.authoring_root.resolve()

@@ -3,6 +3,8 @@
 import re
 from collections.abc import Callable, Iterable
 from importlib.metadata import version
+from itertools import islice
+from pathlib import Path
 from typing import Any
 
 from detect_secrets.plugins.artifactory import ArtifactoryDetector
@@ -28,6 +30,7 @@ from detect_secrets.plugins.twilio import TwilioKeyDetector
 from pydantic import ConfigDict
 
 from fastfence.modules.control.domain.frozen import FrozenControlModel
+from fastfence.modules.control.persistence.secret_plugins import custom_plugins
 
 MARKER = "[REDACTED:detect_secrets]"
 LINE_WRAP = re.compile(r"[ \t]*\r?\n[ \t]*")
@@ -77,22 +80,49 @@ def _views(text: str) -> Iterable[tuple[str, list[int] | None]]:
     yield "".join(text[index] for index in positions), positions
 
 
+def _candidates(detector: _Detector, text: str) -> set[str]:
+    raw = list(islice(detector.analyze(text), 4097))
+    if len(raw) > 4096 or any(
+        not isinstance(candidate, str) or not candidate or candidate not in text
+        for candidate in raw
+    ):
+        raise ValueError("Secret detector returned invalid results")
+    return set(raw)
+
+
+def _regex_spans(
+    detector: _Detector, text: str, candidates: set[str]
+) -> list[tuple[int, int]]:
+    spans = []
+    covered = set()
+    for pattern in detector.patterns:
+        for match in pattern.finditer(text):
+            matching = {
+                candidate
+                for candidate in candidates
+                if candidate in match.group()
+            }
+            if matching and match.start() < match.end():
+                covered.update(matching)
+                spans.append(match.span())
+    if covered != candidates:
+        raise ValueError("Secret detector matches cannot be safely redacted")
+    return spans
+
+
 def _spans(detector: _Detector, text: str) -> Iterable[tuple[int, int]]:
     if detector.necessary_pattern is not None and (
         not any(quote in text for quote in "'\"`")
         or detector.necessary_pattern.search(text) is None
     ):
         return
-    candidates = set(detector.analyze(text))
+    candidates = _candidates(detector, text)
     if not candidates:
         return
     if detector.patterns:
         # Some plugins yield capture groups (e.g. GitHub's prefix). Redact the
         # complete matching credential, rather than trusting that yielded substring.
-        for pattern in detector.patterns:
-            for match in pattern.finditer(text):
-                if any(candidate in match.group() for candidate in candidates):
-                    yield match.span()
+        yield from _regex_spans(detector, text, candidates)
         return
     for candidate in candidates:
         if not candidate:
@@ -122,7 +152,9 @@ def _mask(text: str, spans: list[tuple[int, int]]) -> str:
 class OfflineSecrets:
     """Read-only detector configuration; each invocation has private scratch data."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self, plugin_files: tuple[Path, ...] = (), max_file_bytes: int = 65_536
+    ) -> None:
         plugins: tuple[BasePlugin, ...] = (
             ArtifactoryDetector(),
             AWSKeyDetector(),
@@ -143,6 +175,11 @@ class OfflineSecrets:
             StripeDetector(),
             TelegramBotTokenDetector(),
             TwilioKeyDetector(),
+        )
+        plugins += custom_plugins(
+            plugin_files,
+            max_file_bytes,
+            {type(plugin).__name__ for plugin in plugins},
         )
         self._detectors = tuple(_configure(plugin) for plugin in plugins)
 

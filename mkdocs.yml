@@ -68,6 +68,7 @@ nav:
       - Policies and controls: policies.md
       - Laya, MCP and models: integrations.md
   - Examples:
+      - Custom Python detectors: examples/custom-detectors.md
       - Protected model request: examples/protected-request.md
       - Named Laya rule: examples/semantic-policy.md
       - MCP client: examples/mcp-client.md

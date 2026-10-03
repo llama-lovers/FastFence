@@ -15,6 +15,11 @@ REPOSITORY = (
 )
 PAGES = (
     (
+        "examples/custom-detectors.md",
+        "Custom Python text detectors",
+        "Add trusted literal and regex detect-secrets plugins at startup.",
+    ),
+    (
         "examples/asymmetric-anonymization.md",
         "Public/private-key anonymization",
         "Generate RSA keys and run authenticated stateless recovery envelopes.",
@@ -95,6 +100,7 @@ PAGES = (
 )
 
 EXAMPLE_FILES = (
+    "custom_detector.py",
     "asymmetric_keys.py",
     "protected_request.py",
     "semantic_policy.py",

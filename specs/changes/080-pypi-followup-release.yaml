@@ -1,0 +1,23 @@
+id: FF-080
+title: Publish custom detectors and corpus verification as 0.1.2
+status: implemented
+problem: Version 0.1.1 is already tagged and published while custom detectors and corpus verification need a separate release.
+scope:
+  - Advance the package version to 0.1.2.
+  - Update maintainer release examples to the new version.
+constraints:
+  - Preserve existing release tags and published artifacts.
+  - Keep corpus evaluation data out of runtime distributions.
+change_paths:
+  - _version.py
+  - docs/publishing.md
+acceptance:
+  - Full unit suite and configured quality gates pass before tagging.
+  - Install the published distribution outside the source checkout.
+validation:
+  - command: uv run --locked pytest -q
+    expected: All unit and integration checks pass.
+  - command: uv run --locked pre-commit run --all-files
+    expected: All configured quality gates pass.
+evidence:
+  - result: Release 0.1.1 publication succeeded through GitHub Trusted Publishing. Its public PyPI wheel was downloaded with SHA-256 verification, installed outside the checkout, and passed init, doctor, packaged assets and protected HTTP invocation checks.

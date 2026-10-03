@@ -5,6 +5,18 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+# The sole deliberate execution boundary: operator-selected, bounded startup plugins.
+TRUSTED_PLUGIN_LOADER = (
+    Path(__file__).resolve().parents[1]
+    / "src/fastfence/modules/control/persistence/secret_plugins.py"
+)
+
+
+def prohibited_execution(path: Path, name: str) -> bool:
+    if name == "exec" and path.resolve() == TRUSTED_PLUGIN_LOADER:
+        return False
+    return name in {"__import__", "eval", "exec"}
+
 
 def violations(path: Path) -> list[str]:
     tree = ast.parse(path.read_text(), filename=str(path))
@@ -24,7 +36,7 @@ def violations(path: Path) -> list[str]:
                     f"{path}:{node.lineno}: dataclasses are forbidden; use Pydantic"
                 )
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-            if node.func.id in {"__import__", "eval", "exec"}:
+            if prohibited_execution(path, node.func.id):
                 errors.append(
                     f"{path}:{node.lineno}: dynamic execution bypasses import contracts"
                 )

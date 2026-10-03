@@ -1,0 +1,39 @@
+id: FF-077
+title: Validate supplied bilingual prompt corpus with deterministic tests and actual Laya evaluation
+status: implemented
+problem: The supplied 400 labelled training prompts were absent from regression coverage and actual model evaluation.
+scope:
+  - Preserve exact supplied synthetic prompts with source IDs and bilingual labels in normalized JSONL.
+  - Validate corpus integrity and actual deterministic literal, scope and privacy contracts.
+  - Run actual Laya inference separately and report label disagreements, errors and language-specific metrics.
+constraints:
+  - Never mock semantic classification to return corpus labels or treat synthetic Qwen labels as independently reviewed ground truth.
+  - Do not alter production policies, weaken positive tests or relabel data to inflate accuracy.
+  - Preserve false positives and false negatives in the saved report; errors must not count as successes.
+  - Store no operator credentials or private deployment state in fixtures or reports.
+change_paths:
+  - .secrets.baseline
+  - tests/test_data/training_prompts.jsonl
+  - tests/test_data/training_prompts.md
+  - tests/unit/test_training_prompt_corpus.py
+  - evaluation/prompt_corpus.py
+  - evaluation/run_training_prompts.py
+  - evaluation/results/training-prompts-laya.json
+acceptance:
+  - All 400 entries validate with 100 English and 100 Polish entries in each label and unique IDs/text.
+  - Explicit literal matching and privacy redaction tests use real implementation and distinguish those contracts from semantic labels.
+  - The actual 400-case Laya run reports confusion matrices, errors and source hashes and exits nonzero for any mismatch.
+validation:
+  - command: uv run pytest --no-cov -q tests/unit/test_training_prompt_corpus.py
+    expected: All deterministic and ingestion regressions pass without model inference.
+  - command: uv run python -m evaluation.run_training_prompts --output evaluation/results/training-prompts-laya.json
+    expected: Actual model evidence saved; any classification disagreement remains visible and returns a failing status.
+evidence:
+  - command: uv run pytest --no-cov -q tests/unit/test_training_prompt_corpus.py
+    result: 25 tests passed, including validation of every one of the 400 model inputs, reviewed literal/scope cases, actual email redaction and corpus/error accounting checks.
+  - command: Actual full 400-case Laya/Qwen3:4b evaluation
+    result: Zero provider errors; 186 true positives, 187 true negatives, 14 false negatives and 13 false positives. Accuracy 93.25%, recall 93%; Polish recall 90%, English recall 96%. All disagreements retained; runner correctly exited 1 after saving the report. Summed assessment time 342.2 seconds.
+  - command: Deterministic signature-only baseline on the same corpus
+    result: 9 true positives, 194 true negatives, 191 false negatives and 6 false positives. This is a narrow literal-layer diagnostic, not whole-gateway acceptance.
+  - command: Exact-value review of all detect-secrets findings in new corpus and report
+    result: All 801 findings matched only the 400 original public sample IDs or public report content hashes. Added those exact false positives to the baseline without broad exclusions or replacing existing entries.

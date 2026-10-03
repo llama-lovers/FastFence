@@ -29,3 +29,21 @@ def test_pydantic_model_is_an_allowed_boundary(tmp_path):
         "from pydantic import BaseModel\n\nclass Identity(BaseModel):\n    subject: str\n"
     )
     assert violations(module) == []
+
+
+@pytest.mark.parametrize("name", ["exec", "eval", "__import__"])
+def test_dynamic_execution_remains_rejected_elsewhere(tmp_path, name):
+    module = tmp_path / "other.py"
+    module.write_text(f"{name}('text')")
+    assert violations(module)
+
+
+def test_only_explicit_loader_exec_is_allowed(tmp_path, monkeypatch):
+    from scripts import check_architecture
+
+    module = tmp_path / "trusted.py"
+    monkeypatch.setattr(check_architecture, "TRUSTED_PLUGIN_LOADER", module)
+    module.write_text("exec('text')")
+    assert violations(module) == []
+    module.write_text("eval('text')")
+    assert violations(module)
