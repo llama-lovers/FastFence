@@ -1,0 +1,26 @@
+{
+  "source_commit": "a8ab1e2cd1d3ddba8efebf9ff396a05dac72ec14",
+  "fresh_clone": true,
+  "inherited_private_state": false,
+  "full_features": true,
+  "checks": [
+    "missing_identity_actionable",
+    "repeat_init_preserves_private_files",
+    "doctor_passes",
+    "unauthenticated_denied",
+    "allowed_tool",
+    "injection_blocked",
+    "anonymization_default",
+    "restoration_opt_in",
+    "audit_has_no_originals",
+    "real_mcp_restoration_flags",
+    "real_laya_generated_cases",
+    "real_mcp_letter_rule",
+    "reviewed_policy_activation",
+    "qwen_input_block",
+    "real_qwen_allowed",
+    "real_multipage_ocr",
+    "real_ocr_to_qwen"
+  ],
+  "passed": true
+}

@@ -1,6 +1,6 @@
 id: FF-053
 title: Initialize standalone installations from packaged configuration
-status: implemented
+status: verified
 problem: Installed wheels omit the repository configuration, so initializing identities alone cannot produce a running gateway outside a checkout.
 scope:
   - Distribute reviewed offline policy and signature feed as package resources.

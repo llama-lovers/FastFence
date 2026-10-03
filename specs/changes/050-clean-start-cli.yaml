@@ -1,6 +1,6 @@
 id: FF-050
 title: Safe repeatable initialization and actionable startup diagnostics
-status: implemented
+status: verified
 problem: A fresh checkout crashes with an unhandled missing identity file and CLI defaults override dotenv state configuration.
 scope:
 - Initialize credentials idempotently without replacing existing valid credentials.

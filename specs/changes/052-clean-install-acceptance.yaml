@@ -1,6 +1,6 @@
 id: FF-052
 title: Test the complete documented local installation from a fresh clone
-status: implemented
+status: verified
 problem: The manual assumed private development state and omitted initialization and feature prerequisites, so the advertised clean-start sequence failed.
 scope:
   - Make README, getting-started and manual instructions ordered and self-contained.
@@ -8,6 +8,7 @@ scope:
   - Verify missing-state diagnostics, idempotent initialization, generated keys, HTTP authentication, protection and optional restoration.
   - Offer a full acceptance mode that installs Laya and OCR, checks Qwen and executes the documented real-model and document paths.
   - Require offline clean-clone acceptance in GitHub Actions before documentation deployment.
+  - Independently verify generated action and input/model scope before full acceptance activates a proposal.
 constraints:
   - Do not copy existing state, .env, .venv or credentials into the fresh clone.
   - No model downloads or external model service required by the ordinary CI clean-start check.
@@ -40,4 +41,6 @@ evidence:
   - command: Document route through FastAPI TestClient with actual OCR in the fresh checkout
     result: Default privacy block returned 422 without Markdown; privacy redact returned 200 with two ordered pages and the synthetic email removed. This in-process transport check invoked no LLM.
   - command: Full fresh-clone Laya and model acceptance
-    result: Not established by the core and OCR reports; retain implemented status until a complete --full run succeeds.
+    result: All 17 checks passed at a8ab1e2cd1d3ddba8efebf9ff396a05dac72ec14 without inherited private state. Real Laya, reviewed activation, HTTP/MCP letter-rule enforcement, Qwen completion, two-page OCR and OCR Markdown to Qwen succeeded. Report evaluation/results/clean-install-full.json.
+  - command: uv run --locked pytest -q --tb=short
+    result: 659 tests passed with 91.40 percent coverage; full configured quality hooks pass.

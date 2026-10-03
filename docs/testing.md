@@ -9,7 +9,7 @@ uv sync --locked
 uv run pytest -q
 ```
 
-The stateless anonymization, OCR, policy regression and CI checkpoint passes **606 tests**, with **91.40%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
+The clean-installation and explicit policy-scope checkpoint passes **659 tests**, with **91.40%** first-party source coverage. The configured coverage gate requires **85%**. Tests use an isolated offline policy and local fixtures; a running Ollama server or external account is unnecessary.
 
 The suite covers positive and negative privacy cases, credential detection and redaction, role and tenant boundaries, model/tool allowlists, all five budget limits, concurrent reservation safety, immutable snapshots, dynamic configuration, invalid-update retention, source failures and deadlines, sanitized audit, and protocol behavior. Model request wire tests use explicitly controlled responses; those tests verify integration contracts rather than live inference accuracy.
 
@@ -31,7 +31,8 @@ Architectural checks enforce the layer boundaries and reject first-party datacla
 ## GitHub Actions
 
 Every push to `main` and every pull request runs the locked Python 3.12 environment,
-pytest with the 85% coverage gate, and the complete pre-commit suite: Ruff,
+pytest with the 85% coverage gate, a real fresh-clone HTTP/MCP startup check,
+and the complete pre-commit suite: Ruff,
 basedpyright, import-linter, Pydantic architecture checks, module size,
 complexity, secret scanning, generated settings and lockfile validation.
 CI fails if a hook rewrites tracked files. The specification gate checks the
@@ -87,9 +88,22 @@ state/private/ocr-env/bin/python -m fastfence.modules.ocr.interfaces.smoke \
   --repeats 1 --output state/ocr-install-check.json
 ```
 
-These reports establish clean installation for the core and OCR paths. They do
-not establish fresh-clone Laya authoring or the complete real-model acceptance
-flow; those require a separate successful `--full` run.
+The subsequent [complete fresh-installation report](https://github.com/llama-lovers/HackYeah2026-challenge-second/blob/main/evaluation/results/clean-install-full.json)
+records all **17 checks passing** on commit `a8ab1e2cd1d3ddba8efebf9ff396a05dac72ec14`.
+It creates new credentials, keys, Laya and OCR environments, runs `doctor --full`,
+then exercises real Laya authoring, reviewed regression activation, HTTP/MCP
+letter-rule enforcement, Qwen completion, two-page OCR and OCR Markdown to Qwen.
+The checker independently verifies input/model scope before activation; generated
+rules and expected results are never repaired to force a pass. Ollama is a running
+local prerequisite; public download caches can be reused. Reproduce with:
+
+```sh
+uv run python scripts/smoke_clean_install.py --full
+```
+
+This is local acceptance evidence for the recorded synthetic scenarios. Generated
+policies and tests still require operator review; business-tool handlers remain
+simulated.
 
 ## Current stateless and document evidence
 
