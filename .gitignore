@@ -11,3 +11,7 @@ state/
 /HackYeah 2026 - Rules for Participants/
 /HackYeah2026-challenge/
 /HackYeah2026-challenge-second/
+
+# Python build artifacts
+dist/
+*.egg-info/
