@@ -1,32 +1,38 @@
 id: FF-001
 title: Layered architecture and Pydantic-only models
-status: planned
+status: verified
 problem: The flat MVP mixes composition, transports and implementations and contains dataclasses.
 scope:
-  - app -> workflows -> modules -> shared
-  - Feature interfaces -> application -> persistence -> contracts -> domain
-  - Services depend on typed ports; facade composes concrete implementations.
-  - Pydantic models replace Settings, Snapshot and Assessment dataclasses.
-  - Pydantic settings expose explicit typed environment configuration.
+- app -> workflows -> modules -> shared
+- Feature interfaces -> application -> persistence -> contracts -> domain
+- Services depend on typed ports; facade composes concrete implementations.
+- Pydantic models replace Settings, Snapshot and Assessment dataclasses.
+- Pydantic settings expose explicit typed environment configuration.
 constraints:
-  - Keep FastFence package name and public REST/MCP behavior.
-  - Domain and contracts must not import transport or storage frameworks.
-  - No dataclasses or dynamic execution that bypasses architectural imports.
+- Keep FastFence package name and public REST/MCP behavior.
+- Domain and contracts must not import transport or storage frameworks.
+- No dataclasses or dynamic execution that bypasses architectural imports.
 change_paths:
-  - src/**
-  - README.md
+- src/**
+- README.md
 acceptance:
-  - Every source model validates with Pydantic and uses keyword construction.
-  - Snapshot remains isolated from caller mutation and frozen at its outer boundary.
-  - Existing denial, privacy, resource and model behavior is preserved.
-  - Module files have at most 300 lines and cyclomatic complexity at most 10.
+- Every source model validates with Pydantic and uses keyword construction.
+- Snapshot remains isolated from caller mutation and frozen at its outer boundary.
+- Existing denial, privacy, resource and model behavior is preserved.
+- Module files have at most 300 lines and cyclomatic complexity at most 10.
 validation:
-  - command: uv run pytest -q
-    expected: All migrated baseline and new model validation checks pass.
-  - command: uv run lint-imports
-    expected: All architecture contracts are kept.
-  - command: uv run basedpyright src
-    expected: No type errors under standard Python 3.12 checking.
-  - command: uv run python scripts/check_architecture.py
-    expected: No dataclass imports or dynamic execution.
-evidence: []
+- command: uv run pytest -q
+  expected: All migrated baseline and new model validation checks pass.
+- command: uv run lint-imports
+  expected: All architecture contracts are kept.
+- command: uv run basedpyright src
+  expected: No type errors under standard Python 3.12 checking.
+- command: uv run python scripts/check_architecture.py
+  expected: No dataclass imports or dynamic execution.
+evidence:
+- command: uv run lint-imports
+  result: 15 contracts kept, 0 broken
+- command: uv run basedpyright src
+  result: 0 errors, 0 warnings
+- artifact: evaluation/results/hybrid-gateway-layered-smoke.json
+  result: 5 actual gateway and Ollama scenarios passed

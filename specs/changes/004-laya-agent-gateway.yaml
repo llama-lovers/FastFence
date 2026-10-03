@@ -1,43 +1,43 @@
 id: FF-004
 title: Real Laya agent behind FastFence
-status: planned
+status: implemented
 problem: Laya is currently a reference only; its real model and tool calls do not pass through FastFence.
 scope:
-  - Authenticated OpenAI-compatible models and non-streaming chat completion endpoints
-  - Real upstream Laya llm_call configured as a custom OpenAI-compatible provider
-  - Real upstream Laya tool executor registered with a protected FastFence business handler
-  - Reproducible local setup and sanitized live timing report pinned to the inspected upstream revision
+- Authenticated OpenAI-compatible models and non-streaming chat completion endpoints
+- Real upstream Laya llm_call configured as a custom OpenAI-compatible provider
+- Real upstream Laya tool executor registered with a protected FastFence business handler
+- Reproducible local setup and sanitized live timing report pinned to the inspected upstream revision
 constraints:
-  - Keep FastFence as the independent enforcement boundary.
-  - Do not install the unrelated laya PyPI package or vendor upstream source.
-  - Do not connect or send messages to real Gmail, Slack or other external accounts.
-  - Unsupported streaming, tool-generation and structured-response features fail closed.
-  - Laya third-party dataclasses stay outside our first-party Python package.
-  - Demo configuration, credentials and audit state are isolated from the user's global Laya setup.
+- Keep FastFence as the independent enforcement boundary.
+- Do not install the unrelated laya PyPI package or vendor upstream source.
+- Do not connect or send messages to real Gmail, Slack or other external accounts.
+- Unsupported streaming, tool-generation and structured-response features fail closed.
+- Laya third-party dataclasses stay outside our first-party Python package.
+- Demo configuration, credentials and audit state are isolated from the user's global Laya setup.
 change_paths:
-  - src/fastfence/app/interfaces/http/openai.py
-  - src/fastfence/app/factory.py
-  - src/fastfence/modules/control/**
-  - integrations/laya/**
-  - tests/integration/**
-  - pyproject.toml
-  - uv.lock
-  - README.md
+- src/fastfence/app/interfaces/http/openai.py
+- src/fastfence/app/factory.py
+- src/fastfence/modules/control/**
+- integrations/laya/**
+- tests/integration/**
+- pyproject.toml
+- uv.lock
+- README.md
 acceptance:
-  - An actual upstream Laya llm_call reaches FastFence and returns a real allowed Ollama response.
-  - An adversarial Laya model request is blocked and no generated output is returned.
-  - Actual upstream execute_tool dispatches the registered guarded handler.
-  - Benign tool calls pass and unauthorized role or tenant calls are denied before business execution.
-  - Both model and tool decisions appear in sanitized FastFence audit records.
-  - The compatibility API preserves supported message and stop semantics and clamps output limits.
-  - Unknown capabilities and malformed requests are rejected without echoing secrets.
+- An actual upstream Laya llm_call reaches FastFence and returns a real allowed Ollama response.
+- An adversarial Laya model request is blocked and no generated output is returned.
+- Actual upstream execute_tool dispatches the registered guarded handler.
+- Benign tool calls pass and unauthorized role or tenant calls are denied before business execution.
+- Both model and tool decisions appear in sanitized FastFence audit records.
+- The compatibility API preserves supported message and stop semantics and clamps output limits.
+- Unknown capabilities and malformed requests are rejected without echoing secrets.
 validation:
-  - command: uv run pytest tests/integration -q
-    expected: Compatibility authentication, errors, allowed models and capability checks pass.
-  - command: integrations/laya/setup.sh
-    expected: Pinned upstream source and isolated public Python dependencies install reproducibly.
-  - command: integrations/laya/run-demo.sh
-    expected: Real Laya model and tool paths pass positive and negative live scenarios.
+- command: uv run pytest tests/integration -q
+  expected: Compatibility authentication, errors, allowed models and capability checks pass.
+- command: integrations/laya/setup.sh
+  expected: Pinned upstream source and isolated public Python dependencies install reproducibly.
+- command: integrations/laya/run-demo.sh
+  expected: Real Laya model and tool paths pass positive and negative live scenarios.
 evidence:
-  - upstream_commit: b3b998c03dc44076675305581eb4640b9bf6ff8f
-  - upstream_repository: https://github.com/aayushch/laya
+- upstream_commit: b3b998c03dc44076675305581eb4640b9bf6ff8f
+- upstream_repository: https://github.com/aayushch/laya

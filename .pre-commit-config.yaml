@@ -1,0 +1,96 @@
+exclude: ^(HackYeah2026-challenge(-second)?/|dist/|build/)
+default_install_hook_types: [pre-commit, post-checkout, post-merge, post-rewrite]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-ast
+      - id: check-yaml
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: no-commit-to-branch
+        # Direct commits to main are explicitly requested for this hackathon.
+        args: [--branch, staging, --branch, development]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.8
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: spec-driven
+        name: Require specification updates with implementation changes
+        entry: uv run --native-tls python scripts/check_specs.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+
+      - id: pylint-too-many-lines
+        name: pylint too-many-lines (C0302)
+        entry: uv run --native-tls pylint
+        language: system
+        types: [python]
+        files: ^src/.*\.py$
+        args: [--disable=all, --enable=C0302, --max-module-lines=300]
+
+      - id: import-linter
+        name: import-linter
+        entry: uv run --native-tls lint-imports
+        language: system
+        types: [python]
+        files: \.py$
+        pass_filenames: false
+        require_serial: true
+
+      - id: architecture-boundaries
+        name: Pydantic and architecture boundaries
+        entry: uv run --native-tls python scripts/check_architecture.py
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
+
+      - id: basedpyright
+        name: basedpyright
+        entry: uv run --native-tls basedpyright src
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
+
+      - id: pyscn
+        name: pyscn complexity, dead code, and dependency cycles
+        entry: uv run --native-tls pyscn check --select complexity,deadcode,deps src
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
+
+      - id: pydantic-settings-export
+        name: Export Pydantic settings documentation
+        entry: uv run --native-tls pydantic-settings-export
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.10
+    hooks:
+      - id: uv-lock
+      - id: uv-sync
+        args: [--locked, --all-groups]
+        stages: [pre-commit, post-checkout, post-merge, post-rewrite]

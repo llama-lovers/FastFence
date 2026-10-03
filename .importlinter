@@ -1,0 +1,148 @@
+[importlinter]
+root_packages =
+    fastfence
+    tests
+include_external_packages = True
+exclude_type_checking_imports = False
+
+[importlinter:contract:app-layers]
+name = App depends downward on workflows, modules and shared
+type = layers
+containers = fastfence
+layers =
+    app
+    workflows
+    modules
+    shared
+exhaustive = True
+
+[importlinter:contract:module-layers]
+name = Module interfaces -> application -> persistence -> contracts -> domain
+type = layers
+containers = fastfence.modules.*
+layers =
+    interfaces
+    application
+    persistence
+    contracts
+    domain
+exhaustive = True
+
+[importlinter:contract:application-layers]
+name = Application use cases depend on services
+type = layers
+containers = fastfence.modules.*.application
+layers =
+    use_cases
+    services
+exhaustive = True
+exhaustive_ignores = facade
+
+[importlinter:contract:app-interface-independence]
+name = HTTP and CLI transports are independent
+type = layers
+containers = fastfence.app.interfaces
+layers = cli | http
+
+[importlinter:contract:shared-isolation]
+name = Shared cannot depend on feature or application layers
+type = forbidden
+source_modules = fastfence.shared
+forbidden_modules =
+    fastfence.modules
+    fastfence.app
+    fastfence.workflows
+
+[importlinter:contract:facades-protected]
+name = Feature facades are composition entry points
+type = protected
+protected_modules = fastfence.modules.*.application.facade
+allowed_importers =
+    fastfence.modules.*.application
+    fastfence.modules.*.interfaces
+    fastfence.app
+    fastfence.workflows
+    tests
+
+[importlinter:contract:interfaces-protected]
+name = Only application composition and tests import feature transports
+type = protected
+protected_modules = fastfence.modules.*.interfaces
+allowed_importers =
+    fastfence.app
+    tests
+
+[importlinter:contract:persistence-protected]
+name = Persistence implementations are private to feature application composition
+type = protected
+protected_modules = fastfence.modules.*.persistence
+allowed_importers =
+    fastfence.modules.*.application
+    tests
+
+[importlinter:contract:services-protected]
+name = Services are private to their feature application
+type = protected
+protected_modules = fastfence.modules.*.application.services
+allowed_importers =
+    fastfence.modules.*.application
+    tests
+
+[importlinter:contract:domain-no-frameworks]
+name = Domain and contracts do not import frameworks, transports or storage engines
+type = forbidden
+source_modules =
+    fastfence.modules.*.domain
+    fastfence.modules.*.contracts
+forbidden_modules =
+    fastapi
+    fastmcp
+    httpx
+    sqlite3
+    uvicorn
+    subprocess
+allow_indirect_imports = True
+
+[importlinter:contract:services-no-concrete-storage]
+name = Application services depend on ports rather than persistence implementations
+type = forbidden
+source_modules = fastfence.modules.*.application.services
+forbidden_modules =
+    fastfence.modules.*.persistence
+
+[importlinter:contract:no-dataclasses]
+name = Pydantic models only - direct dataclasses imports are forbidden
+type = forbidden
+source_modules =
+    fastfence
+    tests
+forbidden_modules = dataclasses
+allow_indirect_imports = True
+
+[importlinter:contract:modules-acyclic]
+name = No dependency cycles between feature modules
+type = acyclic_siblings
+ancestors = fastfence.modules
+depth = 0
+
+[importlinter:contract:modules-isolation]
+name = Features are composed through app and workflows
+type = protected
+protected_modules = fastfence.modules.*
+allowed_importers =
+    fastfence.app
+    fastfence.workflows
+    tests
+
+[importlinter:contract:test-layers]
+name = Tests depend downward on reusable fixtures and test data
+type = layers
+containers = tests
+layers =
+    (e2e)
+    integration
+    unit
+    fixtures
+    (test_data)
+exhaustive = True
+exhaustive_ignores = conftest

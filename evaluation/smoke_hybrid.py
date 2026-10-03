@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -12,8 +13,9 @@ from tempfile import TemporaryDirectory
 import yaml
 from fastapi.testclient import TestClient
 
-from fastfence.app import Settings, create_app
-from fastfence.cli import initialize
+from fastfence.app.factory import create_app
+from fastfence.app.interfaces.cli.main import initialize
+from fastfence.shared.settings.app_settings import AppSettings
 
 
 def run(model: str, ollama_url: str) -> dict:
@@ -35,7 +37,10 @@ def run(model: str, ollama_url: str) -> dict:
                 "allowed",
                 "controls_passed",
                 True,
-                {"tool": "knowledge.search", "arguments": {"query": "Quarterly forecast"}},
+                {
+                    "tool": "knowledge.search",
+                    "arguments": {"query": "Quarterly forecast"},
+                },
             ),
             (
                 "semantic_attack",
@@ -65,7 +70,10 @@ def run(model: str, ollama_url: str) -> dict:
                 "blocked",
                 "role_not_allowed",
                 False,
-                {"tool": "payments.prepare", "arguments": {"amount": 100, "recipient": "vendor"}},
+                {
+                    "tool": "payments.prepare",
+                    "arguments": {"amount": 100, "recipient": "vendor"},
+                },
             ),
             (
                 "actual_completion",
@@ -73,18 +81,31 @@ def run(model: str, ollama_url: str) -> dict:
                 "allowed",
                 "controls_passed",
                 True,
-                {"model": model, "prompt": "Say: The report is ready.", "max_output_tokens": 64},
+                {
+                    "model": model,
+                    "prompt": "Say: The report is ready.",
+                    "max_output_tokens": 64,
+                },
             ),
         ]
         results = []
-        settings = Settings(root, root / "state", ollama_url)
+        settings = AppSettings(
+            root=root, state=root / "state", ollama_url=ollama_url
+        )
         with TestClient(create_app(settings)) as client:
-            agent_headers = {"Authorization": "Bearer " + tokens["analyst-blue"]}
+            agent_headers = {
+                "Authorization": "Bearer " + tokens["analyst-blue"]
+            }
             for name, endpoint, decision, reason, executed, body in cases:
-                response = client.post(endpoint, headers=agent_headers, json=body)
+                response = client.post(
+                    endpoint, headers=agent_headers, json=body
+                )
                 response.raise_for_status()
                 verdict = response.json()
-                assert verdict["decision"] == decision, (name, verdict["reason"])
+                assert verdict["decision"] == decision, (
+                    name,
+                    verdict["reason"],
+                )
                 assert verdict["reason"] == reason, (name, verdict["reason"])
                 assert verdict["upstream_executed"] is executed
                 if name == "actual_completion":
@@ -110,7 +131,8 @@ def run(model: str, ollama_url: str) -> dict:
                         },
                     }
                 )
-                print(json.dumps(results[-1]), flush=True)
+                sys.stdout.write(json.dumps(results[-1]) + "\n")
+                sys.stdout.flush()
             export = client.get(
                 "/api/admin/audit.jsonl",
                 headers={"Authorization": "Bearer " + tokens["security-admin"]},

@@ -14,11 +14,11 @@ there is no pretend classifier or fabricated semantic score in the application.
 
 ## Run
 
-Requirements: macOS or Linux, Python 3.12–3.13, and [uv](https://docs.astral.sh/uv/).
-The repository includes `uv.lock` and selects Python 3.13.
+Requirements: macOS or Linux, Python 3.12, and [uv](https://docs.astral.sh/uv/).
+The repository includes `uv.lock` and selects Python 3.12.
 
 ```sh
-uv sync --locked --extra dev
+uv sync --locked
 uv run fastfence init
 uv run fastfence serve
 ```
@@ -33,7 +33,10 @@ In another terminal:
 ```sh
 uv run fastfence demo
 uv run pytest -q
-uv run ruff check src tests/*.py
+uv run ruff check src tests
+uv run basedpyright
+uv run lint-imports
+uv run pre-commit run --all-files
 ```
 
 The demo proves a legitimate request, injection signature, sensitive input, RBAC denial,
@@ -62,10 +65,16 @@ flowchart LR
     L --> V[Management dashboard + JSONL export]
 ```
 
-The `core` package holds identity, schemas, controls, policy, and the decision pipeline;
-`data/ledger.py` owns atomic durable accounting; `actions/tools.py` supplies the small
-simulated backend; `adapters` integrates FastMCP and model servers; `app.py` serves HTTP and
-the dashboard. This is intentionally a small project rather than a new general framework.
+The package follows `app → workflows → modules → shared`. One `modules/control` feature
+contains `interfaces → application → persistence → contracts → domain`. Its application
+services depend on narrow ports; the facade composes concrete storage and model adapters.
+Domain rules and Pydantic models have no FastAPI, FastMCP, HTTPX, or SQLite dependencies.
+HTTP and CLI live in `app/interfaces`; MCP lives in the control feature's interface layer.
+`app/factory.py` composes the feature and transports. The workflows package is reserved for
+future cross-feature orchestration; no artificial workflow is needed for the current MVP.
+
+All records, settings, snapshots and model assessments use Pydantic; there are no dataclasses.
+`shared/settings/app_settings.py` defines environment-backed application settings.
 
 ## Central configuration
 
@@ -135,6 +144,18 @@ upstream URL or provide upstream credentials.
 allowlisted model and role. Requested output tokens are clamped to the model's policy maximum.
 The same input/output controls, timeouts, budget reservations and audit apply.
 
+The bounded OpenAI-compatible routes `/v1/models` and `/v1/chat/completions` let an
+existing agent use FastFence as its custom provider. Chat messages retain native
+`system`, `user`, and `assistant` roles through Ollama `/api/chat`. Every actual
+message and stop sequence is inspected, sanitized when configured, and included
+in the conservative reservation. A plain prompt continues to use `/api/generate`.
+Conflicting prompt-plus-message input is rejected rather than leaving hidden input
+outside the controls. Requests support text messages, non-streaming responses,
+temperature zero and one completion; unsupported features fail explicitly.
+The completion's stop/length reason comes from the provider. OpenAI-style usage is
+`null` because the gateway's conservative budget units do not represent an exact
+split of provider prompt and completion tokens.
+
 ## Budget semantics
 
 - Limits are scoped to a **trusted subject and UTC day**, so inventing session IDs cannot
@@ -183,6 +204,8 @@ The HTTP API's interactive schema is available at `/docs`.
 | --- | --- | --- |
 | `POST /api/invoke` | Agent | `{ "tool": "knowledge.search", "arguments": { "query": "Quarterly forecast" } }` |
 | `POST /api/models/complete` | Agent | `{ "model": "qwen3:4b", "prompt": "Summarize this report", "max_output_tokens": 64 }` |
+| `GET /v1/models` | Agent | Role-filtered allowlisted models for existing clients |
+| `POST /v1/chat/completions` | Agent | Bounded native chat interface through identical controls |
 | `GET /api/me` | Either | Show verified server-side identity |
 | `GET /api/admin/status` | Management | Policy, signatures, telemetry, budgets, sanitized audit |
 | `PUT /api/admin/policy` | Management | Validate, save and activate a higher-version policy |
@@ -218,7 +241,7 @@ asyncio.run(main())
 
 The current adapter is a controlled server with explicit registered operations, not an
 unrestricted arbitrary-MCP proxy. To integrate a real backend, implement the allowlisted
-business handlers in `actions/tools.py` and keep upstream credentials on the gateway side.
+business handlers in `modules/control/persistence/tools.py` and keep upstream credentials on the gateway side.
 The gateway cannot undo business side effects; irreversible operations need an independent
 transaction/approval design appropriate to their domain.
 
@@ -241,7 +264,7 @@ To reproduce live-model checks against your local Ollama server:
 
 ```sh
 uv run python evaluation/run_semantic.py --model qwen3:4b --output evaluation/results/local-semantic.json
-uv run --extra dev python evaluation/smoke_hybrid.py --output evaluation/results/local-hybrid.json
+uv run python evaluation/smoke_hybrid.py --output evaluation/results/local-hybrid.json
 ```
 
 The hybrid smoke test creates temporary isolated policy/state and exercises the real model,

@@ -4,37 +4,123 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fastfence"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A policy gateway for agent tools, resources, and local LLMs"
-requires-python = ">=3.12,<3.14"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
 dependencies = [
   "fastapi>=0.115,<1",
   "uvicorn>=0.34,<1",
   "pydantic>=2.10,<3",
+  "pydantic-settings>=2.10,<3",
   "httpx>=0.28,<1",
   "fastmcp>=2.12,<3",
   "pyyaml>=6,<7",
 ]
 
-[project.optional-dependencies]
-dev = ["pytest>=8,<9", "pytest-asyncio>=0.25,<2", "ruff>=0.11,<1"]
+[dependency-groups]
+dev = [
+  "basedpyright>=1.39.3,<2",
+  "import-linter>=2.3,<3",
+  "pre-commit>=4.2,<5",
+  "pydantic-settings-export>=1.1.2,<2",
+  "pylint>=4.0.5,<5",
+  "pyscn>=1.16,<2",
+  "ruff==0.12.8",
+]
+test = [
+  "pytest>=8.4.1,<9",
+  "pytest-asyncio>=1,<2",
+  "pytest-cov>=6.1,<8",
+  "pytest-mock>=3.14,<4",
+  "httpx>=0.28,<1",
+]
+
+[tool.uv]
+default-groups = ["dev", "test"]
 
 [project.scripts]
-fastfence = "fastfence.cli:main"
+fastfence = "fastfence.app.interfaces.cli.main:main"
+
+[tool.hatch.version]
+source = "code"
+path = "_version.py"
+expression = "__version__"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fastfence"]
 
 [tool.pytest.ini_options]
+minversion = "8.4"
+addopts = "-ra"
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+asyncio_default_test_loop_scope = "function"
 testpaths = ["tests"]
+markers = [
+  "unit: Isolated checks without external services",
+  "integration: HTTP, MCP, or local persistence checks",
+  "e2e: Full running gateway checks",
+  "slow: Checks taking more than five seconds",
+]
 
 [tool.ruff]
-line-length = 100
+line-length = 80
 target-version = "py312"
+exclude = [".git", ".venv", "__pycache__", "build", "dist", "HackYeah2026-challenge", "HackYeah2026-challenge-second"]
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+select = ["B", "C9", "E", "F", "I", "N", "RUF", "UP", "T"]
+ignore = ["E501"]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"src/fastfence/app/interfaces/http/**/*.py" = ["B008"]
+"src/fastfence/modules/*/interfaces/http/**/*.py" = ["B008"]
+"src/fastfence/app/interfaces/cli/**/*.py" = ["T201"]
+"scripts/*.py" = ["T201"]
+"evaluation/*.py" = ["T201"]
+"integrations/laya/run_demo.py" = ["T201"]
+"tests/**/*.py" = ["T201"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends"]
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+
+[tool.basedpyright]
+include = ["src"]
+exclude = ["**/__pycache__", "**/.venv", "build", "dist"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+
+[tool.pylint.main]
+ignore-paths = ["tests/.*", "evaluation/.*"]
+
+[tool.pylint.format]
+max-module-lines = 300
+
+[tool.pydantic_settings_export]
+project_dir = "."
+default_settings = ["fastfence.shared.settings.app_settings:AppSettings"]
+venv = "auto"
+
+[[tool.pydantic_settings_export.generators.markdown]]
+paths = ["docs/settings.md"]
+
+[[tool.pydantic_settings_export.generators.dotenv]]
+paths = [".env.example"]
+
+[tool.pyscn.complexity]
+max_complexity = 10
+low_threshold = 5
+medium_threshold = 9
+
+[tool.pyscn.analysis]
+include_patterns = ["src/**/*.py"]
+exclude_patterns = ["**/__pycache__/**", "**/.venv/**", "build/**", "dist/**", "HackYeah2026-challenge/**", "HackYeah2026-challenge-second/**"]

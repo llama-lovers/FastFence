@@ -7,15 +7,20 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from fastfence.app import Settings, create_app
-from fastfence.cli import initialize
+from fastfence.app.factory import create_app
+from fastfence.app.interfaces.cli.main import initialize
+from fastfence.shared.settings.app_settings import AppSettings
 
 
 @pytest.fixture
 def project(tmp_path):
     (tmp_path / "config").mkdir()
-    shutil.copy(Path("config/policy.offline.yaml"), tmp_path / "config/policy.yaml")
-    shutil.copy(Path("config/signatures.json"), tmp_path / "config/signatures.json")
+    shutil.copy(
+        Path("config/policy.offline.yaml"), tmp_path / "config/policy.yaml"
+    )
+    shutil.copy(
+        Path("config/signatures.json"), tmp_path / "config/signatures.json"
+    )
     initialize(tmp_path / "state")
     return tmp_path
 
@@ -27,16 +32,20 @@ def tokens(project):
 
 @pytest.fixture
 def app(project):
-    return create_app(
-        Settings(project, project / "state", "http://127.0.0.1:1", "http://127.0.0.1:1")
+    instance = create_app(
+        AppSettings(
+            root=project,
+            state=project / "state",
+            ollama_url="http://127.0.0.1:1",
+            kev_url="http://127.0.0.1:1",
+        )
     )
+
+    yield instance
+    instance.state.engine.ledger.close()
 
 
 @pytest.fixture
 def client(app):
     with TestClient(app) as client:
         yield client
-
-
-def headers(tokens, actor="analyst-blue"):
-    return {"Authorization": "Bearer " + tokens[actor]}
