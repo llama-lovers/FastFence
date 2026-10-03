@@ -19,7 +19,7 @@ async def test_real_adapter_wire_contract(monkeypatch, provider):
             return httpx.Response(
                 200,
                 json={
-                    "message": {"content": '{"risk":0.87}'},
+                    "message": {"content": '{"risk":1}'},
                     "prompt_eval_count": 80,
                     "eval_count": 9,
                 },
@@ -41,16 +41,17 @@ async def test_real_adapter_wire_contract(monkeypatch, provider):
     assessment = await SemanticScanner("http://local", "http://local").assess(
         "untrusted content", SemanticConfig(provider=provider)
     )
-    assert assessment.score == 0.87 and assessment.tokens > 0
+    assert assessment.score == (1 if provider == "ollama" else 0.87) and assessment.tokens > 0
     if provider == "ollama":
         assert captured["think"] is False and captured["stream"] is False
-        assert captured["options"]["num_predict"] == 256
+        assert captured["options"]["num_predict"] == 64
+        assert captured["format"]["properties"]["risk"]["enum"] == [0, 1]
     else:
         assert captured["questions"]["risk"]["type"] == "noul"
         assert captured["state"] == "untrusted content"
 
 
-@pytest.mark.parametrize("risk", [-1, 2, "safe", True, None, float("nan")])
+@pytest.mark.parametrize("risk", [-1, 2, 0.5, 1.0, "safe", True, None, float("nan")])
 async def test_invalid_classifier_scores_fail_closed(monkeypatch, risk):
     def respond(request):
         return httpx.Response(200, json={"message": {"content": json.dumps({"risk": risk})}})
