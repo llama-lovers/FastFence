@@ -1,0 +1,34 @@
+id: FF-010
+title: License FastFence under Apache 2.0
+status: verified
+problem: The project has no explicit license despite the requested Apache 2.0 distribution terms.
+scope:
+- Add the canonical Apache License 2.0 text and project attribution.
+- Declare SPDX Apache-2.0 and packaged license files in Python metadata.
+- Link the license from README and preserve third-party attribution.
+constraints:
+- Preserve existing third-party licenses and notices.
+- No runtime behavior or dependency changes are required.
+change_paths:
+- LICENSE
+- NOTICE
+- README.md
+- pyproject.toml
+- uv.lock
+acceptance:
+- Repository contains the complete canonical Apache 2.0 license.
+- Wheel and source distribution include LICENSE and NOTICE.
+- Built wheel metadata declares License-Expression Apache-2.0 and both license files.
+validation:
+- command: uv build
+  expected: Source distribution and wheel build successfully with Apache-2.0 metadata and license files.
+- command: uv run pre-commit run --all-files
+  expected: All configured quality gates pass.
+evidence:
+- source: https://www.apache.org/licenses/LICENSE-2.0.txt
+  result: Canonical Apache License 2.0 downloaded as LICENSE; project attribution in NOTICE
+- command: uv build
+  result: Wheel and source distribution built; inspected SPDX License-Expression Apache-2.0, both License-File
+    entries and exact LICENSE/NOTICE bytes in both archives
+- command: uv lock --check
+  result: Existing dependency lock remains consistent

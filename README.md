@@ -2,6 +2,9 @@
 
 **Fast agents. Clear boundaries.** A working AI Control Layer for HackYeah 2026 / Goldman Sachs.
 
+Licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for project attribution.
+Third-party dependencies and integrations retain their respective licenses and notices.
+
 FastFence sits between an agent and business tools, tenant memory, or an allowlisted local LLM.
 It verifies a provisioned identity, applies centralized policy, reserves a budget before invoking
 the upstream, inspects the result, and records a sanitized decision. The dashboard lets judges
