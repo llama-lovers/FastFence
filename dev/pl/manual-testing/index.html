@@ -752,6 +752,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#inspect-gateway-queue-waiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprawdź oczekiwanie w kolejce bramki
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#model-queue-capacity" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1595,6 +1606,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#inspect-gateway-queue-waiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprawdź oczekiwanie w kolejce bramki
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#model-queue-capacity" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1632,11 +1654,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/95552215485c1d57411fe9fd3f9f70163f094518">Commit 95552215485c</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/f57843692032992fc44b61c0bc4b67973d46ec2b">Commit f57843692032</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/95552215485c1d57411fe9fd3f9f70163f094518">Commit 95552215485c</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/f57843692032992fc44b61c0bc4b67973d46ec2b">Commit f57843692032</a>.</p>
 </div>
 <h1 id="check-your-installation">Sprawdź swoją instalację<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Zainstaluj pakiet w nowym katalogu<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1794,6 +1816,16 @@
 <p>Przykład używa powyższej odwracalnej reguły osoby. Dla reguły litery a wywołaj narzędzie MCP <code>complete</code> z <code>{"model":"qwen3:4b","prompt":"Cat","max_output_tokens":16}</code> i oczekuj blokady wejścia przed wykonaniem Qwena.</p>
 <h2 id="inspect-request-activity">Sprawdź aktywność żądań<a class="headerlink" href="#inspect-request-activity" title="Permanent link">&para;</a></h2>
 <p>Otwórz <strong>Activity</strong> i znajdź wynik po identyfikatorze żądania. Porównaj wersję polityki i źródła sygnatur, decyzję, powód, dopasowania i wykonanie upstream. Rozwiń każdy wiersz, aby porównać <strong>Input text analysis</strong> i <strong>Output text analysis</strong>: <code>passed</code> oznacza, że etap semantyczny wykonał się i dopuścił treść, <code>blocked</code> — że ją odrzucił, <code>error</code> — że ocena zakończyła się błędem, a <code>not_run</code> — że etap nie został osiągnięty. Blokada wejścia zapobiega wykonaniu upstream; blokada wyjścia zatrzymuje dostarczenie po jego wykonaniu. Porównując wyniki przed i po zmianie, dopasuj identyfikator żądania i wersję polityki. Audyt zawiera tylko metadane; nie może zawierać promptów, tekstu OCR, oryginalnych nazwisk ani tokenów odzyskiwania.</p>
+<h3 id="inspect-gateway-queue-waiting">Sprawdź oczekiwanie w kolejce bramki<a class="headerlink" href="#inspect-gateway-queue-waiting" title="Permanent link">&para;</a></h3>
+<p>Od wersji <strong>1.0.7</strong> połącz tożsamość administracyjną i otwórz <strong>Overview → Request queue</strong>. Panel pokazuje aktualną liczbę aktywnych i oczekujących żądań względem limitów tego procesu oraz maksymalne oczekiwanie. Odświeża się co pięć sekund, gdy strona jest widoczna; krótka kolejka może opróżnić się między odczytami. Zero oczekujących jest poprawnym odczytem, nie dowodem, że żadne żądanie wcześniej nie czekało.</p>
+<ol>
+<li>Wyślij ograniczoną serię równoległych wywołań przez chronionego klienta, z timeoutem obejmującym skonfigurowane oczekiwanie i wykonanie. Pozostaw połączony panel w drugim oknie. Domyślna kolejka pozwala na 8 aktywnych żądań i do 1024 oczekujących, dodatkowo ograniczonych do 64 MiB rozliczanych oczekujących danych i 32 oczekujących żądań na tożsamość. Kolejność to FIFO wśród tożsamości mieszczących się w budżecie współbieżności.</li>
+<li>Sprawdź <strong>Active / limit</strong>, <strong>Waiting / limit</strong> oraz <strong>Maximum wait</strong>. Wartości dotyczą jednej instancji. Przepustowość modelu lub narzędzia może być niższa niż limit przyjmowania żądań przez bramkę.</li>
+<li>Po zakończeniu żądania odszukaj je w <strong>Activity</strong>, otwórz <strong>Details</strong> i sprawdź <strong>Queue wait</strong>. <strong>Test requests</strong> również pokazuje oczekiwanie obok łącznej latencji. Łączna latencja obejmuje czekanie; czekanie nie zużywa budżetu czasu obliczeń.</li>
+<li>Przy odmowie sprawdź dokładny powód: <code>request_queue_full</code>, <code>request_queue_timeout</code> albo <code>request_queue_closed</code>. Występują przed chronionym wykonaniem; flaga wykonania usługi docelowej ma wartość false. Odróżnij je od błędów puli modeli/narzędzi, które występują później i mogą zachowywać rozliczenie zakończonych ocen semantycznych.</li>
+<li>Jeśli odświeżenie statusu nie powiedzie się, traktuj wyświetlane liczby jako nieaktualne. Rozłączenie czyści panel kolejki. Starsza bramka bez tej telemetrii pokazuje niedostępne wartości, nie zmyślone zero.</li>
+</ol>
+<p><a href="../integration-reference/#gateway-request-queue">Konfiguracja kolejki</a> opisuje ustawienia startowe <code>.env</code>. Ich zmiana wymaga restartu. Dłuższa kolejka nie przyspiesza modelu, nie zachowuje zadań po restarcie ani nie gwarantuje obsługi skoku do 1000 klientów. Oczekujące żądania ponownie sprawdzają bieżącą politykę po przyjęciu; nie ponawiaj automatycznie żądania, którego status wykonania jest nieznany.</p>
 <h3 id="model-queue-capacity">Pojemność kolejki modelu<a class="headerlink" href="#model-queue-capacity" title="Permanent link">&para;</a></h3>
 <p><code>model_capacity_exceeded</code> oznacza pełną lokalną kolejkę: Laya dopuszcza najwyżej
 32 aktywne i oczekujące oceny na skaner, a każdy adapter HTTP modeli — najwyżej

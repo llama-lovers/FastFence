@@ -1356,7 +1356,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/95552215485c1d57411fe9fd3f9f70163f094518">Commit 95552215485c</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/f57843692032992fc44b61c0bc4b67973d46ec2b">Commit f57843692032</a>.</p>
 </div>
 <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
 <p>Here you can find all available configuration options using ENV variables.</p>
@@ -1435,6 +1435,41 @@
 <td><code>10000</code></td>
 <td>Maximum sanitized audit records retained in memory</td>
 <td><code>10000</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_REQUEST_CONCURRENCY</code></td>
+<td><code>integer</code></td>
+<td><code>8</code></td>
+<td>Maximum protected invocations executing per process; waiting requests use a separate queue</td>
+<td><code>8</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_REQUEST_QUEUE_SIZE</code></td>
+<td><code>integer</code></td>
+<td><code>1024</code></td>
+<td>Maximum protected invocations waiting per process; zero disables waiting</td>
+<td><code>1024</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_REQUEST_QUEUE_TIMEOUT_SECONDS</code></td>
+<td><code>number</code></td>
+<td><code>120</code></td>
+<td>Maximum queue wait, separate from model execution timeout; callers must allow a longer HTTP timeout</td>
+<td><code>120</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_REQUEST_QUEUE_MAX_BYTES</code></td>
+<td><code>integer</code></td>
+<td><code>67108864</code></td>
+<td>Maximum accounted payload bytes waiting in the queue; not a process RSS limit</td>
+<td><code>67108864</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_REQUEST_QUEUE_PER_IDENTITY</code></td>
+<td><code>integer</code></td>
+<td><code>32</code></td>
+<td>Maximum waiting requests per trusted tenant and subject</td>
+<td><code>32</code></td>
 </tr>
 <tr>
 <td><code>FASTFENCE_CONFIG_URL</code></td>
