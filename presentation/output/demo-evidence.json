@@ -1,0 +1,31 @@
+{
+  "product_version": "1.0.7",
+  "source": "public_pypi_isolated_gateway",
+  "duration_seconds": 90.0,
+  "mocked_api_responses": false,
+  "edits": "Credential connection and final idle Overview pause trimmed; explanatory captions added. All actions and inference waits remain continuous and unchanged.",
+  "baseline": {
+    "decision": "allowed",
+    "upstream_executed": true,
+    "semantic_input_status": "passed",
+    "semantic_output_status": "passed",
+    "policy_version": 4,
+    "latency_ms": 1287
+  },
+  "after_local_rule": {
+    "decision": "blocked",
+    "reason": "input_text_rule",
+    "upstream_executed": false,
+    "policy_version": 5,
+    "latency_ms": 1
+  },
+  "semantic_review": {
+    "cases": 8,
+    "tests_passed": true,
+    "policy_version": 6,
+    "tests_saved": true
+  },
+  "same_instance": true,
+  "semantic_calls": 18,
+  "recorded_duration_seconds": 115.01
+}

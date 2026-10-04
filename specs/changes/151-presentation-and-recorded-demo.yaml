@@ -1,0 +1,46 @@
+id: FF-151
+title: Prepare a concise evidence-based product presentation and recorded demonstration
+status: verified
+problem: The published product needs a short presentation and replayable demonstration that communicate its capabilities and measured evidence without overstating security or performance.
+scope:
+  - Create English presentation slides with Polish speaker notes for team llama-lovers and an approximately three-minute delivery.
+  - Record the actual application demonstrating a policy change and observable protected decisions without restart.
+  - Provide a compact evidence sheet linking each numerical claim to its version and measurement scope.
+constraints:
+  - Artifact-only change; do not modify product behavior, operator configuration, model assets or release version. Demonstration policy changes are limited to an explicitly isolated disposable installation.
+  - Use existing evidence for numerical performance and security claims. Real inference is permitted for the isolated recorded demonstration, not as a new benchmark or broad accuracy evaluation.
+  - Distinguish 1.0.7 source tests, public-package checks, actual model integration and controlled scheduling from historical 1.0.2 latency measurements.
+  - Retain known semantic false-negative and false-positive limitations; no security certification, universal detection guarantee or self-assigned score.
+  - Identify recorded footage as recorded; exclude credentials and private state from exported artifacts.
+change_paths:
+  - presentation/output/fastfence-pitch.pptx
+  - presentation/output/fastfence-pitch.pdf
+  - presentation/output/fastfence-demo.mp4
+  - presentation/output/demo-evidence.json
+  - presentation/output/demo-captions.srt
+  - presentation/scripts/build-deck.mjs
+  - presentation/scripts/record_demo.py
+  - presentation/scripts/video_export.py
+  - presentation/assets/*.png
+  - presentation/demo-script.pl.md
+  - presentation/evidence.md
+  - presentation/README.md
+acceptance:
+  - The deck identifies FastFence, team llama-lovers and the demonstrated release, and includes concise Polish speaker notes.
+  - Numerical claims preserve their recorded count, version and workload qualifications.
+  - The recorded demonstration shows actual application behavior and sanitized decision evidence.
+  - Delivered presentation and recording are opened and visually checked before handoff; any missing artifact is stated explicitly.
+validation:
+  - command: Manual artifact review
+    expected: Presentation slides and recording are readable, complete and consistent with presentation/evidence.md. Recorded outcomes come from the isolated real application; no new benchmark, accuracy evaluation or runtime product change is introduced.
+evidence:
+  - check: Existing release and benchmark evidence review
+    result: Confirmed 1484 source tests with 93.28 percent coverage, 406 public-package checks, twelve benign real-model requests with 24 Laya assessments, and a separate 1000-request controlled burst for 1.0.7. The 0.248ms rounded p95 belongs only to the recorded deterministic direct-engine workload on public package 1.0.2.
+  - check: Recorded application outcomes
+    result: The exported 90-second H.264 video (only credential connection and the final idle pause trimmed) records public package 1.0.7 with real models and no mocked responses. The same Hello request changes from allowed at policy version 4 to locally blocked before upstream at version 5, without restarting. Eight semantic review cases pass and are saved on activation at version 6; the session records 18 semantic assessments. These are demonstration outcomes, not a benchmark or general model accuracy estimate.
+  - check: Independent artifact content and privacy review
+    result: Reviewed deck source, selected slide renders, all eight demonstration screenshot views, captions and sanitized outcome JSON. The video frames at zero, half a second and two seconds start after credential connection and show no tokens or private paths. A scan of presentation text and PPTX XML found no private-key, bearer-value or API-key patterns. All temporary review frames remain in private state; this check does not claim exhaustive automated detection of secrets in video.
+  - check: Presentation and PDF validation
+    result: Eight slides finalized with native editable text, an architecture diagram and two native evidence tables. Package, geometry, font and reimport checks passed. Every PDF page was rendered and visually inspected; the final PDF embeds Helvetica Neue and matches the intended layout. Seven main slides have Polish speaker notes plus one optional benchmark appendix. Both PPTX and PDF are below the competition upload limit of 10 MB. No native PowerPoint execution is claimed.
+  - check: Repository quality checks
+    result: All configured pre-commit checks passed, including secret scanning, Ruff, architecture boundaries, import-linter, basedpyright, pyscn and specification validation. The recorder executed against actual installed FastFence; no runtime product code changed.
