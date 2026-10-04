@@ -762,6 +762,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pena-sciezka-czatu-http-103-i-kandydat-104" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pełna ścieżka czatu HTTP — 1.0.3 i kandydat 1.0.4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#off-deterministyczne-semantyczne-paczka-102" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1407,6 +1418,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pena-sciezka-czatu-http-103-i-kandydat-104" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pełna ścieżka czatu HTTP — 1.0.3 i kandydat 1.0.4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#off-deterministyczne-semantyczne-paczka-102" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1522,14 +1544,80 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="benchmarki">Benchmarki<a class="headerlink" href="#benchmarki" title="Permanent link">&para;</a></h1>
 <p>Mierz FastFence na sprzęcie i z polityką, których zamierzasz używać. Lokalne sprawdzenie reguły tekstowej, pełne wywołanie bramki i żądanie oceniane przez Layę wykonują różną pracę. Wyniki poniżej wskazują, którą ścieżkę zmierzono.</p>
+<h2 id="pena-sciezka-czatu-http-103-i-kandydat-104">Pełna ścieżka czatu HTTP — 1.0.3 i kandydat 1.0.4<a class="headerlink" href="#pena-sciezka-czatu-http-103-i-kandydat-104" title="Permanent link">&para;</a></h2>
+<p>Wybrane scenariusze niezależnego laboratorium powtórzono dla 2000 tożsamości, 10 tenantów, 64 reguł dosłownych i dwóch żądań na tożsamość. Model zastępował serwer HTTP z opóźnieniem 20 ms; Laya była wyłączona. Każda próba oczekiwała 2800 dozwolonych odpowiedzi i 1200 blokad. Sprawdzono wersje paczek zainstalowanych poza repozytorium; 1.0.4 pochodziła ze zbudowanego wheel kandydata, jeszcze przed publikacją w PyPI.</p>
+<table>
+<thead>
+<tr>
+<th>Paczka</th>
+<th style="text-align: right;">Równoległość</th>
+<th>Próba</th>
+<th style="text-align: right;">Poprawne / żądania</th>
+<th style="text-align: right;">p95 (ms)</th>
+<th style="text-align: right;">Żądania/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0.3</td>
+<td style="text-align: right;">50</td>
+<td>initial</td>
+<td style="text-align: right;">3998/4000</td>
+<td style="text-align: right;">842.7</td>
+<td style="text-align: right;">160.5</td>
+</tr>
+<tr>
+<td>1.0.3</td>
+<td style="text-align: right;">250</td>
+<td>initial</td>
+<td style="text-align: right;">3999/4000</td>
+<td style="text-align: right;">6949.8</td>
+<td style="text-align: right;">65.0</td>
+</tr>
+<tr>
+<td>1.0.4</td>
+<td style="text-align: right;">50</td>
+<td>initial</td>
+<td style="text-align: right;">4000/4000</td>
+<td style="text-align: right;">752.7</td>
+<td style="text-align: right;">182.6</td>
+</tr>
+<tr>
+<td>1.0.4</td>
+<td style="text-align: right;">250</td>
+<td>initial</td>
+<td style="text-align: right;">3956/4000</td>
+<td style="text-align: right;">5616.0</td>
+<td style="text-align: right;">150.2</td>
+</tr>
+<tr>
+<td>1.0.4</td>
+<td style="text-align: right;">250</td>
+<td>repeat</td>
+<td style="text-align: right;">4000/4000</td>
+<td style="text-align: right;">6190.8</td>
+<td style="text-align: right;">122.8</td>
+</tr>
+<tr>
+<td>1.0.3</td>
+<td style="text-align: right;">250</td>
+<td>repeat</td>
+<td style="text-align: right;">3994/4000</td>
+<td style="text-align: right;">7047.0</td>
+<td style="text-align: right;">61.0</td>
+</tr>
+</tbody>
+</table>
+<p>Pokazujemy wszystkie przebiegi, również nieudaną próbę kandydata. Miała 44 błędy: 43 błędy połączenia generatora z aplikacją oraz jedno 502 aplikacji; powtórka przeszła. Wersja bazowa także miała błędy transportu. Ta zmienność nie pozwala uznać dużej współbieżności za naprawioną. Są to wyniki całej ścieżki, a nie pomiar narzutu silnika polityk.</p>
+<p>Aplikacja ma pulę 100 połączeń do bramki. Czekanie w tej puli wlicza się do p95, natomiast czekanie na slot współbieżności generatora jest pominięte. Wszystkie procesy działały na tym samym Apple M3 Pro z 18 GiB RAM; limitów gniazd systemowych nie zmieniano. Porównanie nie obejmuje prawdziwej inferencji, długich odpowiedzi ani 1000 równoległych rozmów. <a href="https://github.com/llama-lovers/FastFence/blob/v1.0.4/evaluation/results/installed-load-comparison-1.0.3-1.0.4.json">Wszystkie przebiegi i ograniczenia</a>.</p>
 <h2 id="off-deterministyczne-semantyczne-paczka-102">OFF / deterministyczne / semantyczne — paczka 1.0.2<a class="headerlink" href="#off-deterministyczne-semantyczne-paczka-102" title="Permanent link">&para;</a></h2>
 <p>Rzeczywiste pomiary z publicznej paczki PyPI 1.0.2, wykonane 4 października 2026 na Apple M3 Pro. Wszystkie wiersze używają tej samej krótkiej syntetycznej treści i odpowiedzi narzędzia, współbieżność 1. OFF i kontrole deterministyczne zmierzono razem; Layę w osobnym przebiegu na tej samej maszynie.</p>
 <table>

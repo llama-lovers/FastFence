@@ -1356,7 +1356,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
 <p>Here you can find all available configuration options using ENV variables.</p>
@@ -1407,6 +1407,20 @@
 <td><code>null</code></td>
 <td>Trusted read-only startup identity configuration file</td>
 <td><code>null</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_IDENTITY_MAX_RECORDS</code></td>
+<td><code>integer</code></td>
+<td><code>4096</code></td>
+<td>Maximum startup identities, including administrators; independent of active request capacity</td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_IDENTITY_MAX_SOURCE_BYTES</code></td>
+<td><code>integer</code></td>
+<td><code>1048576</code></td>
+<td>Maximum UTF-8 bytes of file or inline startup identity configuration</td>
+<td><code>1048576</code></td>
 </tr>
 <tr>
 <td><code>FASTFENCE_INSTANCE_ID</code></td>

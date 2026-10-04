@@ -747,6 +747,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Historical attack signatures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#educational-quotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Educational quotations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -807,6 +824,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Authored text rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ignoring-invisible-characters-when-matching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ignoring invisible characters when matching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1481,6 +1515,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Historical attack signatures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#educational-quotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Educational quotations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1542,6 +1593,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Authored text rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ignoring-invisible-characters-when-matching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ignoring invisible characters when matching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1588,7 +1656,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="policies-and-guardrails">Policies and guardrails<a class="headerlink" href="#policies-and-guardrails" title="Permanent link">&para;</a></h1>
 <h2 id="configuration-sources">Configuration sources<a class="headerlink" href="#configuration-sources" title="Permanent link">&para;</a></h2>
@@ -1669,6 +1737,8 @@
 <p>Patterns are 4–256 characters; the feed supports up to 200 signatures. The optional <code>match_mode: "token_sequence"</code> matches escaped whitespace-separated tokens with a bounded <code>max_gap</code> of at most 256 characters. The supplied shell signature uses <code>curl | sh</code> with that mode, allowing a URL between the command and pipe without accepting arbitrary regular expressions.</p>
 <p>Input matches block before upstream execution. Output matches suppress delivery after execution; audit retains signature IDs and the <code>upstream_executed</code> flag. The same normalized matcher runs on a versioned external feed updated outside the request path.</p>
 <p>The supplied patterns cover representative pickle/PyTorch loading, remote-shell and instruction-override strings. Quoted descriptions containing an exact dangerous pattern are conservatively blocked too. These are bounded text controls, not model-binary inspection or comprehensive exploit prevention.</p>
+<h3 id="educational-quotations">Educational quotations<a class="headerlink" href="#educational-quotations" title="Permanent link">&para;</a></h3>
+<p>The <code>instruction_override</code> signature also matches a quotation of “ignore all previous instructions”. If you intentionally allow such quotations, remove only that ID's entry from the active <code>config/signatures.json</code>, increment the feed's <code>version</code>, and verify the active version in <strong>Activity</strong> after reload. For a remote feed, update its configured source. Other signatures and semantic assessment remain active; other controls can still block the content. There is no education-aware quotation exception or per-signature scope. Global <code>signatures_enabled: false</code> disables all signatures, so it is not equivalent to removing one rule.</p>
 <h2 id="semantic-controls">Semantic controls<a class="headerlink" href="#semantic-controls" title="Permanent link">&para;</a></h2>
 <p>The product policy uses <strong>Laya with local Qwen3:4b</strong>, a 30-second assessment timeout, threshold <code>0.7</code> and output scanning enabled. Requests first run local controls; content that reaches semantic inspection is assessed before forwarding, and generated output is assessed before delivery. Invalid responses, unavailable models, timeouts and provider failures fail closed. The completion model and assessment model are independently configured.</p>
 <p>In <strong>Policies → Edit configuration → Semantic analysis</strong>, choose the provider and enter an optional natural-language policy in <code>semantic.instructions</code>. That field accepts up to 4,096 characters and requires provider <code>laya</code>; nonempty instructions with another provider are rejected. Review and activate the configuration change before testing representative allowed and prohibited content.</p>
@@ -1739,6 +1809,20 @@
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span></code></pre></div>
 <p>This blocks a model request or response containing a word with <code>a</code>, including uppercase <code>A</code> and Unicode compatibility forms. NFKC normalization and optional casefold apply; accents stay distinct, so <code>ą</code> does not match <code>a</code>. Words consist of Unicode letters and combining marks. <code>contains</code> checks a literal substring of a scalar string; <code>equals</code> checks the entire scalar. A <code>word_contains</code> value must itself contain only letters or combining marks.</p>
+<h3 id="ignoring-invisible-characters-when-matching">Ignoring invisible characters when matching<a class="headerlink" href="#ignoring-invisible-characters-when-matching" title="Permanent link">&para;</a></h3>
+<p><code>ignore_invisible_characters</code> defaults to <code>false</code>. Enable it explicitly to ignore exactly U+200B, U+200C, U+200D, U+2060 and U+FEFF before NFKC and casefold. This example matches both <code>confidential</code> and <code>confi\u200bdential</code>, where <code>\u200b</code> means one actual U+200B character, not six typed characters:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">text_rules</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no-confidential</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confidential</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">model</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">block</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nt">ignore_invisible_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span></code></pre></div>
+<p>In <strong>Add content rule</strong>, select <strong>Ignore invisible formatting characters when matching</strong>, add samples, choose <strong>Test rule</strong>, then review and activate. Preview identifies the matching mode used. The option applies to <code>contains</code>, <code>word_contains</code> and <code>equals</code>, on input and output within the selected scope. It does not remove whitespace, accents or other Unicode characters. <code>equals</code> still compares the whole value, including its spaces. Rules without the option retain their existing behavior.</p>
+<p>This is only a comparison view: forwarded content is unchanged, and matching content is blocked. The option does not change anonymization or redaction. Joiners can carry meaning in languages and emoji, so enabling it is a policy-owner decision. A rule value that becomes empty or whitespace-only after filtering is rejected. Separate messages and fields are never joined.</p>
 <p>Choose <code>input</code>, <code>output</code>, or <code>both</code>, and <code>model</code>, <code>tool</code>, or <code>all</code>. Model inputs include prompt, message content and stop strings; model outputs include generated text. Roles, model identifiers and structural JSON keys are excluded. Tool rules inspect recursive string values, excluding dictionary keys. Existing signature and privacy controls keep their broader inspection scope.</p>
 <p>At most 64 rules are permitted, each with a unique ID and a nonblank value of at most 128 characters. Literal preparation happens during validation. Matching needs no compiler, model, filesystem, or network call. Input blocks precede execution; output blocks suppress delivery after execution. Findings contain rule IDs, never matched content.</p>
 <p>In <strong>Policies</strong>, select <strong>Add content rule</strong>, set its scope and samples, then preview, review and activate the rule. Preview evaluates only the candidate predicate: <code>NO MATCH</code> is not a promise that all other security controls will allow the request. Activation adds the rule to the current policy with a new version. Duplicate IDs, invalid rules and version conflicts are rejected. A remote configuration source must be updated at that source.</p>

@@ -1,6 +1,6 @@
 !!! warning "Development version — unreleased"
 
-    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit d8b1e7074646](https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a).
+    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit edc0fa3036de](https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53).
 
 # FastFence documentation
 
@@ -12,6 +12,23 @@ Source: https://fastfence.dev/dev/benchmarks/
 # Benchmarks
 
 Measure FastFence on the hardware and policy you intend to use. A local text-rule lookup, a complete gateway invocation and a request assessed by Laya measure different work. The results below identify which path was timed.
+
+## Complete HTTP chat path — 1.0.3 and candidate 1.0.4
+
+A focused rerun of an independent operator's chat laboratory used 2000 identities, 10 tenants, 64 literal rules and two requests per identity. The model was an HTTP fixture delayed by 20 ms; Laya was disabled. Each run expected 2800 allowed responses and 1200 blocks. Versions were verified from installed packages outside the checkout; 1.0.4 was the built candidate wheel, not yet a public package when measured.
+
+| Package | Concurrency | Run | Correct / requests | p95 (ms) | Requests/s |
+| --- | ---: | --- | ---: | ---: | ---: |
+| 1.0.3 | 50 | initial | 3998/4000 | 842.7 | 160.5 |
+| 1.0.3 | 250 | initial | 3999/4000 | 6949.8 | 65.0 |
+| 1.0.4 | 50 | initial | 4000/4000 | 752.7 | 182.6 |
+| 1.0.4 | 250 | initial | 3956/4000 | 5616.0 | 150.2 |
+| 1.0.4 | 250 | repeat | 4000/4000 | 6190.8 | 122.8 |
+| 1.0.3 | 250 | repeat | 3994/4000 | 7047.0 | 61.0 |
+
+All runs are shown, including the failing candidate run. Its 44 failures were 43 connection errors from the generator to the frontend and one frontend 502; the repeat passed. The public baseline also had transport failures. This variability prevents a claim that high concurrency is solved. These are observed failures along the complete path, not a measurement of policy-engine overhead.
+
+The application uses a 100-connection pool to the gateway. Queueing there is included in p95; waiting for the generator's concurrency slot is excluded. All processes shared the same Apple M3 Pro/18 GiB machine, and kernel socket limits were not changed. There was no real inference, long-output workload or 1000-concurrent-conversation test in this comparison. [All measured runs and limitations](https://github.com/llama-lovers/FastFence/blob/v1.0.4/evaluation/results/installed-load-comparison-1.0.3-1.0.4.json).
 
 ## OFF / deterministic / semantic — package 1.0.2
 
@@ -362,7 +379,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download acp_server.py](https://fastfence.dev/dev/downloads/acp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/acp_server.py)
+[Download acp_server.py](https://fastfence.dev/dev/downloads/acp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/acp_server.py)
 
 ### Gateway registration
 
@@ -421,7 +438,7 @@ if __name__ == "__main__":
     )
 ```
 
-[Download acp_gateway.py](https://fastfence.dev/dev/downloads/acp_gateway.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/acp_gateway.py)
+[Download acp_gateway.py](https://fastfence.dev/dev/downloads/acp_gateway.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/acp_gateway.py)
 
 ### Official SDK client
 
@@ -479,7 +496,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download acp_client.py](https://fastfence.dev/dev/downloads/acp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/acp_client.py)
+[Download acp_client.py](https://fastfence.dev/dev/downloads/acp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/acp_client.py)
 
 ### Isolated policy
 
@@ -514,7 +531,7 @@ text_rules:
     target: tool
 ```
 
-[Download acp_policy.yaml](https://fastfence.dev/dev/downloads/acp_policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/acp_policy.yaml)
+[Download acp_policy.yaml](https://fastfence.dev/dev/downloads/acp_policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/acp_policy.yaml)
 
 
 ---
@@ -597,7 +614,7 @@ if __name__ == "__main__":
     print("Custom detector example checks passed")
 ```
 
-[Download custom_detector.py](https://fastfence.dev/dev/downloads/custom_detector.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/custom_detector.py)
+[Download custom_detector.py](https://fastfence.dev/dev/downloads/custom_detector.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/custom_detector.py)
 
 Regex detectors supply one to 32 compiled Python `re` patterns, each at most
 8,192 characters long. Patterns that match the empty string are rejected.
@@ -754,7 +771,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download asymmetric_keys.py](https://fastfence.dev/dev/downloads/asymmetric_keys.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/asymmetric_keys.py)
+[Download asymmetric_keys.py](https://fastfence.dev/dev/downloads/asymmetric_keys.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/asymmetric_keys.py)
 
 ## 2. Configure the gateway
 
@@ -1307,7 +1324,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download protected_request.py](https://fastfence.dev/dev/downloads/protected_request.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/protected_request.py)
+[Download protected_request.py](https://fastfence.dev/dev/downloads/protected_request.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/protected_request.py)
 
 Next: [Add a named rule in natural language](semantic-policy.md) or
 [make the same request through FastMCP](mcp-client.md).
@@ -1386,6 +1403,13 @@ a permitted sample with expectations you chose independently. For exact characte
 restrictions, use a deterministic text rule instead of treating model judgment as
 exact matching. Removing the named rule through **Policies** requires another
 reviewed policy version.
+
+
+## Compound-rule limitation
+
+The local Qwen3:4b assessment has a reproduced false negative for a rule requiring **both a person's full name and an email address**: the combined input was allowed even though the named rule reached Laya correctly. A natural-language conjunction is not a reliable substitute for deterministic privacy controls. Keep applicable PII controls enabled and include combined, partial and exception cases in your preview tests; a passing example does not establish general detection accuracy.
+
+The same semantic configuration can also block content permitted by a literal rule because the layers enforce separate restrictions. Inspect the decision reason and input/output assessment results when a literal nonmatch is blocked.
 
 ```python
 """Preview a named natural-language rule with real Laya; activate only explicitly."""
@@ -1532,7 +1556,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download semantic_policy.py](https://fastfence.dev/dev/downloads/semantic_policy.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/semantic_policy.py)
+[Download semantic_policy.py](https://fastfence.dev/dev/downloads/semantic_policy.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/semantic_policy.py)
 
 
 ---
@@ -1663,7 +1687,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download mcp_client.py](https://fastfence.dev/dev/downloads/mcp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/mcp_client.py)
+[Download mcp_client.py](https://fastfence.dev/dev/downloads/mcp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/mcp_client.py)
 
 
 ---
@@ -1776,7 +1800,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download fastmcp_server.py](https://fastfence.dev/dev/downloads/fastmcp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/fastmcp_server.py)
+[Download fastmcp_server.py](https://fastfence.dev/dev/downloads/fastmcp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/fastmcp_server.py)
 
 `create_app(..., tools=ProtectedMCPTools())` is the integration point. Register business operations through this port; an ordinary FastAPI route is not automatically protected by FastFence. The public `/integration-info` route returns static metadata only. The verified identity passed to the adapter can also enforce application-specific tenant ownership before execution.
 
@@ -1833,7 +1857,7 @@ text_rules:
   case_sensitive: false
 ```
 
-[Download policy.yaml](https://fastfence.dev/dev/downloads/policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/policy.yaml)
+[Download policy.yaml](https://fastfence.dev/dev/downloads/policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/policy.yaml)
 
 ## Enable Laya in this example
 
@@ -1957,7 +1981,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download openai_client.py](https://fastfence.dev/dev/downloads/openai_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/openai_client.py)
+[Download openai_client.py](https://fastfence.dev/dev/downloads/openai_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/openai_client.py)
 
 ## Verify blocking
 
@@ -2061,6 +2085,10 @@ Input matches block before upstream execution. Output matches suppress delivery 
 
 The supplied patterns cover representative pickle/PyTorch loading, remote-shell and instruction-override strings. Quoted descriptions containing an exact dangerous pattern are conservatively blocked too. These are bounded text controls, not model-binary inspection or comprehensive exploit prevention.
 
+### Educational quotations
+
+The `instruction_override` signature also matches a quotation of “ignore all previous instructions”. If you intentionally allow such quotations, remove only that ID's entry from the active `config/signatures.json`, increment the feed's `version`, and verify the active version in **Activity** after reload. For a remote feed, update its configured source. Other signatures and semantic assessment remain active; other controls can still block the content. There is no education-aware quotation exception or per-signature scope. Global `signatures_enabled: false` disables all signatures, so it is not equivalent to removing one rule.
+
 ## Semantic controls
 
 The product policy uses **Laya with local Qwen3:4b**, a 30-second assessment timeout, threshold `0.7` and output scanning enabled. Requests first run local controls; content that reaches semantic inspection is assessed before forwarding, and generated output is assessed before delivery. Invalid responses, unavailable models, timeouts and provider failures fail closed. The completion model and assessment model are independently configured.
@@ -2135,6 +2163,26 @@ text_rules:
 ```
 
 This blocks a model request or response containing a word with `a`, including uppercase `A` and Unicode compatibility forms. NFKC normalization and optional casefold apply; accents stay distinct, so `ą` does not match `a`. Words consist of Unicode letters and combining marks. `contains` checks a literal substring of a scalar string; `equals` checks the entire scalar. A `word_contains` value must itself contain only letters or combining marks.
+
+### Ignoring invisible characters when matching
+
+`ignore_invisible_characters` defaults to `false`. Enable it explicitly to ignore exactly U+200B, U+200C, U+200D, U+2060 and U+FEFF before NFKC and casefold. This example matches both `confidential` and `confi\u200bdential`, where `\u200b` means one actual U+200B character, not six typed characters:
+
+```yaml
+text_rules:
+  - id: no-confidential
+    operator: contains
+    value: confidential
+    direction: both
+    target: model
+    action: block
+    case_sensitive: false
+    ignore_invisible_characters: true
+```
+
+In **Add content rule**, select **Ignore invisible formatting characters when matching**, add samples, choose **Test rule**, then review and activate. Preview identifies the matching mode used. The option applies to `contains`, `word_contains` and `equals`, on input and output within the selected scope. It does not remove whitespace, accents or other Unicode characters. `equals` still compares the whole value, including its spaces. Rules without the option retain their existing behavior.
+
+This is only a comparison view: forwarded content is unchanged, and matching content is blocked. The option does not change anonymization or redaction. Joiners can carry meaning in languages and emoji, so enabling it is a policy-owner decision. A rule value that becomes empty or whitespace-only after filtering is rejected. Separate messages and fields are never joined.
 
 Choose `input`, `output`, or `both`, and `model`, `tool`, or `all`. Model inputs include prompt, message content and stop strings; model outputs include generated text. Roles, model identifiers and structural JSON keys are excluded. Tool rules inspect recursive string values, excluding dictionary keys. Existing signature and privacy controls keep their broader inspection scope.
 
@@ -2373,6 +2421,27 @@ Budgets, audit retention and replay-related runtime behavior are scoped to one p
 
 Local OCR produces protected Markdown and supports multipage PDF input. It does not preserve document layout, edit files or produce redacted PDF/image artifacts. See [architecture](architecture.md) and [manual verification](manual-testing.md) for current behavior and reproducible checks.
 
+## Startup identity capacity
+
+The local registry defaults to **4096 identities including administrators** and a **1 MiB** file/inline JSON limit. These bound startup memory; they do not measure concurrent model capacity. Authentication indexes credential digests in memory.
+
+For example, to provision 5000 callers plus administrators, set these in the installation's `.env` and restart:
+
+```dotenv
+FASTFENCE_IDENTITY_MAX_RECORDS=8192
+FASTFENCE_IDENTITY_MAX_SOURCE_BYTES=4194304
+```
+
+Provision the identity records separately. These settings do not create accounts. Hard bounds are 65,536 records and 64 MiB; both limits apply independently. Duplicate subjects and credential hashes are rejected. Budgets and audit remain process-local; increasing registry capacity does not share state across workers or increase Laya inference throughput.
+
+## Runtime admission limits
+
+Each business-model HTTP adapter reuses a pool of up to **32 connections** and admits at most **128 active or waiting requests**. Waiting for a connection consumes the request's existing deadline. Upstream cookies are neither retained nor forwarded between calls.
+
+The local Laya worker evaluates **one assessment at a time**, with at most **32 active or waiting assessments**. Queue time also counts toward the configured semantic timeout. Requests beyond these limits fail closed; increasing the account registry does not change them. A protected chat can require input assessment, model generation and output assessment, so account count is not a throughput estimate.
+
+A burst of 1000 concurrent conversations on one local model is not a supported capacity claim. Measure the complete application/gateway/model path with your prompt sizes, expected output lengths and both allowed and blocked traffic. The [benchmarks](benchmarks.md) separate local controls from inference; they are not a multi-user service SLO.
+
 
 ---
 Source: https://fastfence.dev/dev/reference/http-api/
@@ -2385,28 +2454,28 @@ All `/api/` and `/v1/` requests require a provisioned bearer identity. `/api/adm
 
 | Method | Path | Source handler |
 | --- | --- | --- |
-| `GET` | `/acp/agents` | [discovery](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/acp.py#L215) |
-| `GET` | `/acp/agents/{name}` | [agent](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/acp.py#L225) |
-| `GET` | `/acp/ping` | [ping](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/acp.py#L208) |
-| `POST` | `/acp/runs` | [run](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/acp.py#L234) |
-| `GET` | `/api/admin/audit.jsonl` | [audit_export](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L189) |
-| `POST` | `/api/admin/policies/activate` | [activate_policy](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/policy_authoring.py#L53) |
-| `POST` | `/api/admin/policies/draft` | [draft_policy](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/policy_authoring.py#L35) |
-| `POST` | `/api/admin/policies/preview` | [preview_policy](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/policy_authoring.py#L44) |
-| `PUT` | `/api/admin/policy` | [save_policy](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L177) |
-| `POST` | `/api/admin/reload` | [reload_policy](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L163) |
-| `POST` | `/api/admin/rules/preview` | [preview_rule](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/rule_authoring.py#L32) |
-| `GET` | `/api/admin/rules/schema` | [rule_schema](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/rule_authoring.py#L28) |
-| `POST` | `/api/admin/semantic/preview` | [preview](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/semantic_preview.py#L27) |
-| `GET` | `/api/admin/status` | [status](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L159) |
-| `POST` | `/api/documents/markdown` | [document_markdown](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/documents.py#L61) |
-| `POST` | `/api/invoke` | [invoke](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L143) |
-| `GET` | `/api/me` | [me](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L139) |
-| `POST` | `/api/models/complete` | [complete](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L149) |
-| `GET` | `/health` | [health](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L117) |
-| `GET` | `/ready` | [readiness](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/routes.py#L131) |
-| `POST` | `/v1/chat/completions` | [complete](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/openai.py#L193) |
-| `GET` | `/v1/models` | [models](https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/src/fastfence/app/interfaces/http/openai.py#L165) |
+| `GET` | `/acp/agents` | [discovery](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L215) |
+| `GET` | `/acp/agents/{name}` | [agent](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L225) |
+| `GET` | `/acp/ping` | [ping](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L208) |
+| `POST` | `/acp/runs` | [run](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L234) |
+| `GET` | `/api/admin/audit.jsonl` | [audit_export](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L189) |
+| `POST` | `/api/admin/policies/activate` | [activate_policy](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/policy_authoring.py#L53) |
+| `POST` | `/api/admin/policies/draft` | [draft_policy](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/policy_authoring.py#L35) |
+| `POST` | `/api/admin/policies/preview` | [preview_policy](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/policy_authoring.py#L44) |
+| `PUT` | `/api/admin/policy` | [save_policy](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L177) |
+| `POST` | `/api/admin/reload` | [reload_policy](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L163) |
+| `POST` | `/api/admin/rules/preview` | [preview_rule](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/rule_authoring.py#L32) |
+| `GET` | `/api/admin/rules/schema` | [rule_schema](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/rule_authoring.py#L28) |
+| `POST` | `/api/admin/semantic/preview` | [preview](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/semantic_preview.py#L27) |
+| `GET` | `/api/admin/status` | [status](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L159) |
+| `POST` | `/api/documents/markdown` | [document_markdown](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/documents.py#L61) |
+| `POST` | `/api/invoke` | [invoke](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L143) |
+| `GET` | `/api/me` | [me](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L139) |
+| `POST` | `/api/models/complete` | [complete](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L149) |
+| `GET` | `/health` | [health](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L117) |
+| `GET` | `/ready` | [readiness](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L131) |
+| `POST` | `/v1/chat/completions` | [complete](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/openai.py#L193) |
+| `GET` | `/v1/models` | [models](https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/openai.py#L165) |
 
 ## Response semantics
 
@@ -2433,6 +2502,8 @@ Here you can find all available configuration options using ENV variables.
 | `FASTFENCE_AUTHORING_ROOT`                 | `Path` \| `null`         | `null`                        | Trusted working directory for the isolated Laya installation                                                                 | `null`                        |
 | `FASTFENCE_IDENTITY_CONFIG_JSON`           | `string` \| `null`       | `null`                        | Trusted startup identity records as JSON                                                                                     | `null`                        |
 | `FASTFENCE_IDENTITY_CONFIG_FILE`           | `Path` \| `null`         | `null`                        | Trusted read-only startup identity configuration file                                                                        | `null`                        |
+| `FASTFENCE_IDENTITY_MAX_RECORDS`           | `integer`                | `4096`                        | Maximum startup identities, including administrators; independent of active request capacity                                 | `4096`                        |
+| `FASTFENCE_IDENTITY_MAX_SOURCE_BYTES`      | `integer`                | `1048576`                     | Maximum UTF-8 bytes of file or inline startup identity configuration                                                         | `1048576`                     |
 | `FASTFENCE_INSTANCE_ID`                    | `string` \| `null`       | `null`                        | Trusted instance label; generated once when omitted                                                                          | `null`                        |
 | `FASTFENCE_AUDIT_LIMIT`                    | `integer`                | `10000`                       | Maximum sanitized audit records retained in memory                                                                           | `10000`                       |
 | `FASTFENCE_CONFIG_URL`                     | `string` \| `null`       | `null`                        | Trusted HTTP source for coherent policy/feed JSON bundle                                                                     | `null`                        |

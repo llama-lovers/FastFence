@@ -965,6 +965,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#compound-rule-limitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compound-rule limitation
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1378,6 +1389,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#compound-rule-limitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compound-rule limitation
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1400,7 +1422,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="preview-and-activate-a-natural-language-rule">Preview and activate a natural-language rule<a class="headerlink" href="#preview-and-activate-a-natural-language-rule" title="Permanent link">&para;</a></h1>
 <p>This complete script adds a named policy:</p>
@@ -1466,6 +1488,9 @@ a permitted sample with expectations you chose independently. For exact characte
 restrictions, use a deterministic text rule instead of treating model judgment as
 exact matching. Removing the named rule through <strong>Policies</strong> requires another
 reviewed policy version.</p>
+<h2 id="compound-rule-limitation">Compound-rule limitation<a class="headerlink" href="#compound-rule-limitation" title="Permanent link">&para;</a></h2>
+<p>The local Qwen3:4b assessment has a reproduced false negative for a rule requiring <strong>both a person's full name and an email address</strong>: the combined input was allowed even though the named rule reached Laya correctly. A natural-language conjunction is not a reliable substitute for deterministic privacy controls. Keep applicable PII controls enabled and include combined, partial and exception cases in your preview tests; a passing example does not establish general detection accuracy.</p>
+<p>The same semantic configuration can also block content permitted by a literal rule because the layers enforce separate restrictions. Inspect the decision reason and input/output assessment results when a literal nonmatch is blocked.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="sd">"""Preview a named natural-language rule with real Laya; activate only explicitly."""</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
@@ -1609,7 +1634,7 @@ reviewed policy version.</p>
 </span><span id="__span-3-141"><a id="__codelineno-3-141" name="__codelineno-3-141" href="#__codelineno-3-141"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 </span><span id="__span-3-142"><a id="__codelineno-3-142" name="__codelineno-3-142" href="#__codelineno-3-142"></a>    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
-<p><a href="https://fastfence.dev/dev/downloads/semantic_policy.py">Download semantic_policy.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/d8b1e707464638b589ec0ec3a3b459fa8da2246a/examples/docs/semantic_policy.py">View source</a></p>
+<p><a href="https://fastfence.dev/dev/downloads/semantic_policy.py">Download semantic_policy.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/semantic_policy.py">View source</a></p>
 
 
 

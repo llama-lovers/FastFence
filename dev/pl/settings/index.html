@@ -1356,11 +1356,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="konfiguracja">Konfiguracja<a class="headerlink" href="#konfiguracja" title="Permanent link">&para;</a></h1>
 <p>Poniżej znajdują się dostępne opcje konfiguracji przez zmienne środowiskowe.</p>
@@ -1411,6 +1411,20 @@
 <td><code>null</code></td>
 <td>Zaufany plik konfiguracji tożsamości odczytywany przy starcie</td>
 <td><code>null</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_IDENTITY_MAX_RECORDS</code></td>
+<td><code>integer</code></td>
+<td><code>4096</code></td>
+<td>Limit tożsamości wczytywanych przy starcie, w tym administratorów; niezależny od liczby równoległych żądań</td>
+<td><code>8192</code></td>
+</tr>
+<tr>
+<td><code>FASTFENCE_IDENTITY_MAX_SOURCE_BYTES</code></td>
+<td><code>integer</code></td>
+<td><code>1048576</code></td>
+<td>Limit bajtów UTF-8 pliku lub JSON z konfiguracją tożsamości</td>
+<td><code>4194304</code></td>
 </tr>
 <tr>
 <td><code>FASTFENCE_INSTANCE_ID</code></td>

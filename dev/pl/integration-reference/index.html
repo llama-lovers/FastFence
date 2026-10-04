@@ -1236,6 +1236,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#pojemnosc-rejestru-tozsamosci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pojemność rejestru tożsamości
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limity-przyjmowania-zadan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limity przyjmowania żądań
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1466,6 +1488,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#pojemnosc-rejestru-tozsamosci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pojemność rejestru tożsamości
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limity-przyjmowania-zadan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limity przyjmowania żądań
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1488,11 +1532,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="dokumentacja-integracji">Dokumentacja integracji<a class="headerlink" href="#dokumentacja-integracji" title="Permanent link">&para;</a></h1>
 <p>FastFence egzekwuje kontrole dla operacji skierowanych przez bramkę. Nie przechwytuje pozostałych połączeń sieciowych agenta. Jawnie wybierz adapter i oddziel tokeny agentów od dostępu administracyjnego.</p>
@@ -1586,6 +1630,17 @@
 <h2 id="limity-i-zaozenia-wdrozenia">Limity i założenia wdrożenia<a class="headerlink" href="#limity-i-zaozenia-wdrozenia" title="Permanent link">&para;</a></h2>
 <p>Budżety, retencja audytu i mechanizmy związane z ponownym użyciem danych są lokalne dla procesu. Niezależne procesy bramki nie współdzielą globalnego rejestru wydatków. Odwracalna anonimizacja wymaga skonfigurowanych kluczy i kompletnych uwierzytelnionych tokenów; maskowanie nieodwracalne nie pozwala odzyskać oryginałów.</p>
 <p>Lokalny OCR tworzy chroniony Markdown i obsługuje wielostronicowe PDF. Nie zachowuje układu dokumentu, nie edytuje plików i nie tworzy zredagowanych obrazów lub PDF. Aktualne działanie i powtarzalne testy opisują <a href="../architecture/">architektura</a> oraz <a href="../manual-testing/">testy ręczne</a>.</p>
+<h2 id="pojemnosc-rejestru-tozsamosci">Pojemność rejestru tożsamości<a class="headerlink" href="#pojemnosc-rejestru-tozsamosci" title="Permanent link">&para;</a></h2>
+<p>Lokalny rejestr domyślnie przyjmuje <strong>4096 tożsamości łącznie z administratorami</strong> oraz plik/JSON o rozmiarze do <strong>1 MiB</strong>. Limity ograniczają pamięć przy starcie; nie oznaczają liczby równoczesnych rozmów. Uwierzytelnianie korzysta z indeksu skrótów poświadczeń w pamięci.</p>
+<p>Dla przykładowych 5000 użytkowników oraz administratorów ustaw w <code>.env</code> instalacji i uruchom bramkę ponownie:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>FASTFENCE_IDENTITY_MAX_RECORDS=8192
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>FASTFENCE_IDENTITY_MAX_SOURCE_BYTES=4194304
+</span></code></pre></div>
+<p>Rekordy tożsamości trzeba przygotować osobno. Te ustawienia nie tworzą kont. Górne granice to 65 536 rekordów oraz 64 MiB; oba limity obowiązują niezależnie. Duplikaty identyfikatorów i skrótów poświadczeń są odrzucane. Budżety i audyt nadal należą do pojedynczego procesu; większy rejestr nie synchronizuje stanu między workerami i nie zwiększa wydajności inferencji Laya.</p>
+<h2 id="limity-przyjmowania-zadan">Limity przyjmowania żądań<a class="headerlink" href="#limity-przyjmowania-zadan" title="Permanent link">&para;</a></h2>
+<p>Każdy adapter HTTP modelu korzysta z puli do <strong>32 połączeń</strong> i przyjmuje najwyżej <strong>128 aktywnych lub oczekujących żądań</strong>. Czekanie na połączenie zużywa dotychczasowy limit czasu żądania. Cookies upstreamu nie są przechowywane ani przekazywane między wywołaniami.</p>
+<p>Lokalny worker Laya wykonuje <strong>jedną ocenę naraz</strong>, z limitem <strong>32 ocen aktywnych lub oczekujących</strong>. Czas w kolejce wlicza się w timeout semantyczny. Przekroczenie limitów kończy się odmową dalszego przetwarzania; zwiększenie liczby kont nie zmienia tych granic. Chroniona rozmowa może wymagać oceny wejścia, generacji odpowiedzi oraz oceny wyjścia, więc liczba kont nie wyznacza przepustowości.</p>
+<p>Nie deklarujemy obsługi nagłego skoku do 1000 równoległych rozmów na jednym lokalnym modelu. Mierz pełną ścieżkę aplikacja/bramka/model dla swoich rozmiarów promptów, długości odpowiedzi i proporcji żądań dopuszczanych oraz blokowanych. <a href="../benchmarks/">Benchmarki</a> oddzielają kontrole lokalne od inferencji; nie są gwarancją czasu odpowiedzi usługi wielu użytkowników.</p>
 
 
 

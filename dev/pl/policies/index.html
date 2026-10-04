@@ -747,6 +747,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Sygnatury znanych ataków">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cytaty-edukacyjne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cytaty edukacyjne
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -807,6 +824,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Tworzone reguły tekstowe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pomijanie-niewidocznych-znakow-przy-dopasowaniu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pomijanie niewidocznych znaków przy dopasowaniu
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1481,6 +1515,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Sygnatury znanych ataków">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cytaty-edukacyjne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cytaty edukacyjne
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1542,6 +1593,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Tworzone reguły tekstowe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pomijanie-niewidocznych-znakow-przy-dopasowaniu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pomijanie niewidocznych znaków przy dopasowaniu
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1588,11 +1656,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="polityki-i-kontrole-bezpieczenstwa">Polityki i kontrole bezpieczeństwa<a class="headerlink" href="#polityki-i-kontrole-bezpieczenstwa" title="Permanent link">&para;</a></h1>
 <h2 id="zroda-konfiguracji">Źródła konfiguracji<a class="headerlink" href="#zroda-konfiguracji" title="Permanent link">&para;</a></h2>
@@ -1673,6 +1741,8 @@
 <p>Wzorzec ma 4–256 znaków, a źródło obsługuje do 200 sygnatur. Opcjonalny <code>match_mode: "token_sequence"</code> dopasowuje bezpiecznie escapowane tokeny oddzielone białymi znakami, z <code>max_gap</code> do 256 znaków. Dostarczona sygnatura powłoki używa <code>curl | sh</code> w tym trybie, dopuszczając URL między poleceniem a potokiem bez przyjmowania dowolnego regexu.</p>
 <p>Dopasowanie na wejściu blokuje przed wykonaniem operacji. Dopasowanie na wyjściu wstrzymuje odpowiedź po wykonaniu; audyt zachowuje ID sygnatur i <code>upstream_executed</code>. Ten sam znormalizowany matcher korzysta z wersjonowanego zewnętrznego źródła aktualizowanego poza ścieżką żądania.</p>
 <p>Wzorce obejmują przykładowe ciągi związane z ładowaniem pickle/PyTorch, zdalną powłoką i nadpisywaniem instrukcji. Cytowane opisy zawierające dokładny niebezpieczny wzorzec także bywają blokowane zachowawczo. To ograniczone kontrole tekstowe, a nie analiza binarnych modeli lub pełna ochrona przed exploitami.</p>
+<h3 id="cytaty-edukacyjne">Cytaty edukacyjne<a class="headerlink" href="#cytaty-edukacyjne" title="Permanent link">&para;</a></h3>
+<p>Sygnatura <code>instruction_override</code> dopasowuje także cytat „ignore all previous instructions”. Jeśli świadomie dopuszczasz takie cytaty, usuń wyłącznie wpis z tym ID z aktywnego <code>config/signatures.json</code>, zwiększ <code>version</code> całego feedu i sprawdź aktywną wersję w <strong>Activity</strong> po przeładowaniu. Dla zewnętrznego feedu zmień skonfigurowane źródło. Pozostałe sygnatury i ocena semantyczna pozostają aktywne; inne kontrole nadal mogą zablokować tekst. Nie istnieje wyjątek rozpoznający sam kontekst edukacyjny ani zakres per sygnatura. Globalne <code>signatures_enabled: false</code> wyłącza wszystkie sygnatury, więc nie jest równoważne usunięciu jednej reguły.</p>
 <h2 id="kontrole-semantyczne">Kontrole semantyczne<a class="headerlink" href="#kontrole-semantyczne" title="Permanent link">&para;</a></h2>
 <p>Polityka produktu używa <strong>Laya z lokalnym Qwen3:4b</strong>, 30-sekundowym limitem oceny, progiem <code>0.7</code> i włączoną kontrolą wyjścia. Najpierw wykonywane są kontrole lokalne. Treść docierająca do oceny semantycznej jest analizowana przed przekazaniem, a odpowiedź — przed dostarczeniem. Błędna odpowiedź, brak modelu, przekroczenie czasu lub awaria dostawcy blokuje żądanie. Model odpowiedzi i model oceniający konfiguruje się niezależnie.</p>
 <p>W <strong>Policies → Edit configuration → Semantic analysis</strong> wybierz dostawcę i opcjonalnie wpisz politykę języka naturalnego w <code>semantic.instructions</code>. Pole przyjmuje do 4096 znaków i wymaga <code>laya</code>; niepuste instrukcje z innym dostawcą są odrzucane. Przejrzyj i aktywuj zmianę przed testowaniem reprezentatywnych treści dozwolonych i zabronionych.</p>
@@ -1743,6 +1813,20 @@
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span></code></pre></div>
 <p>Reguła blokuje wejście lub odpowiedź modelu zawierającą słowo z <code>a</code>, również wielkim <code>A</code> i zgodnymi formami Unicode. Stosuje NFKC i opcjonalnie casefold; znaki diakrytyczne pozostają różne, więc <code>ą</code> nie pasuje do <code>a</code>. Słowa składają się z liter Unicode i znaków łączących. <code>contains</code> sprawdza literalny podciąg jednej wartości tekstowej, a <code>equals</code> całą wartość. Wartość <code>word_contains</code> może zawierać tylko litery i znaki łączące.</p>
+<h3 id="pomijanie-niewidocznych-znakow-przy-dopasowaniu">Pomijanie niewidocznych znaków przy dopasowaniu<a class="headerlink" href="#pomijanie-niewidocznych-znakow-przy-dopasowaniu" title="Permanent link">&para;</a></h3>
+<p>Opcja <code>ignore_invisible_characters</code> domyślnie ma wartość <code>false</code>. Włącz ją jawnie, aby dopasowanie ignorowało dokładnie U+200B, U+200C, U+200D, U+2060 i U+FEFF przed NFKC i casefold. Przykład wykrywa zarówno <code>confidential</code>, jak i <code>confi\u200bdential</code>, gdzie <code>\u200b</code> oznacza jeden rzeczywisty znak U+200B, a nie sześć wpisanych znaków:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">text_rules</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no-confidential</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confidential</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">model</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">block</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nt">ignore_invisible_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span></code></pre></div>
+<p>W edytorze <strong>Add content rule</strong> zaznacz <strong>Ignore invisible formatting characters when matching</strong>, dodaj próbki, wybierz <strong>Test rule</strong>, a następnie przejrzyj i aktywuj zmianę. Wynik preview podaje użyty tryb dopasowania. Opcja dotyczy <code>contains</code>, <code>word_contains</code> i <code>equals</code>, na wejściu i wyjściu w wybranym zakresie. Nie usuwa spacji, znaków diakrytycznych ani innych znaków Unicode. <code>equals</code> nadal porównuje całą wartość, w tym jej spacje. Zwykłe reguły bez tej opcji zachowują dotychczasowe działanie.</p>
+<p>To wyłącznie widok do porównania: przekazywany tekst pozostaje niezmieniony, a pasujące treści są blokowane. Opcja nie zmienia anonimizacji ani redakcji. Joinery mogą mieć znaczenie w językach i emoji, dlatego włączenie wymaga decyzji właściciela polityki. Wartość reguły, która po oczyszczeniu pozostaje pusta lub zawiera tylko białe znaki, jest odrzucana. Nie łączymy oddzielnych wiadomości ani pól.</p>
 <p>Wybierz <code>input</code>, <code>output</code> lub <code>both</code> oraz <code>model</code>, <code>tool</code> lub <code>all</code>. Wejście modelu obejmuje prompt, treści wiadomości i ciągi stop; wyjście obejmuje wygenerowany tekst. Role, identyfikatory modeli i strukturalne klucze JSON są wyłączone. Reguły narzędzi sprawdzają rekurencyjnie wartości tekstowe, bez kluczy słowników. Sygnatury i prywatność zachowują szerszy zakres kontroli.</p>
 <p>Dozwolone są maksymalnie 64 reguły z unikalnymi ID i niepustą wartością do 128 znaków. Przygotowanie literału odbywa się podczas walidacji. Dopasowanie nie potrzebuje kompilatora, modelu, plików ani sieci. Blokady wejścia poprzedzają wykonanie; blokady wyjścia wstrzymują dostarczenie po wykonaniu. Wyniki zawierają ID reguł, nie dopasowaną treść.</p>
 <p>W <strong>Policies</strong> wybierz <strong>Add content rule</strong>, ustaw zakres i próbki, a potem sprawdź podgląd, przejrzyj i aktywuj regułę. Podgląd ocenia tylko proponowany predykat: <code>NO MATCH</code> nie obiecuje zezwolenia pozostałych kontroli. Aktywacja dodaje regułę do bieżącej polityki z nową wersją. Duplikaty ID, błędne reguły i konflikty wersji są odrzucane. Zdalną konfigurację aktualizuje się u jej źródła.</p>

@@ -1236,6 +1236,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#startup-identity-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup identity capacity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-admission-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime admission limits
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1466,6 +1488,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#startup-identity-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup identity capacity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-admission-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime admission limits
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1488,7 +1532,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
 </div>
 <h1 id="integration-reference">Integration reference<a class="headerlink" href="#integration-reference" title="Permanent link">&para;</a></h1>
 <p>FastFence enforces controls on operations routed through it. It does not intercept an agent's unrelated network calls. Choose an adapter explicitly and keep agent credentials separate from management access.</p>
@@ -1582,6 +1626,17 @@
 <h2 id="limits-and-deployment-assumptions">Limits and deployment assumptions<a class="headerlink" href="#limits-and-deployment-assumptions" title="Permanent link">&para;</a></h2>
 <p>Budgets, audit retention and replay-related runtime behavior are scoped to one process. Multiple independent gateway processes do not share a global spending ledger. Reversible anonymization depends on configured keys and complete authenticated tokens; irreversible masking cannot recover originals.</p>
 <p>Local OCR produces protected Markdown and supports multipage PDF input. It does not preserve document layout, edit files or produce redacted PDF/image artifacts. See <a href="../architecture/">architecture</a> and <a href="../manual-testing/">manual verification</a> for current behavior and reproducible checks.</p>
+<h2 id="startup-identity-capacity">Startup identity capacity<a class="headerlink" href="#startup-identity-capacity" title="Permanent link">&para;</a></h2>
+<p>The local registry defaults to <strong>4096 identities including administrators</strong> and a <strong>1 MiB</strong> file/inline JSON limit. These bound startup memory; they do not measure concurrent model capacity. Authentication indexes credential digests in memory.</p>
+<p>For example, to provision 5000 callers plus administrators, set these in the installation's <code>.env</code> and restart:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>FASTFENCE_IDENTITY_MAX_RECORDS=8192
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>FASTFENCE_IDENTITY_MAX_SOURCE_BYTES=4194304
+</span></code></pre></div>
+<p>Provision the identity records separately. These settings do not create accounts. Hard bounds are 65,536 records and 64 MiB; both limits apply independently. Duplicate subjects and credential hashes are rejected. Budgets and audit remain process-local; increasing registry capacity does not share state across workers or increase Laya inference throughput.</p>
+<h2 id="runtime-admission-limits">Runtime admission limits<a class="headerlink" href="#runtime-admission-limits" title="Permanent link">&para;</a></h2>
+<p>Each business-model HTTP adapter reuses a pool of up to <strong>32 connections</strong> and admits at most <strong>128 active or waiting requests</strong>. Waiting for a connection consumes the request's existing deadline. Upstream cookies are neither retained nor forwarded between calls.</p>
+<p>The local Laya worker evaluates <strong>one assessment at a time</strong>, with at most <strong>32 active or waiting assessments</strong>. Queue time also counts toward the configured semantic timeout. Requests beyond these limits fail closed; increasing the account registry does not change them. A protected chat can require input assessment, model generation and output assessment, so account count is not a throughput estimate.</p>
+<p>A burst of 1000 concurrent conversations on one local model is not a supported capacity claim. Measure the complete application/gateway/model path with your prompt sizes, expected output lengths and both allowed and blocked traffic. The <a href="../benchmarks/">benchmarks</a> separate local controls from inference; they are not a multi-user service SLO.</p>
 
 
 
