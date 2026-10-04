@@ -1,6 +1,6 @@
 !!! warning "Development version — unreleased"
 
-    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit b4b602e0239d](https://github.com/llama-lovers/FastFence/commit/b4b602e0239d999de78181d11aa45f1396e89d00).
+    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit eb85e50156dd](https://github.com/llama-lovers/FastFence/commit/eb85e50156dd53a171408f9a0ea0584cf4112c54).
 
 # FastFence documentation
 

@@ -563,26 +563,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-fastfence" class="md-nav__link">
+  <a href="#start-with-one-command" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install FastFence
+        Start with one command
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#initialize-and-start-with-uv" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Initialize and start with uv
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Initialize and start with uv">
+    <nav class="md-nav" aria-label="Start with one command">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -635,10 +624,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#add-document-ocr" class="md-nav__link">
+  <a href="#document-ocr-and-advanced-diagnostics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add document OCR
+        Document OCR and advanced diagnostics
       
     </span>
   </a>
@@ -1379,26 +1368,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-fastfence" class="md-nav__link">
+  <a href="#start-with-one-command" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install FastFence
+        Start with one command
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#initialize-and-start-with-uv" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Initialize and start with uv
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Initialize and start with uv">
+    <nav class="md-nav" aria-label="Start with one command">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1451,10 +1429,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#add-document-ocr" class="md-nav__link">
+  <a href="#document-ocr-and-advanced-diagnostics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add document OCR
+        Document OCR and advanced diagnostics
       
     </span>
   </a>
@@ -1494,91 +1472,84 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4b602e0239d999de78181d11aa45f1396e89d00">Commit b4b602e0239d</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/eb85e50156dd53a171408f9a0ea0584cf4112c54">Commit eb85e50156dd</a>.</p>
 </div>
 <h1 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
-<h2 id="install-fastfence">Install FastFence<a class="headerlink" href="#install-fastfence" title="Permanent link">&para;</a></h2>
-<p>Use macOS or Linux with <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>. <code>uv tool run</code> downloads FastFence into its isolated tool cache; you do not need a source checkout or a manually activated virtual environment. The explicit Python selection matches FastFence's Python 3.12 requirement.</p>
-<h2 id="initialize-and-start-with-uv">Initialize and start with uv<a class="headerlink" href="#initialize-and-start-with-uv" title="Permanent link">&para;</a></h2>
-<p>Install <a href="https://ollama.com/">Ollama</a> and start its service before initialization (<code>ollama serve</code> in another terminal, or the running desktop app). Keep Git and <code>sh</code> available for the pinned Laya engine.</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mkdir<span class="w"> </span>fastfence-local
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>fastfence-local
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>init
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>doctor
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>serve
+<h2 id="start-with-one-command">Start with one command<a class="headerlink" href="#start-with-one-command" title="Permanent link">&para;</a></h2>
+<p>Use macOS or Linux with <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>, Git and <code>sh</code>. Install <a href="https://ollama.com/">Ollama</a> and keep its service running (<code>ollama serve</code> in another terminal, or the desktop app). In your chosen working directory:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>fastfence
 </span></code></pre></div>
-<p>Keep using this directory: <code>config/</code>, credentials and keys belong here, not in uv's tool cache. <code>uvx --python 3.12 fastfence@1.0.1</code> is the equivalent shorter prefix. The version pin makes repeated commands use the same release.</p>
+<p>From FastFence <strong>1.0.2</strong>, running without a subcommand prepares the required components and starts the gateway. You do not need a checkout, an activated environment or separate <code>init</code> and <code>serve</code> commands. uv selects a compatible Python and caches the package. Keep using this working directory: <code>config/</code>, credentials and keys belong here.</p>
+<p>If an older FastFence is already in uv's cache, refresh with <code>uv tool run fastfence@latest</code>. To choose this exact release and interpreter:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.2
+</span></code></pre></div>
 <h3 id="alternative-pip-and-a-virtual-environment">Alternative: pip and a virtual environment<a class="headerlink" href="#alternative-pip-and-a-virtual-environment" title="Permanent link">&para;</a></h3>
-<p>If you prefer the <code>fastfence</code> command directly, create a Python 3.12 environment in your working directory:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>fastfence<span class="w"> </span>uv
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>fastfence<span class="w"> </span>init
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>fastfence<span class="w"> </span>doctor
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>fastfence<span class="w"> </span>serve
+<p>If you prefer a directly installed command, create a Python 3.12 environment in the same working directory:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>fastfence<span class="w"> </span>uv
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>fastfence
 </span></code></pre></div>
 <p>Open <strong>http://127.0.0.1:8000</strong>. In <strong>Connection</strong>, enter the <code>local-agent</code> and <code>local-admin</code> tokens from your private <code>state/credentials.json</code>. Agent credentials send protected requests; management credentials review and change policies. Tokens stay in dashboard page memory.</p>
-<p>Initialization creates <code>config/</code>, private credentials and the anonymization issuer keyring in your working directory. It also installs the pinned Laya engine and checks Ollama for the active policy's assessment model, downloading that model only when missing. Repeating <code>init</code> preserves valid existing credentials, policies and keys. Keep this directory when upgrading. Older installations with <code>state/demo-tokens.json</code> retain their <code>security-admin</code> and <code>analyst-blue</code> identities.</p>
+<p>The first launch creates <code>config/</code>, private credentials and the anonymization issuer keyring in your working directory. It also installs the pinned Laya engine and checks Ollama for the active policy's assessment model, downloading that model only when missing. It also prepares OCR dependencies and models if they are not ready. Repeating the launch preserves valid existing credentials, policies and keys. Keep this directory when upgrading. Older installations with <code>state/demo-tokens.json</code> retain their <code>security-admin</code> and <code>analyst-blue</code> identities.</p>
 <p>There are three separate roles:</p>
 <ul>
-<li><strong>Laya</strong> is the Python engine that runs security assessments and helps draft rules. <code>init</code> installs it.</li>
-<li><strong>The assessment model</strong> interprets the text being checked. The default is <strong>Qwen3:4b</strong>, served by Ollama. <code>init</code> checks and downloads the configured assessor.</li>
+<li><strong>Laya</strong> is the Python engine that runs security assessments and helps draft rules. The first launch installs it.</li>
+<li><strong>The assessment model</strong> interprets the text being checked. The default is <strong>Qwen3:4b</strong>, served by Ollama. Startup checks and downloads the configured assessor.</li>
 <li><strong>Your application's model or tool</strong> performs the requested work after input checks. The fresh policy also allows Qwen3:4b for completions, so the quickstart needs one model download. Choose another allowlisted model or an <a href="../examples/openai-upstream/">OpenAI-compatible upstream</a> when your application needs it.</li>
 </ul>
 <p>Assessment and completion are separate calls even when they use the same model. An agent that only calls tools or ACP peers does not need a separate completion model. Initialization preserves an existing model choice and does not download an extra business model. Missing assessment fails closed; precise literal rules run locally before it.</p>
-<p>For offline configuration provisioning, run <code>uv tool run --python 3.12 fastfence@1.0.1 init --config-only</code> (or <code>fastfence init --config-only</code> in the pip environment). This writes configuration and private state without installing Laya or contacting Ollama. Run normal <code>init</code> when the prerequisites are available. <code>setup-laya</code> remains an advanced engine installation/repair command; it is not a separate quickstart step.</p>
+<p>For offline configuration provisioning, run <code>uv tool run --python 3.12 fastfence@1.0.2 init --config-only</code> (or <code>fastfence init --config-only</code> in the pip environment). This writes configuration and private state without installing Laya or contacting Ollama. Run the normal startup command when the prerequisites are available. <code>setup-laya</code> remains an advanced engine installation/repair command; it is not a separate quickstart step.</p>
 <h2 id="send-a-protected-request">Send a protected request<a class="headerlink" href="#send-a-protected-request" title="Permanent link">&para;</a></h2>
-<p>In another terminal, change to <code>fastfence-local</code>. This complete client uses an isolated Python environment containing HTTPX and reads your private credential without placing it in shell history:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span>httpx<span class="w"> </span>python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'PY'</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="s">import json</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="s">from pathlib import Path</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="s">import httpx</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="s">credentials = json.loads(Path("state/credentials.json").read_text())</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="s">with httpx.Client(timeout=120, trust_env=False) as client:</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="s">    response = client.post(</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="s">        "http://127.0.0.1:8000/api/models/complete",</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="s">        headers={"Authorization": "Bearer " + credentials["local-agent"]},</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="s">        json={"model": "qwen3:4b", "prompt": "Hello", "max_output_tokens": 256},</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="s">    )</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="s">    response.raise_for_status()</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="s">    print(response.json())</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="s">PY</span>
+<p>In another terminal, change to the same working directory. This complete client uses an isolated Python environment containing HTTPX and reads your private credential without placing it in shell history:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span>httpx<span class="w"> </span>python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'PY'</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="s">import json</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="s">from pathlib import Path</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s">import httpx</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s">credentials = json.loads(Path("state/credentials.json").read_text())</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="s">with httpx.Client(timeout=120, trust_env=False) as client:</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="s">    response = client.post(</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="s">        "http://127.0.0.1:8000/api/models/complete",</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="s">        headers={"Authorization": "Bearer " + credentials["local-agent"]},</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="s">        json={"model": "qwen3:4b", "prompt": "Hello", "max_output_tokens": 256},</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="s">    )</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="s">    response.raise_for_status()</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="s">    print(response.json())</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="s">PY</span>
 </span></code></pre></div>
 <p>Inspect <code>decision</code>, <code>reason</code>, <code>upstream_executed</code> and the semantic stage statuses. HTTP 200 alone does not mean allowed. Find the returned request ID in <strong>Activity</strong>. Interactive API schemas are at <strong>http://127.0.0.1:8000/docs</strong>.</p>
 <h2 id="download-runnable-examples">Download runnable examples<a class="headerlink" href="#download-runnable-examples" title="Permanent link">&para;</a></h2>
 <p>Download the <a href="../downloads/fastfence-examples.zip">complete examples archive</a> and extract it into <code>examples/</code> inside your installation directory. It contains executable Python files, the FastMCP policy and signatures, and five synthetic OCR fixtures under <code>documents/</code>; no credentials or private state.</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-fL<span class="w"> </span>https://fastfence.dev/dev/downloads/fastfence-examples.zip<span class="w"> </span>-o<span class="w"> </span>fastfence-examples.zip
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>zipfile<span class="w"> </span>-e<span class="w"> </span>fastfence-examples.zip<span class="w"> </span>examples
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/protected_request.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Hello'</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/mcp_client.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Hello'</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/semantic_policy.py
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl<span class="w"> </span>-fL<span class="w"> </span>https://fastfence.dev/dev/downloads/fastfence-examples.zip<span class="w"> </span>-o<span class="w"> </span>fastfence-examples.zip
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>zipfile<span class="w"> </span>-e<span class="w"> </span>fastfence-examples.zip<span class="w"> </span>examples
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/protected_request.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Hello'</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/mcp_client.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Hello'</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/semantic_policy.py
 </span></code></pre></div>
 <p>For other example pages, replace their <code>python</code> prefix with <code>uv run --no-project --python 3.12 --with fastfence==1.0.1 python</code> when using the tool-based installation. Examples needing additional SDKs list those separately. Pip users can run examples with their activated environment.</p>
 <p>The last command previews a named natural-language rule through your actual Laya assessor and displays a diff. It activates nothing unless you rerun with <code>--activate</code> after review. Each <a href="../examples/protected-request/">example page</a> also includes the full source and a direct file download.</p>
 <h2 id="describe-a-rule-then-test-it-through-mcp">Describe a rule, then test it through MCP<a class="headerlink" href="#describe-a-rule-then-test-it-through-mcp" title="Permanent link">&para;</a></h2>
 <p>For semantic intent, follow the <a href="../examples/semantic-policy/">named Laya rule example</a>. For an exact restriction such as a forbidden letter, open <strong>Policies → Add content rule</strong>, choose <strong>Word contains</strong>, value <code>a</code>, <strong>Input only</strong>, <strong>Models</strong>, and case-insensitive matching. Preview <code>Hi</code> and <code>Cat</code>, review and activate.</p>
 <p>Alternatively, <strong>Describe a fast rule</strong> asks Laya to draft this bounded deterministic configuration from your instruction. Inspect the generated operator, value and scope before activation; its local matcher differs from runtime semantic assessment.</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/mcp_client.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Cat'</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/mcp_client.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Hi'</span>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/mcp_client.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Cat'</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>python<span class="w"> </span>examples/mcp_client.py<span class="w"> </span>--prompt<span class="w"> </span><span class="s1">'Hi'</span>
 </span></code></pre></div>
 <p><code>Cat</code> must be blocked before the protected model executes. <code>Hi</code> passes that rule and can reach Qwen if remaining policies permit it. Scope the rule to both directions if generated words should also be checked. Output denial cannot undo an upstream operation that already ran.</p>
-<h2 id="add-document-ocr">Add document OCR<a class="headerlink" href="#add-document-ocr" title="Permanent link">&para;</a></h2>
-<p>Run the packaged installer:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>setup-ocr
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>doctor<span class="w"> </span>--full
+<h2 id="document-ocr-and-advanced-diagnostics">Document OCR and advanced diagnostics<a class="headerlink" href="#document-ocr-and-advanced-diagnostics" title="Permanent link">&para;</a></h2>
+<p>Normal startup prepares OCR automatically. To repair OCR separately or run full diagnostics:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.2<span class="w"> </span>setup-ocr
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.2<span class="w"> </span>doctor<span class="w"> </span>--full
 </span></code></pre></div>
-<p>Continue with <a href="../manual-testing/">manual verification</a>. OCR supports images and multipage PDFs and returns policy-checked Markdown. It does not edit document pixels. Restart after installing optional components, then run <code>fastfence doctor --full</code>.</p>
+<p>Continue with <a href="../manual-testing/">manual verification</a>. OCR supports images and multipage PDFs and returns policy-checked Markdown. It does not edit document pixels. Restart after component repairs, then run <code>fastfence doctor --full</code>.</p>
 <h2 id="update-fastfence">Update FastFence<a class="headerlink" href="#update-fastfence" title="Permanent link">&para;</a></h2>
 <p>Stop the gateway. For the uv tool installation, explicitly select the newest published release:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@latest<span class="w"> </span>doctor
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@latest<span class="w"> </span>serve
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>fastfence@latest
 </span></code></pre></div>
-<p>A plain unversioned tool command may reuse its cached version; <code>@latest</code> refreshes it. A pinned <code>@1.0.1</code> command remains pinned. <a href="https://docs.astral.sh/uv/concepts/tools/#tool-versions">uv documents these cache semantics</a>. A cached exact-version command can run with uv’s <code>--offline</code> option, but that only disables uv downloads: FastFence still needs its configured model service and normal initialization can download runtime components.</p>
+<p>A plain unversioned tool command may reuse its cached version; <code>@latest</code> refreshes it. A pinned <code>@1.0.2</code> command remains pinned. <a href="https://docs.astral.sh/uv/concepts/tools/#tool-versions">uv documents these cache semantics</a>. A cached exact-version command can run with uv’s <code>--offline</code> option, but that only disables uv downloads: FastFence still needs its configured model service and normal initialization can download runtime components.</p>
 <p>For pip, activate the existing virtual environment and run:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>fastfence
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>fastfence<span class="w"> </span>doctor
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>fastfence<span class="w"> </span>serve
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>fastfence
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>fastfence
 </span></code></pre></div>
 <p>Reload the console after restart. Your working directory's <code>config/</code> and <code>state/</code> are separate from the installed package. Back them up and preserve them during upgrades. If a release updates pinned Laya helpers, follow that release's setup instructions; the installer refuses to overwrite modified helper files.</p>
 <p>For policy-only updates, review and activate a higher version through <strong>Policies</strong>. Valid higher-version edits to <code>config/policy.yaml</code> also hot-reload. Invalid changes retain the last valid snapshot. <code>.env</code> changes require a restart.</p>

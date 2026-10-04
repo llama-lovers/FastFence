@@ -2,266 +2,266 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://fastfence.dev/dev/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/architecture/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/architecture/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/architecture/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/getting-started/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/getting-started/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/getting-started/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/integration-reference/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/integration-reference/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/integration-reference/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/integrations/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/integrations/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/integrations/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/learn/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/learn/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/learn/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/manual-testing/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/manual-testing/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/manual-testing/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/policies/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/policies/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/policies/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/settings/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/settings/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/settings/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/acp/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/acp/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/acp/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/asymmetric-anonymization/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/asymmetric-anonymization/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/asymmetric-anonymization/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/custom-detectors/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/custom-detectors/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/custom-detectors/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/fastmcp-server/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/fastmcp-server/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/fastmcp-server/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/mcp-client/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/mcp-client/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/mcp-client/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/openai-client/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/openai-client/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/openai-client/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/openai-upstream/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/openai-upstream/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/openai-upstream/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/protected-request/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/protected-request/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/protected-request/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/examples/semantic-policy/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/examples/semantic-policy/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/examples/semantic-policy/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/reference/http-api/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/reference/http-api/"/>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/reference/http-api/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/architecture/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/architecture/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devarchitecture/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/getting-started/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/getting-started/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devgetting-started/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/integration-reference/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/integration-reference/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devintegration-reference/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/integrations/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/integrations/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devintegrations/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/learn/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/learn/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devlearn/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/manual-testing/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/manual-testing/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devmanual-testing/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/policies/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/policies/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devpolicies/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/settings/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/settings/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devsettings/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/acp/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/acp/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/acp/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/asymmetric-anonymization/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/asymmetric-anonymization/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/asymmetric-anonymization/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/custom-detectors/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/custom-detectors/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/custom-detectors/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/fastmcp-server/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/fastmcp-server/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/fastmcp-server/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/mcp-client/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/mcp-client/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/mcp-client/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/openai-client/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/openai-client/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/openai-client/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/openai-upstream/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/openai-upstream/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/openai-upstream/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/protected-request/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/protected-request/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/protected-request/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/examples/semantic-policy/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/examples/semantic-policy/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devexamples/semantic-policy/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/reference/http-api/</loc>
-        <lastmod>2026-10-03</lastmod>
+        <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/reference/http-api/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devreference/http-api/"/>

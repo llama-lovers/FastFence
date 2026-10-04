@@ -1387,11 +1387,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4b602e0239d999de78181d11aa45f1396e89d00">Commit b4b602e0239d</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/eb85e50156dd53a171408f9a0ea0584cf4112c54">Commit eb85e50156dd</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4b602e0239d999de78181d11aa45f1396e89d00">Commit b4b602e0239d</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/eb85e50156dd53a171408f9a0ea0584cf4112c54">Commit eb85e50156dd</a>.</p>
 </div>
 <p><img alt="Logo FastFence" class="fastfence-landing-logo" height="121" src="../assets/fastfence-logo.svg" width="120" /></p>
 <h1 id="fastfence">FastFence<a class="headerlink" href="#fastfence" title="Permanent link">&para;</a></h1>
@@ -1401,15 +1401,12 @@
 <a class="md-button" href="learn/">Przejdź samouczek</a>
 <a class="md-button" href="reference/http-api/">Dokumentacja HTTP API</a></p>
 <h2 id="uruchom-lokalnie">Uruchom lokalnie<a class="headerlink" href="#uruchom-lokalnie" title="Permanent link">&para;</a></h2>
-<p>Potrzebujesz <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> i działającej usługi <a href="https://ollama.com/">Ollama</a>. Uruchom opublikowany pakiet z Pythonem 3.12 we własnym katalogu roboczym:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mkdir<span class="w"> </span>fastfence-local
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>fastfence-local
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>init
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>doctor
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>serve
+<p>Zainstaluj <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> i uruchom <a href="https://ollama.com/">Ollama</a>. W wybranym katalogu roboczym wykonaj:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>fastfence
 </span></code></pre></div>
-<p>uv przechowuje pakiet w izolowanej pamięci podręcznej, a konfiguracja pozostaje w <code>fastfence-local</code>. <a href="getting-started/">Instrukcja instalacji</a> opisuje także pip, uruchamianie przykładów i aktualizacje.</p>
-<p><code>init</code> przygotowuje prywatną konfigurację, instaluje Laya i w razie potrzeby pobiera model oceniający. Nowa instalacja domyślnie używa Qwen3:4b do oceny i generowania odpowiedzi w osobnych wywołaniach; drugi model nie jest wymagany. Otwórz <strong>http://127.0.0.1:8000</strong> i połącz się przy użyciu wygenerowanych danych dostępu. <a href="getting-started/">Instrukcja</a> opisuje wymagania i prywatną konfigurację. Repozytorium FastFence nie jest potrzebne.</p>
+<p>FastFence <strong>1.0.2 lub nowszy</strong> przygotowuje wymagane środowisko i uruchamia bramkę jednym poleceniem. Tworzy prywatną konfigurację, instaluje Laya, pobiera brakujący model oceniający i w razie potrzeby przygotowuje OCR. Nowa instalacja używa Qwen3:4b do oceny i generowania odpowiedzi w osobnych wywołaniach; drugi model nie jest potrzebny.</p>
+<p>Otwórz <strong>http://127.0.0.1:8000</strong> i połącz się danymi z <code>state/credentials.json</code>. Korzystaj dalej z tego samego katalogu: konfiguracja i klucze pozostają tutaj, a uv przechowuje pakiet osobno. Jeśli uv ma już starsze wydanie w pamięci podręcznej, użyj <code>uv tool run fastfence@latest</code>.</p>
+<p>Nie potrzebujesz repozytorium ani ręcznie aktywowanego środowiska. <a href="getting-started/">Instrukcja instalacji</a> opisuje wymagania, polecenia z przypiętą wersją i aktualizacje.</p>
 <h2 id="wybierz-zadanie">Wybierz zadanie<a class="headerlink" href="#wybierz-zadanie" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
