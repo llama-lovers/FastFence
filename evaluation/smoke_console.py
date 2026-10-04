@@ -11,9 +11,17 @@ from playwright.sync_api import expect, sync_playwright
 
 if __package__:
     from evaluation.console_metrics_checks import metric_checks
+    from evaluation.semantic_review_browser import (
+        named_rule_checks,
+        serve_semantic_fixture,
+    )
     from evaluation.smoke_playground_models import fixture_status
 else:
     from console_metrics_checks import metric_checks
+    from semantic_review_browser import (
+        named_rule_checks,
+        serve_semantic_fixture,
+    )
     from smoke_playground_models import fixture_status
 
 
@@ -120,6 +128,8 @@ class ConsoleFixture:
         path = urlsplit(request.url).path
         self.requests.append((request.method, path))
         if self.serve_asset(route, path):
+            return
+        if serve_semantic_fixture(self, route, path):
             return
         if path == "/api/admin/semantic/preview":
             self.semantic_preview(route)
@@ -450,90 +460,6 @@ def policy_checks(page, fixture, screenshots):
     expect(page.locator("#connectionStatus")).to_have_text("Not connected")
 
 
-def named_rule_checks(page, fixture, screenshots):
-    fixture.status["configuration"].update(
-        management_writable=True, source_kind="local_files"
-    )
-    connect(page)
-    expect(page.locator("#connectDialog")).not_to_be_visible()
-    page.locator('nav [data-nav="policies"]').click()
-    page.locator("#layaRuleBtn").click()
-    expect(page.locator("#layaRuleDialog")).to_be_visible()
-    page.locator("#layaRuleId").fill("no-personal-investment-advice")
-    instruction = "Block personalized investment recommendations. Allow general financial education."
-    page.locator("#layaRuleInstruction").fill(instruction)
-    page.locator("#layaRuleSample").fill("Tell me which stock I should buy.")
-    expect(page.locator("#reviewLayaRule")).to_be_disabled()
-    before = copy.deepcopy(fixture.status["policy"])
-    writes = len(fixture.writes)
-    fixture.semantic_preview_error = True
-    page.locator("#layaRuleTest").click()
-    expect(page.locator("#layaRuleTestResult")).to_contain_text(
-        "unavailable or busy"
-    )
-    expect(page.locator("#reviewLayaRule")).to_be_disabled()
-    expect(page.locator("#layaRuleInstruction")).to_have_value(instruction)
-    fixture.semantic_preview_error = False
-    page.locator("#layaRuleTest").click()
-    expect(page.locator("#layaRuleTestResult")).to_contain_text(
-        "BLOCKED · model input"
-    )
-    expect(page.locator("#reviewLayaRule")).to_be_enabled()
-    preview = fixture.semantic_previews[-1]
-    assert preview["direction"] == "input" and preview["target"] == "model"
-    assert (
-        preview["rule"]["direction"] == "both"
-        and preview["rule"]["target"] == "all"
-    )
-    assert fixture.status["policy"] == before and len(fixture.writes) == writes
-    page.locator("#layaRuleDirection").select_option("input")
-    page.locator("#layaRuleTarget").select_option("model")
-    expect(page.locator("#reviewLayaRule")).to_be_disabled()
-    page.locator("#layaRuleSample").fill("Explain portfolio diversification.")
-    fixture.semantic_decision = "no_semantic_block"
-    page.locator("#layaRuleTest").click()
-    expect(page.locator("#layaRuleTestResult")).to_contain_text(
-        "NO SEMANTIC BLOCK"
-    )
-    expect(page.locator("#reviewLayaRule")).to_be_enabled()
-    if screenshots:
-        page.screenshot(
-            path=str(screenshots.parent / "console-laya-rule.png"),
-            full_page=True,
-        )
-    page.locator("#reviewLayaRule").click()
-    expect(page.locator("#layaRuleDialog")).not_to_be_visible()
-    expect(page.locator("#policyDialog")).to_be_visible()
-    expect(page.locator("#policyJsonMode")).not_to_be_checked()
-    page.locator("#policyReview").click()
-    expect(page.locator("#policyReviewDiff")).to_contain_text("semantic.rules")
-    expect(page.locator("#policyReviewDiff")).to_contain_text(instruction)
-    expect(page.locator("#savePolicy")).to_be_disabled()
-    page.locator("#policyConfirm").check()
-    page.locator("#savePolicy").click()
-    expect(page.locator("#policyMessage")).to_contain_text(
-        "Policy v4 is active"
-    )
-    page.locator("#closePolicy").click()
-    rule = fixture.status["policy"]["semantic"]["rules"][0]
-    assert rule == {
-        "id": "no-personal-investment-advice",
-        "instruction": instruction,
-        "direction": "input",
-        "target": "model",
-    }
-    assert fixture.status["policy"]["semantic"]["provider"] == "laya"
-    expect(page.locator("#policyInventory")).to_contain_text(instruction)
-    card = page.locator("#policyInventory .rule-card").filter(
-        has_text="no-personal-investment-advice"
-    )
-    card.get_by_role("button", name="Edit rule", exact=True).click()
-    expect(page.locator("#layaRuleId")).to_be_disabled()
-    expect(page.locator("#layaRuleInstruction")).to_have_value(instruction)
-    expect(page.locator("#reviewLayaRule")).to_be_disabled()
-    page.locator("#closeLayaRule").click()
-
-
 def run(root, screenshots=None):
     fixture = ConsoleFixture(root)
     errors = []
@@ -577,6 +503,11 @@ def run(root, screenshots=None):
             "named_rule_provider_failure_preserves_draft",
             "named_rule_preview_scope_and_nonmutation",
             "named_rule_scope_edits_invalidate_preview",
+            "named_rule_all_selected_scopes_reviewed",
+            "named_rule_explicit_expected_outcomes_gate",
+            "named_rule_receipt_only_activation_no_generic_put",
+            "named_rule_saved_case_scopes_preserved",
+            "named_rule_saved_replay_never_activates",
             "named_rule_review_without_raw_json",
             "named_rule_explicit_activation_preserves_instruction",
             "named_rule_edit_requires_new_test",

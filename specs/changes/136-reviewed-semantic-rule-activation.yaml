@@ -1,0 +1,41 @@
+id: FF-136
+title: Review bounded semantic examples before activating an exact policy candidate
+status: implemented
+problem: A single ad hoc semantic preview did not bind representative expected outcomes, saved regressions or an exact reviewed candidate to later rule activation.
+scope:
+  - Add management-only POST semantic review and activation endpoints, retaining the existing single-text preview for compatibility.
+  - Compare real scanner outcomes under pinned active and candidate configurations, with candidate construction matching the existing named-rule preview.
+  - Merge submitted examples with saved cases of other active rules through the separately owned semantic suite store.
+  - Issue owner-bound, expiring, one-use receipts only after all explicit expectations and saved regressions pass without assessment errors.
+constraints:
+  - Submit at most 16 unique text-and-scope cases of at most 4096 UTF-8 bytes each, with block and no-semantic-block expectations for every direction and target covered by the edited rule.
+  - Reject blank, invalid UTF-8 surrogate, duplicate and contradictory examples before inference; do not rewrite their expected outcomes.
+  - Merge at most 64 cases and 64 KiB through the suite store, evaluate at most 128 assessments and enforce one shared single-flight 120-second deadline with replay.
+  - Disabled semantic stages are explicitly not_evaluated; this workflow never invokes business models or tools, reserves invocation budgets or claims authorization coverage.
+  - Keep at most 16 receipts for 600 seconds; bind administrator subject and tenant, full immutable base/feed/candidate plus digests, exact cases and suite-content digest.
+  - Activate only the exact reviewed candidate with explicit confirmation and locked expected policy/feed checks; changed source, snapshot or test content invalidates activation.
+  - A timeout, including one after the final result, cannot issue a passing receipt. Cancellation releases the review slot.
+  - Existing rules without saved examples are explicitly untested warnings, not silently claimed as passing. Incompatible saved cases remain a blocking condition.
+  - Expose only sanitized failure reasons. Submitted example text is returned only to authenticated management clients and is never written to invocation audit.
+change_paths:
+  - src/fastfence/app/interfaces/http/semantic_review.py
+  - src/fastfence/app/interfaces/http/semantic_review_models.py
+  - src/fastfence/app/interfaces/http/semantic_review_evaluation.py
+  - src/fastfence/app/interfaces/http/semantic_review_session.py
+  - src/fastfence/app/interfaces/http/routes.py
+  - tests/integration/test_semantic_review.py
+acceptance:
+  - A review returns scoped before/after decisions, scores, latency, pass flags, model, YAML diff and warnings without activating anything.
+  - Both submitted and inherited regression failures prevent receipt issuance, and activation performs no additional inference.
+  - Receipts cannot be reused by another administrator or tenant, after expiry, after one successful activation, or after any relevant policy/feed/suite change.
+  - Policy source edits not yet polled and same-version changed signature content fail at the locked publication boundary without overwriting the source.
+  - Failed or busy assessments remain visible as errors with no activation path, and total timeout/cancellation releases single-flight admission.
+  - Successful activation records whether reviewed examples were saved; a post-publication suite write failure is explicit rather than falsely claiming atomic two-file persistence.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/integration/test_semantic_review.py tests/integration/test_semantic_rule_preview.py tests/unit/test_semantic_suite_store.py
+    expected: Reviewed activation, compatibility and bounded saved-case integration tests pass without real inference.
+evidence:
+  - check: Focused backend verification
+    result: All 63 tests passed in 1.55 seconds. Tests use explicit scanner fakes, cover management authorization, schema and privacy validation, disabled/output-disabled before stages, exact candidate activation, source/feed/suite conflicts, owner/tenant binding, expiry, one use, bounded receipts, cancellation and deadline-after-final-result. No model accuracy claim or model inference was performed.
+  - check: Static validation
+    result: Ruff passed and basedpyright reported zero diagnostics for the new review modules and route wiring.

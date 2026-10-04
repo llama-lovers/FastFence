@@ -65,15 +65,17 @@ workflow below. The semantic classifier remains approximate.
 2. Set **Rule ID** to `no-personal-investment-advice` and **Your rule** to:
    `Block personalized recommendations to buy or sell a specific investment. Allow general explanations of financial concepts.`
 3. Select **Input only** and **Models**.
-4. Enter `Tell me which stock I should buy with my retirement savings.` as sample content. Click **Test with Laya**. Inspect the decision, model, scope, severity and elapsed time. This is actual assessment inference; the protected completion model has not run.
-5. Replace the sample with `Explain what portfolio diversification means.` and test again. Compare the results against your intent. Semantic classification is approximate; record misses and overly broad blocks instead of assuming these examples guarantee a result.
-6. Click **Review policy change**, then **Review changes** in the settings dialog. Check the exact instruction, `input`/`model` scope and provider settings. Confirm the review and click **Activate policy**.
+4. In **Must be blocked**, enter `Tell me which stock I should buy with my retirement savings.`. In **Must pass semantic analysis**, enter `Explain what portfolio diversification means.`. Each nonblank line is a separate synthetic example with an expectation you choose.
+5. Click **Review with Laya**. Compare **Expected**, **Active policy**, **Proposed policy** and the result for each scope. These are actual model assessments; no protected business model or tool runs. Any mismatch or missing evaluation prevents reviewed activation.
+6. Read **Exact policy change**, confirm that you reviewed the expectations, results and scope, then click **Activate reviewed rule**. The server accepts only the exact successful, unexpired review belonging to your management identity.
 7. Confirm the active version increased and the rule appears in the inventory. In **Test requests**, send the same inputs through the protected model and inspect the input/output stage results and **Activity**.
 8. Use **Edit rule** to change it, retest and review, or **Remove…** to review its removal before activation.
 
 Testing does not save the candidate or execute a business tool. It evaluates the candidate together with existing applicable semantic rules and global security instructions. The score does not identify which individual rule caused the result. **NO SEMANTIC BLOCK** does not guarantee that access, budget, privacy or other controls will allow an actual request.
 
-For **Input and output**, the dialog tests **input**; for **Models and tools**, it tests **model** content. The output scope must be verified separately. Use the [preview API](integration-reference.md#test-a-named-laya-rule) to choose a particular direction and target without changing the active configuration. A failed preview or changed sample/rule disables review until a new test succeeds.
+For **Input and output** and **Models and tools**, every example is tested in all four scopes. Include both a blocked and a permitted example for each scope. Existing saved cases of other active rules are included to expose regressions. Editing the rule, samples or identity invalidates the review; changes to the policy, feed or saved suite also invalidate activation on the server.
+
+Use **Replay saved semantic tests** in Policies to rerun the private `config/semantic-policy-tests.yaml` suite against the current policy without activation. See the [runnable review and replay example](examples/semantic-policy.md#saved-cases-and-replay). A successful test is evidence for those examples, not a guarantee for unseen prompts. Ordinary administrative YAML edits and the generic policy endpoint remain outside this reviewed-activation gate.
 
 ## Describe a fast deterministic rule
 

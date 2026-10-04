@@ -106,3 +106,16 @@ Każdy adapter HTTP modelu korzysta z puli do **32 połączeń** i przyjmuje naj
 Lokalny worker Laya wykonuje **jedną ocenę naraz**, z limitem **32 ocen aktywnych lub oczekujących**. Czas w kolejce wlicza się w timeout semantyczny. Przekroczenie limitów kończy się odmową dalszego przetwarzania; zwiększenie liczby kont nie zmienia tych granic. Chroniona rozmowa może wymagać oceny wejścia, generacji odpowiedzi oraz oceny wyjścia, więc liczba kont nie wyznacza przepustowości.
 
 Nie deklarujemy obsługi nagłego skoku do 1000 równoległych rozmów na jednym lokalnym modelu. Mierz pełną ścieżkę aplikacja/bramka/model dla swoich rozmiarów promptów, długości odpowiedzi i proporcji żądań dopuszczanych oraz blokowanych. [Benchmarki](benchmarks.md) oddzielają kontrole lokalne od inferencji; nie są gwarancją czasu odpowiedzi usługi wielu użytkowników.
+
+## Kontrolowana aktywacja semantyczna {#reviewed-semantic-activation}
+
+Te endpointy administracyjne wymuszają po stronie serwera zgodność ocen z oczekiwaniami:
+
+| Endpoint | Cel |
+| --- | --- |
+| `POST /api/admin/semantic/review` | Porównuje aktywną i proponowaną politykę z jawnymi oczekiwaniami oraz zapisanymi regresjami; tylko sukces daje ograniczony czasowo identyfikator testu. |
+| `POST /api/admin/semantic/activate` | Potwierdza i aktywuje dokładnie kandydata powiązanego z pomyślnym testem. |
+| `GET /api/admin/semantic/tests` | Odczytuje prywatny zestaw, jego skrót i stan obowiązywania. |
+| `POST /api/admin/semantic/tests/replay` | Sprawdza zapisane oczekiwania na bieżącej polityce, bez aktywacji. |
+
+[Kompletny działający przykład](examples/semantic-policy.md) obejmuje testowanie, jawną aktywację i ponawianie zapisanego zestawu. Schematy żądań i odpowiedzi są dostępne pod `/docs` uruchomionej bramki. Dotychczasowy endpoint jednej próbki `/semantic/preview` pozostaje diagnostyką i nie wydaje identyfikatora pozwalającego na aktywację. Oceny dotyczą warstwy semantycznej, a nie wykonania narzędzi, budżetów czy kontroli deterministycznych. Bezpośrednie administracyjne zmiany polityki pozostają poza kontrolowaną ścieżką aktywacji.

@@ -14,6 +14,9 @@ from fastfence.app.interfaces.http.rule_authoring import (
 from fastfence.app.interfaces.http.semantic_preview import (
     configure_semantic_preview,
 )
+from fastfence.app.interfaces.http.semantic_review import (
+    configure_semantic_review,
+)
 from fastfence.modules.control.application.facade import ControlRuntime
 from fastfence.modules.control.contracts.dto import (
     Identity,
@@ -31,6 +34,7 @@ def configure_http(app: FastAPI, runtime: ControlRuntime) -> None:
     _configure_management(app, runtime, admin)
     configure_rule_authoring(app, admin)
     configure_semantic_preview(app, runtime, admin)
+    configure_semantic_review(app, runtime, admin)
     configure_policy_authoring(app, runtime, admin)
 
 
@@ -97,6 +101,8 @@ def _configure_public(
             "documents.js",
             "console.js",
             "policy-manager.js",
+            "semantic-review.js",
+            "semantic-regressions.js",
             "console.css",
             "logo.svg",
         }

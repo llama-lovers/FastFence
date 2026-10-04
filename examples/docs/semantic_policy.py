@@ -1,16 +1,11 @@
-"""Preview a named natural-language rule with real Laya; activate only explicitly."""
+"""Review semantic expectations with Laya; activate explicitly or replay saved tests."""
 
 import argparse
-import copy
-import difflib
 import json
 import os
 from pathlib import Path
 
 import httpx
-import yaml
-
-from fastfence.modules.control.domain.models import Policy
 
 RULE = {
     "id": "no-personal-financial-advice",
@@ -41,64 +36,72 @@ def read_policy(client: httpx.Client, token: str) -> dict:
     return response.json()["policy"]
 
 
-def prepare(client: httpx.Client, token: str) -> tuple[dict, dict, list[dict]]:
+def prepare(client: httpx.Client, token: str) -> dict:
     base = read_policy(client, token)
-    candidate = copy.deepcopy(base)
-    candidate["version"] += 1
-    semantic = candidate["semantic"]
-    if semantic["provider"] != "laya":
-        semantic.update(
-            provider="laya",
-            model="qwen3:4b",
-            timeout_ms=max(30000, semantic["timeout_ms"]),
-        )
-    semantic["rules"] = [
-        rule for rule in semantic.get("rules", []) if rule["id"] != RULE["id"]
-    ] + [RULE]
-    candidate = Policy.model_validate(candidate).model_dump(mode="json")
-    results = []
-    for text, expected in CASES:
-        response = client.post(
-            "/api/admin/semantic/preview",
-            headers={"Authorization": "Bearer " + token},
-            json={
-                "rule": RULE,
-                "text": text,
-                "direction": "input",
-                "target": "model",
-                "base_version": base["version"],
-            },
-        )
-        response.raise_for_status()
-        result = response.json()
-        results.append({"expected": expected, **result})
-    return base, candidate, results
-
-
-def activate(
-    client: httpx.Client,
-    token: str,
-    base: dict,
-    candidate: dict,
-    results: list[dict],
-) -> dict:
-    if len(results) != len(CASES) or not all(
-        result["decision"] == result["expected"] and result["rule_applied"]
-        for result in results
-    ):
-        raise ValueError(
-            "Preview did not match expected classifications; no activation."
-        )
-    if read_policy(client, token) != base:
-        raise ValueError(
-            "Active policy changed; preview again before activation."
-        )
-    response = client.put(
-        "/api/admin/policy",
-        headers={"Authorization": "Bearer " + token},
-        json=candidate,
+    directions = (
+        ("input", "output")
+        if RULE["direction"] == "both"
+        else (RULE["direction"],)
     )
-    response.raise_for_status()  # Server also rejects version/source conflicts.
+    targets = (
+        ("model", "tool") if RULE["target"] == "all" else (RULE["target"],)
+    )
+    cases = [
+        {
+            "id": f"sample-{index}-{direction}-{target}",
+            "text": text,
+            "direction": direction,
+            "target": target,
+            "expected": expected,
+        }
+        for index, (text, expected) in enumerate(CASES, start=1)
+        for direction in directions
+        for target in targets
+    ]
+    response = client.post(
+        "/api/admin/semantic/review",
+        headers={"Authorization": "Bearer " + token},
+        json={"base_version": base["version"], "rule": RULE, "cases": cases},
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def activate(client: httpx.Client, token: str, review: dict) -> dict:
+    if not review.get("tests_passed") or not review.get("review_id"):
+        raise ValueError(
+            "Review failed expected classifications; no activation."
+        )
+    response = client.post(
+        "/api/admin/semantic/activate",
+        headers={"Authorization": "Bearer " + token},
+        json={
+            "review_id": review["review_id"],
+            "base_version": review["base_version"],
+            "confirmed": True,
+        },
+    )
+    # The server binds the receipt to exact cases, policy, feed and administrator.
+    response.raise_for_status()
+    return response.json()
+
+
+def replay(client: httpx.Client, token: str) -> dict:
+    base = read_policy(client, token)
+    suite = client.get(
+        "/api/admin/semantic/tests",
+        headers={"Authorization": "Bearer " + token},
+    )
+    suite.raise_for_status()
+    response = client.post(
+        "/api/admin/semantic/tests/replay",
+        headers={"Authorization": "Bearer " + token},
+        json={
+            "base_version": base["version"],
+            "suite_digest": suite.json()["suite_digest"],
+        },
+    )
+    response.raise_for_status()
     return response.json()
 
 
@@ -108,33 +111,39 @@ def main() -> None:
     parser.add_argument(
         "--credentials", type=Path, default=Path("state/credentials.json")
     )
-    parser.add_argument("--activate", action="store_true")
+    actions = parser.add_mutually_exclusive_group()
+    actions.add_argument("--activate", action="store_true")
+    actions.add_argument("--replay-tests", action="store_true")
     args = parser.parse_args()
     token = admin_token(args.credentials)
     with httpx.Client(
-        base_url=args.url, timeout=120, trust_env=False
+        base_url=args.url, timeout=130, trust_env=False
     ) as client:
-        base, candidate, results = prepare(client, token)
-        print(
-            "".join(
-                difflib.unified_diff(
-                    yaml.safe_dump(base, sort_keys=False).splitlines(
-                        keepends=True
-                    ),
-                    yaml.safe_dump(candidate, sort_keys=False).splitlines(
-                        keepends=True
-                    ),
-                    fromfile="active-policy.yaml",
-                    tofile="candidate-policy.yaml",
-                )
+        if args.replay_tests:
+            result = replay(client, token)
+            print(json.dumps(result, indent=2))
+            if not result["tests_passed"]:
+                raise SystemExit(2)
+            return
+        review = prepare(client, token)
+        print(review["yaml_diff"])
+        print(json.dumps(review["cases"], indent=2))
+        if not review["tests_passed"]:
+            print(
+                "Expectations failed or assessment incomplete. Nothing activated."
             )
-        )
-        print(json.dumps(results, indent=2))
+            raise SystemExit(2)
         if args.activate:
-            print(json.dumps(activate(client, token, base, candidate, results)))
+            result = activate(client, token, review)
+            print(json.dumps(result))
+            if not result.get("tests_saved", False):
+                print(
+                    "Policy activated, but tests were not saved. Do not repeat activation."
+                )
+                raise SystemExit(2)
         else:
             print(
-                "Preview only. Review the diff; rerun with --activate to apply."
+                "Review only. Inspect the diff; rerun with --activate to apply."
             )
 
 

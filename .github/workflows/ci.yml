@@ -39,6 +39,7 @@ jobs:
       - name: Exercise the management console in Chromium
         run: |
           uv run --locked --with playwright==1.63.0 python evaluation/smoke_console.py --output state/private/console-browser.json
+          uv run --locked --with playwright==1.63.0 python -m evaluation.smoke_semantic_review --output state/private/semantic-review-browser.json
           uv run --locked --with playwright==1.63.0 python evaluation/smoke_playground_models.py --output state/private/model-browser.json
           uv run --locked --with playwright==1.63.0 python evaluation/smoke_audit_ui.py --output state/private/audit-browser.json
       - name: Build documentation without publishing unreleased changes

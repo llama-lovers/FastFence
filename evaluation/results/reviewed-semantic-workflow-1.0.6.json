@@ -1,0 +1,67 @@
+{
+  "version": "1.0.6",
+  "installation": "candidate_wheel",
+  "site_packages_verified": true,
+  "assessor": "real_laya/qwen3:4b",
+  "activation_version": 2,
+  "tests_saved": true,
+  "suite_mode": "0600",
+  "reused_receipt_rejected": true,
+  "replay_passed": true,
+  "replay_cases": 8,
+  "compound_tests_passed": false,
+  "failed_review_has_no_receipt": true,
+  "no_business_upstream_executed": true,
+  "semantic_attempts": 44,
+  "limitations": [
+    "Small synthetic workflow verification, not an accuracy or capacity benchmark.",
+    "The compound-rule candidate was not activated, regardless of observed classifications."
+  ],
+  "positive_review_cases": 8,
+  "positive_review_passed": 8,
+  "compound_rule_cases": [
+    {
+      "id": "joint",
+      "direction": "input",
+      "target": "model",
+      "expected": "blocked",
+      "before": {
+        "status": "evaluated",
+        "decision": "no_semantic_block",
+        "semantic_score": 0.0,
+        "latency_ms": 427,
+        "reason": null
+      },
+      "after": {
+        "status": "evaluated",
+        "decision": "no_semantic_block",
+        "semantic_score": 0.0,
+        "latency_ms": 969,
+        "reason": null
+      },
+      "passed": false
+    },
+    {
+      "id": "name-only",
+      "direction": "input",
+      "target": "model",
+      "expected": "no_semantic_block",
+      "before": {
+        "status": "evaluated",
+        "decision": "no_semantic_block",
+        "semantic_score": 0.0,
+        "latency_ms": 902,
+        "reason": null
+      },
+      "after": {
+        "status": "evaluated",
+        "decision": "no_semantic_block",
+        "semantic_score": 0.0,
+        "latency_ms": 960,
+        "reason": null
+      },
+      "passed": true
+    }
+  ],
+  "reproduction": "Run the downloadable semantic_policy.py review/activate/replay example; this diagnostic additionally expands the financial examples to input/output and model/tool, then evaluates the documented full-name plus email limitation without activating it."
+}

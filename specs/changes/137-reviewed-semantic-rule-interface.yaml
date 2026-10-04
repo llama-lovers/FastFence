@@ -1,0 +1,52 @@
+id: FF-137
+title: Review expected semantic outcomes before receipt-bound activation
+status: verified
+problem: The named Laya rule editor accepted any single-sample result, collapsed broad scopes and saved through the generic policy endpoint without a server-side regression gate.
+scope:
+  - Replace single-sample authoring with explicit blocked and permitted example lists expanded into all selected direction and target scopes.
+  - Show semantic before/after outcomes, expected decisions, errors, latency, saved regressions and exact policy diff before explicit confirmation.
+  - Activate only through the reviewed semantic receipt endpoint, with stale response and identity protection.
+  - Load saved cases without flattening their scopes and provide an explicit replacement action and non-mutating replay.
+  - Exercise actual Chromium against both controlled API fixtures and a real local HTTP gateway with an explicit scanner fixture.
+constraints:
+  - Preserve deterministic content rule and local policy authoring workflows.
+  - Never persist samples or bearer tokens in browser storage; no inference during UI verification.
+  - Reject failed, missing, expired, stale or mismatched review results; disable duplicate submissions while busy.
+  - Keep submitted sample content and expected outcomes unchanged after failed evaluation.
+  - Distinguish already activated policy from failed suite persistence and failed workspace refresh.
+change_paths:
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/app/interfaces/http/web/policy-manager.js
+  - src/fastfence/app/interfaces/http/web/semantic-review.js
+  - src/fastfence/app/interfaces/http/web/semantic-regressions.js
+  - src/fastfence/app/interfaces/http/web/console.css
+  - tests/integration/test_policy_management_ui.py
+  - tests/integration/test_semantic_review_ui.py
+  - evaluation/smoke_console.py
+  - evaluation/semantic_review_browser.py
+  - evaluation/smoke_playground_models.py
+  - evaluation/smoke_semantic_review.py
+  - .github/workflows/ci.yml
+acceptance:
+  - Both directions and all targets produce four scoped cases per example, and more than sixteen submitted cases are rejected before requests.
+  - Every submitted and inherited case must pass, with no missing active-rule coverage, before a current receipt plus explicit confirmation can activate.
+  - Rule, expectation, scope, identity or active configuration changes invalidate receipts and late responses cannot restore stale approval.
+  - Backend failures preserve form values; missing or false tests_saved produces an explicit warning after successful activation.
+  - Existing saved samples retain exact scopes until explicit replacement; replay never changes active policy.
+  - Desktop and mobile show readable expected, active and proposed results without page overflow.
+validation:
+  - command: uv run pytest --no-cov -q tests/integration/test_semantic_review_ui.py tests/integration/test_policy_management_ui.py tests/integration/test_anonymization_authoring_ui.py
+    expected: Browser lifecycle and previous deterministic authoring protections pass.
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output state/private/semantic-review-console.json --screenshots state/private/semantic-review-console
+    expected: Controlled browser checks pass without inference.
+  - command: uv run --with playwright==1.63.0 python -m evaluation.smoke_semantic_review --output state/private/semantic-review-real-http.json --screenshots state/private/semantic-review-real-http
+    expected: Actual HTTP routes, static assets, scope coverage, activation, saved cases and replay work with only the classifier mocked.
+evidence:
+  - check: Focused interface regression tests
+    result: All four Node-backed tests passed for reviewed semantic rule lifecycle, previous policy management and anonymization authoring. They cover exact scoped mappings, inherited and missing cases, failed review draft preservation, explicit confirmation, receipt invalidation, stale responses, identity changes and receipt-only activation.
+  - check: Actual Chromium with controlled API fixtures
+    result: All 32 console check groups passed with no model calls, including saved scope preservation, expected-outcome gates, replay without activation, desktop and mobile rendering, and existing navigation, metrics and authoring behavior.
+  - check: Actual Chromium through real local HTTP routes
+    result: All nine checks passed against an isolated Uvicorn application with only the scanner replaced by a deterministic fixture. The browser reviewed eight input/output model/tool cases, activated the exact receipt, loaded saved scopes, reassessed before and after, and replayed through the actual semantic/tests/replay route. There were 32 fixture assessments, zero actual model calls, no generic policy PUT and no browser storage. Desktop and mobile screenshots were inspected; saved cases are collapsed by default and result cells use labelled mobile cards.
+  - check: Targeted Python source checks
+    result: Ruff check and format verification passed for all six affected Python test and evaluation files. The parent performs the final repository-wide hooks and complete suite.

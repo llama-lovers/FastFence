@@ -106,3 +106,16 @@ Each business-model HTTP adapter reuses a pool of up to **32 connections** and a
 The local Laya worker evaluates **one assessment at a time**, with at most **32 active or waiting assessments**. Queue time also counts toward the configured semantic timeout. Requests beyond these limits fail closed; increasing the account registry does not change them. A protected chat can require input assessment, model generation and output assessment, so account count is not a throughput estimate.
 
 A burst of 1000 concurrent conversations on one local model is not a supported capacity claim. Measure the complete application/gateway/model path with your prompt sizes, expected output lengths and both allowed and blocked traffic. The [benchmarks](benchmarks.md) separate local controls from inference; they are not a multi-user service SLO.
+
+## Reviewed semantic activation
+
+Use these management-only endpoints for a server-enforced expectations gate:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/admin/semantic/review` | Compare active and proposed semantic policies on explicit expected outcomes and saved regressions; issue a bounded, expiring receipt only on success. |
+| `POST /api/admin/semantic/activate` | Confirm and activate exactly the candidate bound to the successful receipt. |
+| `GET /api/admin/semantic/tests` | Read the private saved suite, its digest and applicability status. |
+| `POST /api/admin/semantic/tests/replay` | Assess saved expectations against the current policy, without activation. |
+
+The [complete runnable example](examples/semantic-policy.md) includes review, explicit activation and saved-suite replay. Requests and responses are documented in `/docs` on your running gateway. The legacy single-sample `/semantic/preview` endpoint remains a diagnostic; it never grants an activation receipt. These evaluations cover the semantic layer, not business tools, identity budgets or deterministic guardrails. Direct administrative policy edits remain outside the reviewed-activation gate.

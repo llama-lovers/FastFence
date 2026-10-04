@@ -49,15 +49,17 @@ Zaufane pole `semantic.instructions` dodaje wytyczne w języku naturalnym. Do ś
 1. Otwórz **Policies → Add Laya rule**.
 2. Ustaw **Rule ID** na `no-personal-investment-advice`, a **Your rule** na: `Block personalized recommendations to buy or sell a specific investment. Allow general explanations of financial concepts.`
 3. Wybierz **Input only** i **Models**.
-4. Wpisz `Tell me which stock I should buy with my retirement savings.` jako próbkę. Kliknij **Test with Laya**. Sprawdź decyzję, model, zakres, poziom zagrożenia i czas. Jest to rzeczywiste wnioskowanie oceniające; chroniony model wykonujący zadanie jeszcze nie został wywołany.
-5. Zastąp próbkę przez `Explain what portfolio diversification means.` i sprawdź ponownie. Porównaj wyniki ze swoją intencją. Klasyfikacja semantyczna jest przybliżona; zapisuj pominięcia i zbyt szerokie blokady zamiast zakładać, że przykłady gwarantują wynik.
-6. Kliknij **Review policy change**, a potem **Review changes** w oknie ustawień. Sprawdź dokładną instrukcję, zakres `input`/`model` i ustawienia dostawcy. Potwierdź przegląd i kliknij **Activate policy**.
+4. W **Must be blocked** wpisz `Tell me which stock I should buy with my retirement savings.`. W **Must pass semantic analysis** wpisz `Explain what portfolio diversification means.`. Każda niepusta linia to osobny syntetyczny przykład z oczekiwaniem ustalonym przez Ciebie.
+5. Kliknij **Review with Laya**. Porównaj **Expected**, **Active policy**, **Proposed policy** i wynik dla każdego zakresu. Są to rzeczywiste oceny modelu; chroniony model biznesowy ani narzędzie nie są wywoływane. Rozbieżność lub brak oceny blokuje kontrolowaną aktywację.
+6. Przeczytaj **Exact policy change**, potwierdź sprawdzenie oczekiwań, wyników i zakresu, następnie kliknij **Activate reviewed rule**. Serwer przyjmuje wyłącznie dokładny, pomyślny i niewygasły test należący do Twojej tożsamości administracyjnej.
 7. Potwierdź wzrost aktywnej wersji i obecność reguły na liście. W **Test requests** wyślij te same wejścia przez chroniony model; sprawdź wyniki etapów wejścia/wyjścia i **Activity**.
 8. Użyj **Edit rule**, aby zmienić regułę, ponownie ją przetestować i przejrzeć, albo **Remove…**, aby sprawdzić jej usunięcie przed aktywacją.
 
 Testowanie nie zapisuje kandydata ani nie wykonuje narzędzia biznesowego. Ocenia kandydata razem z istniejącymi właściwymi regułami semantycznymi i globalnymi instrukcjami bezpieczeństwa. Ocena nie wskazuje, która pojedyncza reguła spowodowała wynik. **NO SEMANTIC BLOCK** nie gwarantuje, że dostęp, budżet, prywatność lub inne kontrole dopuszczą rzeczywiste żądanie.
 
-Dla **Input and output** okno testuje **input**; dla **Models and tools** testuje treść **model**. Zakres wyjścia trzeba sprawdzić osobno. Użyj [API podglądu](integration-reference.md#test-a-named-laya-rule), aby wybrać konkretny kierunek i cel bez zmieniania aktywnej konfiguracji. Nieudany podgląd lub zmiana próbki/reguły wyłącza przegląd do czasu pomyślnego ponownego testu.
+Dla **Input and output** i **Models and tools** każdy przykład jest sprawdzany we wszystkich czterech zakresach. Każdy zakres wymaga zarówno przykładu blokowanego, jak i dozwolonego. Zapisane przypadki pozostałych aktywnych reguł też są sprawdzane, aby wykryć regresje. Edycja reguły, próbek lub tożsamości unieważnia test; zmiana polityki, feedu albo zapisanego zestawu dodatkowo unieważnia aktywację na serwerze.
+
+Użyj **Replay saved semantic tests** w Policies, aby ponownie uruchomić prywatny zestaw `config/semantic-policy-tests.yaml` na bieżącej polityce, bez aktywacji. Zobacz [działający przykład sprawdzania i ponawiania testów](examples/semantic-policy.md#saved-cases-and-replay). Poprawny test potwierdza te przykłady, a nie gwarantuje wyniku dla nieznanych promptów. Zwykła administracyjna edycja YAML i ogólny endpoint polityk nie wymuszają tej ścieżki kontrolowanej aktywacji.
 
 ## Opisz szybką regułę deterministyczną {#describe-a-fast-deterministic-rule}
 

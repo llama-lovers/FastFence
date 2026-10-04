@@ -1,0 +1,37 @@
+id: FF-139
+title: Document and execute server-reviewed semantic regression workflows
+status: implemented
+problem: The downloadable semantic example used a single-sample endpoint and client-side checks followed by a generic policy PUT, so its approval checks were not enforced by the server.
+scope:
+  - Use bounded multi-case semantic review and the server-issued one-use receipt for explicit activation.
+  - Expand examples across all configured input/output and model/tool scopes.
+  - Provide replay of saved semantic YAML cases through the same downloadable example.
+  - Explain expectations, before-after results, stale review rejection, saved cases and limits in English and Polish.
+constraints:
+  - Use the public package and actual HTTP endpoints; never substitute heuristic classifiers in the example.
+  - Demonstrate with synthetic samples and never print management credentials.
+  - Keep the known compound-rule limitation explicit; a successful review proves only the supplied cases.
+  - Explain that generic administrative policy PUT and file edits are separate operator paths, outside reviewed activation.
+  - Distinguish activated policy with failed test-file persistence from failed activation.
+change_paths:
+  - examples/docs/semantic_policy.py
+  - docs/examples/semantic-policy.md
+  - docs/examples/semantic-policy.pl.md
+  - docs/integration-reference.md
+  - docs/integration-reference.pl.md
+  - docs/manual-testing.md
+  - docs/manual-testing.pl.md
+  - tests/integration/test_documentation_examples.py
+acceptance:
+  - The example cannot activate without a successful server review and valid receipt.
+  - Failed expectations, stale configuration and unavailable inference never result in activation.
+  - Saved-suite replay does not mutate policy and returns a failing exit status for unsuccessful tests.
+  - EN/PL documentation and downloadable source describe the same runnable workflow.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/integration/test_documentation_examples.py tests/unit/test_documentation_downloads.py
+    expected: Actual gateway transport and downloadable-example tests pass.
+  - command: uv run --locked mkdocs build --strict
+    expected: Bilingual documentation builds without broken references.
+evidence:
+  - check: Documentation client and download verification
+    result: Eleven tests passed against actual gateway transports with explicit controlled assessor fixtures; strict bilingual MkDocs build passed. Real model and installed-package verification remain separate release checks.

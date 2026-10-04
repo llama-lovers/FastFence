@@ -1,0 +1,47 @@
+id: FF-138
+title: Preserve private semantic regression suites and replay active policy
+status: verified
+problem: Reviewed semantic samples need durable private storage and repeatable evaluation, including regressions from other saved active rules, without accidental activation or losing concurrent operator edits.
+scope:
+  - Store versioned reviewed rule cases and policy/model provenance in config/semantic-policy-tests.yaml.
+  - Expose management-only suite retrieval and nonactivating replay through the real semantic scanner.
+  - Merge saved active-rule cases into candidate reviews and preserve inactive originals with explicit warnings.
+  - Integrate bounded serialization and writable-directory preflight before policy publication, followed by conflict-checked atomic private suite replacement.
+constraints:
+  - Pydantic models only; fixed local path, no database and no invocation-path file access.
+  - Maximum 65536 file bytes, 64 stored/merged cases, and 16 cases per submitted rule.
+  - Share the review singleflight gate and 120-second deadline; comparison permits at most 128 assessments and replay at most 64.
+  - Saved files and temporary writes use mode 0600; reject symlinks, special files, public permissions, aliases, deep nesting and duplicate YAML keys.
+  - Original case text is available only through authenticated management APIs and is absent from replay results, audit records and errors.
+  - Conflicting expected decisions for identical text, direction and target across active rule suites are rejected before inference; identical expectations retain separate rule provenance.
+  - Missing legacy suites produce untested_rule warnings, never implied coverage; invalid saved scope blocks review until that rule is repaired.
+  - Policy and suite writes are not one transaction. A postactivation save failure explicitly returns the activated policy version and tests_saved false without rollback claims.
+  - External file edits are digest-bound and rechecked immediately before replacement; preserve them on conflict.
+change_paths:
+  - .gitignore
+  - src/fastfence/app/interfaces/http/semantic_suite_records.py
+  - src/fastfence/app/interfaces/http/semantic_suite_store.py
+  - src/fastfence/app/interfaces/http/semantic_suite_yaml.py
+  - src/fastfence/app/interfaces/http/semantic_suites.py
+  - tests/fixtures/semantic_suites.py
+  - tests/unit/test_semantic_suite_store.py
+  - tests/integration/test_semantic_saved_suites.py
+acceptance:
+  - Reviewed activation preserves other original suites and reports whether private tests were actually saved.
+  - A new rule whose cases pass cannot activate when a saved active rule regresses.
+  - Two preexisting rules without suites can acquire reviewed suites one at a time with explicit untested-rule warnings.
+  - Replay never invokes a business model/tool, activates policy, or counts inactive or failed cases as passes.
+  - Malformed, oversized, changed or unsafe files fail with bounded reads and static private-safe responses.
+  - Concurrent file edits after policy publication are preserved and reported as a partial save, including the active policy version.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_semantic_suite_store.py tests/integration/test_semantic_saved_suites.py tests/integration/test_semantic_review.py
+    expected: Storage, replay, migration, receipt integration and failure regressions pass without real model calls.
+  - command: uv run --locked basedpyright src/fastfence/app/interfaces/http/semantic_suite_records.py src/fastfence/app/interfaces/http/semantic_suite_store.py src/fastfence/app/interfaces/http/semantic_suite_yaml.py src/fastfence/app/interfaces/http/semantic_suites.py
+    expected: No type errors.
+  - command: uv run --locked lint-imports
+    expected: Architectural boundaries remain valid.
+evidence:
+  - check: Deterministic lifecycle and management-route regressions
+    result: All 70 storage, replay and review tests passed, including migration of two legacy rules, actual postpublication file races, other-rule-only regression failure, malformed private files, bounded capacity, cross-rule contradictory expectations rejected before inference and matching duplicate expectations retained for provenance. Scanner fixtures exercise orchestration and do not claim model accuracy.
+  - check: Static boundaries
+    result: Targeted basedpyright returned zero errors and warnings, Ruff passed, and all 16 import-linter contracts were kept. No business calls or live model inference were used.

@@ -238,3 +238,7 @@ state/
 # Python build artifacts
 dist/
 *.egg-info/
+
+# Private reviewed semantic examples (may contain original user data)
+/config/semantic-policy-tests.yaml
+/config/.semantic-tests-*

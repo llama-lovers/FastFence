@@ -62,6 +62,8 @@ def install_fixture(page, root, status, calls):
             "console.js",
             "console.css",
             "policy-manager.js",
+            "semantic-review.js",
+            "semantic-regressions.js",
             "policy-panels.html",
             "logo.svg",
         }:

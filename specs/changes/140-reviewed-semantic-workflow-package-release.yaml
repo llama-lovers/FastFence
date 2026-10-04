@@ -1,0 +1,36 @@
+id: FF-140
+title: Release the reviewed semantic workflow with installed-package evidence
+status: implemented
+problem: The semantic review UI, API and saved suite must work together from the public distribution, rather than only inside the development checkout.
+scope:
+  - Build and verify version 1.0.6 outside the checkout with private isolated operator state.
+  - Exercise real Laya review, explicit activation and replay through actual HTTP.
+  - Verify failed expectations do not create an activatable receipt.
+  - Publish only after complete tests, browser checks, quality hooks and package validation.
+constraints:
+  - Preserve existing release tags, operator configuration and keys.
+  - Do not claim the workflow fixes classifier accuracy or raises local inference capacity.
+  - Keep management evaluation and its private YAML off the protected invocation path.
+  - Verify public PyPI and versioned bilingual documentation before claiming release completion.
+change_paths:
+  - _version.py
+  - uv.lock
+  - evaluation/results/reviewed-semantic-workflow-1.0.6.json
+acceptance:
+  - The exact installed wheel passes regression and genuine model workflow checks.
+  - Actual dashboard browser interactions use existing endpoints and reject failed or stale reviews.
+  - Release CI, public-package smoke checks and documentation deployment pass.
+validation:
+  - command: uv run --locked pytest -q --tb=short
+    expected: All regression tests pass with the configured coverage gate.
+  - command: uv run --locked pre-commit run --all-files
+    expected: All configured quality gates pass.
+  - command: uv run --locked mkdocs build --strict
+    expected: EN/PL documentation and downloadable examples build consistently.
+evidence:
+  - check: Complete source and installed candidate tests
+    result: 1408 source tests passed with 93.22 percent coverage. The isolated installed wheel passed 253 security, capacity and semantic-review regressions plus all 36 unchanged external chat tests. Standard installed-wheel startup smoke passed.
+  - check: Actual installed Laya workflow
+    result: Eight scoped financial examples passed review, exact receipt activation saved a private suite with mode 0600, repeated activation was rejected and all eight saved cases passed replay. A compound name/email miss produced failed review with no activation receipt; the candidate was never activated. There were 44 assessment attempts and no business upstream execution; this is workflow evidence rather than a model-accuracy benchmark.
+  - check: Browser and documentation
+    result: Chromium passed 32 controlled console groups and nine checks against actual gateway HTTP with only the classifier mocked. Desktop and mobile results were inspected. Strict bilingual documentation build passed; publication remains pending the release workflow.

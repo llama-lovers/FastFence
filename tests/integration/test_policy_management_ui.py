@@ -58,18 +58,6 @@ await vm.runInContext(`(async()=>{
  assert.equal($('activateTextRule').disabled,true);$('textRuleReviewed').checked=true;$('textRuleReviewed').onchange();
  assert.equal($('activateTextRule').disabled,false);listeners.get('fastfence:identity').forEach(fn=>fn());
  assert.equal(previewedRule,null);assert.equal(ruleBase,null);assert.equal($('activateTextRule').disabled,true);
- api=async()=>status;await openLayaRule();
- $('layaRuleId').value='financial-advice';$('layaRuleInstruction').value='Block personalized investment recommendations';
- $('layaRuleDirection').value='input';$('layaRuleTarget').value='model';$('layaRuleSample').value='Buy this stock';
- api=async(path,token,body)=>({decision:'blocked',semantic_score:1,provider:'laya',model:'qwen3:4b',rule_applied:true,base_version:7,latency_ms:20});
- await $('layaRuleTest').onclick();assert.equal($('reviewLayaRule').disabled,false);
- assert.equal(layaRulePreview.instruction,'Block personalized investment recommendations');
- invalidateLayaRuleTest();assert.equal($('reviewLayaRule').disabled,true);
- await $('layaRuleTest').onclick();api=async()=>status;await $('reviewLayaRule').onclick();
- assert.equal($('policyJsonMode').checked,false);assert.equal($('policyAdvanced').open,false);
- $('policyReview').onclick();assert.equal(policyCandidate.semantic.rules[0].id,'financial-advice');
- assert.equal(policyCandidate.semantic.provider,'laya');assert.equal(policyCandidate.semantic.timeout_ms,30000);
- assert.equal(policyCandidate.version,8);
 
 })()`,context);
 """
