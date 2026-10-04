@@ -318,3 +318,27 @@ block prevents upstream execution; an output block withholds delivery after the
 upstream has already run. Match the request ID and policy version when comparing
 before/after results. Audit contains metadata only;
 it must not contain prompts, OCR text, original names or recovery tokens.
+
+### Model queue capacity
+
+`model_capacity_exceeded` means a local model queue is full: Laya admits at most
+32 active and waiting assessments per scanner; each pooled model HTTP adapter
+admits at most 128 requests, with 32 connections. The request fails closed and
+the OpenAI-compatible endpoint returns HTTP 503. Input assessment rejection
+prevents the business model from running; output assessment rejection withholds
+an already generated answer. These limits are separate from identity budgets.
+
+Reduce caller concurrency. Retry only when the operation is safe to repeat or
+`upstream_executed` is false, with bounded attempts, backoff and jitter. An output
+assessment can fail after a tool has already produced side effects.
+Do not disable semantic checks to clear the queue. A capacity rejection charges
+the request count, local input processing, elapsed time and any completed model
+or assessment work; it does not charge inference that was never admitted. A
+business-model admission refusal has `upstream_executed=false` and zero business
+cost. Output assessment refusal preserves completed upstream usage and cost.
+Semantic call counters include attempted assessments, including admission refusal.
+`model_unavailable_fail_closed`
+continues to indicate an unavailable provider or invalid response; an admitted
+request that times out is not classified as a full queue. Compare the reason and
+the input/output stage statuses in Activity; capacity failures count as errors,
+not content-policy blocks. Readiness checks prerequisites, not spare queue slots.

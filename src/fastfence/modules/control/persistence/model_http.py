@@ -6,6 +6,10 @@ from typing import Any
 
 import httpx
 
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+)
+
 MAX_CONNECTIONS = 32
 MAX_PENDING_REQUESTS = 128
 MAX_RESPONSE_BYTES = 262_144
@@ -50,8 +54,10 @@ class ModelHTTP:
         headers: dict[str, str] | None = None,
         max_response_bytes: int = MAX_RESPONSE_BYTES,
     ) -> httpx.Response:
-        if self._closed or self._pending >= MAX_PENDING_REQUESTS:
+        if self._closed:
             raise RuntimeError("Model transport unavailable")
+        if self._pending >= MAX_PENDING_REQUESTS:
+            raise ModelCapacityExceededError("Model capacity exceeded")
         self._pending += 1
         try:
             async with asyncio.timeout(timeout_ms / 1000):

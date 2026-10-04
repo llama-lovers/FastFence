@@ -1,0 +1,46 @@
+id: FF-133
+title: Distinguish local model queue saturation from provider failure
+status: implemented
+problem: Exhausting either the 32-assessment Laya queue or the 128-request model HTTP admission limit produced the same generic unavailable-model reason as installation and provider failures, obscuring the appropriate operator response.
+scope:
+  - Raise a typed domain capacity exception only when local admission is full and preserve it through all built-in model and semantic adapters.
+  - Report model_capacity_exceeded through the existing error verdict and OpenAI-compatible HTTP 503 response.
+  - Explain capacity separately from provider failure in the operator guide and playground.
+constraints:
+  - Preserve fail-closed behavior, queue limits, deadlines, cancellation isolation and conservative reservation accounting for unknown provider failures.
+  - For typed pre-admission failure, charge only local processing and completed stages, with no unused inference allocation or unexecuted business cost.
+  - Closed clients, invalid responses and admitted timeouts must not be reclassified as capacity rejection.
+  - Input semantic rejection never executes the business model, and output rejection never delivers generated content.
+  - Expose only static reasons, never queue payloads, credentials or raw provider errors.
+change_paths:
+  - src/fastfence/modules/control/domain/exceptions.py
+  - src/fastfence/modules/control/persistence/model_http.py
+  - src/fastfence/modules/control/persistence/laya_semantic.py
+  - src/fastfence/modules/control/persistence/models.py
+  - src/fastfence/modules/control/persistence/openai_models.py
+  - src/fastfence/modules/control/application/services/engine.py
+  - src/fastfence/modules/control/application/services/execution.py
+  - src/fastfence/app/interfaces/http/web/playground.js
+  - tests/unit/test_model_http_pool.py
+  - tests/unit/test_laya_concurrency.py
+  - tests/unit/test_semantic_restoration.py
+  - tests/integration/test_model_capacity.py
+  - docs/manual-testing.md
+  - docs/manual-testing.pl.md
+acceptance:
+  - Native Ollama, OpenAI-compatible models and Laya, Ollama and Kev scanners preserve typed capacity failure.
+  - Full local queues produce HTTP 503 with model_capacity_exceeded and no request or response content.
+  - Input, business and output saturation settle the invocation exactly once, release inflight reservations and remain errors rather than policy blocks in telemetry.
+  - Input and business admission refusal leave upstream_executed false; business refusal clears unconsumed cost and preserves earlier semantic usage.
+  - Output and restored-output admission refusal retain completed upstream cost and usage plus earlier semantic assessments, without charging unexecuted assessments or overriding usage with the full reservation.
+  - Existing cancellation, timeout, response validation, budget and telemetry regressions pass without inference.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/integration/test_model_capacity.py tests/unit/test_laya_concurrency.py tests/unit/test_model_http_pool.py tests/integration/test_model_http_connections.py tests/integration/test_failed_provider_accounting.py tests/unit/test_models.py tests/unit/test_openai_upstream.py tests/unit/test_ollama_response.py tests/unit/test_semantic_severity.py tests/unit/test_semantic_v2_protocol.py tests/integration/test_openai.py tests/unit/test_budgets.py tests/unit/test_telemetry_classification.py tests/unit/test_request_path_metrics.py tests/unit/test_semantic_restoration.py
+    expected: Capacity distinction and existing privacy, lifecycle, accounting and HTTP regressions pass.
+evidence:
+  - check: Focused regression verification
+    result: All 224 tests passed in 1.60 seconds, including all five built-in adapter paths, real in-process HTTP 503 for input/business/output saturation, sanitized audit, error counters and released inflight slots. Exact accounting checks cover business refusal after completed input analysis and restored-output refusal after input7 plus business100 plus first-output11 units, retaining118 units and123 microusd only for completed work. No inference or load benchmark was run.
+  - check: Runtime source checks
+    result: Ruff passed, basedpyright reported zero diagnostics, architecture passed for 270 Python files and complexity/dead-code/dependency checks passed.
+  - check: Documentation and affected hooks
+    result: Strict bilingual MkDocs build passed in an isolated private output directory. All applicable source, formatting, secrets, architecture and type hooks passed after the accounting refinement. The global spec hook awaits completion of the separately owned in-progress FF135 release specification; FF133 validates independently.

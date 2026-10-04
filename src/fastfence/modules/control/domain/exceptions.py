@@ -10,6 +10,10 @@ class ModelUnavailableError(Exception):
     """Model provider failed; its raw error must not be sent to callers."""
 
 
+class ModelCapacityExceededError(ModelUnavailableError):
+    """Local bounded model admission rejected work before transport execution."""
+
+
 class RejectedError(Exception):
     def __init__(self, reason: str, findings: list[str] | None = None) -> None:
         super().__init__(reason)

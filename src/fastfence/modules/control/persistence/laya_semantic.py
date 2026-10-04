@@ -12,7 +12,10 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, StrictInt
 
-from fastfence.modules.control.domain.exceptions import ModelUnavailableError
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+    ModelUnavailableError,
+)
 from fastfence.modules.control.domain.models import SemanticConfig
 from fastfence.modules.control.persistence.semantic_severity import (
     OLLAMA_SYSTEM,
@@ -65,8 +68,10 @@ class LayaSemantic:
     async def assess(
         self, text: str, config: SemanticConfig
     ) -> tuple[float, int]:
-        if self._closed or self._pending >= MAX_PENDING_ASSESSMENTS:
+        if self._closed:
             raise ModelUnavailableError("Laya semantic scanner unavailable")
+        if self._pending >= MAX_PENDING_ASSESSMENTS:
+            raise ModelCapacityExceededError("Model capacity exceeded")
         if len(text.encode()) > 65_536:
             raise ValueError("Semantic input exceeds capacity")
         # Admission is atomic within the event loop; at most 31 requests can wait

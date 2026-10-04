@@ -1,0 +1,36 @@
+id: FF-134
+title: Record why a separate semantic policy assessment was not adopted
+status: verified
+problem: Separating compliance from the combined security prompt appeared promising in four earlier examples but had not been checked against the wider compound-policy cases and new held-out inputs.
+scope:
+  - Append outcome-only results for 25 real Laya cases using public FastFence 1.0.4 and private diagnostic code.
+  - Record separate compliance, unchanged base-security and combined decisions, including eight new held-out cases.
+  - Explain in both language guides that the additional inference was not released.
+constraints:
+  - No additional production inference, runtime code, configuration or model-default changes.
+  - Keep earlier public 1.0.3 and experimental results intact and clearly separated.
+  - Publish no raw prompts, model responses, credentials or filesystem paths.
+  - Treat token and latency observations as a small diagnostic, not a controlled benchmark or broad accuracy claim.
+change_paths:
+  - evaluation/results/semantic-compound-policy-evaluation.json
+  - docs/examples/semantic-policy.md
+  - docs/examples/semantic-policy.pl.md
+acceptance:
+  - The follow-up identifies public package 1.0.4 and states the two-stage diagnostic was not shipped.
+  - Counts show policy-only 19/25, unchanged security 25/25, combined 20/25 and new held-out combined 7/8.
+  - The report preserves actual 50 inference calls, 15558 reported tokens and zero observed protocol errors without exposing model response text.
+  - Documentation explains the unresolved misses and extra cost while preserving the existing guard.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_documentation_downloads.py tests/unit/test_documentation_highlighting.py
+    expected: Documentation source and downloadable example checks pass.
+  - command: uv run --locked mkdocs build --strict
+    expected: English and Polish guides build successfully.
+  - command: uv run --locked pre-commit run --files evaluation/results/semantic-compound-policy-evaluation.json docs/examples/semantic-policy.md docs/examples/semantic-policy.pl.md specs/changes/134-dedicated-policy-assessment-evidence.yaml
+    expected: Applicable formatting, secret and specification checks pass.
+evidence:
+  - check: Completed real Laya policy-only plus unchanged security diagnostic
+    result: 50 calls across 25 cases yielded compliance 19/25 with six false negatives, base security 25/25 and combined 20/25 with five false negatives. The eight new held-out cases yielded combined 7/8. No protocol errors occurred.
+  - check: Observed cost and deployment decision
+    result: The two stages reported 15558 total tokens and median combined elapsed time 1105.179ms for this diagnostic. The extra inference was not adopted, and runtime, model defaults and historical corpus scores remain unchanged.
+  - check: Documentation and report checks
+    result: All 11 documentation-download and highlighting tests passed, and the strict English/Polish build passed. Report confusion totals and held-out counts were checked against recorded case outcomes. Applicable pre-commit hooks passed except the global spec gate, which encountered the concurrently incomplete FF135 release spec; FF134 was independently validated.

@@ -10,6 +10,9 @@ from fastfence.modules.anonymization.application.facade import (
     AnonymizationRuntime,
 )
 from fastfence.modules.control.application.services.engine import Engine
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+)
 from fastfence.modules.control.domain.models import (
     Assessment,
     Identity,
@@ -217,3 +220,26 @@ async def test_unchanged_output_skips_extra_scan(runtime):
     verdict = await invoke(runtime, invocation())
     assert verdict.output == {"text": "Hello"} and not verdict.restored
     assert runtime.scanner.assess.await_count == 2
+
+
+async def test_restoration_capacity_retains_only_completed_usage(runtime):
+    configure_policy(
+        runtime,
+        lambda data: data["models"]["qwen3:0.6b"].update(cost_microusd=123),
+    )
+    runtime.models.complete.return_value = ({"text": "ProjectHazel"}, 100)
+    runtime.scanner.assess.side_effect = [
+        Assessment(score=0, tokens=7),
+        Assessment(score=0, tokens=11),
+        ModelCapacityExceededError("Model capacity exceeded"),
+    ]
+    verdict = await invoke(runtime, invocation())
+    assert verdict.reason == "model_capacity_exceeded"
+    assert verdict.output is None and verdict.upstream_executed
+    assert verdict.tokens == 118 and verdict.cost_microusd == 123
+    assert verdict.semantic_input_status == "passed"
+    assert verdict.semantic_output_status == "error"
+    assert runtime.ledger.budgets()[0]["inflight"] == 0
+    assert runtime.ledger.budgets()[0]["tokens"] == 118
+    assert runtime.ledger.stats()["semantic_calls"] == 3
+    assert "ProjectHazel" not in json.dumps(runtime.ledger.audit())

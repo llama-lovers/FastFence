@@ -207,3 +207,28 @@ Przykład używa powyższej odwracalnej reguły osoby. Dla reguły litery a wywo
 ## Sprawdź aktywność żądań {#inspect-request-activity}
 
 Otwórz **Activity** i znajdź wynik po identyfikatorze żądania. Porównaj wersję polityki i źródła sygnatur, decyzję, powód, dopasowania i wykonanie upstream. Rozwiń każdy wiersz, aby porównać **Input text analysis** i **Output text analysis**: `passed` oznacza, że etap semantyczny wykonał się i dopuścił treść, `blocked` — że ją odrzucił, `error` — że ocena zakończyła się błędem, a `not_run` — że etap nie został osiągnięty. Blokada wejścia zapobiega wykonaniu upstream; blokada wyjścia zatrzymuje dostarczenie po jego wykonaniu. Porównując wyniki przed i po zmianie, dopasuj identyfikator żądania i wersję polityki. Audyt zawiera tylko metadane; nie może zawierać promptów, tekstu OCR, oryginalnych nazwisk ani tokenów odzyskiwania.
+
+### Pojemność kolejki modelu {#model-queue-capacity}
+
+`model_capacity_exceeded` oznacza pełną lokalną kolejkę: Laya dopuszcza najwyżej
+32 aktywne i oczekujące oceny na skaner, a każdy adapter HTTP modeli — najwyżej
+128 żądań przy 32 połączeniach. Żądanie kończy się odmową, a endpoint zgodny
+z OpenAI zwraca HTTP 503. Odrzucenie oceny wejścia zapobiega uruchomieniu modelu
+biznesowego; odrzucenie oceny wyjścia zatrzymuje już wygenerowaną odpowiedź.
+Te limity są niezależne od budżetów tożsamości.
+
+Zmniejsz współbieżność klienta. Ponawiaj tylko operacje bezpieczne do powtórzenia
+lub żądania z `upstream_executed=false`: ograniczoną liczbę razy, z rosnącym
+i losowo zróżnicowanym opóźnieniem. Ocena wyjścia może zawieść po wykonaniu
+narzędzia, które już zmieniło stan. Nie wyłączaj kontroli semantycznych, aby
+opróżnić kolejkę. Odrzucenie przy pełnej kolejce nalicza żądanie, lokalne
+przetwarzanie wejścia, czas i ukończoną pracę modeli lub ocen, ale nie nalicza
+inferencji, która nie została dopuszczona. Odmowa przyjęcia przez model biznesowy
+ustawia `upstream_executed=false` i zerowy koszt biznesowy; odmowa oceny wyjścia
+zachowuje zużycie i koszt ukończonego upstream. Licznik wywołań semantycznych
+obejmuje próby oceny, także odrzucone przed przyjęciem do kolejki.
+`model_unavailable_fail_closed` nadal oznacza niedostępnego dostawcę
+lub nieprawidłową odpowiedź; przekroczenie czasu dopuszczonego żądania nie oznacza
+pełnej kolejki. Porównuj powód i statusy etapów wejścia/wyjścia w Activity.
+Przepełnienie jest liczone jako błąd, a nie blokada treści. Readiness sprawdza
+wymagane komponenty, nie wolne miejsca w kolejce.

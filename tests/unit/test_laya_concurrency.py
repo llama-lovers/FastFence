@@ -5,7 +5,10 @@ import json
 
 import pytest
 
-from fastfence.modules.control.domain.exceptions import ModelUnavailableError
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+    ModelUnavailableError,
+)
 from fastfence.modules.control.domain.models import SemanticConfig, ToolCall
 from fastfence.modules.control.persistence.laya_semantic import (
     MAX_PENDING_ASSESSMENTS,
@@ -101,7 +104,7 @@ async def test_total_pending_is_bounded_and_cancellation_frees_every_slot(
     ]
     await asyncio.sleep(0)
     assert adapter._pending == MAX_PENDING_ASSESSMENTS
-    with pytest.raises(ModelUnavailableError, match="unavailable"):
+    with pytest.raises(ModelCapacityExceededError, match="capacity exceeded"):
         await adapter.assess("overflow", config())
     assert len(process.stdin.payloads) == 1
     for task in reversed(tasks):

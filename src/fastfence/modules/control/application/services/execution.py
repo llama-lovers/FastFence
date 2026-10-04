@@ -21,7 +21,10 @@ from fastfence.modules.control.contracts.ports import (
     SecretsPort,
     ToolsPort,
 )
-from fastfence.modules.control.domain.exceptions import RejectedError
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+    RejectedError,
+)
 from fastfence.modules.control.domain.models import (
     InvocationState,
     ModelMessage,
@@ -59,9 +62,14 @@ class Executor:
         self.ledger.record_semantic_call()
         status_field = f"semantic_{direction}_status"
         setattr(state.verdict, status_field, "error")
-        assessment = await asyncio.wait_for(
-            self.scanner.assess(text, config), config.timeout_ms / 1000
-        )
+        try:
+            assessment = await asyncio.wait_for(
+                self.scanner.assess(text, config), config.timeout_ms / 1000
+            )
+        except ModelCapacityExceededError:
+            # Admission refused before inference; earlier completed work remains.
+            state.tokens -= allocation
+            raise
         if assessment.tokens > allocation:
             raise RejectedError("semantic_usage_exceeded")
         state.tokens -= allocation - assessment.tokens
@@ -104,9 +112,15 @@ class Executor:
                     for message in prepared.payload["messages"]
                 ]
             completion = self.models.complete(*common, **options)
-            output, units = await asyncio.wait_for(
-                completion, timeout=prepared.rule.timeout_ms / 1000
-            )
+            try:
+                output, units = await asyncio.wait_for(
+                    completion, timeout=prepared.rule.timeout_ms / 1000
+                )
+            except ModelCapacityExceededError:
+                # Typed local admission failure proves no business model ran.
+                state.verdict.upstream_executed = False
+                state.cost = 0
+                raise
             if units > prepared.base_reserve:
                 state.tokens = state.reserved_tokens
                 raise RejectedError("model_usage_exceeded")

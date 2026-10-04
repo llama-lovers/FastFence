@@ -74,6 +74,8 @@ reviewed policy version.
 
 The local Qwen3:4b assessment has a reproduced false negative for a rule requiring **both a person's full name and an email address**: the combined input was allowed even though the named rule reached Laya correctly. A natural-language conjunction is not a reliable substitute for deterministic privacy controls. Keep applicable PII controls enabled and include combined, partial and exception cases in your preview tests; a passing example does not establish general detection accuracy.
 
+A subsequent diagnostic on public **1.0.4** tested a separate policy-only assessment followed by the unchanged security guard on 25 cases. Policy compliance was correct in **19/25** cases (six missed violations); the security guard was correct in **25/25**. Combining them yielded **20/25**, including **7/8** new held-out cases. The extra inference was **not shipped**: it still missed intended denials and added real token and execution cost. The released semantic runtime remains unchanged; these small diagnostic counts do not establish general accuracy.
+
 The same semantic configuration can also block content permitted by a literal rule because the layers enforce separate restrictions. Inspect the decision reason and input/output assessment results when a literal nonmatch is blocked.
 
 <!-- source: examples/docs/semantic_policy.py -->

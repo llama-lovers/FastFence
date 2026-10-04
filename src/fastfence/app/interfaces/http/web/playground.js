@@ -33,7 +33,7 @@ $('completionModel').onblur = () => syncPlaygroundModels(false);
 function renderVerdict(verdict, destination = 'result') {
   const container = $(destination);
   const color = verdict.decision === 'allowed' ? 'green' : verdict.decision === 'redacted' ? 'amber' : 'red';
-  const reasons = {controls_passed: 'Passed the active controls', input_text_rule: 'Blocked by an input content rule', output_text_rule: 'Output withheld by a content rule', input_signature: 'Blocked by a known threat signature', privacy_redacted: 'Sensitive content was transformed', semantic_input_risk: 'Blocked by semantic input analysis', semantic_output_risk: 'Output withheld by semantic analysis', model_unavailable_fail_closed: 'Model unavailable; request failed closed', tool_not_supported: 'No handler is connected for this tool'};
+  const reasons = {controls_passed: 'Passed the active controls', input_text_rule: 'Blocked by an input content rule', output_text_rule: 'Output withheld by a content rule', input_signature: 'Blocked by a known threat signature', privacy_redacted: 'Sensitive content was transformed', semantic_input_risk: 'Blocked by semantic input analysis', semantic_output_risk: 'Output withheld by semantic analysis', model_unavailable_fail_closed: 'Model unavailable; request failed closed', model_capacity_exceeded: 'Model queue full; request could not complete', tool_not_supported: 'No handler is connected for this tool'};
   container.replaceChildren(el('strong', verdict.decision.toUpperCase(), color),
     el('p', reasons[verdict.reason] || verdict.reason),
     el('p', 'Policy v' + verdict.policy_version + ' · feed v' + verdict.feed_version + ' · ' + verdict.latency_ms + ' ms', 'small'),

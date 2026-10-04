@@ -4,7 +4,10 @@ import math
 from pathlib import Path
 from typing import Any
 
-from fastfence.modules.control.domain.exceptions import ModelUnavailableError
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+    ModelUnavailableError,
+)
 from fastfence.modules.control.domain.models import (
     Assessment,
     ModelMessage,
@@ -79,6 +82,8 @@ class SemanticScanner:
                     + len(config.policy_text.encode()),
                 ),
             )
+        except ModelCapacityExceededError:
+            raise
         except Exception:
             raise ModelUnavailableError(
                 "Semantic model unavailable or invalid response"
@@ -196,6 +201,8 @@ class OllamaModels:
                 "model": model,
                 "finish_reason": finish_reason,
             }, tokens
+        except ModelCapacityExceededError:
+            raise
         except Exception:
             raise ModelUnavailableError(
                 "Model unavailable or invalid response"

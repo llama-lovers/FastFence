@@ -1,0 +1,34 @@
+id: FF-135
+title: Ship verified capacity reporting and accounting through the public package
+status: implemented
+problem: Operators need the capacity corrections as an installable release, with evidence separate from the unresolved semantic-rule and high-concurrency limitations.
+scope:
+  - Publish version 1.0.5 only after source quality gates and isolated installed-wheel verification.
+  - Verify explicit queue-capacity failures, completed-stage accounting and sanitized audit against the built distribution.
+  - Exercise the user's unchanged chat fixture outside the checkout with the installed package.
+  - Retain semantic evaluation limitations; do not claim 1000 concurrent conversations are supported.
+constraints:
+  - Preserve immutable existing tags, operator configuration, private state and keys.
+  - Use the existing trusted-publishing pipeline and versioned bilingual documentation.
+  - Run no additional inference experiment unless required to validate changed behavior.
+acceptance:
+  - Configured tests, coverage and quality hooks pass.
+  - The exact wheel passes isolated package and capacity checks.
+  - Public PyPI verification and matching documentation deployment pass before declaring publication complete.
+change_paths:
+  - _version.py
+  - uv.lock
+validation:
+  - command: uv run --locked pytest -q --tb=short
+    expected: All regression tests pass with the configured coverage threshold.
+  - command: uv run --locked pre-commit run --all-files
+    expected: All configured quality gates pass.
+  - command: uv run --locked python scripts/smoke_wheel.py state/private/release-1.0.5/fastfence-1.0.5-py3-none-any.whl
+    expected: The installed wheel starts and enforces controls outside the checkout.
+evidence:
+  - check: Complete source regression suite
+    result: 1336 tests passed with 92.81 percent coverage; all configured pre-commit hooks passed.
+  - check: Isolated installed candidate
+    result: The exact 1.0.5 wheel passed 183 security and capacity tests, the unchanged external chat lab passed 36 controlled-provider tests and 13 actual Ollama/Laya scenarios. All 141 packaged runtime and helper files matched reviewed source. Standard wheel startup smoke passed outside the checkout.
+  - check: Publication boundary
+    result: Existing release tags remain unchanged. Public PyPI and versioned documentation verification are enforced by the release workflow; local candidate evidence is not a claim of completed publication.

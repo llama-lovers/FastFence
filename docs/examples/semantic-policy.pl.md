@@ -55,6 +55,8 @@ Zmień stałe `RULE` i `CASES`, aby sprawdzić inną politykę. Zachowaj próbk�
 
 Dla lokalnej oceny Qwen3:4b odtworzono przeoczenie reguły wymagającej **jednocześnie pełnego imienia i nazwiska oraz adresu email**: treść zawierająca oba elementy została dopuszczona, mimo że nazwana reguła poprawnie dotarła do Laya. Koniunkcja opisana językiem naturalnym nie zastępuje niezawodnie deterministycznej ochrony prywatności. Zachowaj odpowiednie kontrole PII i testuj osobno kombinacje, pojedyncze elementy oraz wyjątki. Poprawna ocena jednego przykładu nie potwierdza ogólnej skuteczności wykrywania.
 
+Kolejna próba na publicznym pakiecie **1.0.4** objęła 25 przypadków: osobną ocenę zgodności z polityką, a następnie niezmieniony skaner bezpieczeństwa. Ocena polityki była poprawna w **19/25** przypadków (sześć przeoczonych naruszeń), a skaner bezpieczeństwa w **25/25**. Połączenie decyzji dało **20/25**, w tym **7/8** nowych przypadków niewykorzystywanych przy projektowaniu tej próby. Dodatkowe wywołanie modelu **nie zostało wdrożone**: nadal przepuszczało naruszenia i zwiększało zużycie tokenów oraz czas wykonania. Opublikowany runtime semantyczny pozostaje bez zmian; te małe próby nie potwierdzają ogólnej skuteczności.
+
 Ocena semantyczna może też zablokować treść dozwoloną przez regułę dosłowną, ponieważ warstwy egzekwują osobne ograniczenia. Gdy brak dopasowania dosłownego kończy się blokadą, sprawdź przyczynę decyzji oraz wyniki oceny wejścia i wyjścia.
 
 <!-- source: examples/docs/semantic_policy.py -->

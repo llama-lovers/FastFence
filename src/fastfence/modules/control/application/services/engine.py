@@ -24,6 +24,7 @@ from fastfence.modules.control.contracts.ports import (
 )
 from fastfence.modules.control.domain.exceptions import (
     BudgetExceededError,
+    ModelCapacityExceededError,
     ModelUnavailableError,
     RejectedError,
     ResourceDeniedError,
@@ -202,13 +203,15 @@ class Engine:
             return
         state.verdict.decision = "error"
         reasons = {
+            ModelCapacityExceededError: "model_capacity_exceeded",
             ModelUnavailableError: "model_unavailable_fail_closed",
             TimeoutError: "upstream_timeout",
             asyncio.CancelledError: "request_cancelled",
         }
         state.verdict.reason = reasons.get(type(error), "upstream_failure")
-        if state.verdict.upstream_executed or not isinstance(
-            error, ModelUnavailableError
+        if not isinstance(error, ModelCapacityExceededError) and (
+            state.verdict.upstream_executed
+            or not isinstance(error, ModelUnavailableError)
         ):
             # A failed provider reply cannot establish actual usage. Retain the
             # reservation once execution was attempted, including invalid usage.

@@ -8,6 +8,9 @@ import httpx
 import pytest
 
 from fastfence.modules.control.application.facade import ControlRuntime
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+)
 from fastfence.modules.control.persistence import model_http
 from fastfence.modules.control.persistence.model_http import ModelHTTP
 from fastfence.modules.control.persistence.models import (
@@ -132,7 +135,9 @@ async def test_bounded_pending_admission_and_cancellation_release(monkeypatch):
     ]
     try:
         await asyncio.wait_for(entered.wait(), timeout=2)
-        with pytest.raises(RuntimeError, match="unavailable"):
+        with pytest.raises(
+            ModelCapacityExceededError, match="capacity exceeded"
+        ):
             await pool.post("https://model.test/", json={}, timeout_ms=1000)
         assert calls == 128
         for task in pending:

@@ -7,7 +7,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, StrictInt
 
-from fastfence.modules.control.domain.exceptions import ModelUnavailableError
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+    ModelUnavailableError,
+)
 from fastfence.modules.control.domain.models import ModelMessage
 from fastfence.modules.control.persistence.model_http import ModelHTTP
 from fastfence.shared.settings.upstream_url import validate_openai_base_url
@@ -119,6 +122,8 @@ class OpenAIModels:
                 max_response_bytes=MAX_RESPONSE_BYTES,
             )
             return decode_completion(response.content, model, max_tokens)
+        except ModelCapacityExceededError:
+            raise
         except Exception:
             raise ModelUnavailableError(
                 "Model unavailable or invalid response"
