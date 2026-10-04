@@ -213,6 +213,7 @@ class Verdict(StrictModel):
     policy_version: int
     feed_version: int
     latency_ms: int
+    queue_wait_ms: int = Field(default=0, ge=0)
     findings: list[str] = Field(default_factory=list)
     output: Any = None
     semantic_provider: str
@@ -255,6 +256,7 @@ class InvocationState(StrictModel):
     cost: int = 0
     cancelled: bool = False
     preparing_document: bool = False
+    queue_wait_seconds: float = 0
     findings: set[str] = Field(default_factory=set)
 
 

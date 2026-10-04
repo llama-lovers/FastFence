@@ -17,6 +17,7 @@ from fastfence.modules.control.contracts.dto import (
     Verdict,
 )
 from fastfence.shared.models import StrictModel
+from fastfence.shared.request_size import request_size
 
 MAX_BODY_BYTES = 65_536
 
@@ -110,6 +111,7 @@ def verdict_response(verdict: Verdict, model: str) -> JSONResponse:
         "budget_units": verdict.tokens,
         "anonymized": verdict.anonymized,
         "restored": verdict.restored,
+        "queue_wait_ms": verdict.queue_wait_ms,
     }
     headers = {
         "X-FastFence-Request-Id": verdict.request_id,
@@ -117,11 +119,17 @@ def verdict_response(verdict: Verdict, model: str) -> JSONResponse:
         "X-FastFence-Feed-Version": str(verdict.feed_version),
         "X-FastFence-Decision": verdict.decision,
         "X-FastFence-Upstream-Executed": str(verdict.upstream_executed).lower(),
+        "X-FastFence-Queue-Wait-Ms": str(verdict.queue_wait_ms),
     }
     if verdict.decision not in {"allowed", "redacted"}:
         if (
             verdict.decision == "error"
-            and verdict.reason == "model_capacity_exceeded"
+            and verdict.reason
+            in {
+                "model_capacity_exceeded",
+                "request_queue_full",
+                "request_queue_timeout",
+            }
             and not verdict.upstream_executed
         ):
             # Estimated backoff only: no business operation was started.
@@ -212,7 +220,9 @@ def create_router(runtime: ControlRuntime) -> APIRouter:
         if isinstance(payload, JSONResponse):
             return payload
         verdict = await runtime.invoke(
-            identity, payload.as_model_call(restore_originals=restore == "true")
+            identity,
+            payload.as_model_call(restore_originals=restore == "true"),
+            preparation_bytes=request_size(request.scope),
         )
         return verdict_response(verdict, payload.model)
 

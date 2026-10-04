@@ -8,6 +8,12 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from fastfence.modules.control.application.services.admission import (
+    RequestAdmission,
+)
+from fastfence.modules.control.application.services.admission_input import (
+    InputAdmission,
+)
 from fastfence.modules.control.application.services.execution import Executor
 from fastfence.modules.control.application.services.inspection import (
     InputInspector,
@@ -27,6 +33,7 @@ from fastfence.modules.control.domain.exceptions import (
     ModelCapacityExceededError,
     ModelUnavailableError,
     RejectedError,
+    RequestQueueError,
     ResourceDeniedError,
     ToolCapacityExceededError,
 )
@@ -34,6 +41,7 @@ from fastfence.modules.control.domain.models import (
     Identity,
     InvocationState,
     ModelCall,
+    PreparedInvocation,
     ToolCall,
     Verdict,
 )
@@ -49,11 +57,15 @@ class Engine:
         models: ModelsPort,
         secrets: SecretsPort | None = None,
         anonymization: AnonymizationPort | None = None,
+        admission: RequestAdmission | None = None,
     ) -> None:
         self.policies, self.ledger, self.tools = policies, ledger, tools
         self.scanner, self.models = scanner, models
         self.secrets = secrets
         self.anonymization = anonymization
+        self.admission = (
+            admission if admission is not None else RequestAdmission()
+        )
 
     async def invoke(
         self,
@@ -64,6 +76,7 @@ class Engine:
         input_sink: Callable[[dict[str, Any]], None] | None = None,
         prompt_source: Callable[[], Awaitable[str]] | None = None,
         preparation_timeout_ms: int = 0,
+        preparation_bytes: int = 0,
     ) -> Verdict:
         snapshot = self.policies.snapshot()
         verdict = Verdict(
@@ -85,9 +98,19 @@ class Engine:
             if isinstance(call, ToolCall)
             else "llm:" + call.model,
         )
+        admitted = False
         try:
+            prepared = await InputAdmission(
+                self.policies,
+                self.admission,
+                InputInspector(self.tools, self.secrets, self.anonymization),
+            ).prepare(
+                state, prompt_source, preparation_timeout_ms, preparation_bytes
+            )
+            admitted = True
             await self._run(
                 state,
+                prepared=prepared,
                 inspect_only=inspect_only,
                 input_sink=input_sink,
                 prompt_source=prompt_source,
@@ -96,6 +119,8 @@ class Engine:
         except (Exception, asyncio.CancelledError) as error:
             self._mark_failure(state, error)
         finally:
+            if admitted:
+                self.admission.release((identity.tenant, identity.subject))
             self._record(state)
         if state.cancelled:
             raise asyncio.CancelledError
@@ -105,6 +130,7 @@ class Engine:
         self,
         state: InvocationState,
         *,
+        prepared: PreparedInvocation,
         inspect_only: bool,
         input_sink: Callable[[dict[str, Any]], None] | None,
         prompt_source: Callable[[], Awaitable[str]] | None,
@@ -119,12 +145,6 @@ class Engine:
             self.secrets,
             self.anonymization,
         )
-        if prompt_source is not None:
-            if not 1 <= preparation_timeout_ms <= 180_000:
-                raise RejectedError("invalid_document_timeout")
-            prepared = inspector.admit_document(state)
-        else:
-            prepared = inspector.prepare(state)
         self.ledger.reserve(
             state.verdict.request_id,
             state.identity.subject,
@@ -188,6 +208,10 @@ class Engine:
             # Extraction consumed compute time, but no text/model tokens or cost.
             state.tokens = 0
             return
+        if isinstance(error, RequestQueueError):
+            state.verdict.decision = "error"
+            state.verdict.reason = error.reason
+            return
         if isinstance(error, RejectedError):
             state.verdict.reason = error.reason
             state.findings.update(error.findings)
@@ -232,7 +256,20 @@ class Engine:
         verdict.cost_microusd = state.cost
         if state.reserved:
             self.ledger.settle(
-                verdict.request_id, state.tokens, state.cost, verdict.latency_ms
+                verdict.request_id,
+                state.tokens,
+                state.cost,
+                max(
+                    1,
+                    int(
+                        (
+                            time.monotonic()
+                            - state.started_at
+                            - state.queue_wait_seconds
+                        )
+                        * 1000
+                    ),
+                ),
             )
         self.ledger.append(
             state.identity.subject, state.identity.tenant, state.target, verdict

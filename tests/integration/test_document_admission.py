@@ -120,9 +120,16 @@ async def test_concurrent_ocr_holds_atomic_slot_and_cancel_refunds_unused_resour
     )
     first = asyncio.create_task(run(workflow))
     await started.wait()
-    second = await run(workflow)
-    assert second.verdict.reason == "budget_inflight"
+    second = asyncio.create_task(run(workflow))
+    async with asyncio.timeout(1):
+        while engine.admission.snapshot()["waiting"] != 1:
+            await asyncio.sleep(0)
     provider.extract.assert_awaited_once()
+    assert engine.ledger.budgets()[0]["calls"] == 1
+    second.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await second
+    assert engine.admission.snapshot()["waiting"] == 0
     first.cancel()
     with pytest.raises(asyncio.CancelledError):
         await first

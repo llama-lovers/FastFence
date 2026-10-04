@@ -321,6 +321,18 @@ upstream has already run. Match the request ID and policy version when comparing
 before/after results. Audit contains metadata only;
 it must not contain prompts, OCR text, original names or recovery tokens.
 
+### Inspect gateway queue waiting {#inspect-gateway-queue-waiting}
+
+From **1.0.7**, connect a management identity and open **Overview → Request queue**. The panel shows the current active and waiting counts against this process's limits, plus the maximum wait. It refreshes every five seconds while the page is visible; a brief queue can drain between snapshots. Zero waiting is a valid observation, not proof that no request ever waited.
+
+1. Send a bounded concurrent workload through your protected client with a timeout long enough for the configured queue wait plus execution. Keep the dashboard connected in another window. The default queue permits 8 active requests and up to 1024 waiting, also bounded by 64 MiB of accounted waiting payloads and 32 waiting requests per identity. Scheduling is FIFO among identities eligible under their concurrency budget.
+2. Inspect **Active / limit**, **Waiting / limit** and **Maximum wait**. These values are per instance. Model or tool throughput may be lower than the gateway's admission limit.
+3. After a request finishes, locate it in **Activity**, open **Details**, and inspect **Queue wait**. **Test requests** also shows queue wait alongside total latency. Total latency includes waiting; waiting does not consume the compute-time budget.
+4. For a refusal, inspect the exact reason: `request_queue_full`, `request_queue_timeout` or `request_queue_closed`. These occur before protected execution; the upstream flag is false. Compare these with model/tool pool errors, which occur later and may retain completed semantic usage.
+5. If a status refresh fails, treat displayed counts as stale. Disconnecting clears the queue panel. An older gateway without queue telemetry displays unavailable values, not a fabricated zero.
+
+[Queue configuration](integration-reference.md#gateway-request-queue) lists the startup `.env` settings. Changing them requires a restart. A longer queue does not increase model speed, persist jobs across restarts, or guarantee service for a burst of 1000 callers. Queued work rechecks the current policy when admitted; do not automatically retry a request whose execution status is unknown.
+
 ### Model queue capacity
 
 `model_capacity_exceeded` means a local model queue is full: Laya admits at most

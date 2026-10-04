@@ -1,0 +1,36 @@
+id: FF-147
+title: Cancel protected HTTP invocations when their client disconnects
+status: verified
+problem: Nonstreaming HTTP handlers can keep queued work alive after their client disconnects, consuming queue capacity and later executing unwanted work.
+scope:
+  - Monitor disconnects on protected REST, OpenAI, ACP, MCP and document invocation paths.
+  - Cancel downstream handlers and reclaim pending admission without reading request bodies twice.
+  - Propagate a request-local disconnect event to detached stateless MCP handlers and count exact retained request bytes for queue admission.
+constraints:
+  - Preserve existing authentication and body limits; do not buffer or prefetch request bodies.
+  - Only one receiver reads the underlying ASGI channel at a time.
+  - Do not change management, discovery, liveness or streaming endpoints.
+  - A completed response must not trigger cancellation of successful work.
+  - Cancellation after remote execution does not promise remote rollback or safe retry.
+change_paths:
+  - src/fastfence/app/interfaces/http/disconnect.py
+  - src/fastfence/app/factory.py
+  - src/fastfence/modules/control/interfaces/mcp/cancellation.py
+  - src/fastfence/modules/control/interfaces/mcp/server.py
+  - tests/unit/test_invocation_disconnect.py
+  - tests/integration/test_queued_disconnect.py
+acceptance:
+  - Request chunks reach the existing body readers exactly once without added buffering.
+  - Disconnect cancels pending invocation work, releases its queue slot and never invokes upstream.
+  - REST, OpenAI, ACP and mounted stateless MCP propagate cancellation to the engine.
+  - Normal responses and cancellation clean up the monitor task without orphan tasks.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_invocation_disconnect.py tests/integration/test_queued_disconnect.py
+    expected: Deterministic disconnect and queue cleanup checks pass without model calls.
+evidence:
+  - check: Pinned MCP transport review
+    result: Cancelling only the outer HTTP task left the mounted MCP engine invocation queued in the integration probe. A shared scope event and explicit MCP invocation cancellation now release that queue entry; transport cleanup alone is not assumed sufficient.
+  - check: Focused middleware and protocol regressions
+    result: 81 tests passed, including all 15 new checks and existing MCP, ACP, OpenAI and document admission tests. Six actual application paths were disconnected while waiting in the engine queue; every path released queued bytes without budget reservation or upstream execution. Each protocol passed the exact raw body byte count into engine admission, including copied MCP scopes using the shared mutable counter. No model calls were made.
+  - check: Static validation
+    result: Focused Ruff and basedpyright passed with zero errors. Request body consumption remains demand-driven with no middleware prefetch or additional body buffer.

@@ -149,5 +149,9 @@ class ModelsPort(Protocol):
 
 class InvocationPort(Protocol):
     async def invoke(
-        self, identity: Identity, call: ToolCall | ModelCall
+        self,
+        identity: Identity,
+        call: ToolCall | ModelCall,
+        *,
+        preparation_bytes: int = 0,
     ) -> Verdict: ...

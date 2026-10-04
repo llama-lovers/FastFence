@@ -79,9 +79,10 @@ async function connect() {
   } finally { $('saveConnect').disabled = false; }
 }
 function clearManagementView() {
-  for (const id of ['requests', 'allowed', 'blocked', 'redacted', 'errors', 'throughput', 'localPathShare', 'semanticPathShare', 'latency', 'overviewSource', 'lastChecked']) $(id).textContent = '—';
-  $('latencyScope').textContent = 'Includes upstream, excludes gateway transport';
+  for (const id of ['requests', 'allowed', 'blocked', 'redacted', 'errors', 'throughput', 'localPathShare', 'semanticPathShare', 'latency', 'queueActive', 'queueWaiting', 'queueTimeout', 'overviewSource', 'lastChecked']) $(id).textContent = '—';
+  $('latencyScope').textContent = 'Includes queue wait and upstream, excludes gateway transport';
   $('throughputScope').textContent = 'Recent instance traffic';
+  $('queueScope').textContent = 'Connect a management identity to inspect the request queue.';
   $('threatScope').textContent = 'Recent loaded activity only';
   $('topDenialReasons').replaceChildren(el('p', 'Connect a management identity to inspect recent denials.', 'small'));
   $('version').textContent = 'Policy —'; $('policyVersion').textContent = 'Not loaded'; $('headerVersion').textContent = 'Policy not loaded';
@@ -119,7 +120,14 @@ function renderOverviewMetrics(metrics) {
     $(id).textContent = known ? (metrics.requests ? 100 * metrics[key] / metrics.requests : 0).toFixed(1) + '%' : '—';
   }
   $('latency').textContent = metrics.latency_sample_size === 0 ? '—' : metrics.p95_latency_ms + ' ms';
-  $('latencyScope').textContent = 'Last ' + (metrics.latency_sample_size ?? 'available') + ' decisions · integer ms · includes upstream, excludes gateway transport';
+  $('latencyScope').textContent = 'Last ' + (metrics.latency_sample_size ?? 'available') + ' decisions · integer ms · includes queue wait and upstream, excludes gateway transport';
+}
+function renderRequestQueue(queue) {
+  const valid = queue && ['active', 'waiting', 'max_active', 'max_waiting', 'wait_timeout_ms'].every(key => Number.isSafeInteger(queue[key]) && queue[key] >= 0);
+  $('queueActive').textContent = valid ? queue.active + ' / ' + queue.max_active : '—';
+  $('queueWaiting').textContent = valid ? queue.waiting + ' / ' + queue.max_waiting : '—';
+  $('queueTimeout').textContent = valid ? queue.wait_timeout_ms / 1000 + ' s' : '—';
+  $('queueScope').textContent = valid ? 'FIFO admission among eligible identities · refreshed every 5 seconds while this page is visible. Model and tool limits still apply after admission.' : 'Queue status is unavailable from this gateway version.';
 }
 function denialLabel(reason) {
   const labels = {
@@ -167,6 +175,7 @@ async function refresh() {
     active = status.policy; latestStatus = status;
     syncPlaygroundModels();
     renderOverviewMetrics(status.metrics);
+    renderRequestQueue(status.request_queue);
     renderTopDenials(status.audit);
     $('version').textContent = 'Policy v' + active.version;
     $('headerVersion').textContent = 'Policy v' + active.version;

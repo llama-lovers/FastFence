@@ -71,6 +71,8 @@ class ContentUseCases:
         complete: bool,
         max_output_tokens: int,
         restore_originals: bool,
+        *,
+        preparation_bytes: int = 0,
     ) -> tuple[Verdict, str | None]:
         captured: list[str] = []
         verdict = await self.engine.invoke(
@@ -85,6 +87,7 @@ class ContentUseCases:
             input_sink=lambda payload: captured.append(payload["prompt"]),
             prompt_source=source,
             preparation_timeout_ms=timeout_ms,
+            preparation_bytes=preparation_bytes,
         )
         safe = (
             captured[0]

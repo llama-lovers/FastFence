@@ -1,0 +1,43 @@
+id: FF-149
+title: Configure protected request waiting and account transport payloads consistently
+status: implemented
+problem: Bursts require configurable waiting before model execution; retaining HTTP bodies and documents must not bypass the queue byte limit or hide queue latency.
+scope:
+  - Wire validated startup settings into one per-runtime admission queue and expose its snapshot to the dashboard.
+  - Account raw transport bytes on REST, OpenAI-compatible, ACP and MCP invocation paths and raw document bytes before OCR.
+  - Expose queue wait separately in verdict metadata and compatibility headers.
+  - Close admission before provider shutdown to wake waiting callers.
+constraints:
+  - Keep all queues in process memory with no database or external broker.
+  - Queue wait is separate from execution timeout and compute accounting; external client timeouts still apply.
+  - Default eight active invocations, 1024 waiting, 32 waiting per identity, 120-second maximum wait and 64 MiB of accounted queued payloads.
+  - Byte accounting bounds logical retained payloads, not process RSS; existing ingress size limits remain enforced.
+  - Safe retry hints require a proven pre-execution refusal; do not retry unknown remote outcomes.
+change_paths:
+  - .env.example
+  - docs/settings.md
+  - src/fastfence/shared/settings/app_settings.py
+  - src/fastfence/shared/request_size.py
+  - src/fastfence/modules/control/application/facade.py
+  - src/fastfence/modules/control/application/use_cases/content.py
+  - src/fastfence/modules/control/contracts/ports.py
+  - src/fastfence/modules/control/interfaces/mcp/server.py
+  - src/fastfence/workflows/document_markdown.py
+  - src/fastfence/app/interfaces/http/routes.py
+  - src/fastfence/app/interfaces/http/openai.py
+  - src/fastfence/app/interfaces/http/acp.py
+  - tests/unit/test_queue_settings.py
+  - tests/integration/test_queue_transport.py
+acceptance:
+  - Settings validate queue limits and runtime status exposes those exact values.
+  - Raw body or document bytes are charged in addition to normalized call data for waiting requests.
+  - MCP disconnection cancels the actual invocation rather than leaving a queued task after HTTP termination.
+  - Compatibility responses retain protocol shapes and expose queue duration without sensitive content.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_queue_settings.py tests/integration/test_queue_transport.py
+    expected: Settings, metadata, payload accounting and shutdown integration pass.
+evidence:
+  - check: Configuration and compatibility integration
+    result: Sixteen settings and transport tests pass, covering startup bounds, runtime snapshot values, retained-byte scope sharing and OpenAI/ACP queue metadata.
+  - check: Mounted transport byte accounting
+    result: Middleware integration asserts exact raw-body bytes at engine admission on all six protected HTTP paths, including the copied MCP scope and raw documents.

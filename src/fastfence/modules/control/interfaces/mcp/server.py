@@ -1,20 +1,27 @@
 from __future__ import annotations
 
+import asyncio
+
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from fastmcp.server.auth import AccessToken, TokenVerifier
-from fastmcp.server.dependencies import get_access_token
+from fastmcp.server.dependencies import get_access_token, get_http_request
 from pydantic import StrictBool, ValidationError
 
 from fastfence.modules.control.contracts.dto import (
     Identity,
     ModelCall,
     ToolCall,
+    Verdict,
 )
 from fastfence.modules.control.contracts.ports import (
     IdentityPort,
     InvocationPort,
 )
+from fastfence.modules.control.interfaces.mcp.cancellation import (
+    until_disconnect,
+)
+from fastfence.shared.request_size import request_size
 
 
 class ProvisionedTokenVerifier(TokenVerifier):
@@ -32,6 +39,22 @@ class ProvisionedTokenVerifier(TokenVerifier):
             subject=identity.subject,
             scopes=["invoke"],
         )
+
+
+async def protected(
+    engine: InvocationPort, actor: Identity, call: ToolCall | ModelCall
+) -> Verdict:
+    try:
+        scope = get_http_request().scope
+    except RuntimeError:
+        scope = {}
+    event = scope.get("fastfence.disconnect_event")
+    return await until_disconnect(
+        lambda: engine.invoke(
+            actor, call, preparation_bytes=request_size(scope)
+        ),
+        event if isinstance(event, asyncio.Event) else None,
+    )
 
 
 def create_mcp(engine: InvocationPort, identities: IdentityPort) -> FastMCP:
@@ -62,7 +85,7 @@ def create_mcp(engine: InvocationPort, identities: IdentityPort) -> FastMCP:
             )
         except ValidationError:
             raise ToolError("Invalid invocation schema") from None
-        verdict = await engine.invoke(identity(), call)
+        verdict = await protected(engine, identity(), call)
         return verdict.model_dump()
 
     @mcp.tool()
@@ -82,13 +105,14 @@ def create_mcp(engine: InvocationPort, identities: IdentityPort) -> FastMCP:
             )
         except ValidationError:
             raise ToolError("Invalid completion schema") from None
-        verdict = await engine.invoke(identity(), call)
+        verdict = await protected(engine, identity(), call)
         return verdict.model_dump()
 
     @mcp.resource("memory://{tenant}/{key}")
     async def memory(tenant: str, key: str) -> dict[str, object]:
         """Read a tenant-scoped memory resource through identical policy and output controls."""
-        verdict = await engine.invoke(
+        verdict = await protected(
+            engine,
             identity(),
             ToolCall(
                 tool="memory.read", arguments={"resource": f"{tenant}/{key}"}

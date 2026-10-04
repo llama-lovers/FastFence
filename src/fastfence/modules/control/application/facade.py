@@ -2,6 +2,9 @@ import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any, Literal
 
+from fastfence.modules.control.application.services.admission import (
+    RequestAdmission,
+)
 from fastfence.modules.control.application.services.engine import Engine
 from fastfence.modules.control.application.use_cases.content import (
     ContentUseCases,
@@ -79,9 +82,15 @@ class ControlRuntime:
         return self.policies.snapshot()
 
     async def invoke(
-        self, identity: Identity, call: ToolCall | ModelCall
+        self,
+        identity: Identity,
+        call: ToolCall | ModelCall,
+        *,
+        preparation_bytes: int = 0,
     ) -> Verdict:
-        return await self.engine.invoke(identity, call)
+        return await self.engine.invoke(
+            identity, call, preparation_bytes=preparation_bytes
+        )
 
     async def prepare_document(
         self, identity: Identity, markdown: str, model: str | None = None
@@ -108,6 +117,7 @@ class ControlRuntime:
         source: Callable[[], Awaitable[str]],
         *,
         timeout_ms: int,
+        preparation_bytes: int = 0,
         model: str | None = None,
         complete: bool = False,
         max_output_tokens: int = 256,
@@ -122,6 +132,7 @@ class ControlRuntime:
             complete,
             max_output_tokens,
             restore_originals,
+            preparation_bytes=preparation_bytes,
         )
 
     async def preview_semantic_rule(
@@ -138,6 +149,7 @@ class ControlRuntime:
 
     def status(self) -> dict[str, Any]:
         status = self.management.status()
+        status["request_queue"] = self.engine.admission.snapshot()
         configured = list(self.snapshot().policy.tools)
         connected = [
             name for name in configured if self.engine.tools.supports(name)
@@ -179,6 +191,9 @@ class ControlRuntime:
         return self.ledger.audit(limit)
 
     async def aclose(self) -> None:
+        admission = getattr(self.engine, "admission", None)
+        if admission is not None:
+            admission.close()
         try:
             close = getattr(self.engine.scanner, "aclose", None)
             if close is not None:
@@ -263,6 +278,13 @@ def build_runtime(
             settings.secret_plugin_max_file_bytes,
         ),
         anonymization=anonymization,
+        admission=RequestAdmission(
+            concurrency=settings.request_concurrency,
+            max_waiting=settings.request_queue_size,
+            wait_timeout_seconds=settings.request_queue_timeout_seconds,
+            max_waiting_bytes=settings.request_queue_max_bytes,
+            per_identity=settings.request_queue_per_identity,
+        ),
     )
     return ControlRuntime(
         identities=identities,

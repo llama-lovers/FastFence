@@ -6,6 +6,7 @@ from importlib.metadata import version
 from fastapi import FastAPI
 
 from fastfence.app.interfaces.http.acp import create_router as create_acp_router
+from fastfence.app.interfaces.http.disconnect import InvocationDisconnect
 from fastfence.app.interfaces.http.documents import configure_documents
 from fastfence.app.interfaces.http.ingress import ProtectedRestIngress
 from fastfence.app.interfaces.http.openai import create_router
@@ -72,4 +73,5 @@ def create_app(
         )
     )
     app.mount("/mcp", mcp_app)
+    app.add_middleware(InvocationDisconnect)
     return app

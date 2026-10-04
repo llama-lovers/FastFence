@@ -54,6 +54,36 @@ class AppSettings(BaseSettings):
         le=100_000,
         description="Maximum sanitized audit records retained in memory",
     )
+    request_concurrency: int = Field(
+        default=8,
+        ge=1,
+        le=128,
+        description="Maximum protected invocations executing per process; waiting requests use a separate queue",
+    )
+    request_queue_size: int = Field(
+        default=1024,
+        ge=0,
+        le=4096,
+        description="Maximum protected invocations waiting per process; zero disables waiting",
+    )
+    request_queue_timeout_seconds: float = Field(
+        default=120,
+        gt=0,
+        le=3600,
+        description="Maximum queue wait, separate from model execution timeout; callers must allow a longer HTTP timeout",
+    )
+    request_queue_max_bytes: int = Field(
+        default=67_108_864,
+        ge=1,
+        le=268_435_456,
+        description="Maximum accounted payload bytes waiting in the queue; not a process RSS limit",
+    )
+    request_queue_per_identity: int = Field(
+        default=32,
+        ge=1,
+        le=1024,
+        description="Maximum waiting requests per trusted tenant and subject",
+    )
     config_url: str | None = Field(
         default=None,
         description="Trusted HTTP source for coherent policy/feed JSON bundle",

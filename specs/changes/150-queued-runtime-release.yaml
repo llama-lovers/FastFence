@@ -1,0 +1,33 @@
+id: FF-150
+title: Release bounded waiting with installed-package and real-model evidence
+status: implemented
+problem: Short traffic bursts should wait for available protected execution capacity instead of immediately failing, while maintaining security checks, resource bounds and cancellation.
+scope:
+  - Release version 1.0.7 with configured request queue, disconnect cleanup, accurate capacity responses and bounded ACP transport.
+  - Verify the installed wheel outside the repository, official ACP peers and actual Laya plus Ollama calls.
+constraints:
+  - Keep semantic classifier behavior unchanged; the experimental predicate classifier was rejected.
+  - Do not promise unlimited queueing or 1000 simultaneous model generations.
+  - Preserve operator state, keys and user test lab files.
+  - Publish stable documentation only through the verified release workflow.
+change_paths:
+  - _version.py
+  - evaluation/results/request-queue-1.0.7.json
+acceptance:
+  - Controlled burst of 1000 unique identities drains without leaked queue entries or reservations.
+  - Twelve actual model calls wait as necessary, pass input/output semantic checks and drain all resources.
+  - Published package is the exact verified candidate and all release quality gates pass.
+validation:
+  - command: uv run --locked pytest -q --tb=short
+    expected: Complete suite passes with configured coverage gate.
+  - command: uv run --locked pre-commit run --all-files
+    expected: Lint, typing, architecture and specification checks pass.
+evidence:
+  - check: Complete source tests
+    result: 1484 tests passed with 93.28 percent coverage; the synthetic 1000-call burst had eight active invocations and 992 waiting, all completed.
+  - check: Installed wheel with actual local inference
+    result: Twelve concurrent benign requests through a fresh external installation completed with 24 real Laya input/output assessments and actual Ollama output. Ten requests waited, at most 15671ms; all queue and budget inflight counters returned to zero. This is an integration check, not a throughput SLO.
+  - check: Installed package security regressions
+    result: The exact isolated wheel passed 406 security, admission and transport tests. All 36 user chat tests pass in an external copy with only the intentional queueing expectation updated; the unchanged original produced 35 passes and that one obsolete rejection assertion.
+  - check: Package compatibility
+    result: Official ACP client/server smoke checks passed all eight cases. The original user chat suite intentionally expects two rejections where the requested queue now returns three successes; only that assertion is updated in an external copy, and the original files remain untouched.

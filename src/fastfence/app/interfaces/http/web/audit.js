@@ -11,6 +11,7 @@ function auditDetails(record) {
   const container = el('div', '', 'body');
   const fields = [
     ['Request ID', record.request_id],
+    ['Queue wait', Number.isSafeInteger(record.queue_wait_ms) && record.queue_wait_ms >= 0 ? record.queue_wait_ms + ' ms (included in total latency)' : 'Not recorded by this version'],
     ['Matched controls', (record.findings || []).join(', ') || 'None'],
     ['Upstream', record.upstream_executed ? 'Executed' : 'Not executed'],
     ['Policy / feed', 'v' + record.policy_version + ' / v' + record.feed_version],

@@ -18,6 +18,7 @@ from fastfence.shared.acp import (
     project_messages,
     restore_messages,
 )
+from fastfence.shared.request_size import request_size
 
 MAX_BODY_BYTES = 65_536
 
@@ -116,6 +117,7 @@ def run_response(verdict: Verdict, agent: str, created_at: str) -> JSONResponse:
                 verdict.upstream_executed
             ).lower(),
             "X-FastFence-Policy-Version": str(verdict.policy_version),
+            "X-FastFence-Queue-Wait-Ms": str(verdict.queue_wait_ms),
         },
         content={
             "run_id": str(UUID(hex=verdict.request_id)),
@@ -137,6 +139,7 @@ def run_response(verdict: Verdict, agent: str, created_at: str) -> JSONResponse:
                     "reason": verdict.reason,
                     "request_id": verdict.request_id,
                     "upstream_executed": verdict.upstream_executed,
+                    "queue_wait_ms": verdict.queue_wait_ms,
                 },
             },
         },
@@ -166,6 +169,7 @@ async def execute_run(
             arguments={"input": project_messages(payload.input)},
             restore_originals=restore == "true",
         ),
+        preparation_bytes=request_size(request.scope),
     )
     return run_response(verdict, payload.agent_name, created_at)
 

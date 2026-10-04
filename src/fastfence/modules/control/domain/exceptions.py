@@ -23,3 +23,11 @@ class RejectedError(Exception):
         super().__init__(reason)
         self.reason = reason
         self.findings = findings or []
+
+
+class RequestQueueError(Exception):
+    """Bounded local request waiting ended before any execution reservation."""
+
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
+        self.reason = reason

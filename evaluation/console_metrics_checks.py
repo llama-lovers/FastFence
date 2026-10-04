@@ -4,6 +4,14 @@ from playwright.sync_api import expect
 
 
 def metric_checks(page, fixture, screenshots=None):
+    expect(page.locator("#queueActive")).to_have_text("—")
+    fixture.status["request_queue"] = {
+        "active": 8,
+        "waiting": 57,
+        "max_active": 8,
+        "max_waiting": 1024,
+        "wait_timeout_ms": 120000,
+    }
     fixture.status["metrics"].update(
         requests=250,
         allowed=243,
@@ -26,7 +34,8 @@ def metric_checks(page, fixture, screenshots=None):
         "decision": "allowed",
         "reason": "controls_passed",
         "policy_version": 1,
-        "latency_ms": 1,
+        "latency_ms": 401,
+        "queue_wait_ms": 400,
         "event_kind": "invocation",
     }
     rows = [{**base, "request_id": f"fixture-{i}"} for i in range(201)]
@@ -55,11 +64,14 @@ def metric_checks(page, fixture, screenshots=None):
         "semanticPathShare": "20.0%",
         "throughput": "12.35",
         "latency": "123 ms",
+        "queueActive": "8 / 8",
+        "queueWaiting": "57 / 1024",
+        "queueTimeout": "120 s",
     }.items():
         expect(page.locator("#" + name)).to_have_text(expected)
     expect(page.locator("#throughputScope")).to_contain_text("Last 60 seconds")
     expect(page.locator("#latencyScope")).to_have_text(
-        "Last 250 decisions · integer ms · includes upstream, excludes gateway transport"
+        "Last 250 decisions · integer ms · includes queue wait and upstream, excludes gateway transport"
     )
     expect(page.locator("#threatScope")).to_contain_text(
         "199 invocation events"
@@ -80,6 +92,37 @@ def metric_checks(page, fixture, screenshots=None):
         "Known attack signature"
     )
     expect(denials).to_contain_text("Semantic policy violation in input")
+    expect(page.locator("#queueScope")).to_contain_text("FIFO admission")
+    page.locator('nav [data-nav="activity"]').click()
+    page.locator("#events button").first.click()
+    expect(page.locator("#audit-detail-0")).to_contain_text(
+        "Queue wait: 400 ms (included in total latency)"
+    )
+    page.locator('nav [data-nav="requests"]').click()
+    for reason, message in {
+        "request_queue_full": "Request queue full; request was not admitted",
+        "request_queue_timeout": "Request queue wait expired; request was not admitted",
+        "request_queue_closed": "Request queue closed; request was not admitted",
+    }.items():
+        page.evaluate(
+            "v => renderVerdict(v)",
+            {
+                **base,
+                "decision": "error",
+                "reason": reason,
+                "feed_version": 1,
+                "semantic_provider": "disabled",
+                "semantic_score": None,
+                "upstream_executed": False,
+            },
+        )
+        expect(page.locator("#result")).to_contain_text(message)
+        expect(page.locator("#result")).to_contain_text("Queue wait: 400 ms")
+        expect(page.locator("#result")).to_contain_text("401 ms total")
+        expect(page.locator("#result")).to_contain_text(
+            "upstream was not executed"
+        )
+    page.locator('nav [data-nav="overview"]').click()
     if screenshots:
         page.screenshot(
             path=str(screenshots / "metrics-desktop.png"), full_page=True
@@ -90,11 +133,30 @@ def metric_checks(page, fixture, screenshots=None):
         page.screenshot(
             path=str(screenshots / "metrics-mobile.png"), full_page=True
         )
+    del fixture.status["request_queue"]
+    page.evaluate("refresh()")
+    expect(page.locator("#queueWaiting")).to_have_text("—")
+    expect(page.locator("#queueScope")).to_contain_text("unavailable")
+    fixture.status["request_queue"] = {"active": "<img src=x onerror=alert(1)>"}
+    page.evaluate("refresh()")
+    expect(page.locator("#queueActive")).to_have_text("—")
+    assert page.locator("#requestQueuePanel img").count() == 0
+    fixture.status["request_queue"] = {
+        "active": 0,
+        "waiting": 0,
+        "max_active": 8,
+        "max_waiting": 1024,
+        "wait_timeout_ms": 120000,
+    }
+    page.evaluate("refresh()")
+    expect(page.locator("#queueActive")).to_have_text("0 / 8")
+    expect(page.locator("#queueWaiting")).to_have_text("0 / 1024")
     fixture.status_error = True
     page.locator('nav [data-nav="activity"]').click()
     page.locator("#refreshBtn").click()
     expect(page.locator("#globalMessage")).to_contain_text("may be stale")
     expect(page.locator("#allowed")).to_have_text("243")
+    expect(page.locator("#queueWaiting")).to_have_text("0 / 1024")
     fixture.status_error = False
     page.locator('nav [data-nav="connection"]').click()
     page.locator("#disconnectBtn").click()
@@ -105,6 +167,9 @@ def metric_checks(page, fixture, screenshots=None):
         "localPathShare",
         "semanticPathShare",
         "latency",
+        "queueActive",
+        "queueWaiting",
+        "queueTimeout",
     ):
         expect(page.locator("#" + name)).to_have_text("—")
     expect(denials).not_to_contain_text("Known attack signature")

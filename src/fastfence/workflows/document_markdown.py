@@ -46,6 +46,7 @@ class DocumentMarkdownWorkflow:
             identity,
             source,
             timeout_ms=int(self.ocr.limits.timeout_seconds * 1000),
+            preparation_bytes=len(content),
             model=model,
             complete=complete,
             max_output_tokens=max_output_tokens,

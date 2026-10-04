@@ -99,6 +99,26 @@ FASTFENCE_IDENTITY_MAX_SOURCE_BYTES=4194304
 
 Provision the identity records separately. These settings do not create accounts. Hard bounds are 65,536 records and 64 MiB; both limits apply independently. Duplicate subjects and credential hashes are rejected. Budgets and audit remain process-local; increasing registry capacity does not share state across workers or increase Laya inference throughput.
 
+## Gateway request queue {#gateway-request-queue}
+
+From **1.0.7**, protected requests share a bounded admission queue, ordered FIFO among identities eligible to execute, in each gateway process. Defaults allow **8 executing requests**, **1024 waiting requests**, **120 seconds maximum queue wait**, and **64 MiB of accounted waiting payloads**. Each identity can have up to **32 waiting requests** by default; its active work must also fit the role policy concurrency budget. The byte counter covers serialized calls, prepared payloads and retained raw input/document bytes; it is not a process RSS limit. The count and byte bounds both apply: a batch may hit the memory bound before reaching the count limit. This is transient in-process waiting, not a durable job queue or a guarantee that every caller will finish successfully.
+
+Configure these startup values in the installation's private `.env`, then restart the gateway:
+
+```dotenv
+FASTFENCE_REQUEST_CONCURRENCY=8
+FASTFENCE_REQUEST_QUEUE_SIZE=1024
+FASTFENCE_REQUEST_QUEUE_PER_IDENTITY=32
+FASTFENCE_REQUEST_QUEUE_TIMEOUT_SECONDS=120
+FASTFENCE_REQUEST_QUEUE_MAX_BYTES=67108864
+```
+
+The wait limit is configurable up to 3600 seconds. Set client and reverse-proxy timeouts to cover queue wait **plus** the remaining protected operation, including semantic stages. Raising the wait limit does not make a slow model faster. Role budgets and downstream Laya/model/ACP limits still apply after admission.
+
+`GET /api/admin/status` exposes `request_queue`: `active`, `waiting`, `max_active`, `max_waiting`, `wait_timeout_ms`, `waiting_bytes` and `max_waiting_bytes`. These are current instance values, not cumulative throughput. **Overview → Request queue** displays counts and maximum wait; **Test requests** and **Activity → Details** show the completed verdict's `queue_wait_ms`. Total `latency_ms` includes queue wait and execution; compute-budget accounting excludes time spent waiting for admission.
+
+`request_queue_full`, `request_queue_timeout` and `request_queue_closed` mean that this request was not admitted to protected execution. No business upstream or semantic model ran for that refused request, and no invocation budget was reserved. Requests that leave the queue recheck current policy; already executing requests retain their selected snapshot. There is no automatic resubmission. Cancellation releases local waiting, but cannot roll back work that already began after admission.
+
 ## Runtime admission limits
 
 Each business-model HTTP adapter reuses a pool of up to **32 connections** and admits at most **128 active or waiting requests**. Waiting for a connection consumes the request's existing deadline. Upstream cookies are neither retained nor forwarded between calls.

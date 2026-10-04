@@ -210,6 +210,18 @@ Przykład używa powyższej odwracalnej reguły osoby. Dla reguły litery a wywo
 
 Otwórz **Activity** i znajdź wynik po identyfikatorze żądania. Porównaj wersję polityki i źródła sygnatur, decyzję, powód, dopasowania i wykonanie upstream. Rozwiń każdy wiersz, aby porównać **Input text analysis** i **Output text analysis**: `passed` oznacza, że etap semantyczny wykonał się i dopuścił treść, `blocked` — że ją odrzucił, `error` — że ocena zakończyła się błędem, a `not_run` — że etap nie został osiągnięty. Blokada wejścia zapobiega wykonaniu upstream; blokada wyjścia zatrzymuje dostarczenie po jego wykonaniu. Porównując wyniki przed i po zmianie, dopasuj identyfikator żądania i wersję polityki. Audyt zawiera tylko metadane; nie może zawierać promptów, tekstu OCR, oryginalnych nazwisk ani tokenów odzyskiwania.
 
+### Sprawdź oczekiwanie w kolejce bramki {#inspect-gateway-queue-waiting}
+
+Od wersji **1.0.7** połącz tożsamość administracyjną i otwórz **Overview → Request queue**. Panel pokazuje aktualną liczbę aktywnych i oczekujących żądań względem limitów tego procesu oraz maksymalne oczekiwanie. Odświeża się co pięć sekund, gdy strona jest widoczna; krótka kolejka może opróżnić się między odczytami. Zero oczekujących jest poprawnym odczytem, nie dowodem, że żadne żądanie wcześniej nie czekało.
+
+1. Wyślij ograniczoną serię równoległych wywołań przez chronionego klienta, z timeoutem obejmującym skonfigurowane oczekiwanie i wykonanie. Pozostaw połączony panel w drugim oknie. Domyślna kolejka pozwala na 8 aktywnych żądań i do 1024 oczekujących, dodatkowo ograniczonych do 64 MiB rozliczanych oczekujących danych i 32 oczekujących żądań na tożsamość. Kolejność to FIFO wśród tożsamości mieszczących się w budżecie współbieżności.
+2. Sprawdź **Active / limit**, **Waiting / limit** oraz **Maximum wait**. Wartości dotyczą jednej instancji. Przepustowość modelu lub narzędzia może być niższa niż limit przyjmowania żądań przez bramkę.
+3. Po zakończeniu żądania odszukaj je w **Activity**, otwórz **Details** i sprawdź **Queue wait**. **Test requests** również pokazuje oczekiwanie obok łącznej latencji. Łączna latencja obejmuje czekanie; czekanie nie zużywa budżetu czasu obliczeń.
+4. Przy odmowie sprawdź dokładny powód: `request_queue_full`, `request_queue_timeout` albo `request_queue_closed`. Występują przed chronionym wykonaniem; flaga wykonania usługi docelowej ma wartość false. Odróżnij je od błędów puli modeli/narzędzi, które występują później i mogą zachowywać rozliczenie zakończonych ocen semantycznych.
+5. Jeśli odświeżenie statusu nie powiedzie się, traktuj wyświetlane liczby jako nieaktualne. Rozłączenie czyści panel kolejki. Starsza bramka bez tej telemetrii pokazuje niedostępne wartości, nie zmyślone zero.
+
+[Konfiguracja kolejki](integration-reference.md#gateway-request-queue) opisuje ustawienia startowe `.env`. Ich zmiana wymaga restartu. Dłuższa kolejka nie przyspiesza modelu, nie zachowuje zadań po restarcie ani nie gwarantuje obsługi skoku do 1000 klientów. Oczekujące żądania ponownie sprawdzają bieżącą politykę po przyjęciu; nie ponawiaj automatycznie żądania, którego status wykonania jest nieznany.
+
 ### Pojemność kolejki modelu {#model-queue-capacity}
 
 `model_capacity_exceeded` oznacza pełną lokalną kolejkę: Laya dopuszcza najwyżej

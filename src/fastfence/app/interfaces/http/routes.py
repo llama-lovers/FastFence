@@ -25,6 +25,7 @@ from fastfence.modules.control.contracts.dto import (
     Verdict,
 )
 from fastfence.modules.control.domain.models import Policy
+from fastfence.shared.request_size import request_size
 
 
 def configure_http(app: FastAPI, runtime: ControlRuntime) -> None:
@@ -147,15 +148,19 @@ def _configure_public(
 
     @app.post("/api/invoke")
     async def invoke(
-        call: ToolCall, identity: Identity = Depends(actor)
+        call: ToolCall, request: Request, identity: Identity = Depends(actor)
     ) -> Verdict:
-        return await runtime.invoke(identity, call)
+        return await runtime.invoke(
+            identity, call, preparation_bytes=request_size(request.scope)
+        )
 
     @app.post("/api/models/complete")
     async def complete(
-        call: ModelCall, identity: Identity = Depends(actor)
+        call: ModelCall, request: Request, identity: Identity = Depends(actor)
     ) -> Verdict:
-        return await runtime.invoke(identity, call)
+        return await runtime.invoke(
+            identity, call, preparation_bytes=request_size(request.scope)
+        )
 
 
 def _configure_management(

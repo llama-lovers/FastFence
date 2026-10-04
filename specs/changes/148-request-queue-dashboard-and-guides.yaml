@@ -1,0 +1,48 @@
+id: FF-148
+title: Show gateway queue occupancy and request waiting without hiding execution costs
+status: verified
+problem: Operators cannot see the new gateway admission queue or distinguish its waiting time and refusals from later model or tool execution.
+scope:
+  - Add a compact Overview queue snapshot with active and waiting counts, configured limits and maximum wait.
+  - Show separate queue wait in completed request verdicts and expanded audit details, while retaining total latency.
+  - Provide clear reasons for full, expired and closed admission queues, and reset or mark unavailable stale identity data.
+  - Document matching English and Polish operator settings, policy refresh, identity fairness, time accounting and client deadlines.
+constraints:
+  - No backend status, admission, settings, model or policy implementation changes.
+  - Keep the existing five-second visible-page refresh and current dashboard layout.
+  - Missing or malformed queue telemetry is unavailable, not zero; real zero values remain visible.
+  - Queue values are current per-process snapshots, not cumulative throughput or a 1000-caller SLO.
+  - FIFO applies among identities eligible under their policy concurrency limit; byte accounting is not an RSS guarantee.
+change_paths:
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/app/interfaces/http/web/console.js
+  - src/fastfence/app/interfaces/http/web/console.css
+  - src/fastfence/app/interfaces/http/web/playground.js
+  - src/fastfence/app/interfaces/http/web/audit.js
+  - evaluation/console_metrics_checks.py
+  - evaluation/smoke_console.py
+  - docs/manual-testing.md
+  - docs/manual-testing.pl.md
+  - docs/integration-reference.md
+  - docs/integration-reference.pl.md
+acceptance:
+  - Overview displays active/limit, waiting/limit and maximum wait from status.request_queue with an explicit current-instance scope.
+  - Verdict and audit details display nonnegative queue_wait_ms separately from total latency, with unavailable fallback for old audit records.
+  - Full, timeout and closed reasons state that the request was not admitted, without implying that later provider errors guarantee non-execution.
+  - Refresh errors retain visible stale-data warnings; disconnect clears queue fields and identity-bound results.
+  - Browser checks cover populated, zero, missing and malformed telemetry, safe rendering and mobile overflow without model calls.
+  - EN/PL guides agree on startup settings, bounded transient waiting, latest policy after dequeue and compute-budget exclusion of admission wait.
+validation:
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output state/private/request-queue-console.json --screenshots state/private/request-queue-console
+    expected: Queue and existing console browser assertions pass with synthetic fixtures and no inference.
+  - command: uv run --locked pytest --no-cov -q tests/integration/test_semantic_review_ui.py tests/integration/test_policy_management_ui.py tests/integration/test_anonymization_authoring_ui.py
+    expected: Existing independent authoring and privacy interface protections remain intact.
+  - command: uv run --locked mkdocs build --strict --site-dir state/private/docs-ff148
+    expected: Bilingual documentation and queue links render without strict-build errors.
+evidence:
+  - check: Actual Chromium interface verification
+    result: All 37 console check groups passed, including five new queue groups for populated and zero occupancy, missing and invalid telemetry, verdict and audit waiting time, three admission refusal reasons, stale refresh and disconnect reset. Desktop and mobile screenshots were produced; the mobile queue panel was visually inspected without overflow. API responses were controlled fixtures, with zero actual model calls.
+  - check: Independent existing interface regressions
+    result: All four Node-backed semantic review, policy management and anonymization interface tests passed, preserving prior confirmation, stale identity and restoration-consent safeguards.
+  - check: Bilingual documentation and source checks
+    result: Strict English and Polish MkDocs build passed after final scheduling wording. Fenced commands and source blocks are identical across translations. Ruff check and format verification passed for both affected browser test files. Startup settings and snapshot fields were checked against the in-progress admission implementation; backend lifecycle verification remains separately owned by FF146 and FF147.

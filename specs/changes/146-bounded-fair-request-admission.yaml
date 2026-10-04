@@ -1,0 +1,51 @@
+id: FF-146
+title: Queue protected requests before inference with bounded fair admission
+status: verified
+problem: Short provider queues reject bursts before local inference can drain them; callers need bounded waiting with current-policy enforcement rather than an unbounded backlog or immediate overload failures.
+scope:
+  - Add event-loop-local FIFO admission among eligible identities before resource reservations, OCR and model/tool work.
+  - Enforce aggregate active, waiting-count, waiting-payload-byte and per-identity waiting bounds.
+  - Reinspect original queued requests against a fresh immutable policy/feed snapshot after admission.
+  - Expose queue_wait_ms separately from total latency and exclude waiting from compute usage.
+constraints:
+  - Default eight active, 1024 waiting, 64 MiB logical waiting payload bytes, 32 waiting per identity and 120-second waiting deadline.
+  - Respect each prepared identity concurrent limit when scheduling; ineligible identities cannot block other eligible identities.
+  - No database, threads, provider retries, policy downgrades or operator configuration changes.
+  - Local precheck runs before queueing; no business execution or budget reservation happens for full, timed-out or closed queues.
+  - Fresh inspection uses original request data and clears prior mutable findings/anonymization flags; immediate unchanged-snapshot requests reuse precheck work.
+  - Payload-byte accounting includes original request, prepared text and supplied document bytes; it is not a process RSS guarantee.
+  - Cancellation after grant but before resumption releases that slot; shutdown wakes queued callers and allows already active work to drain.
+change_paths:
+  - src/fastfence/modules/control/application/services/admission.py
+  - src/fastfence/modules/control/application/services/admission_input.py
+  - src/fastfence/modules/control/application/services/engine.py
+  - src/fastfence/modules/control/domain/exceptions.py
+  - src/fastfence/modules/control/domain/models.py
+  - tests/unit/test_request_admission.py
+  - tests/integration/test_request_admission.py
+  - tests/integration/test_document_admission.py
+acceptance:
+  - Eligible queued calls execute in order while subject concurrency and global concurrency remain bounded.
+  - Count, byte and identity queue limits reject before reservation and expose explicit request_queue_full.
+  - Waiting timeout and shutdown return request_queue_timeout or request_queue_closed without execution.
+  - Cancellation and grant races restore counters and allow subsequent work.
+  - Policy changes while waiting block newly forbidden content and update verdict provenance.
+  - Queue time appears in latency/audit but does not consume compute allocation; waiting calls reserve no tokens, cost or inflight quota.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_request_admission.py tests/integration/test_request_admission.py
+    expected: Deterministic event-driven fairness, bounds, cancellation, policy refresh and accounting regressions pass without model inference.
+  - command: uv run --locked basedpyright src
+    expected: Source type checks pass.
+  - command: uv run --locked lint-imports
+    expected: All architecture contracts remain valid.
+evidence:
+  - check: Design boundary
+    result: Queue admission is independent of provider-specific capacities and retains existing provider error behavior. Tests use controlled providers and do not claim a local model serves 1000 concurrent requests at once.
+  - check: Queue primitive and full-engine regression checks
+    result: All 69 selected queue, model-capacity, ACP-capacity, OpenAI and document tests passed. The actual engine accepted 1000 distinct synthetic identities, held 992 waiting behind eight active controlled calls, completed all 1000 allowed and left zero active/waiting/inflight reservations. This tests scheduling with a controlled upstream, not model throughput.
+  - check: Local policy and lifecycle boundaries
+    result: Tests cover same-subject concurrency-one waiting, byte/count/per-identity rejection, timeout/closure, grant-cancel races, fresh policy blocking, stale privacy-finding removal, zero reservations while waiting, OCR-byte rejection before extraction and queue-time exclusion from compute usage.
+  - check: Static checks
+    result: Ruff, whole-source basedpyright and pyscn passed; all 16 import-linter contracts were kept. No real inference or operator-state changes occurred.
+  - check: OCR compatibility after admission scheduling
+    result: The prior immediate-concurrency-denial check now verifies a second OCR call waits without reservation or extraction and cancels cleanly. Actual admitted work retains the existing minimum one-millisecond compute charge after queue waiting is excluded.

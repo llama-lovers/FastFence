@@ -1,0 +1,55 @@
+{
+  "version": "1.0.7",
+  "installation": "candidate_wheel",
+  "passed": true,
+  "business_model": "qwen3:0.6b",
+  "assessor": "real_laya/qwen3:4b",
+  "concurrency": 12,
+  "admitted_concurrency": 2,
+  "subject_concurrency": 2,
+  "elapsed_seconds": 17.775,
+  "semantic_calls": 24,
+  "queue_before": {
+    "active": 0,
+    "waiting": 0,
+    "max_active": 2,
+    "max_waiting": 32,
+    "wait_timeout_ms": 120000,
+    "waiting_bytes": 0,
+    "max_waiting_bytes": 67108864,
+    "per_identity": 32
+  },
+  "queue_after": {
+    "active": 0,
+    "waiting": 0,
+    "max_active": 2,
+    "max_waiting": 32,
+    "wait_timeout_ms": 120000,
+    "waiting_bytes": 0,
+    "max_waiting_bytes": 67108864,
+    "per_identity": 32
+  },
+  "budget_inflight": [
+    0
+  ],
+  "limitations": [
+    "Twelve harmless real-model requests verify queue integration, not a capacity or latency SLO.",
+    "This uses an existing local Laya installation; it does not download or alter models.",
+    "The 1000-request scheduling test uses a controlled provider and is separate from this twelve-call inference check."
+  ],
+  "successful_requests": 12,
+  "requests_that_waited": 10,
+  "maximum_wait_ms": 15671,
+  "source_test_suite": {
+    "passed": 1484,
+    "coverage_percent": 93.28
+  },
+  "controlled_burst": {
+    "requests": 1000,
+    "active_limit": 8,
+    "waiting_observed": 992,
+    "passed": 1000,
+    "model_inference": false
+  },
+  "legacy_lab": "Original test expects [200,403,403] for three concurrent calls; queueing intentionally returns [200,200,200]. Original lab remains unchanged; the isolated copy updates only this expectation."
+}

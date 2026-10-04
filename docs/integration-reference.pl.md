@@ -99,6 +99,26 @@ FASTFENCE_IDENTITY_MAX_SOURCE_BYTES=4194304
 
 Rekordy tożsamości trzeba przygotować osobno. Te ustawienia nie tworzą kont. Górne granice to 65 536 rekordów oraz 64 MiB; oba limity obowiązują niezależnie. Duplikaty identyfikatorów i skrótów poświadczeń są odrzucane. Budżety i audyt nadal należą do pojedynczego procesu; większy rejestr nie synchronizuje stanu między workerami i nie zwiększa wydajności inferencji Laya.
 
+## Kolejka żądań bramki {#gateway-request-queue}
+
+Od wersji **1.0.7** chronione żądania współdzielą ograniczoną kolejkę w każdym procesie bramki, obsługiwaną według FIFO wśród tożsamości uprawnionych aktualnie do wykonania. Domyślne limity to **8 wykonywanych żądań**, **1024 oczekujące żądania**, **120 sekund maksymalnego oczekiwania** oraz **64 MiB rozliczanych oczekujących danych**. Domyślnie każda tożsamość może mieć do **32 oczekujących żądań**; aktywna praca musi też mieścić się w budżecie współbieżności roli. Licznik bajtów obejmuje zserializowane wywołania, przygotowane dane i zachowane surowe dane wejścia/dokumentu; nie jest limitem RSS procesu. Ograniczenia liczby i bajtów obowiązują jednocześnie: paczka może osiągnąć limit pamięci przed limitem liczby żądań. Jest to chwilowe oczekiwanie w pamięci procesu, nie trwała kolejka zadań ani gwarancja powodzenia każdego wywołania.
+
+Skonfiguruj wartości startowe w prywatnym `.env` instalacji, a następnie uruchom bramkę ponownie:
+
+```dotenv
+FASTFENCE_REQUEST_CONCURRENCY=8
+FASTFENCE_REQUEST_QUEUE_SIZE=1024
+FASTFENCE_REQUEST_QUEUE_PER_IDENTITY=32
+FASTFENCE_REQUEST_QUEUE_TIMEOUT_SECONDS=120
+FASTFENCE_REQUEST_QUEUE_MAX_BYTES=67108864
+```
+
+Limit oczekiwania można ustawić do 3600 sekund. Timeout klienta i reverse proxy musi obejmować oczekiwanie **oraz** pozostałe wykonanie chronionej operacji, w tym etapy semantyczne. Wydłużenie oczekiwania nie przyspiesza wolnego modelu. Po przyjęciu nadal obowiązują budżety ról oraz limity Laya, modeli i ACP.
+
+`GET /api/admin/status` udostępnia `request_queue`: `active`, `waiting`, `max_active`, `max_waiting`, `wait_timeout_ms`, `waiting_bytes` i `max_waiting_bytes`. To aktualne wartości instancji, nie skumulowana przepustowość. **Overview → Request queue** pokazuje liczby i maksymalne oczekiwanie; **Test requests** oraz **Activity → Details** pokazują `queue_wait_ms` zakończonej decyzji. Łączne `latency_ms` obejmuje kolejkę i wykonanie; budżet czasu obliczeń nie obejmuje czekania na przyjęcie.
+
+`request_queue_full`, `request_queue_timeout` i `request_queue_closed` oznaczają, że żądanie nie zostało przyjęte do chronionego wykonania. Dla tego odrzuconego żądania nie uruchomiono usługi biznesowej ani modelu semantycznego i nie zarezerwowano budżetu wywołania. Żądania opuszczające kolejkę ponownie sprawdzają aktualną politykę; już wykonywane zachowują wybrany snapshot. Automatycznych ponowień nie ma. Anulowanie zwalnia lokalne oczekiwanie, ale nie cofa pracy rozpoczętej po przyjęciu.
+
 ## Limity przyjmowania żądań
 
 Każdy adapter HTTP modelu korzysta z puli do **32 połączeń** i przyjmuje najwyżej **128 aktywnych lub oczekujących żądań**. Czekanie na połączenie zużywa dotychczasowy limit czasu żądania. Cookies upstreamu nie są przechowywane ani przekazywane między wywołaniami.

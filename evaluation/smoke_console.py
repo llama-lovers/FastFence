@@ -480,6 +480,11 @@ def run(root, screenshots=None):
         "mode": "real_chromium_synthetic_api_fixtures_no_inference",
         "checks": [
             "overview_all_decision_counters",
+            "request_queue_current_counts_and_timeout",
+            "request_queue_missing_invalid_and_zero_values",
+            "request_queue_wait_in_verdict_and_audit",
+            "request_queue_rejection_labels",
+            "request_queue_stale_and_identity_reset",
             "request_level_path_percentages_not_call_ratio",
             "recent_denial_scope_and_safe_rendering",
             "metrics_stale_warning_and_identity_reset",
