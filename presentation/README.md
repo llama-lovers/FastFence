@@ -1,10 +1,35 @@
 # FastFence presentation and recorded demo
 
-English slides and video captions, with Polish speaker notes. The main pitch
-uses slides 1–7 and takes approximately three minutes. Slide 8 is an optional
-benchmark appendix with its original package version and measurement scope.
+English slides and video captions, with Polish speaker notes. The revised deck
+contains six main slides and one appendix with verification evidence.
 
-## Deliverables
+## Revised showcase
+
+Use the revised materials for the product pitch:
+
+- [Product film with instrumental music](output/fastfence-demo-v2.mp4)
+- [Revised editable presentation](output/fastfence-pitch-v2.pptx)
+- [Revised PDF presentation](output/fastfence-pitch-v2.pdf)
+- [Polish opening, closing and technical answers](showcase-script.pl.md)
+
+The revised film lasts **1 minute 50 seconds** and shows actual 1.0.7 outcomes. It has
+English on-screen explanations and music, without a voiceover. Scene duration
+does not measure request latency. The original continuous demonstrations below
+remain available for inspecting the complete interaction.
+
+For a three-minute presentation, use a short spoken opening, play the film,
+then close with the operational guarantees and launch command. The Polish
+script provides this opening and closing. The additional slides support a
+presentation without video or questions after the pitch.
+
+The music is an original instrumental generated for FastFence, without vocals
+or third-party audio samples. Its source is `scripts/build_soundtrack.py` and
+`scripts/soundtrack_synthesis.py`. The video uses `scripts/build_showcase.py`.
+With NumPy, Pillow and FFmpeg available, build the soundtrack first, then the
+video; the video builder includes the generated track when present. Private
+masters and intermediate frames remain under `state/private/`.
+
+## Original recording and supporting materials
 
 - [Editable PowerPoint](output/fastfence-pitch.pptx)
 - [PDF slides](output/fastfence-pitch.pdf)

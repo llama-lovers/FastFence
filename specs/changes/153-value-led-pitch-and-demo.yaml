@@ -1,0 +1,40 @@
+id: FF-153
+title: Rebuild the presentation and film around demonstrated user value
+status: verified
+problem: The existing slide deck and long dashboard recording explain features but do not make the product's value or dynamic enforcement clear quickly enough.
+scope:
+  - Produce a concise edited product film using existing real recorded outcomes and readable evidence close-ups.
+  - Redesign the English presentation with Polish narration around policy authoring, safe activation, document protection and operational guarantees.
+  - Add original instrumental electronic music without a voiceover, aligned with the edited scene timings.
+  - Preserve the original recording and distinguish observed demonstrations from tested guarantees.
+constraints:
+  - Artifact-only work with no runtime changes, operator configuration changes or new inference.
+  - Reuse actual recorded UI evidence without manufacturing outputs or presenting edited time as latency evidence.
+  - Describe idempotency only for the operations supported by implementation and tests; do not imply replay-safe business requests.
+  - Do not claim competitor inferiority, universal semantic accuracy or an unlimited-capacity service.
+  - Keep all private state, credentials and temporary renders outside delivered artifacts.
+change_paths:
+  - presentation/scripts/*
+  - presentation/assets/*
+  - presentation/output/*
+  - presentation/README.md
+  - presentation/showcase-script.pl.md
+  - presentation/evidence.md
+acceptance:
+  - The film makes the actual same-request allow-to-block change understandable without a lengthy interface walkthrough.
+  - Natural-language rules and document OCR appear with their real review and protection outcomes.
+  - The deck explains customer benefits and exact dynamic, failure-handling and repeat-initialization guarantees.
+  - English slides and captions remain readable and the Polish script follows the final timeline.
+  - Final slides and representative video frames are visually inspected and the exported video fully decodes.
+validation:
+  - command: Manual artifact review and video decode
+    expected: The final outputs are readable, preserve factual scope and match the delivered narration.
+  - command: uv run --locked pre-commit run
+    expected: All applicable configured checks pass.
+evidence:
+  - check: Revised deck inspection
+    result: Six main slides and one evidence appendix were rendered and visually reviewed. Native editable slide content and Polish notes were retained. PPTX package, geometry and reimport checks passed. All seven PDF pages were inspected using bundled LibreOffice, with no clipping or font substitution observed. Both original presentation files remain available.
+  - check: Video and soundtrack inspection
+    result: The complete 110-second H.264 Full HD film with stereo AAC audio decodes successfully. Every scene was visually inspected. Actual recorded local-rule decisions, semantic review and document redaction remain distinguishable from the editorial regression-tested operations summary. Original instrumental music measures approximately -18.07 LUFS and -1.58 dBTP; no listening review is claimed.
+  - check: Claim boundaries
+    result: Dynamic policy changes are demonstrated by the same recorded request on the same running instance. Existing code and regression tests support last-valid configuration, rechecking after queue admission and repeat setup preserving state. No business-request idempotence, new semantic accuracy, competitor comparison or new latency measurement is claimed.

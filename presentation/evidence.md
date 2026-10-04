@@ -1,5 +1,23 @@
 # FastFence · llama-lovers · presentation evidence
 
+## Operational claims in the revised showcase
+
+The revised presentation and edited film explain user value using the same
+recorded 1.0.7 outcomes. Editing does not introduce new benchmark observations.
+
+| Claim | Supporting evidence and exact scope |
+| --- | --- |
+| Change protection without redeploying the agent | The recorded `Hello` request changes from allowed at v4 to locally blocked at v5 on the same gateway instance. This is a deterministic rule change. |
+| Test a natural-language rule before activation | The separate recorded semantic workflow reviews eight explicit cases against current and proposed policies, then activates the reviewed version. These cases do not establish accuracy on unseen text. |
+| Invalid updates preserve the last valid policy | `tests/unit/test_config_providers.py` checks malformed files, HTTP failures and atomic snapshot visibility. This is implementation and existing regression evidence, not a newly recorded failure demonstration. |
+| Queued requests use current rules before execution | `tests/integration/test_request_admission.py::test_policy_change_while_waiting_rechecks_original_content` verifies that a waiting request is blocked by an updated policy before business execution. |
+| Idempotent setup preserves existing state | `tests/unit/test_cli_startup.py::test_repeat_init_preserves_credentials_and_keys` plus bootstrap tests verify preservation of valid configuration and keys. This does not imply idempotent business operations or request deduplication. |
+| Failed required semantic assessment blocks execution | `tests/unit/test_laya_semantic_runtime.py` covers provider failures and invalid responses. Fail-closed behavior is separate from the correctness of a successful model classification. |
+| Documents remain useful after matched data is removed | Two synthetic email addresses are absent from the approved Markdown, and Qwen returns an actual document summary. Source: `output/ocr-demo-evidence.json`. |
+
+The value proposition describes FastFence's supported behavior. It is not a
+comparison asserting that other products lack these capabilities.
+
 **Release:** 1.0.7 · **Format:** approximately three minutes, English slides and Polish narration. Present the published product and recorded behavior; do not present a recording as a live session.
 
 ## Story and speaking cues

@@ -1,0 +1,241 @@
+{
+  "duration_seconds": 110,
+  "resolution": "1920x1080",
+  "source_recording": "fastfence-demo.mp4",
+  "source_evidence": "demo-evidence.json",
+  "editing": "Editorial layouts, unchanged UI crops and real-time excerpts; cuts omit waits/navigation. No acceleration, no voice, no fabricated UI.",
+  "semantic_review_scope": "Financial example already blocked by base policy; this sequence demonstrates reviewed coverage, not a newly caused verdict change or arbitrary-rule guarantee.",
+  "scenes": [
+    {
+      "id": "hook",
+      "duration": 10,
+      "title": "Same request.\nNew policy.",
+      "body": "Change protection without changing your agent.",
+      "label": "HOT POLICY UPDATE",
+      "proof": "Same running gateway. Genuine before / after results.",
+      "source": null,
+      "crop": null,
+      "source_start": null,
+      "voice_pl": "Ten sam agent, to samo zapytanie. Zmieniamy politykę i zatrzymujemy żądanie przed modelem — bez restartu.",
+      "start_seconds": 0,
+      "end_seconds": 10,
+      "playback_speed": 1
+    },
+    {
+      "id": "allowed",
+      "duration": 7,
+      "title": "Start with a\nreal request.",
+      "body": "Laya checks input and output. Qwen returns the answer.",
+      "label": "01 / CONTROL",
+      "proof": "Public FastFence 1.0.7 · actual Laya + Qwen",
+      "source": "video",
+      "crop": [
+        920,
+        210,
+        640,
+        675
+      ],
+      "source_start": 10.2,
+      "voice_pl": "FastFence stoi między aplikacją a modelem. Tutaj Laya sprawdza wejście i wyjście, a Qwen rzeczywiście odpowiada.",
+      "start_seconds": 10,
+      "end_seconds": 17,
+      "playback_speed": 1
+    },
+    {
+      "id": "literal",
+      "duration": 10,
+      "title": "Test the rule.\nThen activate.",
+      "body": "A prohibited example. A permitted example. An explicit decision.",
+      "label": "01 / CONTROL",
+      "proof": "Literal input rule · model scope · reviewed activation",
+      "source": "video",
+      "crop": [
+        450,
+        45,
+        700,
+        810
+      ],
+      "source_start": 20.5,
+      "voice_pl": "Regułę najpierw sprawdzamy na przykładach. Widzimy, co zostanie zablokowane, a co pozostanie dozwolone. Dopiero wtedy ją aktywujemy.",
+      "start_seconds": 17,
+      "end_seconds": 27,
+      "playback_speed": 1
+    },
+    {
+      "id": "blocked",
+      "duration": 7,
+      "title": "Stop it before\ninference.",
+      "body": "The same Hello is now blocked locally. No business model call.",
+      "label": "01 / CONTROL",
+      "proof": "Policy v4 → v5 · same process · no restart",
+      "source": "video",
+      "crop": [
+        920,
+        210,
+        640,
+        675
+      ],
+      "source_start": 32,
+      "voice_pl": "To samo Hello jest już blokowane lokalnie. Model biznesowy nie został wywołany. Zmieniła się polityka, nie kod agenta.",
+      "start_seconds": 27,
+      "end_seconds": 34,
+      "playback_speed": 1
+    },
+    {
+      "id": "audit",
+      "duration": 6,
+      "title": "Know why.\nProve what ran.",
+      "body": "A decision is useful when you can explain its boundary.",
+      "label": "02 / VISIBILITY",
+      "proof": "Recorded decisions · policy version · execution status",
+      "source": "demo-audit.png",
+      "crop": [
+        255,
+        80,
+        1325,
+        790
+      ],
+      "source_start": null,
+      "voice_pl": "Każda decyzja zostawia ślad: przyczynę, wersję polityki i informację, czy wywołanie rzeczywiście wykonano.",
+      "start_seconds": 34,
+      "end_seconds": 40,
+      "playback_speed": 1
+    },
+    {
+      "id": "language",
+      "duration": 9,
+      "title": "Policies in\nyour words.",
+      "body": "Describe the restriction and its exception. Supply examples that must pass.",
+      "label": "03 / LAYA",
+      "proof": "Scoped input/output policy · explicit sample review",
+      "source": "demo-semantic-rule.png",
+      "crop": [
+        0,
+        0,
+        700,
+        810
+      ],
+      "source_start": null,
+      "voice_pl": "Politykę semantyczną zapisujemy własnymi słowami. Określamy zakaz, wyjątek i oczekiwane wyniki przykładów.",
+      "start_seconds": 40,
+      "end_seconds": 49,
+      "playback_speed": 1
+    },
+    {
+      "id": "review",
+      "duration": 12,
+      "title": "Test before\nyou trust.",
+      "body": "8 scoped cases passed before activation. Input and output. Models and tools.",
+      "label": "03 / LAYA",
+      "proof": "Before / after review · explicit confirmation · saved regressions",
+      "source": "video",
+      "crop": [
+        450,
+        45,
+        700,
+        810
+      ],
+      "source_start": 65.7,
+      "voice_pl": "Laya porównuje aktywną i proponowaną politykę. Osiem przypadków przechodzi testy. Aktywacja wymaga potwierdzenia, a przykłady zostają do regresji.",
+      "start_seconds": 49,
+      "end_seconds": 61,
+      "playback_speed": 1
+    },
+    {
+      "id": "document",
+      "duration": 8,
+      "title": "Keep the value.\nProtect the data.",
+      "body": "A two-page PDF contains useful content and contact details.",
+      "label": "04 / DOCUMENTS",
+      "proof": "Synthetic source document · separate recorded OCR session",
+      "source": "demo-document-preview.png",
+      "crop": [
+        0,
+        0,
+        1600,
+        900
+      ],
+      "source_start": null,
+      "voice_pl": "Dokument zawiera użyteczną treść i dane kontaktowe. Nie musimy rezygnować z jego przetwarzania.",
+      "start_seconds": 61,
+      "end_seconds": 69,
+      "playback_speed": 1
+    },
+    {
+      "id": "redact",
+      "duration": 12,
+      "title": "Useful text.\nHidden contacts.",
+      "body": "Local OCR. Two pages. Two email redactions. Downloadable Markdown.",
+      "label": "04 / DOCUMENTS",
+      "proof": "Exact UI download · [REDACTED:pii_email] x 2",
+      "source": "demo-ocr-markdown.png",
+      "crop": [
+        925,
+        210,
+        625,
+        690
+      ],
+      "source_start": null,
+      "voice_pl": "OCR lokalnie odczytuje obie strony. Polityka usuwa dwa adresy e-mail. Dostajemy użyteczny Markdown, który można pobrać lub przekazać dalej.",
+      "start_seconds": 69,
+      "end_seconds": 81,
+      "playback_speed": 1
+    },
+    {
+      "id": "answer",
+      "duration": 10,
+      "title": "Let the model\ndo useful work.",
+      "body": "Only protected Markdown goes to Qwen. Laya checks both directions.",
+      "label": "04 / DOCUMENTS",
+      "proof": "Protected Markdown · input and output checks",
+      "source": "video",
+      "crop": [
+        920,
+        345,
+        640,
+        540
+      ],
+      "source_start": 134.9,
+      "voice_pl": "Do Qwena trafia chroniony tekst, nie oryginalny PDF. Model tworzy podsumowanie, a Laya sprawdza wejście i odpowiedź.",
+      "start_seconds": 81,
+      "end_seconds": 91,
+      "playback_speed": 1
+    },
+    {
+      "id": "operations",
+      "duration": 10,
+      "title": "Safe policy\nchanges.",
+      "body": "Dynamic protection. Predictable operations.",
+      "label": "REGRESSION-TESTED BEHAVIOR",
+      "proof": "Verified behavior · editorial summary, not a live UI recording",
+      "source": null,
+      "crop": null,
+      "source_start": null,
+      "voice_pl": "Błędna aktualizacja zachowuje ostatnią poprawną politykę. Kolejka sprawdza aktualne reguły przed wykonaniem. Ponowne uruchomienie zachowuje konfigurację i klucze.",
+      "start_seconds": 91,
+      "end_seconds": 101,
+      "playback_speed": 1
+    },
+    {
+      "id": "close",
+      "duration": 9,
+      "title": "Your agents.\nYour policies.",
+      "body": "Start locally with one command.",
+      "label": "FASTFENCE",
+      "proof": "Requires uv and a running Ollama service · first run installs local components",
+      "source": null,
+      "crop": null,
+      "source_start": null,
+      "voice_pl": "FastFence daje kontrolę nad agentami bez przepisywania aplikacji. Uruchom lokalnie jednym poleceniem i sprawdź na własnych regułach.",
+      "start_seconds": 101,
+      "end_seconds": 110,
+      "playback_speed": 1
+    }
+  ],
+  "audio": {
+    "type": "original_instrumental",
+    "source_track": "fastfence-soundtrack.m4a",
+    "voice": false,
+    "source_samples": "original synthesis"
+  }
+}
