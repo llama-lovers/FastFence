@@ -1,0 +1,44 @@
+id: FF-152
+title: Extend the recorded presentation with actual protected document OCR
+status: implemented
+problem: The presentation describes document protection but the recorded product demonstration does not yet show an actual uploaded document passing through local OCR and privacy controls.
+scope:
+  - Append an actual document workflow to the existing ninety-second recorded demonstration.
+  - Record a synthetic document processed by the installed public 1.0.7 package and show the policy-checked Markdown and protected verdict.
+  - Align presentation narration, artifact instructions and evidence with the final recorded sequence.
+constraints:
+  - Artifact-only extension; do not modify runtime code, model assets, operator state or release version.
+  - Real OCR and inference are permitted only in the isolated demonstration installation; no new benchmark or broad accuracy evaluation is introduced.
+  - Use synthetic document content and keep credentials, raw private state and temporary recordings out of delivered artifacts.
+  - Demonstrate the configured input privacy redaction, not asymmetric encryption or original-value restoration unless those actions actually occur.
+  - Original document bytes are processed by local OCR. Only the policy-checked extracted text is eligible for a business-model call; do not claim that raw text is never processed anywhere.
+  - State whether the recording uses extraction or completion mode. Extraction alone cannot demonstrate a business-model call or output assessment.
+  - Do not imply that the gateway edits original PDF pages or image pixels, or that OCR perfectly detects every character or sensitive value.
+change_paths:
+  - presentation/scripts/*.py
+  - presentation/assets/*.png
+  - presentation/assets/demo-document.pdf
+  - presentation/output/fastfence-demo.mp4
+  - presentation/output/demo-evidence.json
+  - presentation/output/ocr-demo-evidence.json
+  - presentation/output/demo-document-approved.md
+  - presentation/output/demo-captions.srt
+  - presentation/README.md
+  - presentation/demo-script.pl.md
+  - presentation/evidence.md
+acceptance:
+  - The appended footage shows an actual document upload and successful local OCR with nonzero page and elapsed-time values.
+  - The original synthetic sensitive value is absent from the approved Markdown; the verdict records the actual privacy decision and execution boundary.
+  - Completion claims, if made, agree with upstream_executed and input/output semantic statuses; blocked or extraction-only outcomes are labelled accurately.
+  - Final duration, captions, screenshot and evidence match the exported video, with its OCR segment clearly distinguished from the earlier continuous recording.
+  - Final output frames are inspected for readable results and credential exposure; temporary material remains private.
+validation:
+  - command: Manual recording and evidence review
+    expected: The actual installed-package OCR outcome, sanitized report, captions and final video agree, without new runtime tests or model evaluations.
+evidence:
+  - check: Existing document pipeline review
+    result: DocumentMarkdownWorkflow passes original bytes only to its local OCR source. ContentUseCases.process captures the prepared prompt after input controls, and Executor.call forwards that prepared text to the business-model adapter. The existing test_redacted_document_is_the_only_payload_forwarded_and_audit_is_content_free regression compares the returned approved Markdown with the captured model prompt; this review did not rerun tests or inference.
+  - check: Final recording and approved Markdown
+    result: Public PyPI 1.0.7 produced two actual two-page OCR results with redacted decisions, pii_email findings and two redaction markers each. The exact UI-downloaded Markdown contains neither original synthetic contact address. Extraction did not execute upstream; completion executed Qwen with passed Laya input/output checks. Three actual assessments belong to this separate OCR session, not the earlier policy session.
+  - check: Artifact duration and privacy review
+    result: ffprobe verified the combined H.264 1600x990 film at 144.933008 seconds. The first 90 seconds are the policy film, followed by six seconds of synthetic PDF preview and the OCR UI recording. Captions and Polish narration match the final boundaries. Independent inspection of frames at 96 and 136 seconds found no displayed credentials or private paths; original contact values appear only in the explicitly synthetic source preview. No runtime tests or new model calls were performed by this review.

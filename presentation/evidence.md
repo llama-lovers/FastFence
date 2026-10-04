@@ -28,3 +28,24 @@
 - The historical 400-case Laya corpus recorded **14 false negatives and 13 false positives**; it was Qwen-generated/labelled development data, not a fresh independent 1.0.7 benchmark. [Report](../evaluation/results/training-prompts-laya.json).
 - Fail-closed provider errors do not guarantee a correct semantic judgment. Cancellation after execution cannot undo remote effects. Queue limits concern one runtime; memory counters and audit reset on restart.
 - Do not claim a security certification, universal detection, zero overhead, unlimited concurrency or a self-assigned competition score. Never display credentials, private policies or raw sensitive payloads in the recording.
+
+
+## Recorded document extension
+
+The [combined film](output/fastfence-demo.mp4) lasts **144.933 seconds**. Its
+first 90 seconds retain the policy demonstration; a six-second synthetic PDF
+preview introduces a separate isolated public-PyPI **1.0.7** OCR session.
+Both actual document requests processed two pages, returned `redacted` with
+`pii_email`, and replaced both contact addresses with `[REDACTED:pii_email]`.
+The [downloaded Markdown](output/demo-document-approved.md) contains neither
+original address. Extraction has `upstream_executed=false`; completion has
+`upstream_executed=true`, an actual Qwen response, and passed Laya input/output
+checks. This adds three assessments to the policy segment's eighteen; it is not
+an accuracy or latency benchmark. [Recorded evidence](output/ocr-demo-evidence.json).
+
+The source workflow processes original bytes in local OCR and forwards only the
+protected extracted prompt to the business-model adapter. The video and downloaded
+artifact establish the displayed redaction outcome; this review did not capture
+provider network traffic. This is masking, not asymmetric restoration or editing
+PDF pixels. Independent frame review at the OCR segment start (96 seconds) and
+final response (136 seconds) found no displayed credentials or private paths.

@@ -45,3 +45,27 @@ Explicit confirmation activates the tested policy and saves regression cases.
 12
 00:01:23,012 --> 00:01:30,000
 Fast local enforcement. Reviewed semantic policies. Visible, exportable decisions.
+
+13
+00:01:30,000 --> 00:01:36,000
+Source PDF preview: two pages of synthetic contact data. Original emails are visible here.
+
+14
+00:01:36,000 --> 00:01:40,250
+4. Documents: local OCR, protected Markdown, then a real model response.
+
+15
+00:01:40,250 --> 00:01:53,927
+Upload the actual two-page PDF. Local OCR extracts text; input privacy redacts matches.
+
+16
+00:01:53,927 --> 00:02:00,979
+Two pages become approved Markdown. Synthetic email values are removed before model use.
+
+17
+00:02:00,979 --> 00:02:14,847
+Send protected Markdown to Qwen. The original PDF is not sent to the business model.
+
+18
+00:02:14,847 --> 00:02:24,933
+Real model output, with Laya input and output checks. No edited PDF is produced.

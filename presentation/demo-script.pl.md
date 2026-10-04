@@ -38,9 +38,9 @@ FastFence uruchamiamy z PyPI jednym poleceniem widocznym na slajdzie. Publicznie
 
 To pomiary publicznej paczki 1.0.2 na Apple M3 Pro, przy jednym równoległym żądaniu. Dwa tysiące próbek lokalnych kontroli dało medianę 0,206 i p95 0,248 milisekundy. Dwie oceny Laya, wejścia i wyjścia, miały medianę 1117 i p95 1200 milisekund w dwudziestu próbkach. Oba pomiary wykluczają wejściowe HTTP i generowanie odpowiedzi przez model biznesowy. Model semantyczny był rozgrzany i otrzymywał powtarzany prompt. To obserwacje historyczne; pełny pomiar opóźnień wersji 1.0.7 pozostaje do wykonania.
 
-## Nagranie produktu: około 2 minut
+## Nagranie produktu: około 2 minut 25 sekund
 
-Nagranie trwa **90 s**. Poniższe czasy i angielskie podpisy odpowiadają końcowemu plikowi `presentation/output/demo-captions.srt`. Sesja używa publicznej paczki 1.0.7: `Hello` przechodzi przy polityce v4, zostaje zablokowane przy v5, a poprawny przegląd reguły semantycznej prowadzi do aktywacji v6. Wykonano 18 rzeczywistych ocen Laya: dwie dla powitania i szesnaście podczas porównania ośmiu przypadków.
+Łączne nagranie trwa **144,933 s**. Pierwsze 90 sekund pokazuje sesję reguł, a kolejne 54,933 sekundy obejmują podgląd PDF i ochronę dokumentu w osobnej izolowanej sesji. Poniższe czasy i angielskie podpisy odpowiadają końcowemu plikowi `presentation/output/demo-captions.srt`. Sesja używa publicznej paczki 1.0.7: `Hello` przechodzi przy polityce v4, zostaje zablokowane przy v5, a poprawny przegląd reguły semantycznej prowadzi do aktywacji v6. W części reguł wykonano 18 rzeczywistych ocen Laya: dwie dla powitania i szesnaście podczas porównania ośmiu przypadków. Osobna część OCR dodaje trzy oceny: jedną przy ekstrakcji oraz wejście i wyjście przy wywołaniu modelu.
 
 | Czas filmu | Czynność w dashboardzie | English caption |
 | --- | --- | --- |
@@ -56,6 +56,12 @@ Nagranie trwa **90 s**. Poniższe czasy i angielskie podpisy odpowiadają końco
 | 01:05.629–01:13.838 | Wyniki 8/8: wejście i wyjście, modele i narzędzia. | “All 8 reviewed cases pass. Input + output, models + tools. No business call during review.” |
 | 01:13.838–01:23.012 | Jawne potwierdzenie aktywuje v6 i zapisuje przypadki regresyjne. | “Explicit confirmation activates the tested policy and saves regression cases.” |
 | 01:23.012–01:30.000 | Powrót do Overview; podsumowanie działania produktu. | “Fast local enforcement. Reviewed semantic policies. Visible, exportable decisions.” |
+| 01:30.000–01:36.000 | Podgląd oryginalnego, syntetycznego PDF z adresami kontaktowymi. | “Source PDF preview: two pages of synthetic contact data. Original emails are visible here.” |
+| 01:36.000–01:40.250 | Osobna sesja: ustawienia prywatności Redact i ocena Laya. | “4. Documents: local OCR, protected Markdown, then a real model response.” |
+| 01:40.250–01:53.927 | Wysłanie dwustronicowego PDF do lokalnego OCR. | “Upload the actual two-page PDF. Local OCR extracts text; input privacy redacts matches.” |
+| 01:53.927–02:00.979 | Chroniony Markdown z dwoma znacznikami redakcji; pobranie pliku. | “Two pages become approved Markdown. Synthetic email values are removed before model use.” |
+| 02:00.979–02:14.847 | Przetworzenie dokumentu w trybie wywołania Qwen; widoczne oczekiwanie. | “Send protected Markdown to Qwen. The original PDF is not sent to the business model.” |
+| 02:14.847–02:24.933 | Odpowiedź modelu, decyzja REDACTED, znalezione pii_email oraz poprawne kontrole wejścia i wyjścia. | “Real model output, with Laya input and output checks. No edited PDF is produced.” |
 
 Zmianę zachowania `ALLOW → BLOCK` pokazuje reguła lokalna `Hello`. Sekwencja finansowa pokazuje ocenę próbek, aktywację oraz zapis testów: zabroniony przykład był już blokowany przez bazową ocenę bezpieczeństwa. Film nie dowodzi, że dopiero nowa reguła spowodowała tę blokadę, ani nie pokazuje osobnego finansowego wywołania po aktywacji.
 
@@ -95,6 +101,28 @@ uv tool run --python 3.12 fastfence@1.0.7 --port 8020
 ```
 
 Otwórz `http://127.0.0.1:8020`. Podłącz lokalną tożsamość agenta i administratora przed udostępnieniem ekranu. Wybierz model dostępny w aktywnej allowliście. Nowa domyślna instalacja może używać innego modelu biznesowego niż izolowane nagranie; treść reguły i kroki przeglądu pozostają takie same.
+
+## Ręczne powtórzenie ochrony dokumentu
+
+Użyj [dwustronicowego pliku demo-document.pdf](assets/demo-document.pdf).
+Zawiera wyłącznie dane syntetyczne; widoczne w oryginale adresy `example.com`
+służą do pokazania redakcji. Pracuj w osobnej instancji demonstracyjnej.
+
+1. Ustaw akcję prywatności wejścia na **Redact**, pozostawiając rzeczywistą
+   ocenę Laya wejścia i wyjścia. Nie wyłączaj kontroli, aby wymusić sukces.
+2. W **Documents** wybierz `demo-document.pdf`, tryb **Download protected
+   Markdown** i **Process document**. Sprawdź dwie strony, decyzję redakcji,
+   znacznik `[REDACTED:pii_email]` oraz brak oryginalnych adresów.
+3. W tym trybie model biznesowy nie jest wywoływany. **Download .md** pobiera
+   zatwierdzony tekst, nie przerobiony PDF.
+4. Wybierz **Send protected Markdown to a model** i model z aktywnej allowlisty.
+   Po wykonaniu pokaż osobno chroniony Markdown, odpowiedź modelu i statusy
+   kontroli wejścia oraz wyjścia. W przypadku błędu lub blokady pokaż rzeczywisty
+   wynik; nie przedstawiaj go jako poprawnego wywołania.
+
+Komentarz mówcy: „Plik trafia do lokalnego OCR. Adresy kontaktowe zastępujemy
+znacznikami przed wywołaniem modelu. Model dostaje sprawdzony Markdown, a nie
+oryginalny załącznik. To redakcja danych — nie pokaz odwracalnego szyfrowania.”
 
 ## Granice stwierdzeń na scenie
 

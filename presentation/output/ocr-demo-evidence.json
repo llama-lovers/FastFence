@@ -1,0 +1,28 @@
+{
+  "product_version": "1.0.7",
+  "source": "public_pypi_isolated_gateway",
+  "actual_ocr": true,
+  "mocked_api_responses": false,
+  "pages": 2,
+  "extract_ocr_ms": 8656,
+  "complete_ocr_ms": 7533,
+  "extract_decision": "redacted",
+  "extract_findings": [
+    "pii_email"
+  ],
+  "model_findings": [
+    "pii_email"
+  ],
+  "redaction_markers_in_each_markdown": 2,
+  "extract_upstream_executed": false,
+  "model_upstream_executed": true,
+  "decision": "redacted",
+  "semantic_input_status": "passed",
+  "semantic_output_status": "passed",
+  "synthetic_sensitive_values_absent": true,
+  "approved_markdown_is_exact_ui_download": true,
+  "same_instance": true,
+  "semantic_calls": 3,
+  "ui_duration_seconds": 48.919,
+  "appendix_duration_seconds": 54.933
+}
