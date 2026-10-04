@@ -14,6 +14,10 @@ class ModelCapacityExceededError(ModelUnavailableError):
     """Local bounded model admission rejected work before transport execution."""
 
 
+class ToolCapacityExceededError(Exception):
+    """Local bounded tool admission rejected work before transport execution."""
+
+
 class RejectedError(Exception):
     def __init__(self, reason: str, findings: list[str] | None = None) -> None:
         super().__init__(reason)

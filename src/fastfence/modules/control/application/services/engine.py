@@ -28,6 +28,7 @@ from fastfence.modules.control.domain.exceptions import (
     ModelUnavailableError,
     RejectedError,
     ResourceDeniedError,
+    ToolCapacityExceededError,
 )
 from fastfence.modules.control.domain.models import (
     Identity,
@@ -204,12 +205,15 @@ class Engine:
         state.verdict.decision = "error"
         reasons = {
             ModelCapacityExceededError: "model_capacity_exceeded",
+            ToolCapacityExceededError: "tool_capacity_exceeded",
             ModelUnavailableError: "model_unavailable_fail_closed",
             TimeoutError: "upstream_timeout",
             asyncio.CancelledError: "request_cancelled",
         }
         state.verdict.reason = reasons.get(type(error), "upstream_failure")
-        if not isinstance(error, ModelCapacityExceededError) and (
+        if not isinstance(
+            error, ModelCapacityExceededError | ToolCapacityExceededError
+        ) and (
             state.verdict.upstream_executed
             or not isinstance(error, ModelUnavailableError)
         ):

@@ -189,7 +189,14 @@ class ControlRuntime:
                 if close_model is not None:
                     await close_model()
             finally:
-                self.close()
+                try:
+                    close_tools = getattr(
+                        getattr(self.engine, "tools", None), "aclose", None
+                    )
+                    if close_tools is not None:
+                        await close_tools()
+                finally:
+                    self.close()
 
     def close(self) -> None:
         self.ledger.close()

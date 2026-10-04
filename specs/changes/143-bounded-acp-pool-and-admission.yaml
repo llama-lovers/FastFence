@@ -1,0 +1,44 @@
+id: FF-143
+title: Bound ACP upstream connections and distinguish local tool admission refusal
+status: verified
+problem: Each ACP call creates a separate HTTP client with no process-runtime-wide admission bound, allowing a large multi-identity burst to create unbounded outgoing connections.
+scope:
+  - Give the configured ACP adapter a lazy shared HTTP pool with aggregate bounded admission across agent aliases.
+  - Preserve synchronous text-only ACP validation, isolated per-call credentials, response bounds and total deadlines including pool wait.
+  - Distinguish proven local tool admission failure from attempted remote execution in accounting and public verdict reasons.
+  - Close pooled tools during runtime shutdown even when another provider close fails.
+constraints:
+  - Reuse the existing bounded HTTP transport with 128 pending calls and 32 connections per ACP adapter; do not increase model or semantic capacity.
+  - No redirects, ambient proxy configuration, cookies, automatic retries or dynamic user-controlled upstream destinations.
+  - Only local rejection before HTTP execution can clear upstream_executed and business cost; remote HTTP429/503, timeout and malformed replies retain conservative attempted-execution accounting.
+  - Preserve ACP protocol response shapes and HTTP statuses, canonical content projection and the 262144-byte response limit.
+  - Cancellation releases local admission; it does not guarantee a remote agent stopped or rolled back effects.
+  - Keep operator policies, credentials and model configuration unchanged.
+change_paths:
+  - src/fastfence/modules/control/persistence/acp_tools.py
+  - src/fastfence/modules/control/domain/exceptions.py
+  - src/fastfence/modules/control/application/services/execution.py
+  - src/fastfence/modules/control/application/services/engine.py
+  - src/fastfence/modules/control/application/facade.py
+  - tests/unit/test_acp_pool.py
+  - tests/integration/test_acp_capacity.py
+acceptance:
+  - Multiple configured agent aliases reuse a lazy connection pool without cross-request credentials or cookies.
+  - Queue saturation fails before HTTP work with tool_capacity_exceeded, upstream_executed false, zero business cost and settled inflight accounting.
+  - Timed-out pool wait and cancelled calls release admission and permit later calls.
+  - Remote rate limits and failures remain attempted upstream calls with conservative accounting and no unsafe retry metadata.
+  - Application shutdown closes tool connections on normal and exceptional paths.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_acp_pool.py tests/integration/test_acp_capacity.py tests/unit/test_acp_tools.py tests/integration/test_acp_http.py tests/unit/test_model_http_pool.py tests/integration/test_model_capacity.py
+    expected: Pooled admission, execution accounting, protocol compatibility and shutdown tests pass without models.
+  - command: uv run --locked basedpyright src
+    expected: No type errors.
+  - command: uv run --locked lint-imports
+    expected: Layer contracts remain valid.
+evidence:
+  - check: Initial source audit
+    result: ACPTools used one AsyncClient per request while model adapters already used a bounded shared transport. Existing ACP protocol constraints and conservative remote-failure accounting must be retained.
+  - check: Focused ACP pooling and pipeline regression suite
+    result: All 95 tests passed, including actual loopback TCP reuse and deadline while waiting for a pool connection, aggregate alias admission/cancellation, cross-alias cookie/header isolation, conservative remote429/503 accounting and shutdown after each provider failure. No model calls were made.
+  - check: Static and architectural validation
+    result: Ruff, whole-source basedpyright and pyscn passed; all 16 import contracts remained intact. The final loopback fixture closes its keepalive client before awaiting server shutdown, with bounded cleanup on failure.

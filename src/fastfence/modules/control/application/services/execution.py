@@ -24,6 +24,7 @@ from fastfence.modules.control.contracts.ports import (
 from fastfence.modules.control.domain.exceptions import (
     ModelCapacityExceededError,
     RejectedError,
+    ToolCapacityExceededError,
 )
 from fastfence.modules.control.domain.models import (
     InvocationState,
@@ -89,12 +90,17 @@ class Executor:
         state.verdict.upstream_executed = True
         state.cost = prepared.rule.cost_microusd
         if isinstance(state.call, ToolCall):
-            output = await asyncio.wait_for(
-                self.tools.call(
-                    state.call.tool, prepared.payload, state.identity
-                ),
-                timeout=prepared.rule.timeout_ms / 1000,
-            )
+            try:
+                output = await asyncio.wait_for(
+                    self.tools.call(
+                        state.call.tool, prepared.payload, state.identity
+                    ),
+                    timeout=prepared.rule.timeout_ms / 1000,
+                )
+            except ToolCapacityExceededError:
+                state.verdict.upstream_executed = False
+                state.cost = 0
+                raise
             output_units = len(encode(output).encode())
         else:
             common = (

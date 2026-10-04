@@ -1,15 +1,18 @@
 """Trusted synchronous ACP text calls through the existing tool policy pipeline."""
 
-import asyncio
 import json
 from typing import Any, Literal
 from uuid import UUID
 
-import httpx
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from fastfence.modules.control.domain.exceptions import ResourceDeniedError
+from fastfence.modules.control.domain.exceptions import (
+    ModelCapacityExceededError,
+    ResourceDeniedError,
+    ToolCapacityExceededError,
+)
 from fastfence.modules.control.domain.models import Identity
+from fastfence.modules.control.persistence.model_http import ModelHTTP
 from fastfence.shared.acp import (
     ACPAgentSettings,
     ACPInput,
@@ -89,6 +92,7 @@ def decode_run(body: bytes, agent_name: str) -> dict[str, Any]:
 
 class ACPTools:
     def __init__(self, agents: dict[str, ACPAgentSettings]) -> None:
+        self._http = ModelHTTP()
         self._agents = {
             "acp." + alias: config for alias, config in agents.items()
         }
@@ -116,39 +120,24 @@ class ACPTools:
                 "Bearer " + config.api_key.get_secret_value()
             )
         try:
-            async with asyncio.timeout(config.timeout_seconds):
-                async with httpx.AsyncClient(
-                    timeout=config.timeout_seconds,
-                    trust_env=False,
-                    follow_redirects=False,
-                ) as client:
-                    async with client.stream(
-                        "POST",
-                        config.base_url + "/runs",
-                        json=payload,
-                        headers=headers,
-                    ) as response:
-                        if (
-                            response.status_code != 200
-                            or response.headers.get(
-                                "content-encoding", "identity"
-                            )
-                            != "identity"
-                        ):
-                            raise ValueError("Unsupported ACP response")
-                        body = bytearray()
-                        async for chunk in response.aiter_bytes(
-                            chunk_size=8192
-                        ):
-                            if len(body) + len(chunk) > MAX_RESPONSE_BYTES:
-                                raise ValueError(
-                                    "ACP response exceeds byte limit"
-                                )
-                            body.extend(chunk)
-                        return decode_run(bytes(body), config.agent_name)
+            response = await self._http.post(
+                config.base_url + "/runs",
+                json=payload,
+                headers=headers,
+                timeout_ms=max(1, int(config.timeout_seconds * 1000)),
+                max_response_bytes=MAX_RESPONSE_BYTES,
+            )
+            if response.status_code != 200:
+                raise ValueError("Unsupported ACP response")
+            return decode_run(response.content, config.agent_name)
+        except ModelCapacityExceededError:
+            raise ToolCapacityExceededError("Tool capacity exceeded") from None
         except TimeoutError:
             raise TimeoutError("ACP agent timeout") from None
         except Exception:
             raise RuntimeError(
                 "ACP agent unavailable or invalid response"
             ) from None
+
+    async def aclose(self) -> None:
+        await self._http.aclose()
