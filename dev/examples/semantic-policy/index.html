@@ -1422,7 +1422,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4e4571e32989066d704e05d6eb20160759f7ff1">Commit b4e4571e3298</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
 </div>
 <h1 id="preview-and-activate-a-natural-language-rule">Preview and activate a natural-language rule<a class="headerlink" href="#preview-and-activate-a-natural-language-rule" title="Permanent link">&para;</a></h1>
 <p>This complete script adds a named policy:</p>
@@ -1490,6 +1490,7 @@ exact matching. Removing the named rule through <strong>Policies</strong> requir
 reviewed policy version.</p>
 <h2 id="compound-rule-limitation">Compound-rule limitation<a class="headerlink" href="#compound-rule-limitation" title="Permanent link">&para;</a></h2>
 <p>The local Qwen3:4b assessment has a reproduced false negative for a rule requiring <strong>both a person's full name and an email address</strong>: the combined input was allowed even though the named rule reached Laya correctly. A natural-language conjunction is not a reliable substitute for deterministic privacy controls. Keep applicable PII controls enabled and include combined, partial and exception cases in your preview tests; a passing example does not establish general detection accuracy.</p>
+<p>A subsequent diagnostic on public <strong>1.0.4</strong> tested a separate policy-only assessment followed by the unchanged security guard on 25 cases. Policy compliance was correct in <strong>19/25</strong> cases (six missed violations); the security guard was correct in <strong>25/25</strong>. Combining them yielded <strong>20/25</strong>, including <strong>7/8</strong> new held-out cases. The extra inference was <strong>not shipped</strong>: it still missed intended denials and added real token and execution cost. The released semantic runtime remains unchanged; these small diagnostic counts do not establish general accuracy.</p>
 <p>The same semantic configuration can also block content permitted by a literal rule because the layers enforce separate restrictions. Inspect the decision reason and input/output assessment results when a literal nonmatch is blocked.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="sd">"""Preview a named natural-language rule with real Laya; activate only explicitly."""</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
@@ -1634,7 +1635,7 @@ reviewed policy version.</p>
 </span><span id="__span-3-141"><a id="__codelineno-3-141" name="__codelineno-3-141" href="#__codelineno-3-141"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 </span><span id="__span-3-142"><a id="__codelineno-3-142" name="__codelineno-3-142" href="#__codelineno-3-142"></a>    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
-<p><a href="https://fastfence.dev/dev/downloads/semantic_policy.py">Download semantic_policy.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/examples/docs/semantic_policy.py">View source</a></p>
+<p><a href="https://fastfence.dev/dev/downloads/semantic_policy.py">Download semantic_policy.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/semantic_policy.py">View source</a></p>
 
 
 

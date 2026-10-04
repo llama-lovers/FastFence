@@ -748,6 +748,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Sprawdź aktywność żądań">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-queue-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pojemność kolejki modelu
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1574,6 +1591,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Sprawdź aktywność żądań">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-queue-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pojemność kolejki modelu
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1598,11 +1632,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4e4571e32989066d704e05d6eb20160759f7ff1">Commit b4e4571e3298</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4e4571e32989066d704e05d6eb20160759f7ff1">Commit b4e4571e3298</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
 </div>
 <h1 id="check-your-installation">Sprawdź swoją instalację<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Zainstaluj pakiet w nowym katalogu<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1759,6 +1793,28 @@
 <p>Przykład używa powyższej odwracalnej reguły osoby. Dla reguły litery a wywołaj narzędzie MCP <code>complete</code> z <code>{"model":"qwen3:4b","prompt":"Cat","max_output_tokens":16}</code> i oczekuj blokady wejścia przed wykonaniem Qwena.</p>
 <h2 id="inspect-request-activity">Sprawdź aktywność żądań<a class="headerlink" href="#inspect-request-activity" title="Permanent link">&para;</a></h2>
 <p>Otwórz <strong>Activity</strong> i znajdź wynik po identyfikatorze żądania. Porównaj wersję polityki i źródła sygnatur, decyzję, powód, dopasowania i wykonanie upstream. Rozwiń każdy wiersz, aby porównać <strong>Input text analysis</strong> i <strong>Output text analysis</strong>: <code>passed</code> oznacza, że etap semantyczny wykonał się i dopuścił treść, <code>blocked</code> — że ją odrzucił, <code>error</code> — że ocena zakończyła się błędem, a <code>not_run</code> — że etap nie został osiągnięty. Blokada wejścia zapobiega wykonaniu upstream; blokada wyjścia zatrzymuje dostarczenie po jego wykonaniu. Porównując wyniki przed i po zmianie, dopasuj identyfikator żądania i wersję polityki. Audyt zawiera tylko metadane; nie może zawierać promptów, tekstu OCR, oryginalnych nazwisk ani tokenów odzyskiwania.</p>
+<h3 id="model-queue-capacity">Pojemność kolejki modelu<a class="headerlink" href="#model-queue-capacity" title="Permanent link">&para;</a></h3>
+<p><code>model_capacity_exceeded</code> oznacza pełną lokalną kolejkę: Laya dopuszcza najwyżej
+32 aktywne i oczekujące oceny na skaner, a każdy adapter HTTP modeli — najwyżej
+128 żądań przy 32 połączeniach. Żądanie kończy się odmową, a endpoint zgodny
+z OpenAI zwraca HTTP 503. Odrzucenie oceny wejścia zapobiega uruchomieniu modelu
+biznesowego; odrzucenie oceny wyjścia zatrzymuje już wygenerowaną odpowiedź.
+Te limity są niezależne od budżetów tożsamości.</p>
+<p>Zmniejsz współbieżność klienta. Ponawiaj tylko operacje bezpieczne do powtórzenia
+lub żądania z <code>upstream_executed=false</code>: ograniczoną liczbę razy, z rosnącym
+i losowo zróżnicowanym opóźnieniem. Ocena wyjścia może zawieść po wykonaniu
+narzędzia, które już zmieniło stan. Nie wyłączaj kontroli semantycznych, aby
+opróżnić kolejkę. Odrzucenie przy pełnej kolejce nalicza żądanie, lokalne
+przetwarzanie wejścia, czas i ukończoną pracę modeli lub ocen, ale nie nalicza
+inferencji, która nie została dopuszczona. Odmowa przyjęcia przez model biznesowy
+ustawia <code>upstream_executed=false</code> i zerowy koszt biznesowy; odmowa oceny wyjścia
+zachowuje zużycie i koszt ukończonego upstream. Licznik wywołań semantycznych
+obejmuje próby oceny, także odrzucone przed przyjęciem do kolejki.
+<code>model_unavailable_fail_closed</code> nadal oznacza niedostępnego dostawcę
+lub nieprawidłową odpowiedź; przekroczenie czasu dopuszczonego żądania nie oznacza
+pełnej kolejki. Porównuj powód i statusy etapów wejścia/wyjścia w Activity.
+Przepełnienie jest liczone jako błąd, a nie blokada treści. Readiness sprawdza
+wymagane komponenty, nie wolne miejsca w kolejce.</p>
 
 
 

@@ -748,6 +748,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Inspect request activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-queue-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model queue capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1574,6 +1591,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Inspect request activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-queue-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model queue capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1598,7 +1632,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4e4571e32989066d704e05d6eb20160759f7ff1">Commit b4e4571e3298</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
 </div>
 <h1 id="check-your-installation">Check your installation<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Install the package in a fresh directory<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1864,6 +1898,27 @@ block prevents upstream execution; an output block withholds delivery after the
 upstream has already run. Match the request ID and policy version when comparing
 before/after results. Audit contains metadata only;
 it must not contain prompts, OCR text, original names or recovery tokens.</p>
+<h3 id="model-queue-capacity">Model queue capacity<a class="headerlink" href="#model-queue-capacity" title="Permanent link">&para;</a></h3>
+<p><code>model_capacity_exceeded</code> means a local model queue is full: Laya admits at most
+32 active and waiting assessments per scanner; each pooled model HTTP adapter
+admits at most 128 requests, with 32 connections. The request fails closed and
+the OpenAI-compatible endpoint returns HTTP 503. Input assessment rejection
+prevents the business model from running; output assessment rejection withholds
+an already generated answer. These limits are separate from identity budgets.</p>
+<p>Reduce caller concurrency. Retry only when the operation is safe to repeat or
+<code>upstream_executed</code> is false, with bounded attempts, backoff and jitter. An output
+assessment can fail after a tool has already produced side effects.
+Do not disable semantic checks to clear the queue. A capacity rejection charges
+the request count, local input processing, elapsed time and any completed model
+or assessment work; it does not charge inference that was never admitted. A
+business-model admission refusal has <code>upstream_executed=false</code> and zero business
+cost. Output assessment refusal preserves completed upstream usage and cost.
+Semantic call counters include attempted assessments, including admission refusal.
+<code>model_unavailable_fail_closed</code>
+continues to indicate an unavailable provider or invalid response; an admitted
+request that times out is not classified as a full queue. Compare the reason and
+the input/output stage statuses in Activity; capacity failures count as errors,
+not content-policy blocks. Readiness checks prerequisites, not spare queue slots.</p>
 
 
 
