@@ -11,6 +11,8 @@ policy changes, test requests and inspect activity.
 [Documentation](https://fastfence.dev/) · [Getting started](https://fastfence.dev/getting-started/) ·
 [Manual testing](https://fastfence.dev/manual-testing/) · [API reference](https://fastfence.dev/integration-reference/)
 
+[HackYeah submission: demo, ten-slide presentation and five assessment categories](SUBMISSION.md)
+
 ## Run locally
 
 Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and run [Ollama](https://ollama.com/) on macOS or Linux. In the directory where you want to keep your FastFence configuration, run:

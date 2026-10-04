@@ -1,0 +1,16 @@
+{
+  "capture": "Actual isolated public FastFence 1.0.7 dashboard recording",
+  "source_evidence": "presentation/output/demo-evidence.json",
+  "images": [
+    {
+      "file": "dashboard.png",
+      "source": "presentation/assets/demo-overview-final.png",
+      "copied_without_changes": true
+    },
+    {
+      "file": "audit.png",
+      "source": "presentation/assets/demo-audit.png",
+      "copied_without_changes": true
+    }
+  ]
+}

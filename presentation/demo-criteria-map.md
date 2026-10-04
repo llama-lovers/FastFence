@@ -5,25 +5,27 @@ benchmark. Existing recordings and the verified OpenAI, MCP, ACP and reversible-
 runs use public PyPI FastFence 1.0.7. Integration code and results are rendered
 from real execution transcripts, not live terminal screen captures. Test-suite results remain separately scoped evidence.
 
-## Official sources and the weighting discrepancy
+## Official sources and confirmed assessment weights
 
-Read in full, with the scoring pages also visually inspected:
+The organizer clarification supplied by the user confirms the assessment weights
+as **30% / 20% / 20% / 15% / 15%**, matching the challenge criteria. Use these
+weights for the jury directory structure and assessment mapping.
 
-- `HackYeah 2026 - Rules for Participants/Partner Task [Goldman Sachs] - AI Control Layer/CRIETRIA AI Control Layer.pdf`, page 4, sections 6–8.
-- `HackYeah 2026 - Rules for Participants/Partner Task [Goldman Sachs] - AI Control Layer/RULES AI Control Layer.pdf`, page 2, clause 11. The directory is a sibling of the canonical repository.
+| Criterion | Confirmed weight |
+| --- | ---: |
+| Robustness of the Solution and Quality of Guardrails | 30% |
+| Architecture and Performance Efficiency | 20% |
+| Security Reporting | 20% |
+| Completeness of the Self-Testing Suite | 15% |
+| Practical Implementability and Scalability | 15% |
 
-| Criterion | CRIETRIA, section 8 | RULES, clause 11 |
-| --- | ---: | ---: |
-| Robustness of the Solution and Quality of Guardrails | 30% | 30% |
-| Architecture and Performance Efficiency | 20% | 20% |
-| Security Reporting | 20% | 20% |
-| Completeness of the Self-Testing Suite | 15% | 20% |
-| Practical Implementability and Scalability | 15% | 10% |
-
-The documents disagree on the last two weights. Do not silently choose a column,
-calculate a self-score, or claim a resolved official weighting. A film can show
-all five criterion names without percentages. If percentages are needed for the
-submission, identify both sources and ask the organizer to resolve the difference.
+Historical document discrepancy, now resolved for this assessment by that
+organizer clarification: `CRIETRIA AI Control Layer.pdf`, page 4 section 8,
+lists 15% self-testing and 15% implementability; `RULES AI Control Layer.pdf`,
+page 2 clause 11, lists 20% and 10% respectively. Both PDFs were read in full and
+the scoring pages visually inspected. They reside in the sibling directory
+`HackYeah 2026 - Rules for Participants/Partner Task [Goldman Sachs] - AI Control Layer/`.
+This evidence map does not assign FastFence a jury score.
 
 The criteria also require a simple architecture diagram, a documented sample
 policy, a dashboard, and an executable suite with positive and negative cases.

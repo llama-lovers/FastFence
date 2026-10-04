@@ -1,0 +1,228 @@
+{
+  "duration_seconds": 180,
+  "resolution": "1920x1080",
+  "edited": true,
+  "playback_speed": 1,
+  "voice": false,
+  "scenes": [
+    {
+      "id": "intro",
+      "duration_seconds": 2,
+      "caption": "FastFence: change protection without changing your agent.",
+      "source_start_seconds": 6.1,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 0,
+      "end_seconds": 2
+    },
+    {
+      "id": "integration",
+      "duration_seconds": 8,
+      "caption": "One integration. Central rules around every request.",
+      "source_start_seconds": null,
+      "asset": "integration-demo.mp4",
+      "note": "Recorded SDK integration results \u00b7 separate isolated session \u00b7 exact response fields replayed",
+      "start_seconds": 2,
+      "end_seconds": 10
+    },
+    {
+      "id": "allowed",
+      "duration_seconds": 8,
+      "caption": "Send a real request. Laya checks input and output; Qwen answers.",
+      "source_start_seconds": 6.1,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 10,
+      "end_seconds": 18
+    },
+    {
+      "id": "literal-rule",
+      "duration_seconds": 14,
+      "caption": "Edit the rule. Test prohibited and permitted inputs. Activate explicitly.",
+      "source_start_seconds": 18.232,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 18,
+      "end_seconds": 32
+    },
+    {
+      "id": "blocked",
+      "duration_seconds": 7,
+      "caption": "Same Hello. New policy. Blocked before the business model runs.",
+      "source_start_seconds": 32.236,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 32,
+      "end_seconds": 39
+    },
+    {
+      "id": "audit",
+      "duration_seconds": 6,
+      "caption": "Inspect the reason, policy version and execution boundary.",
+      "source_start_seconds": 39.334,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 39,
+      "end_seconds": 45
+    },
+    {
+      "id": "laya-instruction",
+      "duration_seconds": 11,
+      "caption": "Describe a rule in your words. Add expected block and permit cases.",
+      "source_start_seconds": 45.45,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 45,
+      "end_seconds": 56
+    },
+    {
+      "id": "laya-review",
+      "duration_seconds": 10,
+      "caption": "Eight scoped cases pass. Confirm activation and save the regression suite.",
+      "source_start_seconds": 65.629,
+      "asset": null,
+      "note": "Actual before/after semantic review \u00b7 scoped cases \u00b7 waiting interval omitted",
+      "start_seconds": 56,
+      "end_seconds": 66
+    },
+    {
+      "id": "pdf-source",
+      "duration_seconds": 4,
+      "caption": "Two pages. Useful service information and synthetic contact details.",
+      "source_start_seconds": 90,
+      "asset": null,
+      "note": "Actual source PDF \u00b7 separate recorded OCR session",
+      "start_seconds": 66,
+      "end_seconds": 70
+    },
+    {
+      "id": "ocr-upload",
+      "duration_seconds": 12,
+      "caption": "Upload the PDF. Local OCR extracts text; privacy rules redact matches.",
+      "source_start_seconds": 100.25,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 70,
+      "end_seconds": 82
+    },
+    {
+      "id": "ocr-markdown",
+      "duration_seconds": 8,
+      "caption": "Two email redactions. Download protected Markdown or send it to the model.",
+      "source_start_seconds": 113.927,
+      "asset": null,
+      "note": "Real capture \u00b7 edited excerpts \u00b7 playback 1x",
+      "start_seconds": 82,
+      "end_seconds": 90
+    },
+    {
+      "id": "ocr-answer",
+      "duration_seconds": 10,
+      "caption": "Qwen summarizes protected text. Laya checks both directions.",
+      "source_start_seconds": 134.847,
+      "asset": null,
+      "note": "Actual model result \u00b7 intervening waiting omitted \u00b7 original PDF not sent to business model",
+      "start_seconds": 90,
+      "end_seconds": 100
+    },
+    {
+      "id": "anonymization",
+      "duration_seconds": 20,
+      "caption": "Keep sensitive values private. Restore permitted originals only when requested.",
+      "source_start_seconds": null,
+      "asset": "anonymization-demo.mp4",
+      "note": "Recorded cryptographic round trip \u00b7 local echo tool \u00b7 no model inference",
+      "start_seconds": 100,
+      "end_seconds": 120
+    },
+    {
+      "id": "backend",
+      "duration_seconds": 8,
+      "caption": "Verify the effect at the API boundary, not just in the dashboard.",
+      "source_start_seconds": null,
+      "asset": "backend-demo.mp4",
+      "note": "Recorded SDK integration results \u00b7 policy v1 to v2 \u00b7 actual fields replayed",
+      "start_seconds": 120,
+      "end_seconds": 128
+    },
+    {
+      "id": "mcp",
+      "duration_seconds": 16,
+      "caption": "MCP tools: permit the call, then enforce a new rule before execution.",
+      "source_start_seconds": null,
+      "asset": "mcp-demo.mp4",
+      "note": "Recorded MCP protocol results \u00b7 real local deterministic tool \u00b7 no LLM inference",
+      "start_seconds": 128,
+      "end_seconds": 144
+    },
+    {
+      "id": "acp",
+      "duration_seconds": 16,
+      "caption": "ACP agents: the same protocol request, protected by the active policy.",
+      "source_start_seconds": null,
+      "asset": "acp-demo.mp4",
+      "note": "Recorded ACP protocol results \u00b7 real local deterministic peer \u00b7 no LLM inference",
+      "start_seconds": 144,
+      "end_seconds": 160
+    },
+    {
+      "id": "benchmark",
+      "duration_seconds": 12,
+      "caption": "Measure the protection layer with a reproducible package benchmark.",
+      "source_start_seconds": null,
+      "asset": "benchmark-demo.png",
+      "note": "Measured evidence \u00b7 benchmark scope and environment shown",
+      "start_seconds": 160,
+      "end_seconds": 172
+    },
+    {
+      "id": "requirements",
+      "duration_seconds": 5,
+      "caption": "Evidence shown: protection, dynamic policies, audit, tests and integration.",
+      "source_start_seconds": null,
+      "asset": "requirements-demo.png",
+      "note": "Challenge requirements mapped to demonstrated product behavior",
+      "start_seconds": 172,
+      "end_seconds": 177
+    },
+    {
+      "id": "close",
+      "duration_seconds": 3,
+      "caption": "uv tool run fastfence     |     fastfence.dev",
+      "source_start_seconds": 83.012,
+      "asset": null,
+      "note": "Requires uv and a running Ollama service \u00b7 first run installs local components",
+      "start_seconds": 177,
+      "end_seconds": 180
+    }
+  ],
+  "missing_assets": [],
+  "original_recording_preserved": true,
+  "semantic_scope": "The financial example was already blocked by the base policy; this recording demonstrates review and activation, not a new causal verdict flip.",
+  "audio": {
+    "type": "original_instrumental",
+    "source_track": "fastfence-soundtrack-v4.m4a",
+    "voice": false
+  },
+  "integration_evidence": [
+    "integration-demo-evidence.json",
+    "mcp-demo-evidence.json",
+    "acp-demo-evidence.json",
+    "anonymization-demo-evidence.json"
+  ],
+  "integration_presentation": "Exact recorded response fields replayed; a separate session from original UI evidence. Code is the equivalent short SDK call with environment-backed credentials.",
+  "submission_edit": {
+    "start_seconds": 172,
+    "end_seconds": 177,
+    "card": "submission-requirements.png",
+    "weights_percent": [
+      30,
+      20,
+      20,
+      15,
+      15
+    ],
+    "original_preserved": "fastfence-demo-v4.mp4",
+    "audio_unchanged": true
+  }
+}

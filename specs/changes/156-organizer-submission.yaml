@@ -1,0 +1,44 @@
+id: FF-156
+title: Finalize the three-minute demo and ten-slide presentation for organizer assessment
+status: verified
+problem: The final deadline requires immediately usable presentation artifacts mapped to the organizer's five assessment categories.
+scope:
+  - Deliver final English-captioned demo with instrumental music and no voice.
+  - Deliver exactly ten slides as editable PowerPoint and PDF with Polish speaker notes.
+  - Map verified evidence to the five recommended repository directories.
+  - Apply organizer-confirmed assessment weights of 30, 20, 20, 15 and 15 percent.
+constraints:
+  - Reuse actual recorded interactions and verified transcripts; do not fabricate new runs.
+  - Preserve earlier versions and benchmark version and workload boundaries.
+  - Do not alter runtime behavior, operator services, credentials or models.
+change_paths:
+  - README.md
+  - SUBMISSION.md
+  - 1-solution/*
+  - 2-architecture/*
+  - 3-reporting/*
+  - 4-testing/*
+  - 5-implementation/*
+  - presentation/README.md
+  - presentation/demo-criteria-map.md
+  - presentation/scripts/*
+  - presentation/output/*
+acceptance:
+  - The final deck has exactly ten slides and all five categories with correct weights.
+  - The final film retains actual OpenAI, MCP, ACP, policy, privacy and OCR demonstrations.
+  - Submission folders reference real implementation, configuration, reporting and test evidence.
+  - Local artifact and evidence links resolve and all configured checks pass.
+validation:
+  - command: Render and inspect presentation, verify PDF and PPTX page count
+    expected: Ten readable pages with explicit category mapping and existing factual scopes preserved.
+  - command: Inspect video card and decode full MP4
+    expected: Three minutes of H.264/AAC video with music and no speech, with matching evidence labels.
+  - command: uv run --locked pre-commit run
+    expected: All applicable configured checks pass.
+evidence:
+  - check: Submission documentation
+    result: All local Markdown links in the submission index and five category directories resolve. Reporting screenshots are byte-identical copies of the actual recording assets. The test inventory references 34 verified existing test functions.
+  - check: Presentation
+    result: Both final formats contain exactly ten slides. The finalizer and visual inspection passed with organizer category labels and unchanged recorded proof, native tables and architecture.
+  - check: Film and repository checks
+    result: The final 180-second Full HD H.264/AAC film fully decodes. Its updated category card was visually inspected and the audio stream is unchanged from the verified instrumental original. All configured pre-commit hooks passed.

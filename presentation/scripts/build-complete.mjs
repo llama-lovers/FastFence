@@ -28,7 +28,9 @@ function page(dark, number, notes) {
   const s = deck.slides.add(); s.background.fill = dark ? C.dark : C.light;
   tx(s, 'FASTFENCE', 60, 30, 300, 26, 18, dark ? C.lime : C.teal, true);
   tx(s, String(number).padStart(2,'0'), 1170, 30, 50, 26, 18, dark ? C.muted : C.gray);
-  s.speakerNotes.textFrame.setText(notes);
+  const categories = {1:'SOLUTION 30%',2:'ARCHITECTURE 20%',3:'REPORTING 20%',4:'SOLUTION 30%',5:'IMPLEMENTATION 15%',6:'IMPLEMENTATION 15%',7:'SOLUTION 30%',8:'SOLUTION 30%',9:'TESTING 15%',10:'ARCHITECTURE 20%'};
+  tx(s, categories[number], 680, 30, 450, 26, 18, dark ? C.muted : C.gray);
+  s.speakerNotes.textFrame.setText(notes + '\nOrganizer criteria: Solution 30% (slides1,4,7,8); Architecture 20% (slides2,10); Reporting 20% (slide3 and recorded Activity); Testing 15% (slide9 plus policy/protocol examples); Implementation 15% (slides5,6 and installation on slide10). These are organizer weights, not self-assigned scores.');
   return s;
 }
 async function crop(name, rect, dest) {

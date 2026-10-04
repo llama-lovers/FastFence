@@ -3,13 +3,13 @@
 English slides and video captions, with Polish speaker notes. The complete deck
 contains exactly ten slides, including its cover and closing.
 
-## Revised showcase
+## Final submission showcase
 
-Use the revised materials for the product pitch:
+Use the final materials for the product pitch. [Organizer assessment folders](../SUBMISSION.md) map the evidence to all five categories:
 
-- [Complete workflow demo with instrumental music](output/fastfence-demo-v4.mp4)
-- [Complete editable presentation, ten slides](output/fastfence-pitch-v3.pptx)
-- [Complete PDF presentation, ten slides](output/fastfence-pitch-v3.pdf)
+- [Complete workflow demo with instrumental music](output/fastfence-submission.mp4)
+- [Complete editable presentation, ten slides](output/fastfence-submission.pptx)
+- [Complete PDF presentation, ten slides](output/fastfence-submission.pdf)
 - [Polish opening, closing and technical answers](showcase-script.pl.md)
 - [Official criteria mapped to evidence](demo-criteria-map.md)
 - [Actual OpenAI SDK integration results](output/integration-demo-evidence.json)
@@ -48,14 +48,14 @@ The music is an original instrumental generated for FastFence, without vocals
 or third-party audio samples. Its source is `scripts/build_soundtrack.py` and
 `scripts/soundtrack_synthesis.py`.
 With NumPy, Pillow and FFmpeg available, build the soundtrack first, then the
-video; the current builder is `scripts/build_demo_v4.py`. To generate its music,
+video; `scripts/build_demo_v4.py` builds the source film and `scripts/build_submission_demo.py` applies the final organizer category card. To generate its music,
 pass `--duration 180 --soft-start 70 --soft-end 106 --output presentation/output/fastfence-soundtrack-v4.m4a`
 to the soundtrack builder. Private
 masters and intermediate frames remain under `state/private/`.
 
 The earlier [workflow film](output/fastfence-demo-v3.mp4),
 [edited film](output/fastfence-demo-v2.mp4) and original recordings below remain
-available. The latest film is v4 and the latest deck is v3.
+available. The final organizer-aligned files are named `fastfence-submission`; v4 film and v3 deck remain available as earlier revisions.
 
 ## Original recording and supporting materials
 
