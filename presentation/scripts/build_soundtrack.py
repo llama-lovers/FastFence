@@ -57,12 +57,19 @@ def main():
         type=Path,
         default=root / "presentation/output/fastfence-soundtrack.m4a",
     )
+    parser.add_argument("--duration", type=int, default=DURATION)
+    parser.add_argument("--soft-start", type=int, default=60)
+    parser.add_argument("--soft-end", type=int, default=90)
     args = parser.parse_args()
+    if args.duration < 30 or args.duration % 2:
+        parser.error("duration must be an even number of seconds, at least 30")
+    if not 0 <= args.soft_start < args.soft_end <= args.duration:
+        parser.error("soft section must fall inside the track duration")
     private = root / "state/private/soundtrack"
     private.mkdir(parents=True, exist_ok=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     master = private / "original-master.wav"
-    write_wave(master, compose())
+    write_wave(master, compose(args.duration, args.soft_start, args.soft_end))
     levels = loudness(master)
     normalizer = "loudnorm=I=-18:TP=-1.5:LRA=9:linear=true:" + ":".join(
         f"{key}={levels[value]}"
@@ -111,7 +118,7 @@ def main():
         )
     report = {
         "title": "Signal and Control",
-        "duration_seconds": DURATION,
+        "duration_seconds": args.duration,
         "attribution": "Original instrumental generated for FastFence",
         "method": "Seeded additive and noise synthesis; no recordings, samples, or speech",
         "bpm": 120,

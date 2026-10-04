@@ -1,0 +1,43 @@
+id: FF-154
+title: Show actual workflows, integration effects and measured evidence in the demo
+status: verified
+problem: The revised video relies too heavily on presentation layouts and does not sufficiently show actual operation or how a developer integrates the backend.
+scope:
+  - Build a 140-second film dominated by actual UI and integration execution, with concise explanatory overlays.
+  - Demonstrate an OpenAI-compatible client against an isolated installed public package with genuine local model execution.
+  - Connect the demonstrated effects to official challenge requirements and explicitly scoped benchmark evidence.
+  - Extend the original instrumental soundtrack without adding speech.
+constraints:
+  - Preserve previous films and slide decks.
+  - Do not change product runtime code or operator instances, settings, credentials or model configuration.
+  - Any new integration call must use an isolated disposable gateway and existing local model assets; stop the owned gateway afterward.
+  - Never reconstruct invented success output or expose credentials in delivered clips.
+  - Separate deterministic overhead, controlled queue measurements and real model integration evidence.
+  - Identify edited recordings and do not treat trimmed footage as a latency measurement.
+change_paths:
+  - presentation/scripts/*
+  - presentation/assets/*
+  - presentation/output/*
+  - presentation/README.md
+  - presentation/showcase-script.pl.md
+  - presentation/demo-criteria-map.md
+acceptance:
+  - Actual request, policy activation, block, semantic review and OCR workflows occupy most of the film.
+  - The integration segment shows a real standard client call and its observed protected outcome.
+  - Benchmark labels state version, workload and whether inference and transport were included.
+  - Requirement mapping cites the official PDFs and distinguishes evidence from guarantees not demonstrated.
+  - The final film contains music without speech and is visually reviewed and fully decoded.
+validation:
+  - command: Isolated installed-package integration demonstration
+    expected: A benign request executes the real model; after activating a matching local rule, the repeated request is blocked before upstream execution.
+  - command: Video decode and visual inspection
+    expected: The 140-second film has readable actual evidence, no credential exposure and valid H.264/AAC streams.
+  - command: uv run --locked pre-commit run
+    expected: All applicable checks pass.
+evidence:
+  - check: Actual installed-package SDK flow
+    result: Public FastFence 1.0.7 was loaded from site-packages outside the checkout. OpenAI SDK 3.24.0 called real Qwen3:0.6b with Laya Qwen3:4b assessing input and output. The first Hello returned HTTP 200 under policy v1. After activating a matching local rule, the identical call returned HTTP 403 under v2 with upstream_executed false and zero budget units. Both calls used the same gateway instance, and the owned gateway shut down afterward. Sanitized evidence and transcript are delivered.
+  - check: Final video review
+    result: The final film is exactly 140 seconds, H.264 1920x1080 with stereo AAC music and no voice. All sixteen scenes were visually reviewed and the entire audio/video file decoded successfully. Original capture occupies 101 seconds including the synthetic source PDF, actual SDK code/results replay occupies twenty seconds, and scoped evidence graphics occupy nineteen seconds. Edited session boundaries and replayed results are labelled.
+  - check: Official criteria and numerical scope
+    result: The official CRIETRIA and RULES PDFs were read and their conflicting self-testing/implementability weights documented. The film maps observed effects to the five categories without scoring. Historical public-package 1.0.2 deterministic p95 is distinguished from 1.0.7 controlled scheduling and real-model candidate-wheel integration checks. No new benchmark or universal compliance claim is introduced.

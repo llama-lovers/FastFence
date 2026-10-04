@@ -7,27 +7,38 @@ contains six main slides and one appendix with verification evidence.
 
 Use the revised materials for the product pitch:
 
-- [Product film with instrumental music](output/fastfence-demo-v2.mp4)
+- [Workflow demo with instrumental music](output/fastfence-demo-v3.mp4)
 - [Revised editable presentation](output/fastfence-pitch-v2.pptx)
 - [Revised PDF presentation](output/fastfence-pitch-v2.pdf)
 - [Polish opening, closing and technical answers](showcase-script.pl.md)
+- [Official criteria mapped to evidence](demo-criteria-map.md)
+- [Actual OpenAI SDK integration results](output/integration-demo-evidence.json)
 
-The revised film lasts **1 minute 50 seconds** and shows actual 1.0.7 outcomes. It has
+The current film lasts **2 minutes 20 seconds** and shows actual 1.0.7 outcomes. It has
 English on-screen explanations and music, without a voiceover. Scene duration
-does not measure request latency. The original continuous demonstrations below
-remain available for inspecting the complete interaction.
+does not measure request latency. Full-screen recorded interactions show policy
+editing, protection decisions, Laya review and document OCR. Two brief code/result
+scenes reproduce the sanitized output from a separate real OpenAI SDK run, with
+one allowed request and the same request blocked after a live policy change.
+The benchmark scene separates historical local-control latency from controlled
+queue tests and real-model integration checks.
 
-For a three-minute presentation, use a short spoken opening, play the film,
-then close with the operational guarantees and launch command. The Polish
-script provides this opening and closing. The additional slides support a
+For a three-minute presentation, use a ten-second spoken opening, play the film,
+then close in twenty seconds with the operational guarantees and launch command.
+The Polish script provides these short lines plus longer speaking notes. The additional slides support a
 presentation without video or questions after the pitch.
 
 The music is an original instrumental generated for FastFence, without vocals
 or third-party audio samples. Its source is `scripts/build_soundtrack.py` and
 `scripts/soundtrack_synthesis.py`. The video uses `scripts/build_showcase.py`.
 With NumPy, Pillow and FFmpeg available, build the soundtrack first, then the
-video; the video builder includes the generated track when present. Private
+video; the v3 builder is `scripts/build_demo_v3.py`. To generate the longer music,
+pass `--duration 140 --soft-start 70 --soft-end 106 --output presentation/output/fastfence-soundtrack-v3.m4a`
+to the soundtrack builder. Private
 masters and intermediate frames remain under `state/private/`.
+
+The [previous edited film](output/fastfence-demo-v2.mp4) and original recordings
+below remain available. The latest film is v3.
 
 ## Original recording and supporting materials
 

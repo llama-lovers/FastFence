@@ -135,8 +135,10 @@ def render_notes(bar, start, root, chord, soft, outro, strength, bass, melody):
             )
 
 
-def render_drums(bar, start, soft, outro, strength, hits, drums, kick_times):
-    if bar < 6 or bar >= 53:
+def render_drums(
+    bar, start, soft, outro, strength, hits, drums, kick_times, end_bar
+):
+    if bar < 6 or bar >= end_bar:
         return
     beats = [0, 2] if soft or bar < 10 or outro else [0, 1, 2, 3]
     for beat in beats:
@@ -165,8 +167,8 @@ def render_drums(bar, start, soft, outro, strength, hits, drums, kick_times):
         add(drums, hits["rise"], start + 0.5, 0.11, -0.1)
 
 
-def compose():
-    shape = (DURATION * RATE, 2)
+def compose(duration=DURATION, soft_start=60, soft_end=90):
+    shape = (duration * RATE, 2)
     pads = np.zeros(shape, np.float32)
     melody = np.zeros(shape, np.float32)
     bass = np.zeros(shape, np.float32)
@@ -183,11 +185,11 @@ def compose():
         for name in ["kick", "snare", "hat", "open_hat", "rise"]
     }
     kick_times = []
-    for bar in range(54):
+    for bar in range(duration // 2 - 1):
         start = bar * 2
         root, chord = harmony[(bar // 2) % 4]
-        soft = 30 <= bar < 45
-        outro = bar >= 50
+        soft = soft_start <= start < soft_end
+        outro = start >= duration - 10
         strength = 0.66 if soft else 1
         if bar % 2 == 0:
             for index, note in enumerate(chord):
@@ -201,12 +203,22 @@ def compose():
         render_notes(
             bar, start, root, chord, soft, outro, strength, bass, melody
         )
-        render_drums(bar, start, soft, outro, strength, hits, drums, kick_times)
+        render_drums(
+            bar,
+            start,
+            soft,
+            outro,
+            strength,
+            hits,
+            drums,
+            kick_times,
+            duration // 2 - 2,
+        )
     # Resolve to Dm9 instead of stopping on a repeating loop.
     for index, note in enumerate([50, 62, 65, 69, 76]):
-        add(pads, tone(note, 3.9), 106, 0.14, -0.6 + index * 0.3)
-    add(melody, tone(74, 2, "pluck"), 107, 0.08, 0.25)
-    add(bass, tone(38, 2, "bass"), 106, 0.18)
+        add(pads, tone(note, 3.9), duration - 4, 0.14, -0.6 + index * 0.3)
+    add(melody, tone(74, 2, "pluck"), duration - 3, 0.08, 0.25)
+    add(bass, tone(38, 2, "bass"), duration - 4, 0.18)
     for seconds, gain in [(0.375, 0.23), (0.75, 0.10), (1.125, 0.045)]:
         shift = round(seconds * RATE)
         melody[shift:] += melody[:-shift, ::-1].copy() * gain

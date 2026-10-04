@@ -1,8 +1,25 @@
 # FastFence — pokaz wartości produktu
 
-Film v2 ma angielskie napisy i instrumentalną muzykę, bez lektora. Materiał
-wykorzystuje rzeczywiste nagranie publicznej paczki 1.0.7. Montaż skraca pokaz,
-dlatego długość scen nie jest pomiarem czasu odpowiedzi.
+Film v3 trwa 2:20 i ma angielskie napisy oraz instrumentalną muzykę, bez lektora.
+Pokazuje rzeczywiste nagranie publicznej paczki 1.0.7 oraz wyniki osobnego,
+rzeczywistego wywołania przez OpenAI SDK. Sceny kodu i odpowiedzi odtwarzają
+oczyszczony zapis tej integracji. Montaż skraca pokaz, dlatego długość scen nie
+jest pomiarem czasu odpowiedzi.
+
+## Wariant do trzech minut, razem z filmem
+
+Otwarcie, około 10 sekund: „FastFence pozwala zmienić ochronę agenta bez
+przepisywania jego kodu. Pokażemy integrację, zmianę polityki i jej rzeczywisty
+skutek, a następnie ochronę dokumentu.”
+
+Uruchom film `output/fastfence-demo-v3.mp4`, 2 minuty 20 sekund.
+
+Zamknięcie, około 20 sekund: „Ten sam klient działa dalej, a nowa polityka zmienia
+wynik wywołania. Reguły sprawdzamy przed aktywacją, a błędna konfiguracja nie
+zastępuje poprawnej. Lokalna kontrola poprzedza ocenę modelu. FastFence uruchamiamy
+z PyPI poleceniem uv tool run fastfence.”
+
+Dłuższe notatki poniżej służą prezentacji bez filmu i odpowiedziom na pytania.
 
 ## Główna myśl
 
@@ -22,7 +39,7 @@ agenta. Za chwilę zobaczycie tę zmianę na rzeczywistym żądaniu.”
 
 ## Pokaz filmu
 
-Uruchom `output/fastfence-demo-v2.mp4` na pełnym ekranie z dźwiękiem.
+Uruchom `output/fastfence-demo-v3.mp4` na pełnym ekranie z dźwiękiem.
 Film sam objaśnia kolejne sceny po angielsku. Nie trzeba czytać podpisów na głos.
 
 W pokazie są dwa odrębne mechanizmy reguł. Lokalna reguła dotycząca `Hello`

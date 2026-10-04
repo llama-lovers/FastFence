@@ -1,0 +1,9 @@
+Recorded integration run | FastFence 1.0.7 | OpenAI SDK 3.24.0
+Actual local Qwen + Laya. Installed package outside the repository.
+
+Hello -> HTTP 200 | ALLOWED | policy v1
+upstream_executed=true | semantic input=passed output=passed
+Activate contains Hello / input / model -> policy v2
+Hello -> HTTP 403 | BLOCKED | input_text_rule
+upstream_executed=false | budget_units=0
+Same SDK call. Same running gateway. No restart.
