@@ -1,0 +1,1855 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Fast, local policy enforcement for AI agents, tools and models.">
+      
+      
+      
+        <link rel="canonical" href="https://fastfence.dev/1.0.3/benchmarks/">
+      
+      
+        <link rel="prev" href="../integrations/">
+      
+      
+        <link rel="next" href="../examples/acp/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../pl/benchmarks/" hreflang="pl">
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Benchmarks - FastFence</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/branding.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#benchmarks" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="FastFence" class="md-header__button md-logo" aria-label="FastFence" data-md-component="logo">
+      
+  <img src="../assets/fastfence-header.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FastFence
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Benchmarks
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../pl/benchmarks/" hreflang="pl" class="md-select__link">
+              Polski
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/llama-lovers/FastFence" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    llama-lovers/FastFence
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Get started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../policies/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../examples/acp/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../integration-reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://github.com/llama-lovers/FastFence/releases" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="FastFence" class="md-nav__button md-logo" aria-label="FastFence" data-md-component="logo">
+      
+  <img src="../assets/fastfence-header.svg" alt="logo">
+
+    </a>
+    FastFence
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/llama-lovers/FastFence" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    llama-lovers/FastFence
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn by task
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verify your installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies and controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Connect agents and models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#off-deterministic-semantic-package-102" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OFF / deterministic / semantic — package 1.0.2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-102-results-4-october-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package 1.0.2 results — 4 October 2026
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package 1.0.2 results — 4 October 2026">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#actual-laya-input-and-output-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actual Laya input and output assessment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-against-an-installed-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run against an installed package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read-the-measurements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read the measurements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-verification-alongside-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior verification alongside performance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recorded-measurements-from-3-october-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recorded measurements from 3 October 2026
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#make-comparisons-reproducible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Make comparisons reproducible
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/acp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Communication Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/custom-detectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Python detectors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/protected-request/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Protected model request
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/semantic-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Named Laya rule
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/mcp-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/fastmcp-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/openai-client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI SDK client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/openai-upstream/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI-compatible upstream
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/asymmetric-anonymization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public/private-key anonymization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration contracts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/http-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HTTP API from source
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime settings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/llama-lovers/FastFence/releases" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#off-deterministic-semantic-package-102" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OFF / deterministic / semantic — package 1.0.2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-102-results-4-october-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package 1.0.2 results — 4 October 2026
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package 1.0.2 results — 4 October 2026">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#actual-laya-input-and-output-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actual Laya input and output assessment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-against-an-installed-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run against an installed package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read-the-measurements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read the measurements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-verification-alongside-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior verification alongside performance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recorded-measurements-from-3-october-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recorded measurements from 3 October 2026
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#make-comparisons-reproducible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Make comparisons reproducible
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="benchmarks">Benchmarks<a class="headerlink" href="#benchmarks" title="Permanent link">&para;</a></h1>
+<p>Measure FastFence on the hardware and policy you intend to use. A local text-rule lookup, a complete gateway invocation and a request assessed by Laya measure different work. The results below identify which path was timed.</p>
+<h2 id="off-deterministic-semantic-package-102">OFF / deterministic / semantic — package 1.0.2<a class="headerlink" href="#off-deterministic-semantic-package-102" title="Permanent link">&para;</a></h2>
+<p>Actual public PyPI package 1.0.2 measurements, recorded on 4 October 2026 on an Apple M3 Pro. Every row uses the same short synthetic input and tool response at concurrency 1. OFF and deterministic controls were measured together; Laya ran separately on the same machine.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th style="text-align: right;">Samples + warmup</th>
+<th style="text-align: right;">p50 (ms)</th>
+<th style="text-align: right;">p95 (ms)</th>
+<th style="text-align: right;">p99 (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OFF — synthetic response</td>
+<td style="text-align: right;">2000 + 100</td>
+<td style="text-align: right;">0.000125</td>
+<td style="text-align: right;">0.000167</td>
+<td style="text-align: right;">0.000208</td>
+</tr>
+<tr>
+<td>Deterministic controls ON</td>
+<td style="text-align: right;">2000 + 100</td>
+<td style="text-align: right;">0.206125</td>
+<td style="text-align: right;">0.247500</td>
+<td style="text-align: right;">0.643750</td>
+</tr>
+<tr>
+<td>Laya semantic ON — input and output</td>
+<td style="text-align: right;">20 + 2</td>
+<td style="text-align: right;">1117.160333</td>
+<td style="text-align: right;">1199.532000</td>
+<td style="text-align: right;">1222.141500</td>
+</tr>
+</tbody>
+</table>
+<p><strong>OFF</strong> bypasses all controls, identity validation, budgets and audit. It measures only a constant function response without I/O; values near timer resolution do not represent real model or API latency. Do not extrapolate production throughput from them. ON timings include the controls that executed; semantic additionally includes two real Qwen assessments. All three exclude gateway ingress HTTP/MCP transport and business-model generation. Laya timings include communication with local Ollama during assessment.</p>
+<p>The <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/installed-package-1.0.2-comparison.json">OFF and deterministic ON report</a> also retains concurrency 8 and the observed slower p99 tail. The <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/installed-package-1.0.2-semantic.json">semantic ON report</a> has only 20 samples: its p99 is the largest observation, not a stable estimate of the tail. Environment and measurement details follow below.</p>
+<h2 id="package-102-results-4-october-2026">Package 1.0.2 results — 4 October 2026<a class="headerlink" href="#package-102-results-4-october-2026" title="Permanent link">&para;</a></h2>
+<p>The exported ZIP was run against <strong>public PyPI package 1.0.2</strong>, installed in a fresh environment outside the checkout. Import provenance, every expected verdict and budget accounting were verified.</p>
+<p>Apple M3 Pro, 11 logical CPUs, 18 GiB RAM, macOS 27.0.1 arm64, Python 3.12.12, Pydantic 2.13.5 and detect-secrets 1.5.0. One process, 2,000 samples and 100 warmup calls per row: 12,000 measured calls and 600 warmups in total. Recorded at 00:12 UTC.</p>
+<p><strong>Scope:</strong> complete engine invocation through Python, detect-secrets, memory budgets and audit. Semantic assessment disabled; zero-wait synthetic tool response. No HTTP/MCP or business-model generation. Inputs contain 31, 45 and 38 bytes for allowed, signature and role workloads respectively.</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th style="text-align: right;">Concurrency</th>
+<th style="text-align: right;">p50 (ms)</th>
+<th style="text-align: right;">p95 (ms)</th>
+<th style="text-align: right;">Requests/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Allowed request</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.204625</td>
+<td style="text-align: right;">0.227500</td>
+<td style="text-align: right;">4757.87</td>
+</tr>
+<tr>
+<td>Signature rejection</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.031125</td>
+<td style="text-align: right;">0.038167</td>
+<td style="text-align: right;">29740.33</td>
+</tr>
+<tr>
+<td>Role rejection</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.012000</td>
+<td style="text-align: right;">0.015167</td>
+<td style="text-align: right;">76225.32</td>
+</tr>
+<tr>
+<td>Allowed request</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.203834</td>
+<td style="text-align: right;">0.228625</td>
+<td style="text-align: right;">4681.31</td>
+</tr>
+<tr>
+<td>Signature rejection</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.031625</td>
+<td style="text-align: right;">0.037333</td>
+<td style="text-align: right;">27566.10</td>
+</tr>
+<tr>
+<td>Role rejection</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.012042</td>
+<td style="text-align: right;">0.014542</td>
+<td style="text-align: right;">63487.61</td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/installed-package-1.0.2-deterministic.json">complete JSON report</a> also records p99, process memory and workload checksums. Higher concurrency did not improve throughput here: this is one process doing local CPU work. These timings do not represent the default Laya-assessed request path.</p>
+<h3 id="actual-laya-input-and-output-assessment">Actual Laya input and output assessment<a class="headerlink" href="#actual-laya-input-and-output-assessment" title="Permanent link">&para;</a></h3>
+<p>A separate run on the same machine and public package 1.0.2 used <strong>Laya + qwen3:4b (Q4_K_M)</strong>. Threshold 0.7, timeout 60 seconds, output assessment enabled. Each row contains 20 measured requests and 2 warmup calls at concurrency 1. Recorded at 00:13 UTC.</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th style="text-align: right;">p50 (ms)</th>
+<th style="text-align: right;">p95 (ms)</th>
+<th style="text-align: right;">Requests/s</th>
+<th style="text-align: right;">Assessor calls including warmup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Allowed request, input and output assessment</td>
+<td style="text-align: right;">1117.160333</td>
+<td style="text-align: right;">1199.532000</td>
+<td style="text-align: right;">0.88</td>
+<td style="text-align: right;">44</td>
+</tr>
+<tr>
+<td>Early signature rejection</td>
+<td style="text-align: right;">0.034042</td>
+<td style="text-align: right;">0.042167</td>
+<td style="text-align: right;">24451.13</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Early role rejection</td>
+<td style="text-align: right;">0.013000</td>
+<td style="text-align: right;">0.017166</td>
+<td style="text-align: right;">51847.05</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p>The allowed request executes two real model assessments. Its <code>median_ms</code> was 1119.5705 ms; the table's p50 uses the nearest-rank method rather than averaging the two central observations. Early rejections do not call the model.</p>
+<p>This is a small sample with a repeated fixed prompt and a warmed model; Ollama prefix/KV reuse may help. It does not describe cold starts, varied long conversations or attack-detection quality. The tool response remains synthetic. The <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/installed-package-1.0.2-semantic.json">complete Laya report</a> contains the full model digest, configuration and accounting evidence.</p>
+<h2 id="run-against-an-installed-package">Run against an installed package<a class="headerlink" href="#run-against-an-installed-package" title="Permanent link">&para;</a></h2>
+<p>Install <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>, then download the benchmark bundle. No FastFence source checkout or running gateway is required for the deterministic measurement.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-L<span class="w"> </span>https://fastfence.dev/1.0.3/downloads/fastfence-benchmarks.zip<span class="w"> </span>-o<span class="w"> </span>fastfence-benchmarks.zip
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>zipfile<span class="w"> </span>-e<span class="w"> </span>fastfence-benchmarks.zip<span class="w"> </span>benchmarks
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>python<span class="w"> </span>benchmarks/scripts/benchmark_package.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--pypi-version<span class="w"> </span><span class="m">1</span>.0.2<span class="w"> </span>--samples<span class="w"> </span><span class="m">2000</span><span class="w"> </span>--warmup<span class="w"> </span><span class="m">100</span><span class="w"> </span>--concurrency<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">8</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span>--output<span class="w"> </span>results.json
+</span></code></pre></div>
+<p>The launcher installs the exact public PyPI package into a fresh temporary environment, verifies that <code>fastfence</code> imports from its installed package, and executes the bundled workload outside your project. It creates separate synthetic policies and identities; it does not use or change your gateway configuration. It reports actual dependency versions, hardware, expected verdicts and accounting checks alongside the timings. Python dependencies may download on the first run; package installation is outside the timed workload.</p>
+<p>The default run uses the deterministic pipeline and a zero-wait synthetic tool response. It measures local control work; it does not represent the default Laya-enabled product request path. Concurrency 1 and 8 are separate measurements, not a horizontal scaling test.</p>
+<p>For an additional real Laya measurement, start Ollama and run this command when the model is otherwise idle:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>python<span class="w"> </span>benchmarks/scripts/benchmark_package.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--pypi-version<span class="w"> </span><span class="m">1</span>.0.2<span class="w"> </span>--semantic<span class="w"> </span>--samples<span class="w"> </span><span class="m">20</span><span class="w"> </span>--warmup<span class="w"> </span><span class="m">2</span><span class="w"> </span>--concurrency<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--output<span class="w"> </span>semantic-results.json
+</span></code></pre></div>
+<p>This run prepares the configured assessment runtime and model in its isolated workspace. Its model calls, warmup and measured requests can consume substantial time and memory. The upstream tool response remains synthetic, so this measures semantic control plus the local invocation, not business-model generation. Twenty samples provide only an exploratory latency estimate; retain the model and environment metadata and increase samples for a meaningful tail comparison.</p>
+<h2 id="read-the-measurements">Read the measurements<a class="headerlink" href="#read-the-measurements" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>p50</strong> is the 50th percentile of request latency (nearest-rank in these reports): half of the measured requests completed within this time.</li>
+<li><strong>p95</strong> is the latency at or below which 95% of measured requests completed. It describes the slower requests better than the mean.</li>
+<li><strong>p99</strong> is the 99th percentile; small samples cannot reliably characterize such rare delays.</li>
+<li><strong>Throughput</strong> is completed requests divided by elapsed wall time, reported as requests per second. Concurrency can increase throughput while also increasing individual request latency.</li>
+<li><strong>Warmup</strong> runs prepare the runtime but are excluded from the latency sample. Their effects on caches, audit and budgets still matter.</li>
+</ul>
+<p>The engine benchmark measures complete in-process invocations, including configured controls, memory budget reservation/settlement and bounded audit. It excludes HTTP/MCP transport, process startup and configuration loading. The zero-wait fixture returns a fixed synthetic response; the delayed fixture deliberately waits 15 ms. Neither fixture measures a business model.</p>
+<p>Laya assessment requires separate measurements with its real configured model. Enabling semantic controls adds inference time and may change the decision path. A request rejected by a deterministic rule can skip the model entirely. Report those paths separately; a fast input rejection does not establish the latency of an allowed model request.</p>
+<h2 id="behavior-verification-alongside-performance">Behavior verification alongside performance<a class="headerlink" href="#behavior-verification-alongside-performance" title="Permanent link">&para;</a></h2>
+<p>Public package 1.0.2 passed <strong>143/143 existing parameterized security regressions</strong>, with no skipped cases. Tests ran in a fresh environment outside the checkout; network connections were blocked and service/semantic boundaries were controlled by the tests. This verifies permissions, blocking, redaction, budgets, signatures and control composition — not 143 novel attacks or model detection accuracy. <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/installed-security-1.0.2.json">Installed-package security report</a>.</p>
+<p>A separate actual one-command package run verified Laya, OCR and live policy updates without restarting: <strong>ALLOW v1 → BLOCK v2 → ALLOW v3 → budget block v4 → ALLOW v5</strong> in the same instance. Repeated startup preserved private state. The <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/installed-one-command-1.0.2.json">actual lifecycle report</a> contains outcomes only, without prompts, model responses or credentials.</p>
+<h2 id="recorded-measurements-from-3-october-2026">Recorded measurements from 3 October 2026<a class="headerlink" href="#recorded-measurements-from-3-october-2026" title="Permanent link">&para;</a></h2>
+<p>These are historical development measurements, <strong>not results for the current package release</strong>. The transport report identifies FastFence 0.1.0. The microbenchmark reports do not identify a package release; their raw reports and source are linked below.</p>
+<p>The engine and transport reports record an Apple M3 Pro, 11 logical CPUs, 18 GiB RAM, macOS 27.0.1 arm64 and Python 3.12.12. They used one process; the selected rows below use concurrency 1. Background applications and CPU power state were not controlled.</p>
+<table>
+<thead>
+<tr>
+<th>Measured path</th>
+<th style="text-align: right;">Samples</th>
+<th style="text-align: right;">p50 (ms)</th>
+<th style="text-align: right;">p95 (ms)</th>
+<th style="text-align: right;">Requests/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Engine, allowed request, detect-secrets enabled, zero-wait fixture</td>
+<td style="text-align: right;">2,000</td>
+<td style="text-align: right;">0.131875</td>
+<td style="text-align: right;">0.141625</td>
+<td style="text-align: right;">7,530.61</td>
+</tr>
+<tr>
+<td>HTTP gateway, allowed request, simulated 15 ms backend</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">25.022</td>
+<td style="text-align: right;">29.191</td>
+<td style="text-align: right;">39.041</td>
+</tr>
+<tr>
+<td>One literal rule, 128-byte input, no match</td>
+<td style="text-align: right;">2,000</td>
+<td style="text-align: right;">0.001083</td>
+<td style="text-align: right;">0.001250</td>
+<td style="text-align: right;">Not measured</td>
+</tr>
+<tr>
+<td>64 literal rules, 65,536-byte input, no match</td>
+<td style="text-align: right;">2,000</td>
+<td style="text-align: right;">0.276750</td>
+<td style="text-align: right;">0.317000</td>
+<td style="text-align: right;">Not measured</td>
+</tr>
+<tr>
+<td>Reversible AES-GCM token, synthetic email, transform and restore</td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">0.035250</td>
+<td style="text-align: right;">0.035875</td>
+<td style="text-align: right;">Not measured</td>
+</tr>
+</tbody>
+</table>
+<p>The engine row includes 100 excluded warmup calls; the HTTP row has 20, the rule cases 100, and the token case 100. The rule measurements exclude privacy checks, budgets, audit and transport. The token measurement excludes key initialization, matching over larger payloads, transport and model calls; it uses symmetric FFR1 tokens, not RSA envelopes.</p>
+<p>Download the complete raw reports: <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/detect-secrets-runtime-benchmark.json">engine with detect-secrets</a>, <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/transport-benchmark.json">HTTP/MCP transport</a>, <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/authored-text-rules-benchmark.json">literal text rules</a>, <a href="https://github.com/llama-lovers/FastFence/blob/main/evaluation/results/stateless-token-benchmark.json">stateless tokens</a>. They contain the measurement scope and additional cases; selecting these rows does not make the workloads equivalent.</p>
+<h2 id="make-comparisons-reproducible">Make comparisons reproducible<a class="headerlink" href="#make-comparisons-reproducible" title="Permanent link">&para;</a></h2>
+<p>Keep the raw JSON report with the package version, Python and dependency versions, CPU/OS/RAM, sample count, warmup, concurrency, payload size and enabled rules. For model-assisted measurements, also record the model, whether it was already loaded, and which input/output assessment stages executed. Compare the same workload and concurrency on the same machine.</p>
+<p>Use enough samples to observe slower requests. A p95 from ten samples has very little information about the latency tail. Repeat measurements and retain errors or unexpected verdicts; successful HTTP responses can still represent blocked requests. Stop a comparison if its expected outcomes or budget accounting fail validation.</p>
+<p>These numbers are observations on one development machine, not an SLA or a capacity guarantee. Do not subtract a health endpoint from a protected request to claim pure security overhead: those endpoints perform different work. Benchmarking throughput also does not measure security detection quality.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../integrations/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Connect agents and models">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Connect agents and models
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../examples/acp/" class="md-footer__link md-footer__link--next" aria-label="Next: Agent Communication Protocol">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Agent Communication Protocol
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 FastFence contributors · Apache-2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../javascripts/mermaid.mjs" type="module"></script>
+      
+    
+  </body>
+</html>
