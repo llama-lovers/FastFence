@@ -11,6 +11,7 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+from datetime import UTC, datetime
 from pathlib import Path
 
 CLIENT = urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -63,6 +64,80 @@ def blocked(verdict, reason, version):
     assert verdict["semantic_output_status"] == "not_run"
 
 
+class BudgetDayChangedError(Exception):
+    """The documented UTC-day window changed during the acceptance sequence."""
+
+
+def utc_day():
+    return datetime.now(UTC).date().isoformat()
+
+
+def check_budget_sequence(status, invoke, activate, instance, initial_day):
+    day = initial_day
+
+    def current():
+        state = status()
+        assert state["runtime"]["instance_id"] == instance
+        if utc_day() != day:
+            raise BudgetDayChangedError
+        return state
+
+    def row():
+        value = next(
+            (
+                item
+                for item in current()["budgets"]
+                if item["subject"] == "local-agent"
+            ),
+            None,
+        )
+        if value is None:
+            raise RuntimeError("Budget row missing within the same UTC day")
+        if value["day"] != day:
+            raise RuntimeError("Budget row has an unexpected UTC day")
+        return value
+
+    for attempt in range(2):
+        try:
+            if attempt:
+                # Seed the new daily bucket after a proven rollover only.
+                verdict = invoke()
+                current()
+                allowed(verdict)
+            value = row()
+            used = value["calls"]
+            assert used >= 1 and value["roles"] == ["analyst"]
+            active = activate(
+                lambda policy, used=used: policy["budgets"]["analyst"].update(
+                    calls=used
+                )
+            )
+            current()
+            verdict = invoke()
+            current()
+            blocked(verdict, "budget_calls", active)
+            assert row()["calls"] == used
+            active = activate(
+                lambda policy, used=used: policy["budgets"]["analyst"].update(
+                    calls=used + 1
+                )
+            )
+            current()
+            verdict = invoke()
+            current()
+            allowed(verdict)
+            assert verdict["policy_version"] == active
+            assert row()["calls"] == used + 1
+            return used
+        except BudgetDayChangedError:
+            if attempt:
+                raise RuntimeError(
+                    "UTC budget day changed twice during verification"
+                ) from None
+            day = utc_day()
+    raise RuntimeError("Budget verification did not complete")
+
+
 def run_checks(root, base, version, full):
     assert request(base, "/openapi.json")["info"]["version"] == version
     credentials = json.loads((root / "state/credentials.json").read_text())
@@ -98,6 +173,7 @@ def run_checks(root, base, version, full):
         )
         return verdict
 
+    initial_day = utc_day()
     first = invoke()
     if not full:
         assert first["decision"] == "error"
@@ -136,32 +212,13 @@ def run_checks(root, base, version, full):
     allowed(result)
     assert result["policy_version"] == active
 
-    def budget_row():
-        return next(
-            row
-            for row in status()["budgets"]
-            if row["subject"] == "local-agent"
-        )
-
-    row = budget_row()
-    used = row["calls"]
-    assert used >= 1 and row["roles"] == ["analyst"]
-    active = activate_file(
-        root,
+    used = check_budget_sequence(
         status,
-        lambda policy: policy["budgets"]["analyst"].update(calls=used),
+        invoke,
+        lambda edit: activate_file(root, status, edit),
+        instance,
+        initial_day,
     )
-    blocked(invoke(), "budget_calls", active)
-    assert budget_row()["calls"] == used
-    active = activate_file(
-        root,
-        status,
-        lambda policy: policy["budgets"]["analyst"].update(calls=used + 1),
-    )
-    result = invoke()
-    allowed(result)
-    assert result["policy_version"] == active
-    assert budget_row()["calls"] == used + 1
     final = status()
     assert final["runtime"]["instance_id"] == instance
     by_id = {entry["request_id"]: entry for entry in final["audit"]}

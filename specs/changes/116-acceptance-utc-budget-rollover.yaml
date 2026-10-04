@@ -1,0 +1,30 @@
+id: FF-116
+title: Keep public package acceptance valid across the documented UTC budget reset
+status: implemented
+problem: The full 1.0.2 candidate acceptance crossed midnight UTC and failed with StopIteration while looking for the previous day's budget row after an allowed request. Production accounting intentionally exposes only the current UTC day's rows.
+scope:
+  - Isolate the budget deny and increase sequence in the installed-package acceptance helper.
+  - Recognize a demonstrated UTC-date change and retry the complete budget sequence once with a newly seeded daily bucket.
+  - Retain exact same-day accounting, policy version, runtime instance, semantic and upstream assertions.
+constraints:
+  - Do not change production accounting or its UTC-day semantics.
+  - Never catch or suppress assertion failures unrelated to the explicit date-change signal.
+  - Missing same-day rows, changed instances and unexpected row dates remain failures.
+  - A second rollover fails instead of retrying indefinitely.
+change_paths:
+  - scripts/smoke_uv_tool.py
+  - tests/unit/test_smoke_budget_rollover.py
+acceptance:
+  - Normal same-day deny then budget extension preserves exact call accounting.
+  - Midnight between an allowed invocation and the subsequent status read causes one bounded reseed and complete verification.
+  - Missing rows within a day, incorrect call charges and process replacement fail without retry.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_smoke_budget_rollover.py tests/unit/test_budgets.py
+    expected: Acceptance rollover scenarios and production budget regressions pass.
+  - command: uv run --locked ruff check scripts/smoke_uv_tool.py tests/unit/test_smoke_budget_rollover.py
+    expected: No lint errors.
+evidence:
+  - check: Failed candidate trace and existing ledger behavior
+    result: Trace failed at the post-extension budget row lookup; observed execution spanned 2026-10-03 23:58 UTC through 2026-10-04 00:00 UTC. Ledger.budgets filters to the current UTC day and management status explicitly reports this window, supporting test rollover rather than an unexplained production reset.
+  - check: Focused tests
+    result: All 15 tests passed, including six acceptance cases and nine existing production budget cases. No production files changed.
