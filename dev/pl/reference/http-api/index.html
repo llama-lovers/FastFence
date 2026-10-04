@@ -1356,7 +1356,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4e4571e32989066d704e05d6eb20160759f7ff1">Commit b4e4571e3298</a>.</p>
 </div>
 <h1 id="dokumentacja-http-api">Dokumentacja HTTP API<a class="headerlink" href="#dokumentacja-http-api" title="Permanent link">&para;</a></h1>
 <p>Ten wykaz endpointów powstaje z deklaracji tras w Pythonie przy każdym budowaniu dokumentacji. Link do funkcji prowadzi do modeli żądań i odpowiedzi. Uruchomiona bramka udostępnia pełne schematy JSON pod <code>/openapi.json</code> oraz interaktywną dokumentację pod <code>/docs</code>.</p>
@@ -1373,112 +1373,112 @@
 <tr>
 <td><code>GET</code></td>
 <td><code>/acp/agents</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L215">discovery</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/acp.py#L215">discovery</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/acp/agents/{name}</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L225">agent</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/acp.py#L225">agent</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/acp/ping</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L208">ping</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/acp.py#L208">ping</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/acp/runs</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/acp.py#L234">run</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/acp.py#L234">run</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/api/admin/audit.jsonl</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L189">audit_export</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L189">audit_export</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/admin/policies/activate</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/policy_authoring.py#L53">activate_policy</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/policy_authoring.py#L53">activate_policy</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/admin/policies/draft</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/policy_authoring.py#L35">draft_policy</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/policy_authoring.py#L35">draft_policy</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/admin/policies/preview</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/policy_authoring.py#L44">preview_policy</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/policy_authoring.py#L44">preview_policy</a></td>
 </tr>
 <tr>
 <td><code>PUT</code></td>
 <td><code>/api/admin/policy</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L177">save_policy</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L177">save_policy</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/admin/reload</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L163">reload_policy</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L163">reload_policy</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/admin/rules/preview</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/rule_authoring.py#L32">preview_rule</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/rule_authoring.py#L32">preview_rule</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/api/admin/rules/schema</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/rule_authoring.py#L28">rule_schema</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/rule_authoring.py#L28">rule_schema</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/admin/semantic/preview</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/semantic_preview.py#L27">preview</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/semantic_preview.py#L27">preview</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/api/admin/status</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L159">status</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L159">status</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/documents/markdown</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/documents.py#L61">document_markdown</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/documents.py#L61">document_markdown</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/invoke</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L143">invoke</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L143">invoke</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/api/me</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L139">me</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L139">me</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/models/complete</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L149">complete</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L149">complete</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/health</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L117">health</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L117">health</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/ready</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/routes.py#L131">readiness</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/routes.py#L131">readiness</a></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/v1/chat/completions</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/openai.py#L193">complete</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/openai.py#L193">complete</a></td>
 </tr>
 <tr>
 <td><code>GET</code></td>
 <td><code>/v1/models</code></td>
-<td><a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/src/fastfence/app/interfaces/http/openai.py#L165">models</a></td>
+<td><a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/src/fastfence/app/interfaces/http/openai.py#L165">models</a></td>
 </tr>
 </tbody>
 </table>

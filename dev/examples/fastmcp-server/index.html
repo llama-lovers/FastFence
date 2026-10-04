@@ -1444,7 +1444,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/edc0fa3036de58530d32889d07247275d9521d53">Commit edc0fa3036de</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/b4e4571e32989066d704e05d6eb20160759f7ff1">Commit b4e4571e3298</a>.</p>
 </div>
 <h1 id="protect-a-fastmcp-server-inside-a-fastapi-application">Protect a FastMCP server inside a FastAPI application<a class="headerlink" href="#protect-a-fastmcp-server-inside-a-fastapi-application" title="Permanent link">&para;</a></h1>
 <p>This complete application connects a real FastMCP <code>uppercase</code> tool to FastFence through <code>ToolsPort</code>. FastFence's FastAPI application exposes authenticated REST and MCP entry points. Its input controls run <strong>before</strong> the tool, and output controls run before delivery.</p>
@@ -1541,7 +1541,7 @@
 </span><span id="__span-1-83"><a id="__codelineno-1-83" name="__codelineno-1-83" href="#__codelineno-1-83"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 </span><span id="__span-1-84"><a id="__codelineno-1-84" name="__codelineno-1-84" href="#__codelineno-1-84"></a>    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
-<p><a href="https://fastfence.dev/dev/downloads/fastmcp_server.py">Download fastmcp_server.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/fastmcp_server.py">View source</a></p>
+<p><a href="https://fastfence.dev/dev/downloads/fastmcp_server.py">Download fastmcp_server.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/examples/docs/fastmcp_server.py">View source</a></p>
 <p><code>create_app(..., tools=ProtectedMCPTools())</code> is the integration point. Register business operations through this port; an ordinary FastAPI route is not automatically protected by FastFence. The public <code>/integration-info</code> route returns static metadata only. The verified identity passed to the adapter can also enforce application-specific tenant ownership before execution.</p>
 <h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -1593,7 +1593,7 @@
 </span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="w">  </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tool</span>
 </span><span id="__span-2-48"><a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="w">  </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span></code></pre></div>
-<p><a href="https://fastfence.dev/dev/downloads/policy.yaml">Download policy.yaml</a> · <a href="https://github.com/llama-lovers/FastFence/blob/edc0fa3036de58530d32889d07247275d9521d53/examples/docs/policy.yaml">View source</a></p>
+<p><a href="https://fastfence.dev/dev/downloads/policy.yaml">Download policy.yaml</a> · <a href="https://github.com/llama-lovers/FastFence/blob/b4e4571e32989066d704e05d6eb20160759f7ff1/examples/docs/policy.yaml">View source</a></p>
 <h2 id="enable-laya-in-this-example">Enable Laya in this example<a class="headerlink" href="#enable-laya-in-this-example" title="Permanent link">&para;</a></h2>
 <p>Stop the example server. From your main installation directory, with Ollama running, prepare the runtime:</p>
 <div class="language-sh highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence@1.0.1<span class="w"> </span>init<span class="w"> </span>--anonymization
