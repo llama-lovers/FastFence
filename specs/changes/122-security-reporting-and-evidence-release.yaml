@@ -1,0 +1,29 @@
+id: FF-122
+title: Release model reliability fixes and measured security reporting as 1.0.3
+status: implemented
+problem: The published 1.0.2 accepts incomplete native Ollama responses and rejects overlapping Laya calls; it also predates request-level dashboard metrics and reproducible benchmark documentation.
+scope:
+  - Publish model response validation, bounded Laya admission and explicit semantic readiness under a new immutable patch version.
+  - Include additive request-level dashboard reporting.
+  - Include bilingual benchmark instructions and measured public-package evidence in tagged documentation.
+constraints:
+  - Preserve the published 1.0.2 tag, distributions and documentation provenance.
+  - Label benchmark and security reports with the actual measured package version.
+  - Require tests, quality gates, installed-package checks and public documentation verification.
+change_paths:
+  - _version.py
+acceptance:
+  - The package reports 1.0.3 and exposes additive request-level telemetry.
+  - Independent chat regressions pass against the installed candidate, including malformed Ollama responses and two concurrent real Laya requests.
+  - Tagged documentation includes the actual three-mode benchmark comparison and its raw reports.
+validation:
+  - command: uv run --locked pytest -q --tb=short
+    expected: All regression tests pass.
+  - command: uv build
+    expected: Immutable 1.0.3 wheel and source distribution build.
+evidence:
+  - check: Prior immutable release
+    result: Public 1.0.2 package and bilingual documentation verified. The new version identifier prevents overwriting those artifacts; 1.0.3 publication remains subject to its release gates.
+
+  - check: Independent operator chat laboratory against installed candidate wheel
+    result: All 36 controlled-provider tests and all 13 real Ollama/Laya scenarios passed outside the checkout, with site-packages import verification. Public PyPI verification follows publication. Full source regression suite passed 1262 tests with 92.64 percent coverage.

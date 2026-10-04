@@ -1,0 +1,35 @@
+id: FF-121
+title: Show complete decision counts and scoped security-path telemetry
+status: verified
+problem: The overview omitted allowed/error totals, traffic rate, request-level semantic path shares and recent denial reasons, while its latency caption did not explain the sample boundary.
+scope:
+  - Display requests, allowed, blocked, redacted, errors, throughput and local-only versus semantic request percentages.
+  - Render readable reason labels with exact diagnostic codes available as title text.
+  - Rank blocked invocation reasons from at most 200 loaded audit events, excluding management events and non-denials.
+  - Explain p95 sample size, integer milliseconds and inclusion of upstream time without claiming gateway transport or pure guardrail overhead.
+  - Clear all new metrics on identity reset and preserve the existing stale-refresh warning.
+  - Replace the obsolete initialization instruction with one-command uv tool startup.
+constraints:
+  - Use FF-120 request-level counters; never derive semantic request percentage from model call counts.
+  - Keep lifetime instance counters distinct from recent audit and throughput windows.
+  - Render audit reason values as text, not HTML; retain the existing console structure.
+  - Browser acceptance uses synthetic mocked API data and never private operator credentials or policies.
+change_paths:
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/app/interfaces/http/web/console.js
+  - src/fastfence/app/interfaces/http/web/console.css
+  - evaluation/console_metrics_checks.py
+  - evaluation/smoke_console.py
+acceptance:
+  - Semantic request percentage uses semantic_requests divided by requests even when one request has two model assessments.
+  - A denial outside the latest 200 events, a management denial and an error do not affect displayed top denial reasons.
+  - Markup-looking reasons remain inert text and mobile width stays within the viewport.
+  - Disconnect clears all new counters, percentages, scope captions and denial entries.
+validation:
+  - command: uv run --with playwright==1.63.0 python evaluation/smoke_console.py --output state/private/console-telemetry-browser.json
+    expected: Existing console flows and new scoped telemetry checks pass in real Chromium.
+evidence:
+  - check: Existing backend and frontend review
+    result: Existing metrics already provided all decision totals, rolling traffic and bounded p95; semantic_calls counts assessments and cannot represent request shares. New request-level fields are independently implemented and tested in FF-120.
+  - command: Real Chromium console acceptance with explicit synthetic API fixtures
+    result: All 27 named check groups passed, including five new scoped telemetry, request-percentage, inert markup, stale/reset and mobile checks. No real model calls or operator state access.

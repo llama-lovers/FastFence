@@ -20,6 +20,10 @@ from fastfence.modules.control.contracts.ports import (
     PolicyPort,
     ToolsPort,
 )
+from fastfence.modules.control.contracts.readiness import (
+    ReadinessPort,
+    ReadinessReport,
+)
 from fastfence.modules.control.domain.models import (
     Identity,
     ModelCall,
@@ -38,6 +42,7 @@ from fastfence.modules.control.persistence.models import (
 )
 from fastfence.modules.control.persistence.openai_models import OpenAIModels
 from fastfence.modules.control.persistence.policy import PolicyStore
+from fastfence.modules.control.persistence.readiness import SemanticReadiness
 from fastfence.modules.control.persistence.secrets import OfflineSecrets
 from fastfence.modules.control.persistence.tools import UnconfiguredTools
 from fastfence.shared.settings.app_settings import AppSettings
@@ -52,6 +57,7 @@ class ControlRuntime:
         policies: PolicyPort,
         ledger: LedgerPort,
         engine: Engine,
+        readiness: ReadinessPort | None = None,
     ) -> None:
         self.identities, self.policies, self.ledger, self.engine = (
             identities,
@@ -59,7 +65,13 @@ class ControlRuntime:
             ledger,
             engine,
         )
+        self._readiness = readiness
         self.management = ManagementUseCases(policies, identities, ledger)
+
+    async def readiness(self) -> ReadinessReport:
+        if self._readiness is None:
+            raise RuntimeError("Readiness probe was not configured")
+        return await self._readiness.check(self.snapshot().policy.semantic)
 
     def authenticate(self, token: str | None) -> Identity | None:
         return self.identities.authenticate(token)
@@ -237,5 +249,11 @@ def build_runtime(
         anonymization=anonymization,
     )
     return ControlRuntime(
-        identities=identities, policies=policies, ledger=ledger, engine=engine
+        identities=identities,
+        policies=policies,
+        ledger=ledger,
+        engine=engine,
+        readiness=SemanticReadiness(
+            settings.authoring_root or settings.root, settings.ollama_url
+        ),
     )

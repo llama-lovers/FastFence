@@ -13,6 +13,9 @@ from fastfence.modules.control.domain.models import (
     SemanticConfig,
 )
 from fastfence.modules.control.persistence.laya_semantic import LayaSemantic
+from fastfence.modules.control.persistence.ollama_response import (
+    decode_completion,
+)
 from fastfence.modules.control.persistence.semantic_severity import (
     OLLAMA_SYSTEM,
     SEVERITY_SCHEMA,
@@ -178,27 +181,16 @@ class OllamaModels:
                     endpoint = "/api/chat"
                 response = await client.post(self.url + endpoint, json=payload)
                 response.raise_for_status()
-                data = response.json()
-                text = (
-                    data.get("response")
-                    if messages is None
-                    else data.get("message", {}).get("content")
+                text, finish_reason, tokens = decode_completion(
+                    response.json(),
+                    chat=messages is not None,
+                    max_tokens=max_tokens,
                 )
-                if not isinstance(text, str):
-                    raise ValueError("Invalid model output")
-                prompt_tokens = int(data.get("prompt_eval_count", 0))
-                completion_tokens = int(data.get("eval_count", 0))
-                if (
-                    prompt_tokens < 0
-                    or completion_tokens < 0
-                    or completion_tokens > max_tokens
-                ):
-                    raise ValueError("Provider violated token limit")
                 return {
                     "text": text,
                     "model": model,
-                    "finish_reason": data.get("done_reason", "stop"),
-                }, prompt_tokens + completion_tokens
+                    "finish_reason": finish_reason,
+                }, tokens
         except Exception:
             raise ModelUnavailableError(
                 "Model unavailable or invalid response"

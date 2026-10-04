@@ -1,0 +1,26 @@
+id: FF-120
+title: Count semantic and local-only request paths for the security dashboard
+status: implemented
+problem: Semantic call counts can include both input and output assessments and cannot be divided by request counts to calculate the share of requests that used semantic controls.
+scope:
+  - Add process-lifetime counters for completed invocations with and without attempted semantic assessment.
+  - Use nearest-rank p95 for the bounded integer-millisecond invocation latency sample.
+constraints:
+  - Keep each request in exactly one path, including failed semantic attempts.
+  - Exclude management events and preserve totals after audit eviction.
+  - Preserve semantic_calls as a separate model-call counter.
+  - Local-only does not imply a latency guarantee; invocation latency includes upstream execution and excludes HTTP transport.
+change_paths:
+  - src/fastfence/modules/control/persistence/ledger.py
+  - tests/unit/test_request_path_metrics.py
+acceptance:
+  - semantic_requests plus local_only_requests equals requests.
+  - Two assessment stages count one semantic request.
+  - All combinations of not_run, passed, blocked and error statuses are handled.
+  - The p95 of integer latencies 1 through 20 is 19.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_request_path_metrics.py tests/unit/test_memory_runtime.py
+    expected: Request classification, eviction and latency percentile regressions pass.
+evidence:
+  - check: Focused metrics and existing memory runtime tests
+    result: 23 tests passed, including every input/output status combination, audit eviction, management exclusion and the exact percentile boundary.

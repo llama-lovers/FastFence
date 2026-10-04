@@ -79,7 +79,11 @@ async function connect() {
   } finally { $('saveConnect').disabled = false; }
 }
 function clearManagementView() {
-  for (const id of ['requests', 'blocked', 'redacted', 'latency', 'overviewSource', 'lastChecked']) $(id).textContent = '—';
+  for (const id of ['requests', 'allowed', 'blocked', 'redacted', 'errors', 'throughput', 'localPathShare', 'semanticPathShare', 'latency', 'overviewSource', 'lastChecked']) $(id).textContent = '—';
+  $('latencyScope').textContent = 'Includes upstream, excludes gateway transport';
+  $('throughputScope').textContent = 'Recent instance traffic';
+  $('threatScope').textContent = 'Recent loaded activity only';
+  $('topDenialReasons').replaceChildren(el('p', 'Connect a management identity to inspect recent denials.', 'small'));
   $('version').textContent = 'Policy —'; $('policyVersion').textContent = 'Not loaded'; $('headerVersion').textContent = 'Policy not loaded';
   $('policySource').textContent = 'Source not loaded'; $('policyUpdated').textContent = '';
   for (const id of ['privacyMode', 'feedMode', 'textRuleCount', 'semanticMode']) $(id).textContent = 'Not loaded';
@@ -106,6 +110,54 @@ function renderBudgets(rows) {
     $('budgets').append(row);
   }
 }
+function renderOverviewMetrics(metrics) {
+  for (const key of ['requests', 'allowed', 'blocked', 'redacted', 'errors']) $(key).textContent = metrics[key] ?? '—';
+  $('throughput').textContent = metrics.throughput_rps == null ? '—' : Number(metrics.throughput_rps).toFixed(2);
+  $('throughputScope').textContent = metrics.throughput_window_seconds == null ? 'Recent instance traffic' : 'Last ' + metrics.throughput_window_seconds + ' seconds · this instance';
+  for (const [id, key] of [['localPathShare', 'local_only_requests'], ['semanticPathShare', 'semantic_requests']]) {
+    const known = Number.isFinite(metrics[key]) && Number.isFinite(metrics.requests);
+    $(id).textContent = known ? (metrics.requests ? 100 * metrics[key] / metrics.requests : 0).toFixed(1) + '%' : '—';
+  }
+  $('latency').textContent = metrics.latency_sample_size === 0 ? '—' : metrics.p95_latency_ms + ' ms';
+  $('latencyScope').textContent = 'Last ' + (metrics.latency_sample_size ?? 'available') + ' decisions · integer ms · includes upstream, excludes gateway transport';
+}
+function denialLabel(reason) {
+  const labels = {
+    input_sensitive_data: 'Sensitive input', output_sensitive_data: 'Sensitive output blocked',
+    attack_signature: 'Known attack signature', output_attack_signature: 'Known attack signature in output',
+    semantic_input_risk: 'Semantic policy violation in input', semantic_output_risk: 'Semantic policy violation in output',
+    input_text_rule: 'Input content rule matched', output_text_rule: 'Output content rule matched',
+    access_denied: 'Access denied', role_not_allowed: 'Role access denied', target_not_allowlisted: 'Destination not allowed',
+    admin_credential_cannot_invoke: 'Agent access required', role_budget_missing: 'Role budget not configured',
+    budget_calls: 'Request budget exceeded', budget_tokens: 'Token budget exceeded', budget_cost_microusd: 'Cost budget exceeded',
+    budget_compute_ms: 'Compute budget exceeded', budget_inflight: 'Concurrency limit reached',
+    anonymization_restore_denied: 'Restoration not permitted', anonymization_unavailable: 'Anonymization unavailable',
+  };
+  if (Object.hasOwn(labels, reason)) return labels[reason];
+  const readable = reason.replaceAll('_', ' ');
+  return readable.charAt(0).toUpperCase() + readable.slice(1);
+}
+function renderTopDenials(records) {
+  const loaded = records.slice(0, 200);
+  const invocations = loaded.filter(record => record.event_kind === 'invocation');
+  const counts = new Map();
+  for (const record of invocations) {
+    if (record.decision !== 'blocked') continue;
+    const reason = typeof record.reason === 'string' && record.reason ? record.reason : 'Unspecified';
+    counts.set(reason, (counts.get(reason) || 0) + 1);
+  }
+  $('threatScope').textContent = invocations.length + ' invocation events · latest ' + loaded.length + ' loaded events (max 200)';
+  $('topDenialReasons').replaceChildren();
+  const ranked = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 5);
+  if (!ranked.length) $('topDenialReasons').append(el('p', 'No blocked invocations in this recent activity window.', 'small'));
+  for (const [reason, count] of ranked) {
+    const row = el('div', '', 'control');
+    const label = el('span', denialLabel(reason));
+    label.title = reason;
+    row.append(label, el('span', String(count)));
+    $('topDenialReasons').append(row);
+  }
+}
 async function refresh() {
   if (!admin) return;
   const token = admin, epoch = connectionEpoch;
@@ -114,10 +166,8 @@ async function refresh() {
     if (token !== admin || epoch !== connectionEpoch) return;
     active = status.policy; latestStatus = status;
     syncPlaygroundModels();
-    $('requests').textContent = status.metrics.requests;
-    $('blocked').textContent = status.metrics.blocked;
-    $('redacted').textContent = status.metrics.redacted;
-    $('latency').textContent = status.metrics.p95_latency_ms + ' ms';
+    renderOverviewMetrics(status.metrics);
+    renderTopDenials(status.audit);
     $('version').textContent = 'Policy v' + active.version;
     $('headerVersion').textContent = 'Policy v' + active.version;
     $('policyVersion').textContent = 'Active · v' + active.version;

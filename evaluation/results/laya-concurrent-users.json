@@ -1,0 +1,46 @@
+{
+  "created_at": "2026-10-04T00:39:29.737440+00:00",
+  "scope": "Actual concurrent loopback HTTP through isolated candidate source gateway, real pinned Laya and Ollama; not a published-package test or load-capacity claim.",
+  "concurrent_users": 2,
+  "configured_identity_concurrency": 4,
+  "business_model": "qwen3:0.6b",
+  "semantic_model": "qwen3:4b",
+  "results": [
+    {
+      "request_id": "dccae7fbbcf842d7848919f7e93bbdc9",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "semantic_input_status": "passed",
+      "semantic_output_status": "passed",
+      "upstream_executed": true,
+      "subject": "first",
+      "elapsed_ms": 6630
+    },
+    {
+      "request_id": "a37dd5bd485b4a33949f1d219f7063a0",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "semantic_input_status": "passed",
+      "semantic_output_status": "passed",
+      "upstream_executed": true,
+      "subject": "second",
+      "elapsed_ms": 7196
+    }
+  ],
+  "semantic_calls": 4,
+  "per_identity_calls": {
+    "first": 1,
+    "second": 1
+  },
+  "all_inflight_released": true,
+  "audit_without_raw_payload": true,
+  "all_passed": true,
+  "editable_distribution_metadata_version": "1.0.1",
+  "source_checkout_candidate_version": "1.0.3",
+  "adapter_sha256": "633504774b674ea219086c41eced1dd316b04a116b80d93ae1cc3437c75d152c",
+  "limitations": [
+    "The repository environment has stale1.0.1 distribution metadata; this run exercised the modified source candidate, not a published package.",
+    "Two concurrent users are a regression proof, not a throughput or capacity guarantee.",
+    "Real local Ollama and the existing pinned Laya installation were used; policies, identities and gateway process were temporary and isolated."
+  ]
+}

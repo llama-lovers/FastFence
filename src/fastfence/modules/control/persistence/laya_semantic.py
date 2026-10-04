@@ -51,28 +51,46 @@ def local_origin(url: str) -> bool:
     )
 
 
+MAX_PENDING_ASSESSMENTS = 32
+
+
 class LayaSemantic:
     def __init__(self, root: Path, url: str) -> None:
         self.root, self.url = root, url
         self._process: asyncio.subprocess.Process | None = None
         self._slot = asyncio.Lock()
         self._closed = False
+        self._pending = 0
 
     async def assess(
         self, text: str, config: SemanticConfig
     ) -> tuple[float, int]:
-        if self._closed or self._slot.locked():
+        if self._closed or self._pending >= MAX_PENDING_ASSESSMENTS:
             raise ModelUnavailableError("Laya semantic scanner unavailable")
-        async with self._slot:
-            try:
-                async with asyncio.timeout(config.timeout_ms / 1000):
-                    result = await self._exchange(text, config)
-                    return severity_score(result.content), (
-                        result.input_tokens + result.output_tokens
-                    )
-            except BaseException:
-                await self._stop()
-                raise
+        if len(text.encode()) > 65_536:
+            raise ValueError("Semantic input exceeds capacity")
+        # Admission is atomic within the event loop; at most 31 requests can wait
+        # behind the worker owner. Waiting consumes the same stage deadline.
+        self._pending += 1
+        try:
+            async with asyncio.timeout(config.timeout_ms / 1000):
+                async with self._slot:
+                    if self._closed:
+                        raise ModelUnavailableError(
+                            "Laya semantic scanner unavailable"
+                        )
+                    try:
+                        result = await self._exchange(text, config)
+                        return severity_score(result.content), (
+                            result.input_tokens + result.output_tokens
+                        )
+                    except BaseException:
+                        # Only the worker owner may stop it. A timed-out or
+                        # cancelled waiter must not interrupt another request.
+                        await self._stop()
+                        raise
+        finally:
+            self._pending -= 1
 
     async def _start(self) -> asyncio.subprocess.Process:
         interpreter = self.root / "state/laya/venv/bin/python"
@@ -109,6 +127,9 @@ class LayaSemantic:
             stderr=asyncio.subprocess.DEVNULL,
             limit=8192,
         )
+        if self._closed:
+            await self._stop()
+            raise ModelUnavailableError("Laya semantic scanner unavailable")
         return self._process
 
     async def _exchange(

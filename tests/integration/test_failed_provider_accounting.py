@@ -6,12 +6,21 @@ import json
 import pytest
 
 from fastfence.modules.control.domain.models import ModelCall
+from fastfence.modules.control.persistence.models import OllamaModels
 from fastfence.modules.control.persistence.openai_models import OpenAIModels
 from tests.fixtures.policy import configure_policy
 
 
 @pytest.mark.parametrize(
-    "mode", ["excess_usage", "missing_usage", "http_error"]
+    "mode",
+    [
+        "excess_usage",
+        "missing_usage",
+        "http_error",
+        "native_incomplete",
+        "native_missing_usage",
+        "native_not_done",
+    ],
 )
 async def test_unknown_provider_usage_charges_reservation_and_blocks_retry(
     app, tokens, mode
@@ -46,6 +55,17 @@ async def test_unknown_provider_usage_charges_reservation_and_blocks_retry(
         }
         if mode == "missing_usage":
             reply.pop("usage")
+        if mode.startswith("native_"):
+            reply = {"response": "Hello"}
+            if mode == "native_missing_usage":
+                reply.update(done=True, done_reason="stop")
+            if mode == "native_not_done":
+                reply.update(
+                    done=False,
+                    done_reason="stop",
+                    prompt_eval_count=5,
+                    eval_count=3,
+                )
         body = json.dumps(reply).encode()
         status = (
             b"500 Internal Server Error" if mode == "http_error" else b"200 OK"
@@ -64,7 +84,11 @@ async def test_unknown_provider_usage_charges_reservation_and_blocks_retry(
     server = await asyncio.start_server(serve, "127.0.0.1", 0)
     async with server:
         port = server.sockets[0].getsockname()[1]
-        engine.models = OpenAIModels(f"http://127.0.0.1:{port}/v1")
+        engine.models = (
+            OllamaModels(f"http://127.0.0.1:{port}")
+            if mode.startswith("native_")
+            else OpenAIModels(f"http://127.0.0.1:{port}/v1")
+        )
         identity = app.state.identities.authenticate(tokens["analyst-blue"])
         call = ModelCall(model="qwen3:0.6b", prompt="Hi", max_output_tokens=64)
         failed = await engine.invoke(identity, call)
@@ -77,4 +101,7 @@ async def test_unknown_provider_usage_charges_reservation_and_blocks_retry(
     assert denied.tokens == 0 and len(attempts) == 1
     row = engine.ledger.budgets()[0]
     assert row["tokens"] == 1103 and row["inflight"] == 0
-    assert attempts[0]["max_tokens"] == 64
+    if mode.startswith("native_"):
+        assert attempts[0]["options"]["num_predict"] == 64
+    else:
+        assert attempts[0]["max_tokens"] == 64

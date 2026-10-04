@@ -10,8 +10,10 @@ from urllib.parse import urlsplit
 from playwright.sync_api import expect, sync_playwright
 
 if __package__:
+    from evaluation.console_metrics_checks import metric_checks
     from evaluation.smoke_playground_models import fixture_status
 else:
+    from console_metrics_checks import metric_checks
     from smoke_playground_models import fixture_status
 
 
@@ -543,6 +545,7 @@ def run(root, screenshots=None):
         shell_checks(page, fixture, screenshots)
         policy_checks(page, fixture, screenshots)
         named_rule_checks(page, fixture, screenshots)
+        metric_checks(page, fixture, screenshots)
         assert not errors, errors
         browser.close()
     return {
@@ -550,6 +553,11 @@ def run(root, screenshots=None):
         "all_passed": True,
         "mode": "real_chromium_synthetic_api_fixtures_no_inference",
         "checks": [
+            "overview_all_decision_counters",
+            "request_level_path_percentages_not_call_ratio",
+            "recent_denial_scope_and_safe_rendering",
+            "metrics_stale_warning_and_identity_reset",
+            "metrics_mobile_no_overflow",
             "navigation",
             "atomic_identity_connection",
             "memory_only_credentials",

@@ -1,0 +1,41 @@
+id: FF-117
+title: Reproduce core guardrail and optional actual Laya benchmarks from an installed package
+status: verified
+problem: Historical source-checkout benchmarks do not establish current installed-package performance or provide a runnable operator path.
+scope:
+  - Reuse the operational gateway benchmark for exact installed public versions and reviewed wheels in fresh external environments.
+  - Stage only explicit benchmark fixtures and scripts, never FastFence package source or private settings.
+  - Report median, nearest-rank p50/p95/p99, throughput, concurrency, counts, environment and package provenance.
+  - Include controls-OFF baseline using the identical allowed fixture payload and timer, explicitly without auth, validation, budgets or audit.
+  - Optionally measure actual installed-default Laya input and output assessment with serial synthetic requests.
+constraints:
+  - Do not infer production latency guarantees or security accuracy from fixed development workloads.
+  - Explicitly distinguish constant fixture upstream from real business model generation and HTTP/MCP transport, which are excluded.
+  - Fail on unexpected decisions, skipped semantic stages, accounting mismatches or checkout imports.
+  - Exclude warmups from timing while reconciling their budget, audit and semantic calls.
+  - Preserve existing benchmark entry points and historical reports.
+  - Semantic runs must coordinate the local model slot and report model digest, quantization and warmed repeated-prompt limitations.
+change_paths:
+  - scripts/benchmark_package.py
+  - evaluation/benchmark_gateway.py
+  - tests/unit/test_package_benchmark.py
+  - evaluation/results/installed-package-1.0.2-deterministic.json
+  - evaluation/results/installed-package-1.0.2-semantic.json
+  - evaluation/results/installed-package-1.0.2-comparison.json
+acceptance:
+  - Downloaded bundle runs outside checkout and imports the exact distribution from its isolated environment.
+  - Public installation refreshes FastFence metadata so newly published versions are not hidden by stale cache.
+  - Allowed and locally blocked scenarios verify real policy, inspection, memory accounting and bounded audit.
+  - Serial semantic allowed calls complete two real assessments while local early denials report zero semantic calls.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_package_benchmark.py
+    expected: Fixture isolation, environment isolation, actual core accounting and installed-default configuration contracts pass.
+  - command: python scripts/benchmark_package.py --pypi-version 1.0.2 --samples 2000 --warmup 100 --concurrency 1 8 --output results.json
+    expected: Actual installed public-package measurements and provenance pass from the exported benchmark bundle.
+evidence:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_package_benchmark.py
+    result: Ten focused tests passed including real local core accounting and the equivalent OFF fixture without engine execution.
+  - check: Exported benchmark bundle with exact public PyPI1.0.2 in external fresh environments
+    result: Deterministic run passed 12,000 timed requests plus 600 warmups; allowed serial p95 0.2275ms. Actual Laya run passed 20 timed plus 2 warmup allowed requests with 44 input/output assessments including warmups; median 1119.5705 ms and p95 1199.532 ms. Installed-default Qwen3:4b Q4_K_M digest recorded. Fixed warmed prompts may benefit from KV reuse; business model generation and network transport excluded. Earlier reports retained when adding OFF.
+  - check: Comparable OFF and deterministic rerun from freshly rebuilt exported ZIP
+    result: Public 1.0.2 comparison passed 16,000 timed operations plus 800 warmups. Serial allowed OFF p50/p95/p99 0.000125/0.000167/0.000208 ms; deterministic 0.206125/0.2475/0.64375 ms. OFF uses the same constant fixture payload and timer but omits all controls. Earlier deterministic and real-semantic reports preserved; semantic measured path was unchanged, so no duplicate inference was run.

@@ -26,6 +26,7 @@ async def test_short_real_adapter_usage_is_allowed_and_unused_allowance_released
                 "response": "H",
                 "prompt_eval_count": 17,
                 "eval_count": 1,
+                "done": True,
                 "done_reason": "length",
             },
         )

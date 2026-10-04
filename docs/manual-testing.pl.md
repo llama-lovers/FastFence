@@ -15,6 +15,23 @@ Poczekaj, aż `doctor --full` zakończy się powodzeniem. Sprawdza prywatną ini
 
 Zwykłe `init` instaluje Laya i pobiera tylko brakujący skonfigurowany model oceniający. Zachowuje istniejące poprawne tokeny, polityki i klucze. Nowe `state/identities.json`, `state/credentials.json` i `state/anonymization-keys.json` są prywatne. Domyślna polityka wymaga Laya/Qwen3:4b; niedostępny model oceniający powoduje odmowę.
 
+## Odróżnij działający proces od gotowych zależności {#readiness}
+
+W osobnym terminalu sprawdź oba endpointy:
+
+```sh
+curl -sS http://127.0.0.1:8000/health
+curl -sS -i http://127.0.0.1:8000/ready
+```
+
+`/health` jest kontrolą **liveness**: potwierdza, że proces obsługuje HTTP. Zachowuje historyczne `status: "ready"` dla istniejących klientów, ale `scope: "liveness"` i `readiness_endpoint: "/ready"` wyjaśniają zakres. Nie oznacza dostępnej Laya ani gotowego modelu.
+
+`/ready` zwraca **200**, gdy sprawdzono wymagane zależności oceny semantycznej, albo **503**, gdy są niedostępne lub nie da się ich zweryfikować. Zakres to `required_semantic_prerequisites`. Dla Laya sprawdza interpreter, pomocnicze pliki, przypiętą rewizję i importy podczas inicjalizacji bez inferencji; następnie sprawdza obecność skonfigurowanego modelu w `/api/tags` Ollamy. Natywna Ollama wymaga modelu w tym samym wykazie. Wyłączona semantyka zwraca `not_required`; Kev zwraca 503 z `provider_probe_unsupported`, bo nie ma potwierdzonego taniego kontraktu sprawdzania.
+
+Jedno sprawdzenie trwa najwyżej około 5 sekund wraz ze sprzątaniem procesu. Wynik jest przechowywany przez 10 sekund; równoległe odczyty współdzielą sprawdzenie. Zmiana aktywnego dostawcy lub modelu unieważnia cache. `checked_at` wskazuje czas sprawdzenia. Po naprawie zależności odczekaj do 10 sekund i ponów `/ready`.
+
+To nie test inferencji ani gwarancja całej ścieżki: `inference_tested`, `business_upstreams_checked` i `ocr_checked` pozostają `false`. Endpoint nie zużywa budżetu, nie generuje zdarzeń audytu i nie wysyła promptów. Dla gotowości ruchu używaj `/ready`, a rzeczywiste decyzje modelu i OCR sprawdzaj scenariuszami poniżej. `doctor --full` pozostaje osobną diagnozą szerszego zestawu lokalnych komponentów.
+
 ## Połącz się {#connect}
 
 Otwórz <http://127.0.0.1:8000>. Kliknij **Connection**, następnie skopiuj `local-agent` i `local-admin` z własnego `state/credentials.json` do odpowiednich pól. Tokeny pozostają w pamięci strony. Jej ponowne załadowanie je usuwa. W istniejącej instalacji z `state/demo-tokens.json` użyj oryginalnych tokenów `security-admin` i `analyst-blue`; aktualizacja zachowuje ten stan.

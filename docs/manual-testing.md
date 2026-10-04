@@ -15,6 +15,23 @@ Wait for `doctor --full` to pass. It checks private initialization, Laya, the is
 
 Normal `init` installs Laya and downloads only a missing configured assessment model. It preserves existing valid credentials, policies and keys. New `state/identities.json`, `state/credentials.json` and `state/anonymization-keys.json` are private. The default policy requires Laya/Qwen3:4b; an unavailable assessor fails closed.
 
+## Distinguish a live process from ready dependencies {#readiness}
+
+In a separate terminal, inspect both endpoints:
+
+```sh
+curl -sS http://127.0.0.1:8000/health
+curl -sS -i http://127.0.0.1:8000/ready
+```
+
+`/health` is a **liveness** check: it confirms the process serves HTTP. It retains the historical `status: "ready"` for existing clients, while `scope: "liveness"` and `readiness_endpoint: "/ready"` identify its actual scope. It does not establish that Laya or the model is available.
+
+`/ready` returns **200** when required semantic prerequisites have been checked, or **503** when they are unavailable or cannot be verified. Its scope is `required_semantic_prerequisites`. For Laya it checks the interpreter, helper files, pinned revision and imports through initialization without inference, then checks the configured model in Ollama's `/api/tags`. Native Ollama requires its model in the same inventory. Disabled semantic assessment returns `not_required`; Kev returns 503 with `provider_probe_unsupported` because no verified cheap probe contract is available.
+
+A check is bounded to approximately 5 seconds including subprocess cleanup. Results are cached for 10 seconds; concurrent readers share one check. Changing the active provider or model invalidates the cache. `checked_at` records when the check completed. After repairing dependencies, allow up to 10 seconds and request `/ready` again.
+
+This is not inference or a guarantee of the complete path: `inference_tested`, `business_upstreams_checked` and `ocr_checked` remain `false`. The endpoint consumes no budget, writes no audit event and sends no prompts. Use `/ready` for prerequisite-based traffic readiness, then verify actual model decisions and OCR with the scenarios below. `doctor --full` remains a separate diagnostic for the wider set of local components.
+
 ## Connect
 
 Open <http://127.0.0.1:8000>. Click **Connection**, then copy

@@ -1,0 +1,39 @@
+id: FF-124
+title: Reject incomplete native Ollama completions before delivering output
+status: verified
+problem: The native business-model adapter accepted a text-only partial provider response and silently converted absent usage into zero, allowing an invalid completion to be returned successfully and undercounted.
+scope:
+  - Validate native non-streaming Ollama chat and generate completion envelopes with strict Pydantic models.
+  - Reproduce the user-reported missing completion and usage fields through the public chat route.
+  - Verify conservative budget accounting for provider replies whose usage cannot be trusted.
+constraints:
+  - Do not change the user's sibling test workspace or existing operator configuration.
+  - Preserve legitimate zero token counts and completed responses with the length finish reason.
+  - Reject incomplete replies and malformed usage without exposing provider errors or content.
+  - Keep semantic-provider behavior and the existing conservative failure-accounting implementation unchanged.
+change_paths:
+  - src/fastfence/modules/control/persistence/models.py
+  - src/fastfence/modules/control/persistence/ollama_response.py
+  - tests/unit/test_ollama_response.py
+  - tests/unit/test_models.py
+  - tests/unit/test_model_template_reservation.py
+  - tests/integration/test_failed_provider_accounting.py
+  - tests/integration/test_native_ollama_response.py
+acceptance:
+  - Both native endpoints require an explicit boolean done=true, supported finish reason, and nonnegative integer prompt and completion usage without coercion.
+  - Chat output must contain assistant text; unsupported tool calls or image output and provider error envelopes fail closed.
+  - Missing fields, done=false, nulls, boolean/string/float usage, negative usage and excess completion usage cannot produce successful output.
+  - The reported text-only chat reply returns HTTP 503 without disclosing its text.
+  - Failed attempted calls retain their full reservation, and a subsequent call cannot bypass the remaining token budget.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_ollama_response.py tests/unit/test_models.py tests/unit/test_model_template_reservation.py tests/integration/test_failed_provider_accounting.py tests/integration/test_native_ollama_response.py
+    expected: Native response validation, HTTP failure, compatibility and conservative accounting regressions pass.
+  - command: uv run --locked basedpyright src/fastfence/modules/control/persistence/ollama_response.py src/fastfence/modules/control/persistence/models.py
+    expected: No type errors.
+evidence:
+  - check: Exact user-reported malformed chat reply before the fix
+    result: The new regression failed with DID NOT RAISE ModelUnavailableError, independently reproducing the acceptance bug.
+  - check: Focused validation after the fix
+    result: All 88 tests passed; targeted basedpyright returned zero errors. Correct zero counts and completed length responses remain accepted.
+  - check: Real loopback HTTP provider and public-route regression
+    result: Incomplete and missing-usage native responses fail closed; the ledger retains 1103 reserved tokens, releases inflight count, and blocks a retry before a second provider call. The malformed chat route returns 503 without output. No live model inference is needed to verify this wire-protocol contract.

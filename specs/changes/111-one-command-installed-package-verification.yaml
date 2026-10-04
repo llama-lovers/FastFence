@@ -24,5 +24,7 @@ validation:
   - command: uv run --no-project python scripts/smoke_one_command.py --version VERSION --output REPORT
     expected: The exact public package passes the same first-run and operator checks.
 evidence:
+  - command: UV_CACHE_DIR="$PWD/state/private/uv-public-1.0.2" uv run --no-project python scripts/smoke_one_command.py --version 1.0.2 --output state/private/one-command-1.0.2-pypi.json
+    result: Passed exact public PyPI 1.0.2 with a fresh uv cache and temporary working directory. Automatic first and repeat startup, unchanged configuration and keys, actual OCR privacy blocking, actual Laya input/output assessment, hot reload and budget enforcement all passed.
   - command: uv run --no-project python scripts/smoke_one_command.py --version 1.0.2 --wheel state/private/release-1.0.2-final/fastfence-1.0.2-py3-none-any.whl --output state/private/one-command-1.0.2-wheel.json
     result: Passed installed-wheel startup twice without init or serve commands; preserved configuration, identities and keys. Actual OCR read the PNG and privacy controls withheld its sensitive Markdown. Actual Laya input/output checks, policy v1 through v5 changes and same-identity budget accounting passed.

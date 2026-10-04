@@ -17,5 +17,9 @@ validation:
   - command: uv build
     expected: Version 1.0.2 wheel and source distributions build successfully.
 evidence:
+  - check: Public release 1.0.2
+    result: GitHub Actions run 37163868257 passed build, tests, quality gates, PyPI publication, exact public distribution verification, ACP peers, uv tool invocation, public documentation verification and release notes. An independent local fresh-cache public-package startup test also passed with actual Laya and OCR.
+  - command: uv run --no-project python scripts/verify_public_docs.py --version 1.0.2 --timeout 15 --output state/private/public-docs-1.0.2.json
+    result: Verified public English and Polish 1.0.2 pages and latest aliases. Latest stable is 1.0.2.
   - check: Candidate distribution acceptance
     result: Built version 1.0.2 wheel and sdist. Installed candidate completed automatic initialization and repeat launch in a fresh external directory with actual Laya and OCR, without explicit init or serve commands. Public-package verification follows publication.

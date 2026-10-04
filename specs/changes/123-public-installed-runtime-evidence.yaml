@@ -1,0 +1,22 @@
+id: FF-123
+title: Publish sanitized evidence of actual model and hot-reload behavior
+status: implemented
+problem: The successful public-package acceptance report was retained privately, so readers could not inspect its outcomes from the documentation.
+scope:
+  - Publish outcome-only evidence from the completed public PyPI 1.0.2 startup acceptance.
+  - Record reviewed public SHA-256 report values and detector description labels as exact secret-scanner false positives.
+constraints:
+  - Exclude prompts, model responses, private paths, credentials and configuration contents.
+  - Preserve the actual measured package version and request outcomes.
+  - Do not describe a five-request smoke sequence as a broad attack-detection evaluation.
+change_paths:
+  - evaluation/results/installed-one-command-1.0.2.json
+  - .secrets.baseline
+acceptance:
+  - The report shows policy changes v1 through v5 on one instance, actual input/output assessments, deterministic denials and unchanged keys on repeated startup.
+validation:
+  - command: uv run --no-project python scripts/smoke_one_command.py --version 1.0.2 --output REPORT
+    expected: Public-package startup, actual OCR, Laya, hot reload and budget assertions pass.
+evidence:
+  - check: Previously completed clean-cache public-package acceptance
+    result: Published the reviewed outcome-only report from state/private/one-command-1.0.2-pypi.json. Only status, version, synthetic request identifiers, decisions, stage statuses and boolean verification results are included.

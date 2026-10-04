@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import math
 import threading
 import time
 from collections import Counter, deque
@@ -158,6 +159,14 @@ class Ledger:
 
     def _count_request(self, verdict: Verdict) -> None:
         self._counters["requests"] += 1
+        path = (
+            "local_only_requests"
+            if verdict.semantic_input_status
+            == verdict.semantic_output_status
+            == "not_run"
+            else "semantic_requests"
+        )
+        self._counters[path] += 1
         self._counters[
             "errors" if verdict.decision == "error" else verdict.decision
         ] += 1
@@ -209,6 +218,8 @@ class Ledger:
                     "redacted",
                     "errors",
                     "semantic_calls",
+                    "semantic_requests",
+                    "local_only_requests",
                 )
             }
             latencies = sorted(self._latencies)
@@ -223,7 +234,7 @@ class Ledger:
         return {
             **counts,
             "p95_latency_ms": latencies[
-                min(len(latencies) - 1, int(len(latencies) * 0.95))
+                max(0, math.ceil(len(latencies) * 0.95) - 1)
             ]
             if latencies
             else 0,

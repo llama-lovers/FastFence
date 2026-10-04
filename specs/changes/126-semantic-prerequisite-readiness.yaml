@@ -1,0 +1,49 @@
+id: FF-126
+title: Distinguish process liveness from bounded semantic dependency readiness
+status: verified
+problem: An external operator observed health reporting ready while Laya was unavailable, although the endpoint only established process liveness.
+scope:
+  - Preserve legacy health status and add explicit liveness scope and readiness endpoint metadata.
+  - Add a public readiness endpoint returning 200 or 503 for active semantic prerequisites, with ten-second cache and a single in-flight check.
+  - Verify Laya initialization without inference and bounded Ollama model inventory with an overall five-second deadline.
+  - Document operator probes and limits in English and Polish.
+constraints:
+  - No LLM inference, prompts, budget accounting, audit events, database or operator state writes during probes.
+  - Keep business upstreams and OCR explicitly outside this readiness guarantee.
+  - Never expose configured paths, credentials, provider response bodies or subprocess diagnostics.
+  - Kill and reap probe subprocesses on timeout or cancellation; reject unsupported provider probes rather than claiming readiness.
+  - Preserve health HTTP 200 and historical status ready for existing clients.
+change_paths:
+  - src/fastfence/modules/control/contracts/readiness.py
+  - src/fastfence/modules/control/persistence/readiness.py
+  - src/fastfence/modules/control/application/facade.py
+  - src/fastfence/app/interfaces/http/routes.py
+  - tests/unit/test_readiness.py
+  - tests/integration/test_readiness_http.py
+  - docs/manual-testing.md
+  - docs/manual-testing.pl.md
+  - scripts/docs_reference.py
+acceptance:
+  - Missing Laya, missing model, invalid inventory and unsupported probe return not-ready without claiming inference success.
+  - Concurrent checks share work and cached results expire; active provider or model changes invalidate the cache immediately.
+  - Hanging or cancelled initialization leaves no running probe process.
+  - Health remains live while readiness rejects an unavailable semantic configuration.
+  - HTTP readiness does not increment requests, semantic calls or audit counters.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_readiness.py tests/integration/test_readiness_http.py -q
+    expected: Cached, bounded, non-inferential readiness and liveness compatibility regressions pass.
+  - command: uv run basedpyright src
+    expected: No type errors.
+  - command: uv run lint-imports
+    expected: All architectural contracts pass.
+  - command: uv run mkdocs build --strict
+    expected: Operator instructions and public API inventory build in both locales.
+evidence:
+  - check: External operator report
+    result: Read-only inspection of the supplied tests/README.txt confirmed health was used as a whole-path readiness signal. The sibling workspace was not modified.
+  - command: Focused readiness regressions
+    result: Thirteen tests passed, including real subprocess timeout and cancellation cleanup, provider/model cache invalidation, payload bounds, compatibility and unchanged audit/budget counters.
+  - command: Final readiness and documentation regression suite
+    result: Twenty-two tests passed, including four implicit-latest-tag compatibility cases; basedpyright, import contracts, pyscn and strict bilingual documentation build passed.
+  - check: Actual local non-inference prerequisite probes
+    result: Real pinned Laya initialization with available Ollama returned ready/prerequisites_checked; the same installation with an unreachable Ollama endpoint returned not_ready/probe_failed. Both reports explicitly marked inference, business upstream and OCR checks false; no prompts were sent.

@@ -1,0 +1,64 @@
+{
+  "status": "passed",
+  "version": "1.0.2",
+  "installation": "public_pypi_uv_tool",
+  "explicit_setup_or_serve_commands": false,
+  "repeated_start_preserved_configuration_and_keys": true,
+  "actual_ocr_first_start": {
+    "pages": 1,
+    "decision": "blocked",
+    "reason": "input_sensitive_data"
+  },
+  "mode": "actual_laya_ollama_hot_reload_budget",
+  "checks": [
+    {
+      "request_id": "f60fcb939b4e422ba4d1e9fb482743ff",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "policy_version": 1,
+      "upstream_executed": true,
+      "semantic_input_status": "passed",
+      "semantic_output_status": "passed"
+    },
+    {
+      "request_id": "464bc96ed72249d6ba494d8c3a5a86e7",
+      "decision": "blocked",
+      "reason": "input_text_rule",
+      "policy_version": 2,
+      "upstream_executed": false,
+      "semantic_input_status": "not_run",
+      "semantic_output_status": "not_run"
+    },
+    {
+      "request_id": "7ac3958989194673b8f4d300f80f7425",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "policy_version": 3,
+      "upstream_executed": true,
+      "semantic_input_status": "passed",
+      "semantic_output_status": "passed"
+    },
+    {
+      "request_id": "18e0514c6a2344d1871187c606a73e4f",
+      "decision": "blocked",
+      "reason": "budget_calls",
+      "policy_version": 4,
+      "upstream_executed": false,
+      "semantic_input_status": "not_run",
+      "semantic_output_status": "not_run"
+    },
+    {
+      "request_id": "f87adfc2884944ff9a41c42ca0217adc",
+      "decision": "allowed",
+      "reason": "controls_passed",
+      "policy_version": 5,
+      "upstream_executed": true,
+      "semantic_input_status": "passed",
+      "semantic_output_status": "passed"
+    }
+  ],
+  "instance_preserved": true,
+  "calls_before_limit": 2,
+  "calls_after_extension": 3,
+  "audit_without_prompt_or_output": true
+}

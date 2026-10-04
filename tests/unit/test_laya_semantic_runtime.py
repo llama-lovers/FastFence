@@ -198,14 +198,8 @@ async def test_deadline_kills_worker_and_releases_capacity(semantic_adapter):
     assert not semantic_adapter._slot.locked()
 
 
-async def test_concurrent_request_fails_immediately_and_cancellation_kills_worker(
-    semantic_adapter,
-):
+async def test_cancelled_waiter_preserves_active_worker(semantic_adapter):
     import asyncio
-
-    from fastfence.modules.control.domain.exceptions import (
-        ModelUnavailableError,
-    )
 
     process = WorkerProcess()
     semantic_adapter._process = process
@@ -213,14 +207,21 @@ async def test_concurrent_request_fails_immediately_and_cancellation_kills_worke
         semantic_adapter.assess("first", semantic_config())
     )
     await asyncio.sleep(0)
-    with pytest.raises(ModelUnavailableError, match="unavailable"):
-        await semantic_adapter.assess("second", semantic_config())
+    second = asyncio.create_task(
+        semantic_adapter.assess("second", semantic_config())
+    )
+    await asyncio.sleep(0)
     assert len(process.stdin.payloads) == 1
+    second.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await second
+    assert process.kills == 0 and semantic_adapter._pending == 1
     first.cancel()
     with pytest.raises(asyncio.CancelledError):
         await first
     assert process.kills == process.waits == 1
     assert not semantic_adapter._slot.locked()
+    assert semantic_adapter._pending == 0
 
 
 @pytest.mark.parametrize(

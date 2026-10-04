@@ -1,0 +1,39 @@
+id: FF-119
+title: Execute existing security regressions against the public installed distribution
+status: implemented
+problem: Source-checkout regressions and historical attack reports do not prove the public 1.0.2 package preserves the implemented security controls.
+scope:
+  - Reuse 143 existing parameterized security cases without adding a replacement attack suite.
+  - Install the exact public package in a fresh external Python environment and stage only explicit tests and synthetic fixtures.
+  - Check installed package origin before and after pytest and disable real socket connections during offline verification.
+  - Save sanitized per-case outcomes, fixture hashes, package provenance and explicit evidence limitations.
+constraints:
+  - Never copy FastFence source, private state or operator settings into the verification workspace.
+  - Do not inherit checkout PYTHONPATH, pytest plugins or source coverage configuration.
+  - No live model calls and no model-accuracy or novel-attack-count claims.
+  - Preserve failing and skipped outcomes; success requires all 143 cases passing.
+  - Reports omit raw assertion output, exception bodies and parameter payloads.
+change_paths:
+  - scripts/verify_installed_security.py
+  - scripts/installed_security_probe.py
+  - tests/unit/test_installed_security_verifier.py
+  - evaluation/results/installed-security-1.0.2.json
+acceptance:
+  - Exact public FastFence 1.0.2 imports from the fresh environment's site-packages throughout verification.
+  - Existing cases cover authorization, allow/block/redact, budgets, signatures, policy reload and validation, secrets, output leakage and redaction/restoration composition.
+  - Semantic error and restoration boundary regressions use mocks and remain clearly separate from actual inference quality.
+  - All selected cases pass with no skips and without real network access during pytest.
+validation:
+  - command: python3 scripts/verify_installed_security.py --version 1.0.2 --output evaluation/results/installed-security-1.0.2.json
+    expected: Existing 143 public-package security cases pass in a fresh external environment.
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_installed_security_verifier.py
+    expected: Staging isolation, external symlink refusal, sanitized evidence and network prohibition pass.
+evidence:
+  - check: Actual public installed-package run
+    result: Fresh public PyPI 1.0.2 environment passed all 143 cases with zero failures and zero skips. Import provenance checked before and after tests; real network connections prohibited during pytest. Sanitized report records each outcome and exact source-fixture hashes.
+  - check: Separate existing live operator evidence
+    result: The private sanitized public-package one-command 1.0.2 report already verifies ALLOW policy v1, BLOCK after rule update v2, ALLOW v3, budget denial v4 and allowance after budget extension v5 without changing runtime instance. That live HTTP and actual Laya evidence is separate from this offline suite.
+  - check: Final rerun and harness regression checks
+    result: Repeated public installation again passed143/143 with Python3.12.12, pytest8.4.2 and pytest-asyncio1.4.0. One socket attempt was intercepted by the offline guard, so no real connection occurred. Four harness checks passed; Ruff formatting and lint passed.
+  - check: Static probe architecture correction
+    result: Provenance and result hooks now live in a normal imported module, copied byte-identically into the external workspace. No dynamic execution is used. The actual public1.0.2 suite passed143/143 again with the static probe.

@@ -92,7 +92,13 @@ async def test_completion_enforces_output_token_bound(monkeypatch):
         assert json.loads(request.content)["options"]["num_predict"] == 12
         return httpx.Response(
             200,
-            json={"response": "safe", "prompt_eval_count": 3, "eval_count": 20},
+            json={
+                "response": "safe",
+                "prompt_eval_count": 3,
+                "eval_count": 20,
+                "done": True,
+                "done_reason": "stop",
+            },
         )
 
     client_class = httpx.AsyncClient
@@ -116,7 +122,13 @@ async def test_completion_preserves_validated_stop_sequences(monkeypatch):
         assert options["num_predict"] == 12
         return httpx.Response(
             200,
-            json={"response": "ready", "prompt_eval_count": 3, "eval_count": 5},
+            json={
+                "response": "ready",
+                "prompt_eval_count": 3,
+                "eval_count": 5,
+                "done": True,
+                "done_reason": "stop",
+            },
         )
 
     client_class = httpx.AsyncClient
@@ -141,6 +153,7 @@ async def test_completion_retains_provider_truncation_reason(monkeypatch):
                 "response": "Incomplete report",
                 "prompt_eval_count": 3,
                 "eval_count": 12,
+                "done": True,
                 "done_reason": "length",
             },
         )
@@ -184,6 +197,7 @@ async def test_native_chat_wire_preserves_roles_and_content(monkeypatch):
                 "message": {"role": "assistant", "content": "Approved summary"},
                 "prompt_eval_count": 3,
                 "eval_count": 5,
+                "done": True,
                 "done_reason": "stop",
             },
         )

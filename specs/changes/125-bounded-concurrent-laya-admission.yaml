@@ -1,0 +1,36 @@
+id: FF-125
+title: Serialize admitted concurrent Laya assessments through a bounded deadline-aware queue
+status: implemented
+problem: The public 1.0.2 user reproduction admitted two concurrent chats under concurrency four, but one immediately failed model_unavailable_fail_closed because Laya rejected any call while its worker lock was held.
+scope:
+  - Replace immediate busy-worker rejection with FIFO lock admission bounded to 32 active plus waiting assessments per scanner.
+  - Include queue wait and inference in the existing configured semantic-stage deadline.
+  - Isolate queued cancellation and timeout from the request currently owning the worker protocol.
+  - Preserve process restart after active cancellation or invalid output and prevent queued starts after close.
+constraints:
+  - Never skip semantic input or output checks or weaken fail-closed behavior.
+  - Queue overflow rejects without sending request content to the worker.
+  - Only the active protocol owner may stop the worker; queued requests cannot consume another request's response.
+  - Every exit releases pending capacity and existing engine reservation settlement remains authoritative.
+  - Do not modify the user's separate reproduction directory or private policy.
+change_paths:
+  - src/fastfence/modules/control/persistence/laya_semantic.py
+  - tests/unit/test_laya_semantic_runtime.py
+  - tests/unit/test_laya_concurrency.py
+  - evaluation/results/laya-concurrent-users.json
+acceptance:
+  - Two concurrent identities receive distinct successful verdicts with actual input and output assessments when all work fits their deadlines.
+  - A queue never retains more than 32 active and waiting assessments together.
+  - A cancelled or expired waiter leaves the active worker and its response untouched.
+  - Active cancellation clears the old protocol before the next queued request restarts the worker.
+  - Closing during process creation kills the late child before sending any request data.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_laya_concurrency.py tests/unit/test_laya_semantic_runtime.py tests/integration/test_laya_raw_provider.py
+    expected: Queue, protocol isolation, lifecycle, engine accounting and actual pinned-worker transport tests pass.
+evidence:
+  - check: User reproduction and exact source cause
+    result: Read-only inspection of the user's 1.0.2 report showed one of two concurrent chats failed before upstream execution in12ms with semantic input error. LayaSemantic.assess explicitly rejected a locked worker, independent of configured identity concurrency four.
+  - check: Focused deterministic and real worker transport checks
+    result: All35 tests passed, including two-identity full Engine behavior, distinct data and policy fields, bounded overflow, waiting timeout and cancellation, active cancellation/restart, close and close-during-spawn. The raw-provider integration uses the actual pinned Laya worker with a local fixture HTTP provider, without GPU inference.
+  - check: Actual two-user concurrent HTTP reproduction
+    result: Both isolated concurrent chats passed with real Laya qwen3:4b and business qwen3:0.6b, with four semantic assessments, unique request IDs, one settled call per identity and zero remaining inflight. Times were6630ms and7196ms including initial worker/model work. Sanitized result identifies the modified source candidate and stale editable-distribution metadata separately; it is not claimed as public-package evidence.

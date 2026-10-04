@@ -70,6 +70,7 @@ plugins:
             HTTP API from source: HTTP API
             Runtime settings: Ustawienia
             Architecture: Architektura
+            Benchmarks: Benchmarki
             Changelog: Dziennik zmian
 
 hooks:
@@ -109,6 +110,7 @@ nav:
   - Guides:
       - Policies and controls: policies.md
       - Connect agents and models: integrations.md
+      - Benchmarks: benchmarks.md
   - Examples:
       - Agent Communication Protocol: examples/acp.md
       - Custom Python detectors: examples/custom-detectors.md

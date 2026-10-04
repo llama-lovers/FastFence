@@ -1,0 +1,43 @@
+id: FF-118
+title: Publish reproducible package benchmarks and clearly scoped results
+status: verified
+problem: Operators could not discover or reproduce measured latency results without a source checkout, and historical microbenchmarks did not describe the current packaged product.
+scope:
+  - Add complete English and Polish benchmark guides and navigation.
+  - Publish a deterministic archive containing only the explicit public benchmark runner and its workload inputs.
+  - Distinguish local control overhead, transport, synthetic upstream latency and actual semantic assessment.
+  - Include benchmark guidance in both LLM corpora and align their launch introduction with one-command startup.
+constraints:
+  - Never relabel historical development measurements as current package results.
+  - Preserve sample counts, warmup, concurrency and measurement boundaries; no SLA or unmeasured performance claims.
+  - Benchmark downloads contain no operator configuration, private state or credentials.
+  - English and Polish executable commands remain identical.
+change_paths:
+  - docs/benchmarks.md
+  - docs/benchmarks.pl.md
+  - mkdocs.yml
+  - scripts/docs_reference.py
+  - tests/unit/test_benchmark_documentation.py
+acceptance:
+  - An operator can download a bounded archive and run the exact public package benchmark without cloning FastFence.
+  - Both locales explain p50, p95, throughput, warmup and the limits of comparisons.
+  - The displayed historical figures agree with linked raw reports and are explicitly not attributed to the current release.
+  - The generated download is byte-identical to its allowlisted public sources and runs from a separate directory.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_benchmark_documentation.py tests/unit/test_documentation_downloads.py -q
+    expected: Archive isolation, public source parity, LLM inclusion and bilingual command parity pass.
+  - command: uv run mkdocs build --strict
+    expected: Both locales and benchmark downloads build without broken links.
+evidence:
+  - check: Existing measurements reviewed
+    result: Existing core, transport, literal-rule and stateless-token reports are from 3 October 2026; the transport report identifies 0.1.0. Their timing boundaries are retained instead of presenting those values as current package performance.
+  - command: uv run pytest --no-cov tests/unit/test_benchmark_documentation.py tests/unit/test_documentation_downloads.py -q
+    result: Seven tests passed, including exact seven-file archive parity, extracted launcher help outside checkout, bilingual command parity and both LLM corpora.
+  - command: uv run mkdocs build --strict
+    result: English and Polish benchmark pages, navigation, downloadable archive and LLM outputs built successfully. Full package measurement results remain the separate FF-117 acceptance task.
+  - check: Actual current package result tables
+    result: Both locales include the exact public PyPI 1.0.2 deterministic and real Laya measurements from FF-117, run through the exported bundle. Raw reports preserve import provenance, synthetic upstream boundaries, warmup, model configuration and expected-verdict/accounting checks. Table parity is tested against JSON.
+  - check: Three-mode comparison and separate behavior evidence
+    result: OFF, deterministic ON and real semantic ON table records actual p50/p95/p99 from public package 1.0.2; OFF timer-resolution and small semantic sample caveats retained. Separate links document 143 offline security regressions and actual one-command Laya/OCR/live-policy/budget outcomes.
+  - command: Final benchmark and documentation tests plus strict bilingual build
+    result: Nine tests passed; both locales, archive downloads and LLM outputs built successfully after current measured tables were added.

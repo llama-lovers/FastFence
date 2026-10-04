@@ -118,12 +118,22 @@ def _configure_public(
         snapshot = runtime.snapshot()
         return {
             "status": "ready",
+            "scope": "liveness",
+            "readiness_endpoint": "/ready",
             "policy_version": snapshot.policy.version,
             "semantic_provider": snapshot.policy.semantic.provider,
             "semantic_status": "disabled"
             if snapshot.policy.semantic.provider == "disabled"
             else "configured; verified per invocation",
         }
+
+    @app.get("/ready")
+    async def readiness() -> JSONResponse:
+        report = await runtime.readiness()
+        return JSONResponse(
+            status_code=200 if report.status == "ready" else 503,
+            content=report.model_dump(mode="json"),
+        )
 
     @app.get("/api/me")
     def me(identity: Identity = Depends(actor)) -> Identity:

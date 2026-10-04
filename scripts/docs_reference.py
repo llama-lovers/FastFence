@@ -26,6 +26,11 @@ REPOSITORY = f"https://github.com/llama-lovers/FastFence/blob/{SOURCE_REF}/"
 BUILD_DOCS = tempfile.TemporaryDirectory(prefix="fastfence-docs-")
 PAGES = (
     (
+        "benchmarks.md",
+        "Benchmarks",
+        "Reproduce package measurements and understand published latency results.",
+    ),
+    (
         "examples/acp.md",
         "Agent Communication Protocol",
         "Protect real synchronous agent-to-agent ACP calls with shared input/output policies.",
@@ -156,6 +161,30 @@ def example_downloads():
     return sources, buffer.getvalue()
 
 
+BENCHMARK_FILES = (
+    "scripts/benchmark_package.py",
+    "evaluation/benchmark_gateway.py",
+    "evaluation/business_fixture.py",
+    "examples/business_tools/tools.py",
+    "examples/business_tools/credentials.py",
+    "examples/business_tools/policy.yaml",
+    "config/signatures.json",
+)
+
+
+def benchmark_download():
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(
+        buffer, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
+        for name in BENCHMARK_FILES:
+            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o644 << 16
+            archive.writestr(info, (ROOT / name).read_bytes())
+    return buffer.getvalue()
+
+
 SOURCE_MARKER = re.compile(
     r"<!-- source: (examples/docs/[a-z_]+\.(?:py|yaml)) -->"
 )
@@ -224,7 +253,7 @@ def endpoint_reference():
         "",
         "This endpoint inventory is generated from the Python route declarations on every documentation build. Follow a handler link to inspect its request and response models. The running gateway exposes the complete JSON schemas at `/openapi.json` and an interactive explorer at `/docs`.",
         "",
-        "All `/api/` and `/v1/` requests require a provisioned bearer identity. `/api/admin/` requires a management identity. `/health` is public. The MCP mount at `/mcp/` uses the same trusted bearer identities and is listed separately in the [integration reference](../integration-reference.md).",
+        "All `/api/` and `/v1/` requests require a provisioned bearer identity. `/api/admin/` requires a management identity. `/health` is public liveness; `/ready` is the public cached semantic-prerequisite readiness check (200/503, no inference). The MCP mount at `/mcp/` uses the same trusted bearer identities and is listed separately in the [integration reference](../integration-reference.md).",
         "",
         "| Method | Path | Source handler |",
         "| --- | --- | --- |",
@@ -251,7 +280,7 @@ def polish_reference(reference):
     replacements = {
         "# HTTP API reference": "# Dokumentacja HTTP API",
         "This endpoint inventory is generated from the Python route declarations on every documentation build. Follow a handler link to inspect its request and response models. The running gateway exposes the complete JSON schemas at `/openapi.json` and an interactive explorer at `/docs`.": "Ten wykaz endpointów powstaje z deklaracji tras w Pythonie przy każdym budowaniu dokumentacji. Link do funkcji prowadzi do modeli żądań i odpowiedzi. Uruchomiona bramka udostępnia pełne schematy JSON pod `/openapi.json` oraz interaktywną dokumentację pod `/docs`.",
-        "All `/api/` and `/v1/` requests require a provisioned bearer identity. `/api/admin/` requires a management identity. `/health` is public. The MCP mount at `/mcp/` uses the same trusted bearer identities and is listed separately in the [integration reference](../integration-reference.md).": "Wszystkie żądania do `/api/` i `/v1/` wymagają skonfigurowanej tożsamości Bearer. `/api/admin/` wymaga uprawnień administracyjnych. `/health` jest publiczny. Endpoint MCP `/mcp/` używa tych samych zaufanych tożsamości; opisuje go [kontrakt integracji](../integration-reference.md).",
+        "All `/api/` and `/v1/` requests require a provisioned bearer identity. `/api/admin/` requires a management identity. `/health` is public liveness; `/ready` is the public cached semantic-prerequisite readiness check (200/503, no inference). The MCP mount at `/mcp/` uses the same trusted bearer identities and is listed separately in the [integration reference](../integration-reference.md).": "Wszystkie żądania do `/api/` i `/v1/` wymagają skonfigurowanej tożsamości Bearer. `/api/admin/` wymaga uprawnień administracyjnych. `/health` jest publiczną kontrolą działania procesu; `/ready` sprawdza wymagane zależności semantyczne z cache (200/503, bez inferencji). Endpoint MCP `/mcp/` używa tych samych zaufanych tożsamości; opisuje go [kontrakt integracji](../integration-reference.md).",
         "| Method | Path | Source handler |": "| Metoda | Ścieżka | Funkcja w kodzie |",
         "## Response semantics": "## Znaczenie odpowiedzi",
         "An HTTP 200 response from a protected invocation can still contain a `blocked` security verdict. Check `decision`, `reason` and `upstream_executed`; do not use HTTP status alone as an authorization result. A blocked output can follow an already executed upstream operation.": "Odpowiedź HTTP 200 z chronionego wywołania może zawierać decyzję `blocked`. Sprawdź pola `decision`, `reason` i `upstream_executed`; sam status HTTP nie oznacza zgody na operację. Blokada odpowiedzi może nastąpić po wykonaniu operacji przez docelową usługę.",
@@ -267,9 +296,9 @@ def llm_documents(base, language, reference):
     localized_base = base + ("/pl" if polish else "")
     title = "Dokumentacja FastFence" if polish else "FastFence documentation"
     introduction = (
-        "Uruchom `uv tool run --python 3.12 fastfence init`, a następnie `uv tool run --python 3.12 fastfence serve`. Ollama musi działać. Inicjalizacja przygotowuje Layę i skonfigurowany model oceniający. `init --config-only` pomija pobieranie komponentów. Kod źródłowy FastFence nie jest potrzebny. Polityki i tożsamości są lokalne; budżety i audyt należą do procesu. Propozycja Laya wymaga zatwierdzenia przed aktywacją."
+        "Uruchom `uv tool run fastfence`. Ollama musi działać. Polecenie przygotowuje brakujące komponenty Laya, skonfigurowany model oceniający i OCR, a następnie uruchamia dashboard. `init --config-only` pomija pobieranie komponentów. Kod źródłowy FastFence nie jest potrzebny. Polityki i tożsamości są lokalne; budżety i audyt należą do procesu. Propozycja Laya wymaga zatwierdzenia przed aktywacją."
         if polish
-        else "Run `uv tool run --python 3.12 fastfence init`, then `uv tool run --python 3.12 fastfence serve`, with Ollama running. Initialization prepares Laya and the configured assessor; `init --config-only` skips component downloads. No FastFence checkout is required. Policies and identities are local; budgets and audit are process-local. Laya proposals require explicit review before activation."
+        else "Run `uv tool run fastfence` with Ollama running. It prepares missing Laya, the configured assessor and OCR components, then starts the dashboard; `init --config-only` skips component downloads. No FastFence checkout is required. Policies and identities are local; budgets and audit are process-local. Laya proposals require explicit review before activation."
     )
     index = [f"# {title}", "", introduction, ""]
     full = [f"# {title}", "", introduction, ""]
@@ -338,6 +367,7 @@ def on_config(config):
         )
     sources, archive = example_downloads()
     sources["fastfence-examples.zip"] = archive
+    sources["fastfence-benchmarks.zip"] = benchmark_download()
     for name, content in sources.items():
         destination = target / "downloads" / name
         destination.parent.mkdir(parents=True, exist_ok=True)
