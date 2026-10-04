@@ -1,0 +1,39 @@
+id: FF-145
+title: Explain ACP pool limits, execution accounting and safe retry handling
+status: verified
+problem: ACP operators need to distinguish a locally refused call from an attempted remote execution without interpreting HTTP 200 as success or retrying side effects blindly.
+scope:
+  - Add matching English and Polish ACP overload guidance and integration-reference links.
+  - Document the shared per-process ACP pool, its separate capacity, and queue-inclusive deadlines introduced by FF143.
+  - Explain typed local refusal, retained completed semantic usage and native ACP failed-run responses.
+  - Keep remote failure uncertainty and retry limitations explicit without throughput promises.
+constraints:
+  - Documentation only; no runtime, policy, credentials, model or workflow changes.
+  - The 128 admission bound includes both active and waiting calls across aliases, not 128 queued calls per agent.
+  - Zero business-tool cost does not imply zero completed semantic usage.
+  - Remote errors, cancellation and timeouts do not prove that no upstream side effect occurred.
+change_paths:
+  - docs/examples/acp.md
+  - docs/examples/acp.pl.md
+  - docs/integration-reference.md
+  - docs/integration-reference.pl.md
+acceptance:
+  - Both languages identify 32 connections and 128 active or waiting calls per ACP adapter in one gateway process, separately from model and Laya capacity.
+  - Both languages explain agent timeout_seconds and outer tool timeout_ms include queue wait.
+  - The native ACP example shows status failed with tool_capacity_exceeded and upstream_executed false while identifying the JSON as a partial response.
+  - Operators are warned against blind retries of remote 429, 503, timeout and invalid-response failures.
+  - Version 1.0.7 introduction and example package pin match; code fences are identical across translations.
+validation:
+  - command: uv run --locked mkdocs build --strict --site-dir state/private/docs-ff145
+    expected: Bilingual docs build without warnings or broken links.
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_acp_pool.py tests/integration/test_acp_capacity.py
+    expected: Underlying source supports the documented local and remote failure distinctions without inference.
+  - command: uv run python scripts/check_specs.py
+    expected: Changed documentation has a valid specification.
+evidence:
+  - check: Current runtime and protocol source inspection
+    result: ACPTools owns one ModelHTTP pool shared across configured aliases; the transport caps 32 connections and 128 total pending calls with queue-inclusive deadlines. Typed ToolCapacityExceededError alone clears attempted tool execution and business cost; the engine retains completed semantic usage. Native ACP maps the failed verdict into an HTTP 200 failed run.
+  - check: Focused backing behavior regressions
+    result: All 11 ACP pool and capacity tests passed without model inference, covering local refusal, remote overload accounting, pooled transport behavior and cleanup.
+  - check: Bilingual documentation validation
+    result: Strict MkDocs build completed for English and Polish. All fenced code blocks match between each translated pair, including the partial failed-run JSON and package version 1.0.7 launch command.

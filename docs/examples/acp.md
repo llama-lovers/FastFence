@@ -40,7 +40,7 @@ credential. The file's contents are never printed.
 In a second terminal, run the gateway with its own FastFence dependencies:
 
 ```sh
-uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/acp_gateway.py
+uv run --python 3.12 --no-project --with fastfence==1.0.7 python examples/acp_gateway.py
 ```
 
 This starts an isolated FastFence instance on port 8030 and registers the
@@ -111,6 +111,32 @@ gateway credentials or network boundaries.
 These controls cover messages crossing FastFence. They do not inspect a remote
 agent's internal model/tool calls unless those calls also pass through FastFence;
 hidden internal token usage is not measured by this adapter.
+
+## Queue limits and overload {#queue-limits-and-overload}
+
+From FastFence **1.0.7**, outgoing ACP calls share a separate pool of up to **32 connections** and **128 active or waiting calls in total** across all configured agent aliases in one gateway process. This is not a separate allowance for each agent or caller. Business-model adapters and the Laya worker have their own limits; multiple gateway processes do not share one admission counter.
+
+Waiting for a connection and the peer exchange both consume the agent's configured `timeout_seconds`. The policy tool's `timeout_ms` is an additional outer deadline around the whole tool call, including that wait. Increasing either timeout does not increase the connection or admission limits.
+
+When this local pool refuses admission before sending the call, the reason is `tool_capacity_exceeded`, `upstream_executed` is `false`, and the configured business-tool cost is zero. Previously completed semantic assessment usage remains charged; the entire protected request is not necessarily free. Inspect the verdict in **Activity** for resource accounting.
+
+For native ACP, this refusal is an **HTTP 200 response containing a failed run**, not a successful result. Check all of these fields:
+
+```json
+{
+  "status": "failed",
+  "error": {
+    "data": {
+      "reason": "tool_capacity_exceeded",
+      "upstream_executed": false
+    }
+  }
+}
+```
+
+The JSON above shows the relevant fields, not the complete response. The same protected tool called through REST/MCP also reports the verdict reason and execution flag.
+
+A peer's HTTP `429` or `503`, a timeout, or an invalid response is different: FastFence cannot prove that the remote agent did no work. These failures retain conservative attempted-execution accounting; even a timeout while waiting locally does not carry the typed pre-admission guarantee. There is no automatic retry. Retry deliberately with backoff only when this attempt is confirmed unexecuted or the operation is safe to repeat. Cancellation cannot undo a remote side effect. These bounds are not a throughput or latency promise; measure your complete workload.
 
 ## Supported content and execution
 

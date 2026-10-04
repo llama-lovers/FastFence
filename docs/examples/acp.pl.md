@@ -25,7 +25,7 @@ Oficjalny ACP SDK udostępnia rzeczywistą operację zamiany na wielkie litery n
 W drugim terminalu uruchom bramkę z jej własnymi zależnościami FastFence:
 
 ```sh
-uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/acp_gateway.py
+uv run --python 3.12 --no-project --with fastfence==1.0.7 python examples/acp_gateway.py
 ```
 
 To uruchamia odizolowaną instancję FastFence na porcie 8030 i rejestruje agenta `uppercase` jako narzędzie polityki `acp.uppercase`. Konfiguracja i tokeny bramki znajdują się pod `state/examples/acp-gateway/`. Ponowny start zachowuje istniejącą konfigurację i nie edytuje głównej instalacji. Jawna polityka przykładu używa kontroli deterministycznych, więc nie wymaga modelu; domyślna polityka produktu nadal wymaga Laya.
@@ -72,6 +72,32 @@ Po zmianie ustawień startowych uruchom proces ponownie. Zmiany polityki nadal p
 `GET /acp/agents` pokazuje wyłącznie agentów zarejestrowanych, skonfigurowanych i dozwolonych dla roli. `POST /acp/runs` przyjmuje tę samą tożsamość Bearer co REST/MCP; wszystkie te transporty współdzielą politykę i budżet w pamięci dla danego podmiotu. Koszty agenta to skonfigurowany koszt narzędzia i ograniczone rozliczanie zasobów tekstowych, a nie pomiary tokenów rozliczeniowych dostawcy. Bezpośredni dostęp do backendu musi pozostawać ograniczony do zaufanych tokenów bramki lub właściwych granic sieciowych.
 
 Kontrole obejmują wiadomości przechodzące przez FastFence. Nie sprawdzają wewnętrznych wywołań modeli/narzędzi zdalnego agenta, chyba że one również przechodzą przez FastFence; ukryte wewnętrzne zużycie tokenów nie jest mierzone przez ten adapter.
+
+## Limity kolejki i przeciążenie {#queue-limits-and-overload}
+
+Od FastFence **1.0.7** wychodzące wywołania ACP współdzielą osobną pulę do **32 połączeń** i **128 aktywnych lub oczekujących wywołań łącznie** dla wszystkich skonfigurowanych aliasów agentów w jednym procesie bramki. Nie jest to osobny limit dla każdego agenta lub klienta. Adaptery modeli biznesowych i worker Laya mają własne limity; osobne procesy bramki nie współdzielą jednego licznika przyjęć.
+
+Czekanie na połączenie i komunikacja z agentem zużywają skonfigurowany dla niego `timeout_seconds`. Wartość `timeout_ms` narzędzia w polityce jest dodatkowym zewnętrznym limitem całego wywołania, włącznie z tym oczekiwaniem. Zwiększenie limitu czasu nie zwiększa liczby połączeń ani przyjmowanych wywołań.
+
+Jeśli lokalna pula odmówi przyjęcia przed wysłaniem wywołania, powodem jest `tool_capacity_exceeded`, `upstream_executed` ma wartość `false`, a skonfigurowany koszt narzędzia biznesowego wynosi zero. Zużycie wcześniej zakończonych ocen semantycznych pozostaje rozliczone; całe chronione żądanie nie musi być darmowe. Rozliczenie zasobów sprawdzisz w decyzji w **Activity**.
+
+W natywnym ACP odmowa ma postać **odpowiedzi HTTP 200 z nieudanym wykonaniem**, a nie poprawnego wyniku. Sprawdzaj wszystkie poniższe pola:
+
+```json
+{
+  "status": "failed",
+  "error": {
+    "data": {
+      "reason": "tool_capacity_exceeded",
+      "upstream_executed": false
+    }
+  }
+}
+```
+
+Powyższy JSON pokazuje istotne pola, nie całą odpowiedź. To samo chronione narzędzie wywołane przez REST/MCP również zwraca powód decyzji i informację o wykonaniu.
+
+HTTP `429` lub `503` od agenta, przekroczenie czasu albo błędna odpowiedź oznaczają inną sytuację: FastFence nie może dowieść, że zdalny agent niczego nie wykonał. Takie błędy zachowują konserwatywne rozliczenie próby wykonania; nawet przekroczenie czasu podczas lokalnego oczekiwania nie daje gwarancji odmowy przed przyjęciem. Automatycznych ponowień nie ma. Ponawiaj świadomie, z odstępami, tylko gdy potwierdzono brak wykonania tej próby albo operację można bezpiecznie powtórzyć. Anulowanie nie cofa zdalnych skutków ubocznych. Te limity nie są obietnicą przepustowości ani czasu odpowiedzi; zmierz pełną ścieżkę własnego obciążenia.
 
 ## Obsługiwana treść i wykonanie {#supported-content-and-execution}
 
