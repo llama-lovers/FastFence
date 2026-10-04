@@ -1,0 +1,12 @@
+Actual reversible anonymization | public FastFence 1.0.7
+Fresh RSA-3072 key pair + issuer keyring. Deterministic echo, no LLM.
+
+Synthetic input: Anna Kowalska
+restore_originals=false -> [FFR2.local-... [abbreviated]
+upstream original absent | anonymized=true | restored=false
+restore_originals=true, allow_restore=true -> Anna Kowalska
+upstream original absent | restored=true | echo calls=2
+Same scoped identifier, randomized ciphertext on repeated input.
+Policy v2 allow_restore=false + request restore=true -> anonymization_restore_denied
+upstream_executed=false | echo calls=2
+Full gateway holds both recipient keys. No keys or full tokens exported.

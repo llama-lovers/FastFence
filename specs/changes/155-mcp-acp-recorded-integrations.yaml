@@ -1,0 +1,48 @@
+id: FF-155
+title: Complete protocol and reversible privacy demonstrations with a ten-slide deck
+status: verified
+problem: The workflow film lacks MCP, ACP and reversible anonymization examples, and the complete product story must also fit exactly ten slides.
+scope:
+  - Execute isolated MCP and synchronous text ACP integrations against the installed public FastFence package.
+  - Demonstrate successful local tool or peer execution followed by policy-based denial of the identical invocation before upstream execution.
+  - Include concise client code and actual recorded protocol results in a three-minute film with music and no voice.
+  - Demonstrate actual public/private-key pseudonymization with response restoration off and on, retaining explicit policy permission.
+  - Deliver exactly ten English slides including cover and closing, with Polish speaker notes, architecture, integrations, privacy and scoped evidence.
+constraints:
+  - Use the actual protocol clients and real local deterministic tool or peer implementations, without fabricating result output.
+  - Clearly distinguish these protocol tests from the separate real-model scenes; no new inference is needed.
+  - Keep operator services, configuration and credentials unchanged; close all owned temporary services.
+  - Preserve all earlier films and their evidence.
+  - ACP means Agent Communication Protocol with the implemented synchronous text scope, not A2A or Agent Client Protocol.
+  - Generate demonstration keys only in disposable private storage; never publish private key material or suggest that abbreviated ciphertext can be restored.
+  - "Describe the deployed crypto accurately: the gateway loads both recipient keys and an issuer keyring, with no conversation database; this is not a public-key-only gateway."
+change_paths:
+  - presentation/scripts/*
+  - presentation/output/*
+  - presentation/README.md
+  - presentation/showcase-script.pl.md
+  - presentation/demo-criteria-map.md
+acceptance:
+  - MCP discovery and invocation use a real MCP client and the protected MCP endpoint.
+  - ACP discovery and synchronous run use the actual ACP protocol and a real peer agent.
+  - Both repeated prohibited invocations show denial without another upstream execution.
+  - Actual anonymization evidence shows protected text reaching the local echo tool, restoration off retaining protected values, and authorized restoration on returning original synthetic text.
+  - The editable PowerPoint and rendered PDF contain exactly ten complete, readable slides with all requested features represented.
+  - Film captions agree with the sanitized evidence and state that displayed code/results replay actual recorded runs.
+  - The final three-minute H.264/AAC film is visually reviewed and fully decodes.
+validation:
+  - command: Isolated MCP and ACP example executions
+    expected: Each protocol permits the initial invocation and blocks the identical invocation after activating a matching local policy, with the upstream execution counter unchanged.
+  - command: Video review and full decode
+    expected: Readable, correctly scoped protocol evidence, music without speech, no displayed credentials.
+  - command: uv run --locked pre-commit run
+    expected: All applicable checks pass.
+evidence:
+  - check: MCP integration
+    result: Installed public 1.0.7 and FastMCP 2.14.7 performed actual Streamable HTTP discovery and invocation. The real uppercase tool returned HELLO under v1. The same invocation under v2 was blocked by input_text_rule without upstream execution; the backend invocation count stayed at one. Unauthenticated access returned 401. No model inference or runtime source changes occurred.
+  - check: ACP integration
+    result: The official acp-sdk 1.0.3 client discovered and invoked a real local SDK peer through installed public 1.0.7. The first run completed with HELLO. After policy activation, the same run failed with input_text_rule and upstream_executed false; the peer invocation count remained one. Both owned HTTP services stopped afterward. This is synchronous plain-text Agent Communication Protocol, not A2A or Agent Client Protocol.
+  - check: Reversible privacy
+    result: Fresh RSA-3072 recipient keys and an issuer keyring protected synthetic text before an actual local echo operation. Restoration off delivered an encrypted FFR2 token; authorized restoration on delivered Anna Kowalska while the upstream saw no original text. Disabling restoration permission blocked the next request before upstream. Stable scoped identifiers, randomized ciphertext and sanitized audit were verified. Keys and full tokens are excluded from artifacts and temporary services were cleaned up.
+  - check: Film and complete deck
+    result: The final H.264/AAC film is exactly 180 seconds, with instrumental music and no voice. New protocol and privacy frames were visually inspected and the whole file decoded. The editable PowerPoint and PDF contain exactly ten slides including cover and closing. All PDF pages were rendered and visually inspected; package, geometry, font and reimport checks passed. Independent factual review corrected architecture arrow direction and clarified the benchmark fixture baseline before finalization. Earlier artifacts remain unchanged.

@@ -1,0 +1,168 @@
+{
+  "mcp": {
+    "evidence_file": "mcp-demo-evidence.json",
+    "sections": [
+      {
+        "title": "MCP client → FastFence → real local tool",
+        "lines": [
+          "from fastmcp import Client",
+          "from fastmcp.client.auth import BearerAuth",
+          "import os",
+          "async with Client(",
+          "    os.environ['FASTFENCE_URL'] + '/mcp/',",
+          "    auth=BearerAuth(os.environ['FASTFENCE_AGENT_TOKEN']),",
+          ") as client:",
+          "    tools = await client.list_tools()",
+          "    result = await client.call_tool('invoke', {",
+          "        'tool': 'text.uppercase',",
+          "        'arguments': {'text': 'hello'},",
+          "    })"
+        ],
+        "duration_seconds": 6,
+        "footer": "MCP Streamable HTTP · /mcp/ · no LLM inference"
+      },
+      {
+        "title": "Recorded MCP result · before policy update",
+        "lines": [
+          "{",
+          "  \"policy_version\": 1,",
+          "  \"decision\": \"allowed\",",
+          "  \"reason\": \"controls_passed\",",
+          "  \"upstream_executed\": true,",
+          "  \"output\": {",
+          "    \"text\": \"HELLO\"",
+          "  },",
+          "  \"backend_calls\": 1",
+          "}"
+        ],
+        "duration_seconds": 5,
+        "color": "#4EE0BE",
+        "footer": "Real deterministic tool · same gateway · no LLM inference · no restart"
+      },
+      {
+        "title": "Recorded MCP result · same request after policy update",
+        "lines": [
+          "{",
+          "  \"policy_version\": 2,",
+          "  \"decision\": \"blocked\",",
+          "  \"reason\": \"input_text_rule\",",
+          "  \"upstream_executed\": false,",
+          "  \"output\": null,",
+          "  \"backend_calls\": 1",
+          "}"
+        ],
+        "duration_seconds": 5,
+        "color": "#FFA886",
+        "footer": "Real deterministic tool · same gateway · no LLM inference · no restart"
+      }
+    ]
+  },
+  "acp": {
+    "evidence_file": "acp-demo-evidence.json",
+    "sections": [
+      {
+        "title": "ACP client → FastFence → real local agent",
+        "lines": [
+          "import os",
+          "from acp_sdk.client import Client",
+          "from acp_sdk.models import Message, MessagePart",
+          "token = os.environ['FASTFENCE_AGENT_TOKEN']",
+          "async with Client(",
+          "    base_url=os.environ['FASTFENCE_URL'] + '/acp',",
+          "    headers={'Authorization': 'Bearer ' + token},",
+          ") as client:",
+          "    result = await client.run_sync(",
+          "        agent='uppercase', input=[Message(",
+          "            role='user', parts=[MessagePart(content='hello')],",
+          "        )],",
+          "    )"
+        ],
+        "duration_seconds": 6,
+        "footer": "Agent Communication Protocol · POST /acp/runs · sync text"
+      },
+      {
+        "title": "Recorded ACP result · before policy update",
+        "lines": [
+          "{",
+          "  \"run_status\": \"completed\",",
+          "  \"policy_version\": 1,",
+          "  \"upstream_executed\": true,",
+          "  \"output\": \"HELLO\",",
+          "  \"peer_invocations\": 1",
+          "}"
+        ],
+        "duration_seconds": 5,
+        "color": "#4EE0BE",
+        "footer": "Real deterministic peer · same gateway · no LLM inference · no restart"
+      },
+      {
+        "title": "Recorded ACP result · same request after policy update",
+        "lines": [
+          "{",
+          "  \"run_status\": \"failed\",",
+          "  \"policy_version\": 2,",
+          "  \"upstream_executed\": false,",
+          "  \"output\": [],",
+          "  \"reason\": \"input_text_rule\",",
+          "  \"peer_invocations\": 1",
+          "}"
+        ],
+        "duration_seconds": 5,
+        "color": "#FFA886",
+        "footer": "Real deterministic peer · same gateway · no LLM inference · no restart"
+      }
+    ]
+  },
+  "anonymization": {
+    "evidence_file": "anonymization-demo-evidence.json",
+    "sections": [
+      {
+        "title": "Restoration OFF: recipient receives protected data",
+        "duration_seconds": 6,
+        "lines": [
+          "Synthetic input: Anna Kowalska",
+          "",
+          "{",
+          "  \"anonymized\": true,",
+          "  \"restored\": false,",
+          "  \"upstream_original_absent\": true,",
+          "  \"delivered_preview\": \"[FFR2.local-... [abbreviated]\",",
+          "  \"echo_invocations\": 1",
+          "}"
+        ],
+        "color": "#4EE0BE",
+        "footer": "RSA public/private keys held by gateway · real local echo tool · no model"
+      },
+      {
+        "title": "Restoration ON: permitted original is returned",
+        "duration_seconds": 7,
+        "lines": [
+          "{",
+          "  \"anonymized\": true,",
+          "  \"restored\": true,",
+          "  \"upstream_original_absent\": true,",
+          "  \"delivered_text\": \"Anna Kowalska\",",
+          "  \"echo_invocations\": 2",
+          "}"
+        ],
+        "color": "#4EE0BE",
+        "footer": "Actual cryptographic round trip · local echo tool · no model inference"
+      },
+      {
+        "title": "Policy denies restoration: request blocked before tool",
+        "duration_seconds": 7,
+        "lines": [
+          "{",
+          "  \"allow_restore\": false,",
+          "  \"decision\": \"blocked\",",
+          "  \"reason\": \"anonymization_restore_denied\",",
+          "  \"upstream_executed\": false,",
+          "  \"echo_invocations\": 2",
+          "}"
+        ],
+        "color": "#FFA886",
+        "footer": "Actual cryptographic round trip · local echo tool · no model inference"
+      }
+    ]
+  }
+}

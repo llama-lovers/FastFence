@@ -1,0 +1,10 @@
+Actual Agent Communication Protocol | official acp-sdk 1.0.3 | FastFence 1.0.7
+Synchronous text only. Local uppercase peer; no LLM inference.
+
+Discover agents -> uppercase
+run_sync(agent='uppercase', input='hello') -> completed / HELLO
+policy v1 | upstream_executed=true | peer invocations=1
+Activate exact hello / input / tool rule -> policy v2
+Same run_sync call -> failed / input_text_rule / no output
+policy v2 | upstream_executed=false | peer invocations still=1
+Same running gateway. No restart. Both owned services stopped.

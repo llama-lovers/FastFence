@@ -1,20 +1,23 @@
 # FastFence — pokaz wartości produktu
 
-Film v3 trwa 2:20 i ma angielskie napisy oraz instrumentalną muzykę, bez lektora.
-Pokazuje rzeczywiste nagranie publicznej paczki 1.0.7 oraz wyniki osobnego,
-rzeczywistego wywołania przez OpenAI SDK. Sceny kodu i odpowiedzi odtwarzają
-oczyszczony zapis tej integracji. Montaż skraca pokaz, dlatego długość scen nie
-jest pomiarem czasu odpowiedzi.
+Film v4 trwa 3:00 i ma angielskie napisy oraz instrumentalną muzykę, bez lektora.
+Pokazuje rzeczywiste nagranie publicznej paczki 1.0.7 oraz wyniki osobnych prób
+OpenAI SDK, MCP, ACP i przywracania zaszyfrowanych danych. Sceny kodu i odpowiedzi
+odtwarzają oczyszczone zapisy tych prób. Montaż skraca pokaz, dlatego długość scen
+nie jest pomiarem czasu odpowiedzi.
 
-## Wariant do trzech minut, razem z filmem
+## Samodzielne trzyminutowe demo
 
-Otwarcie, około 10 sekund: „FastFence pozwala zmienić ochronę agenta bez
+Film zajmuje pełne trzy minuty. Dodatkowe przemówienie wydłuża pokaz. Prezentacja
+ma dokładnie dziesięć slajdów i może służyć jako osobna forma pitchu.
+
+Opcjonalne otwarcie: „FastFence pozwala zmienić ochronę agenta bez
 przepisywania jego kodu. Pokażemy integrację, zmianę polityki i jej rzeczywisty
 skutek, a następnie ochronę dokumentu.”
 
-Uruchom film `output/fastfence-demo-v3.mp4`, 2 minuty 20 sekund.
+Uruchom film `output/fastfence-demo-v4.mp4`, 3 minuty.
 
-Zamknięcie, około 20 sekund: „Ten sam klient działa dalej, a nowa polityka zmienia
+Opcjonalne zamknięcie: „Ten sam klient działa dalej, a nowa polityka zmienia
 wynik wywołania. Reguły sprawdzamy przed aktywacją, a błędna konfiguracja nie
 zastępuje poprawnej. Lokalna kontrola poprzedza ocenę modelu. FastFence uruchamiamy
 z PyPI poleceniem uv tool run fastfence.”
@@ -39,7 +42,7 @@ agenta. Za chwilę zobaczycie tę zmianę na rzeczywistym żądaniu.”
 
 ## Pokaz filmu
 
-Uruchom `output/fastfence-demo-v3.mp4` na pełnym ekranie z dźwiękiem.
+Uruchom `output/fastfence-demo-v4.mp4` na pełnym ekranie z dźwiękiem.
 Film sam objaśnia kolejne sceny po angielsku. Nie trzeba czytać podpisów na głos.
 
 W pokazie są dwa odrębne mechanizmy reguł. Lokalna reguła dotycząca `Hello`
@@ -71,9 +74,14 @@ poświadczenia i klucze. Produkt jest dostępny na PyPI: uv tool run fastfence.�
 - **Szybkość:** lokalne dopasowania poprzedzają inference. Blokada lokalna w filmie
   nie wykonuje modelu. Historyczny benchmark ma osobno opisaną wersję i zakres.
 - **Prywatność:** w filmie dwa adresy e-mail zastępują znaczniki redakcji.
-  Model biznesowy otrzymuje chroniony Markdown. Film nie pokazuje przywracania
-  danych za pomocą klucza prywatnego.
+  Model biznesowy otrzymuje chroniony Markdown. Osobna próba pokazuje szyfrowane
+  tokeny FFR2 i przywrócenie syntetycznego imienia oraz nazwiska po włączeniu
+  opcji. Przywrócenie wymaga klucza prywatnego i zgody reguły. Lokalna operacja
+  echo widzi wyłącznie chronione dane, niezależnie od ustawienia przywracania.
+  Ten przykład nie używa modelu i nie zakłada, że model zawsze zachowa token.
 - **Zakres:** ta sama ścieżka kontroli obsługuje REST, OpenAI-compatible, MCP
-  i synchroniczny tekstowy ACP. Materiał przedstawia integrację modelową i OCR.
+  i synchroniczny tekstowy ACP. Film pokazuje klienta OpenAI, rzeczywiste
+  wywołanie MCP oraz ACP do lokalnego agenta. W obu integracjach narzędziowych
+  powtórzenie po aktywacji reguły nie zwiększa licznika wykonań backendu.
 
 Szczegółowe wyniki i źródła twierdzeń: [evidence.md](evidence.md).

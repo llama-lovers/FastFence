@@ -1,0 +1,37 @@
+{
+  "package_version": "1.0.7",
+  "sdk": "acp-sdk",
+  "sdk_version": "1.0.3",
+  "protocol": "Agent Communication Protocol",
+  "mode": "sync",
+  "content_type": "text/plain",
+  "gateway_endpoint": "/acp/runs",
+  "peer_endpoint": "/runs",
+  "installed_site_packages_verified": true,
+  "public_package_cached_offline": true,
+  "same_gateway_instance": true,
+  "peer": "Official ACP SDK uppercase example agent",
+  "model_inference": false,
+  "semantic_provider": "disabled",
+  "semantic_calls": 0,
+  "discovered_agents": [
+    "uppercase"
+  ],
+  "allowed": {
+    "run_status": "completed",
+    "output": "HELLO",
+    "policy_version": 1,
+    "upstream_executed": true,
+    "peer_invocations": 1
+  },
+  "blocked": {
+    "run_status": "failed",
+    "output": [],
+    "reason": "input_text_rule",
+    "policy_version": 2,
+    "upstream_executed": false,
+    "peer_invocations": 1
+  },
+  "scope": "Real SDK client to FastFence to real local deterministic peer. Stateless synchronous text only; not A2A or Agent Client Protocol. No semantic or model-quality claim.",
+  "owned_services_stopped": true
+}

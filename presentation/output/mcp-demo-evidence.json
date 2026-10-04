@@ -1,0 +1,51 @@
+{
+  "package_version": "1.0.7",
+  "sdk": "FastMCP",
+  "sdk_version": "2.14.7",
+  "installed_site_packages_verified": true,
+  "source": "public_pypi_cached_offline",
+  "transport": "Actual MCP Streamable HTTP",
+  "endpoint": "/mcp/",
+  "operation": "text.uppercase via private FastMCP backend",
+  "operation_source": "examples/docs/fastmcp_server.py",
+  "mocked_protocol_results": false,
+  "model_calls": 0,
+  "unauthenticated_http_status": 401,
+  "discovered_tools": [
+    "complete",
+    "invoke"
+  ],
+  "same_gateway_instance": true,
+  "same_client_context": true,
+  "allowed": {
+    "request_id": "70d6ae44b55c44a387da697a0762d759",
+    "policy_version": 1,
+    "feed_version": 2,
+    "decision": "allowed",
+    "reason": "controls_passed",
+    "upstream_executed": true,
+    "tokens": 32,
+    "output": {
+      "text": "HELLO"
+    },
+    "semantic_input_status": "not_run",
+    "semantic_output_status": "not_run",
+    "client_elapsed_ms": 6.493
+  },
+  "blocked": {
+    "request_id": "1f446de1fa934015a9a1ebe1d1ad7e1f",
+    "policy_version": 2,
+    "feed_version": 2,
+    "decision": "blocked",
+    "reason": "input_text_rule",
+    "upstream_executed": false,
+    "tokens": 0,
+    "output": null,
+    "semantic_input_status": "not_run",
+    "semantic_output_status": "not_run",
+    "client_elapsed_ms": 2.201
+  },
+  "backend_calls_after_allow": 1,
+  "backend_calls_after_block": 1,
+  "scope": "Actual deterministic tool integration; observed timings are not a benchmark"
+}

@@ -1,0 +1,51 @@
+{
+  "package_version": "1.0.7",
+  "installed_site_packages_verified": true,
+  "public_package_cached_offline": true,
+  "same_gateway_instance": true,
+  "cryptography": "RSA-3072 OAEP-SHA256 wraps AES-256-GCM, with issuer authentication",
+  "token_format": "FFR2",
+  "fresh_recipient_key_pair": true,
+  "fresh_issuer_keyring": true,
+  "both_recipient_keys_loaded_by_gateway": true,
+  "synthetic_original": "Anna Kowalska",
+  "upstream": "Explicit deterministic echo ToolsPort",
+  "model_inference": false,
+  "semantic_provider": "disabled",
+  "semantic_calls": 0,
+  "restore_off": {
+    "decision": "redacted",
+    "anonymized": true,
+    "restored": false,
+    "upstream_executed": true,
+    "upstream_original_absent": true,
+    "delivered_preview": "[FFR2.local-... [abbreviated]",
+    "preview_is_not_restorable_token": true,
+    "echo_invocations": 1
+  },
+  "restore_on": {
+    "decision": "redacted",
+    "anonymized": true,
+    "restored": true,
+    "upstream_executed": true,
+    "upstream_original_absent": true,
+    "delivered_text": "Anna Kowalska",
+    "echo_invocations": 2
+  },
+  "permission_denied": {
+    "policy_version": 2,
+    "restore_originals": true,
+    "allow_restore": false,
+    "decision": "blocked",
+    "reason": "anonymization_restore_denied",
+    "restored": false,
+    "upstream_executed": false,
+    "echo_invocations": 2
+  },
+  "stable_scoped_identifier_for_repeated_original": true,
+  "randomized_encrypted_tokens": true,
+  "audit_excludes_original_and_full_tokens": true,
+  "full_tokens_and_keys_excluded_from_artifacts": true,
+  "scope": "Actual HTTP plus real crypto and deterministic echo, not model output preservation. Self-contained tokens require no conversation mapping database; full gateway holds both RSA keys and issuer keyring. Restoration remains subject to output controls.",
+  "owned_service_stopped": true
+}

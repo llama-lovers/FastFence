@@ -1,0 +1,10 @@
+Recorded MCP integration | FastFence 1.0.7
+Actual FastMCP HTTP client -> FastFence /mcp/ -> private FastMCP tool
+Unauthenticated request -> HTTP 401
+tools/list -> complete, invoke
+invoke text.uppercase {"text":"hello"} -> ALLOWED / {"text":"HELLO"} / policy v1
+Backend executions: 1
+Activate input/tool contains hello -> policy v2
+Same MCP invocation -> BLOCKED / input_text_rule / upstream_executed=false
+Backend executions: still 1. Same gateway; no restart.
+Real deterministic tool. No model inference in this protocol demonstration.

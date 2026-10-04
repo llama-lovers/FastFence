@@ -1,9 +1,9 @@
 # FastFence demo: official criteria and evidence map
 
 This is a factual production guide for the next film, not a jury score or a new
-benchmark. Existing recordings show public PyPI FastFence 1.0.7. The OpenAI client integration also has verified actual outcomes. Its code and
-results are rendered from the real execution transcript, not a live terminal
-screen capture. Test-suite results remain separately scoped evidence.
+benchmark. Existing recordings and the verified OpenAI, MCP, ACP and reversible-privacy
+runs use public PyPI FastFence 1.0.7. Integration code and results are rendered
+from real execution transcripts, not live terminal screen captures. Test-suite results remain separately scoped evidence.
 
 ## Official sources and the weighting discrepancy
 
@@ -30,8 +30,9 @@ policy, a dashboard, and an executable suite with positive and negative cases.
 Section 6 explicitly anticipates judges changing configuration or feeds, trying
 unprepared prompts, and reviewing performance telemetry. The rules require a
 maximum ten-slide PDF plus the project title, team name, member list and project
-description. The seven-slide v2 PDF satisfies the slide-count limit only; it does
-not replace the separate submission fields or the requested architecture diagram.
+description. The requested complete deck has exactly ten slides, including cover
+and closing slide. Its architecture diagram does not replace the separate
+submission fields. The earlier seven-slide v2 deck remains an older artifact.
 
 ## Scene and evidence map
 
@@ -44,7 +45,10 @@ not replace the separate submission fields or the requested architecture diagram
 | Historical attack signatures / externally managed feed | Show one actual known-signature block with the matched control and upstream not executed, alongside a harmless allowed example. If showing feed reload, show its version changing. | [Signature tests](../tests/unit/test_signature_matching.py) cover encoded variants, bounded decoding and safe near matches; sample [feed](../examples/docs/signatures.json). They establish matching behavior, not complete prevention of every named vulnerability. No current film scene demonstrates a feed edit. |
 | Security reporting and auditing | From the blocked request, open Activity and show reason, policy version, upstream flag, resource/queue fields; export actual JSONL if included. | Actual [audit screenshot](assets/demo-audit.png) and original movie around 39–45 seconds. UI records explain the execution boundary. Export capability is implemented, but an unrecorded export must not be presented as a filmed action. Audit excludes raw prompts and credentials. |
 | Executable positive/negative self-tests | Show the command, installed package version/import origin, then real collected/passed output and a few named allow/block/redact/budget/signature cases. | Release 1.0.7 source evidence: 1,484 passed, 93.28% coverage; separate public-package verification: 406 security/admission/transport checks. [Release report](../evaluation/results/request-queue-1.0.7.json); sanitized private report `state/private/queue-package-1.0.7-pypi.json`. Do not sum counts or imply 406 model-accuracy prompts. A fresh filmed run needs its own exact count. |
-| Easy integration with agents, MCP and models | Show a short real OpenAI SDK client pointing at the gateway, then the actual protected result. Optionally show the MCP client/tool pair using the same policy. | Ready examples: [OpenAI client](../examples/docs/openai_client.py), [MCP client](../examples/docs/mcp_client.py), [FastMCP server](../examples/docs/fastmcp_server.py), [ACP client](../examples/docs/acp_client.py). Actual installed public-package 1.0.7 integration passed: OpenAI SDK 3.24.0 called the protected `/v1` endpoint; `Hello` returned HTTP 200 under v1 with real Qwen and both Laya checks, then HTTP 403 under v2 with upstream false after the local rule activated. Same gateway, two semantic assessments. [Execution evidence](output/integration-demo-evidence.json) and [transcript](output/integration-demo-transcript.txt). The film renders code/results from this transcript, not a live terminal capture. MCP/ACP examples exist but this integration scene does not film them. Authentication remains in environment variables; values are not displayed. |
+| OpenAI client integration | The same SDK request returns a real model answer, then a policy block after activation. | Official OpenAI SDK 3.24.0 uses `/v1`. `Hello` returns HTTP 200 under v1 with Qwen and both Laya checks, then HTTP 403 under v2 with upstream false. Same gateway, two semantic assessments. [Evidence](output/integration-demo-evidence.json), [transcript](output/integration-demo-transcript.txt), [client example](../examples/docs/openai_client.py). |
+| MCP integration | Discover the gateway tools, invoke the real uppercase operation, then repeat after an input rule activates. | Actual MCP Streamable HTTP using FastMCP 2.14.7 at `/mcp/`. The same client context sees ALLOW/HELLO under v1 and BLOCK/input_text_rule under v2. Private backend calls remain one after the block. No model calls; semantic statuses are not_run. [Evidence](output/mcp-demo-evidence.json), [transcript](output/mcp-demo-transcript.txt). |
+| Agent Communication Protocol integration | Official client discovers `uppercase`, performs a synchronous text run through the gateway to an official SDK peer, then repeats after policy activation. | Official acp-sdk 1.0.3, `/acp/runs` to peer `/runs`. v1 returns ACP `completed`/HELLO; v2 returns ACP `failed`/input_text_rule with no output and upstream false. Peer invocation count remains one. This is stateless synchronous text **Agent Communication Protocol**, not Agent Client Protocol or A2A. A failed ACP run is not an HTTP 403 claim. Local deterministic peer, no model inference. [Evidence](output/acp-demo-evidence.json), [transcript](output/acp-demo-transcript.txt). |
+| Public/private-key reversible privacy | Synthetic `Anna Kowalska` becomes an FFR2 token before a deterministic echo tool. Restoration off delivers the token; restoration on delivers the original. | Actual HTTP with fresh RSA-3072 OAEP-SHA256/AES-256-GCM and issuer authentication. Both upstream captures lack plaintext. Repeated originals have stable scoped identifiers and randomized ciphertext. Setting allow_restore=false blocks the request flag before upstream, leaving echo calls at two. Full gateway holds both recipient keys plus issuer keyring; this is not public-key-only forwarding. No conversation mapping database. No model/token-preservation claim. [Evidence](output/anonymization-demo-evidence.json), [transcript](output/anonymization-demo-transcript.txt). Token previews are explicitly abbreviated and cannot restore anything; full tokens and keys are absent from artifacts. |
 | Reliability while policies change | Invalid configuration keeps the active snapshot; queued work rechecks the latest policy; repeated initialization preserves policy, credentials and keys. | [Policy validation](../tests/integration/test_policy_validation.py), [queue integration](../tests/integration/test_request_admission.py), [startup preservation](../tests/unit/test_one_command_startup.py). The v2 operations scene is explicitly an editorial summary of regression-tested behavior. Idempotent setup does not mean deduplicated business requests. |
 
 A compact, clearly labelled architecture view should show an app or agent,
@@ -108,8 +112,8 @@ These belong in the evidence description and one concise end caption, not as an
 unsupported certification or a reason to hide successful observed behavior.
 
 No new tests, model calls, benchmarks, product source edits or PDF edits were made
-by this mapping review. The integration owner performed the separately recorded
-actual run linked above. The film distinguishes unchanged UI footage, rendered
-code/results from the actual integration transcript, and labelled explanatory
+by this mapping review. The integration owners performed the separately recorded
+actual OpenAI, MCP, ACP and reversible-privacy runs linked above. The film distinguishes unchanged UI footage, rendered
+code/results from the actual integration transcripts, and labelled explanatory
 graphics. The self-testing summary refers to the filmed allowed/blocked example
 review before activation, not a new filmed execution of the full test suite.
