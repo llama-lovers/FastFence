@@ -1,0 +1,29 @@
+FastFence — Instructions on how to open the project
+
+Requirements: macOS or Linux, uv, Git and a running Ollama instance.
+
+1. Open a terminal in an empty directory and run:
+
+   uv tool run --python 3.12 fastfence@1.0.7
+
+   The first launch prepares configuration, credentials, Laya, model downloads and OCR dependencies. This may take several minutes. No repository checkout is required.
+
+2. Open the dashboard:
+
+   http://127.0.0.1:8000
+
+3. Open Connection. Use the credentials generated in state/credentials.json:
+   - local-admin: manage policies.
+   - local-agent: send protected requests.
+
+4. Open Policies to create a text or natural-language rule. Test examples, review the proposed change and activate it without restarting.
+
+5. Open Test requests to send prompts. Open Activity to inspect security decisions.
+
+6. Open Documents to upload an image or multipage PDF. Extract protected Markdown or send it to the configured model.
+
+Documentation:
+https://fastfence.dev/
+
+Presentation, recorded demo and sample PDF:
+https://github.com/llama-lovers/FastFence/tree/main/presentation

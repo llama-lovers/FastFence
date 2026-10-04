@@ -25,6 +25,7 @@ change_paths:
   - presentation/demo-script.pl.md
   - presentation/evidence.md
   - presentation/README.md
+  - presentation/instructions.txt
 acceptance:
   - The deck identifies FastFence, team llama-lovers and the demonstrated release, and includes concise Polish speaker notes.
   - Numerical claims preserve their recorded count, version and workload qualifications.
@@ -44,3 +45,5 @@ evidence:
     result: Eight slides finalized with native editable text, an architecture diagram and two native evidence tables. Package, geometry, font and reimport checks passed. Every PDF page was rendered and visually inspected; the final PDF embeds Helvetica Neue and matches the intended layout. Seven main slides have Polish speaker notes plus one optional benchmark appendix. Both PPTX and PDF are below the competition upload limit of 10 MB. No native PowerPoint execution is claimed.
   - check: Repository quality checks
     result: All configured pre-commit checks passed, including secret scanning, Ruff, architecture boundaries, import-linter, basedpyright, pyscn and specification validation. The recorder executed against actual installed FastFence; no runtime product code changed.
+  - check: Plain-text launch instructions
+    result: Added UTF-8 instructions.txt for the project submission, matching the documented public-package launch command, dashboard connection roles and document workflow. No runtime code or configuration changed.
