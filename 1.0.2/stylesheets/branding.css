@@ -1,0 +1,21 @@
+/* Supplied vector artwork keeps its original colors in both palettes. */
+.md-header .md-logo img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+}
+
+.fastfence-landing-logo {
+  display: block;
+  width: 10rem;
+  max-width: 45vw;
+  height: auto;
+  margin: 0 0 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .fastfence-landing-logo {
+    width: 7rem;
+    margin-bottom: 1rem;
+  }
+}
