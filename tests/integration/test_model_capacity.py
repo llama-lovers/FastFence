@@ -121,6 +121,10 @@ def test_http_capacity_is_503_with_settled_private_audit(
     engine.models._http._pending = 0
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "model_capacity_exceeded"
+    assert response.json()["error"]["type"] == "server_error"
+    assert response.headers.get("Retry-After") == (
+        None if stage == "output" else "1"
+    )
     assert "synthetic private" not in response.text
     audit = engine.ledger.audit()[0]
     assert audit["decision"] == "error"

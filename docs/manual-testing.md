@@ -329,6 +329,13 @@ admits at most 128 requests, with 32 connections. The request fails closed and
 the OpenAI-compatible endpoint returns HTTP 503. Input assessment rejection
 prevents the business model from running; output assessment rejection withholds
 an already generated answer. These limits are separate from identity budgets.
+Execution failures use the OpenAI error type `server_error`; policy blocks retain
+`permission_denied`. A local capacity rejection with `upstream_executed=false`
+includes `Retry-After: 1`, an estimated minimum delay rather than a promise of
+availability. There is no retry hint after upstream execution, for timeouts or
+for an unavailable/invalid provider response. FastFence does not automatically
+retry. Configure SDK retries deliberately: the absence of this header does not
+stop an SDK from retrying HTTP 503 on its own.
 
 Reduce caller concurrency. Retry only when the operation is safe to repeat or
 `upstream_executed` is false, with bounded attempts, backoff and jitter. An output

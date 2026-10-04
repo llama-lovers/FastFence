@@ -210,5 +210,45 @@ def test_enabled_semantic_failure_is_a_compatibility_error(client, tokens):
     )
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "model_unavailable_fail_closed"
+    assert response.json()["error"]["type"] == "server_error"
+    assert "Retry-After" not in response.headers
     assert response.headers["X-FastFence-Upstream-Executed"] == "false"
     assert "choices" not in response.json()
+
+
+@pytest.mark.parametrize(
+    "reason",
+    ["upstream_failure", "upstream_timeout", "model_unavailable_fail_closed"],
+)
+@pytest.mark.parametrize("upstream_executed", [False, True])
+def test_unknown_execution_failures_never_offer_capacity_retry(
+    reason, upstream_executed
+):
+    from fastfence.app.interfaces.http.openai import verdict_response
+    from fastfence.modules.control.domain.models import Verdict
+
+    verdict = Verdict(
+        request_id="0" * 32,
+        decision="error",
+        reason=reason,
+        policy_version=1,
+        feed_version=1,
+        latency_ms=1,
+        semantic_provider="disabled",
+        upstream_executed=upstream_executed,
+    )
+    response = verdict_response(verdict, "fixture")
+    assert response.status_code == 503
+    assert json.loads(response.body)["error"]["type"] == "server_error"
+    assert "Retry-After" not in response.headers
+
+
+def test_policy_denial_retains_permission_type_without_retry(client, tokens):
+    response = client.post(
+        "/v1/chat/completions",
+        headers=headers(tokens),
+        json=chat_request(model="not-allowlisted"),
+    )
+    assert response.status_code == 403
+    assert response.json()["error"]["type"] == "permission_denied"
+    assert "Retry-After" not in response.headers

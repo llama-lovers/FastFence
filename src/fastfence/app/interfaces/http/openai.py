@@ -119,13 +119,22 @@ def verdict_response(verdict: Verdict, model: str) -> JSONResponse:
         "X-FastFence-Upstream-Executed": str(verdict.upstream_executed).lower(),
     }
     if verdict.decision not in {"allowed", "redacted"}:
+        if (
+            verdict.decision == "error"
+            and verdict.reason == "model_capacity_exceeded"
+            and not verdict.upstream_executed
+        ):
+            # Estimated backoff only: no business operation was started.
+            headers["Retry-After"] = "1"
         return JSONResponse(
             status_code=403 if verdict.decision == "blocked" else 503,
             headers=headers,
             content={
                 "error": {
                     "message": "FastFence denied or could not complete this request.",
-                    "type": "permission_denied",
+                    "type": "permission_denied"
+                    if verdict.decision == "blocked"
+                    else "server_error",
                     "code": verdict.reason,
                 },
                 "fastfence": metadata,

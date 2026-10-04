@@ -218,6 +218,13 @@ Otwórz **Activity** i znajdź wynik po identyfikatorze żądania. Porównaj wer
 z OpenAI zwraca HTTP 503. Odrzucenie oceny wejścia zapobiega uruchomieniu modelu
 biznesowego; odrzucenie oceny wyjścia zatrzymuje już wygenerowaną odpowiedź.
 Te limity są niezależne od budżetów tożsamości.
+Błędy wykonania mają typ OpenAI `server_error`; blokady polityki zachowują
+`permission_denied`. Lokalna odmowa przyjęcia z `upstream_executed=false`
+zawiera `Retry-After: 1`: szacowane minimalne opóźnienie, a nie gwarancję
+dostępności. Po wykonaniu upstream, przy timeoutach i niedostępnej lub błędnej
+odpowiedzi dostawcy nagłówka nie ma. FastFence nie ponawia automatycznie żądań.
+Ustaw ponawianie w SDK świadomie: brak nagłówka nie powstrzymuje SDK przed
+samodzielnym ponowieniem HTTP 503.
 
 Zmniejsz współbieżność klienta. Ponawiaj tylko operacje bezpieczne do powtórzenia
 lub żądania z `upstream_executed=false`: ograniczoną liczbę razy, z rosnącym

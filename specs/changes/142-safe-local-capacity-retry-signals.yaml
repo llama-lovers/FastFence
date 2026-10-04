@@ -1,0 +1,37 @@
+id: FF-142
+title: Distinguish transient OpenAI capacity errors and safe retry hints
+status: verified
+problem: OpenAI-compatible local capacity errors use a permission-denied error type and omit a retry hint, making temporary admission failures difficult to distinguish from policy denial.
+scope:
+  - Return server_error for OpenAI execution failures while retaining permission_denied for policy blocks.
+  - Add an estimated Retry-After header only for typed local capacity errors before any business upstream execution.
+  - Document bounded backoff and uncertainty without adding automatic retries.
+constraints:
+  - Keep existing HTTP status codes, verdict reasons, accounting and REST/MCP/ACP contracts unchanged.
+  - Do not classify remote 429 or 503 as local pre-admission rejection, or change their conservative execution accounting.
+  - Never suggest automatic replay after business upstream execution, malformed provider output, timeout, unavailable model or unknown failure.
+  - The one-second hint is an estimated minimum delay, not an availability guarantee.
+  - No runtime model calls or queue-capacity increases are needed for validation.
+change_paths:
+  - src/fastfence/app/interfaces/http/openai.py
+  - tests/integration/test_model_capacity.py
+  - tests/integration/test_openai.py
+  - docs/manual-testing.md
+  - docs/manual-testing.pl.md
+acceptance:
+  - Local input or business-model admission saturation returns HTTP 503, server_error, model_capacity_exceeded and Retry-After 1 with upstream_executed false.
+  - Output-stage saturation returns the same capacity reason without a Retry-After hint because the business upstream already executed.
+  - Policy denials remain HTTP 403 with permission_denied and no retry hint.
+  - Generic execution errors receive server_error but no retry hint; accounting and inflight cleanup remain valid.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/integration/test_model_capacity.py tests/integration/test_openai.py tests/unit/test_model_http_pool.py tests/integration/test_model_http_connections.py tests/unit/test_laya_semantic_runtime.py
+    expected: Classified response, accounting and cancellation regressions pass without live model calls.
+  - command: uv run --locked ruff check src/fastfence/app/interfaces/http/openai.py tests/integration/test_model_capacity.py tests/integration/test_openai.py
+    expected: Lint passes.
+evidence:
+  - check: Read-only overload audit before this change
+    result: Source 4e25b6d version 1.0.6 has a 32-assessment Laya admission limit and 128-pending/32-connection model transport. All 73 related protocol, pooling, timeout and cleanup tests passed. This change does not imply support for a burst of 1000 model requests.
+  - check: Focused response and lifetime regressions
+    result: All 72 selected OpenAI/capacity/pool/Laya transport tests passed without live inference. Input/business admission failures include Retry-After 1; output capacity and unknown execution failures do not. Accounting settles inflight reservations to zero. Ruff and targeted basedpyright passed.
+  - check: Remote overload distinction
+    result: In-memory HTTP429 and503 probes for both native Ollama and OpenAI adapters still raised ModelUnavailableError and released pending counters to zero. They were deliberately not reclassified as local pre-admission failures.
