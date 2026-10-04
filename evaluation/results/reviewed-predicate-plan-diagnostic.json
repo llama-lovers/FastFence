@@ -1,0 +1,421 @@
+{
+  "evaluation": "reviewed-predicate-plan-diagnostic",
+  "date": "2026-10-04",
+  "released": false,
+  "runtime_changed": false,
+  "provider": "real_laya",
+  "model": "qwen3:4b",
+  "baseline": "Current severity-v2 with mandatory additional natural-language policy; source semantics unchanged from1.0.6",
+  "candidate": "Frozen administrator-reviewed positive predicates; exact-substring evidence validation; host three-valued all/any/not and exception composition, OR unchanged independent base security assessment",
+  "datasets": {
+    "development": {
+      "cases": [
+        {
+          "id": "pair-both",
+          "expected_blocked": true,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "pair-name-only",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "pair-email-only",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "pair-organization",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "pair-given-name-only",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": null,
+          "candidate_policy_error": "unknown",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "pair-polish-lines",
+          "expected_blocked": true,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "exception-exact",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": null,
+          "candidate_policy_error": "unknown",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "exception-other",
+          "expected_blocked": true,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "exception-subdomain",
+          "expected_blocked": true,
+          "baseline_blocked": false,
+          "candidate_blocked": null,
+          "candidate_policy_error": "unknown",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "exception-suffix",
+          "expected_blocked": true,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "exception-mixed",
+          "expected_blocked": true,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "security-independent",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "finance-both",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": "ungrounded",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "finance-investment-only",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": null,
+          "candidate_policy_error": "ungrounded",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "finance-promise-only",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": null,
+          "candidate_policy_error": "unknown",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "finance-neither",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        }
+      ],
+      "counts": {
+        "samples": 16,
+        "baseline_correct": 9,
+        "baseline_false_positives": 1,
+        "baseline_false_negatives": 6,
+        "candidate_correct": 11,
+        "candidate_false_positives": 0,
+        "candidate_false_negatives": 0,
+        "candidate_unresolved": 5,
+        "candidate_policy_errors": 6
+      },
+      "observed_median_ms": {
+        "baseline": 912.63,
+        "candidate_two_calls": 2450.24
+      }
+    },
+    "holdout": {
+      "cases": [
+        {
+          "id": "v3-h01-01",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h01-02",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h01-03",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h01-04",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h02-01",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h02-02",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h02-03",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h02-04",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h03-01",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h03-02",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h03-03",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h03-04",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h04-01",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h04-02",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h04-03",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h04-04",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": "unknown",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h05-01",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h05-02",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h05-03",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h05-04",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": false,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": false
+        },
+        {
+          "id": "v3-h06-01",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": true,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h06-02",
+          "expected_blocked": false,
+          "baseline_blocked": false,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h06-03",
+          "expected_blocked": false,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": null,
+          "candidate_policy_blocked": false,
+          "candidate_security_blocked": true
+        },
+        {
+          "id": "v3-h06-04",
+          "expected_blocked": true,
+          "baseline_blocked": true,
+          "candidate_blocked": true,
+          "candidate_policy_error": "unknown",
+          "candidate_policy_blocked": null,
+          "candidate_security_blocked": true
+        }
+      ],
+      "counts": {
+        "samples": 24,
+        "baseline_correct": 15,
+        "baseline_false_positives": 9,
+        "baseline_false_negatives": 0,
+        "candidate_correct": 17,
+        "candidate_false_positives": 7,
+        "candidate_false_negatives": 0,
+        "candidate_unresolved": 0,
+        "candidate_policy_errors": 2
+      },
+      "observed_median_ms": {
+        "baseline": 979.73,
+        "candidate_two_calls": 3467.61
+      }
+    }
+  },
+  "decision": "Do not change the default classifier: the candidate produced unresolved allowed cases and seven false positive denials on the independent24-case holdout. No observed false negatives in this small diagnostic does not establish security accuracy.",
+  "limitations": [
+    "40 synthetic cases, not a security certification, calibrated accuracy benchmark or capacity measurement.",
+    "Manual plans were reviewed before inference; automatic natural-language compilation was not implemented or evaluated.",
+    "Holdout plans/labels were produced independently, frozen before inference and not exposed during protocol design.",
+    "Exact evidence proves substring occurrence, not semantic truth of the predicate.",
+    "Final OR uses three-valued logic: a known base-security denial remains a denial even if fact assessment is unresolved. Initial private driver strict-completion counts (10/16 and15/24) included such cases as errors; final composition gives11/16 and17/24 without changing any model output.",
+    "Latency includes local communication, model/prefix caching and first-call startup; unrelated source checks ran concurrently, so these observations are not a controlled performance comparison.",
+    "The candidate adds one inference and repeated input; production reservations, telemetry and combined deadlines were not modified."
+  ],
+  "protocol_frozen_before_inference": true
+}

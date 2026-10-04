@@ -1,0 +1,29 @@
+id: FF-144
+title: Evaluate explicit semantic predicates before changing the released classifier
+status: verified
+problem: The current Laya categorical assessor can miss compound natural-language policy violations; the new review workflow detects examples but does not fix model classification.
+scope:
+  - Compare unchanged severity-v2 against a frozen fact-classification protocol using manually reviewed bounded predicate plans.
+  - Evaluate host three-valued Boolean composition and independently retain the unchanged base security guard.
+  - Use an independently prepared holdout with frozen plans and labels.
+constraints:
+  - Do not alter the released semantic runtime, operator settings, models or source test lab.
+  - Never interpret substring evidence as proof of semantic correctness.
+  - Do not publish sample text, model evidence excerpts, credentials or private paths.
+  - Count unresolved classifications separately from correct denials.
+change_paths:
+  - evaluation/results/reviewed-predicate-plan-diagnostic.json
+acceptance:
+  - Report baseline and candidate outcomes for all 16 development and 24 independent holdout cases.
+  - Preserve errors, false positives and false negatives; do not select only passing examples.
+  - Keep the candidate out of production when the independent evaluation does not justify changing the default.
+validation:
+  - command: python3 -m json.tool evaluation/results/reviewed-predicate-plan-diagnostic.json
+    expected: Public outcome-only evidence parses and all dataset totals reconcile.
+evidence:
+  - check: Frozen protocol and independent holdout
+    result: The protocol and manually reviewed plans were fixed before inference; all calls used pinned real Laya with local qwen3:4b. There were 120 inference calls over 40 cases, with no business upstream calls.
+  - check: Development and holdout outcomes
+    result: Development baseline9/16 versus candidate11/16 with five unresolved outcomes. Independent holdout baseline15/24 versus candidate17/24 with seven false positive denials. The candidate had no observed false negatives in this small diagnostic, which is insufficient to establish accuracy.
+  - check: Decision
+    result: Candidate not adopted. It adds model work, unresolved decisions and unacceptable false positives; no runtime classifier or accounting changes were shipped. Final counts apply host three-valued OR consistently, without modifying any recorded model output.
