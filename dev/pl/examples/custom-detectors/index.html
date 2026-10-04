@@ -1422,11 +1422,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/f57843692032992fc44b61c0bc4b67973d46ec2b">Commit f57843692032</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/c26e20109eed87057f1e0c65d711b617b6434063">Commit c26e20109eed</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/f57843692032992fc44b61c0bc4b67973d46ec2b">Commit f57843692032</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/c26e20109eed87057f1e0c65d711b617b6434063">Commit c26e20109eed</a>.</p>
 </div>
 <h1 id="write-custom-python-text-detectors">Napisz własne detektory tekstu w Pythonie<a class="headerlink" href="#write-custom-python-text-detectors" title="Permanent link">&para;</a></h1>
 <p>Dodaj własne frazy literalne i wyrażenia regularne w plikach Pythona rozszerzających detect-secrets. Detektory działają razem z wbudowanymi detektorami tokenów i kluczy FastFence na zagnieżdżonych wartościach wejściowych i wyjściowych, w tym kluczach słowników. Dopasowanie uruchamia działanie prywatności z aktywnej polityki: blokowanie lub redakcję.</p>
@@ -1475,7 +1475,7 @@
 </span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">(</span><span class="n">CompanyCodeDetector</span><span class="p">()</span><span class="o">.</span><span class="n">analyze_string</span><span class="p">(</span><span class="s2">"ordinary report"</span><span class="p">))</span>
 </span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Custom detector example checks passed"</span><span class="p">)</span>
 </span></code></pre></div>
-<p><a href="https://fastfence.dev/dev/downloads/custom_detector.py">Pobierz custom_detector.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/f57843692032992fc44b61c0bc4b67973d46ec2b/examples/docs/custom_detector.py">Zobacz źródło</a></p>
+<p><a href="https://fastfence.dev/dev/downloads/custom_detector.py">Pobierz custom_detector.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/c26e20109eed87057f1e0c65d711b617b6434063/examples/docs/custom_detector.py">Zobacz źródło</a></p>
 <p>Detektory regex dostarczają od jednego do 32 skompilowanych wzorców Python <code>re</code>, każdy o długości maksymalnie 8 192 znaków. Wzorce dopasowujące pusty ciąg są odrzucane. FastFence maskuje całe dopasowanie regex, również przy użyciu grup przechwytujących. Detektory bazowe zwracają dokładne dopasowane fragmenty. Detektor może zwrócić maksymalnie 4 096 kandydatów dla jednej analizowanej postaci tekstu; niepoprawne wyniki lub wyjątki odrzucają żądanie ze stałym powodem niedostępności detektora.</p>
 <p>Rozszerzenie korzysta z interfejsów <a href="https://github.com/Yelp/detect-secrets/blob/v1.5.0/detect_secrets/plugins/base.py">BasePlugin i RegexBasedDetector</a> projektu źródłowego. FastFence wywołuje <code>analyze_string</code> bezpośrednio i nie wywołuje <code>verify</code> ani globalnego mechanizmu skanowania plików biblioteki.</p>
 <h2 id="choose-input-and-output-behavior">Wybierz zachowanie wejścia i wyjścia<a class="headerlink" href="#choose-input-and-output-behavior" title="Permanent link">&para;</a></h2>
