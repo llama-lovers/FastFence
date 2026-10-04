@@ -1,4 +1,3 @@
-import json
 import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any, Literal
@@ -180,10 +179,17 @@ class ControlRuntime:
         return self.ledger.audit(limit)
 
     async def aclose(self) -> None:
-        close = getattr(self.engine.scanner, "aclose", None)
-        if close is not None:
-            await close()
-        self.close()
+        try:
+            close = getattr(self.engine.scanner, "aclose", None)
+            if close is not None:
+                await close()
+        finally:
+            try:
+                close_model = getattr(self.engine.models, "aclose", None)
+                if close_model is not None:
+                    await close_model()
+            finally:
+                self.close()
 
     def close(self) -> None:
         self.ledger.close()
@@ -210,13 +216,16 @@ def build_runtime(
             else UnconfiguredTools()
         )
     )
-    identities = (
-        IdentityStore(records=json.loads(settings.identity_config_json))
-        if settings.identity_config_json is not None
-        else IdentityStore(
+    identities = IdentityStore(
+        path=(
             settings.identity_config_file
             or settings.state_path / "identities.json"
         )
+        if settings.identity_config_json is None
+        else None,
+        json_content=settings.identity_config_json,
+        max_records=settings.identity_max_records,
+        max_bytes=settings.identity_max_source_bytes,
     )
     policies = PolicyStore(
         settings.root / "config/policy.yaml",

@@ -51,6 +51,7 @@ def test_case_sensitivity_and_prepared_value_are_not_serialized():
         "target",
         "action",
         "case_sensitive",
+        "ignore_invisible_characters",
     }
     with pytest.raises(ValidationError):
         rule.value = "changed"

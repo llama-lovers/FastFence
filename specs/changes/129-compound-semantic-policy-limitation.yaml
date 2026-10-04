@@ -1,0 +1,36 @@
+id: FF-129
+title: Record the reproduced compound semantic-policy limitation without shipping an unreliable fix
+status: verified
+problem: The public 1.0.3 Laya and Qwen3:4b semantic assessor permits a combined full-name and email input despite an explicit conjunction policy, while permitting the three allowed partial cases correctly.
+scope:
+  - Reproduce only the four relevant cases from the user lab against an isolated installation of public FastFence 1.0.3.
+  - Verify the scoped policy, selected model and input actually reach the real Laya worker.
+  - Evaluate a bounded set of prompt and structured-assessment candidates outside the product source.
+  - Publish outcome-only counts and document the specific unresolved limitation in both language guides.
+constraints:
+  - No runtime code changes, extra model calls per request, model-default changes or automatic deterministic policy translation.
+  - Preserve the user lab files and all operator configuration.
+  - Distinguish public-package behavior from unreleased experimental copied helpers.
+  - Do not tune on personal-name patterns, overwrite historical corpus results or claim universal conjunction failure or detection accuracy.
+  - Exclude raw prompts, model response text, credentials and filesystem paths from the public report.
+change_paths:
+  - docs/examples/semantic-policy.md
+  - docs/examples/semantic-policy.pl.md
+  - evaluation/results/semantic-compound-policy-evaluation.json
+acceptance:
+  - The report identifies the actual public package as 1.0.3 despite the original lab driver's hardcoded 1.0.2 report label.
+  - Original cases show three correct allowed decisions and one false negative for combined data.
+  - Candidate outcomes include false-positive and false-negative counts, separate final held-out counts and an explicit not-released designation.
+  - Documentation states the reproduced compound-rule limitation and recommends testing partial, combined and exception cases without presenting generic semantic correctness as guaranteed.
+validation:
+  - command: uv run --with fastfence==1.0.3 python run_profile.py --backend laya --laya-root INSTALLED_HELPERS --profiles semantic_combination --report PRIVATE_REPORT
+    expected: An external copied lab reproduces the known false negative and confirms the actual package version and import origin inside its Python process.
+  - command: python3 -m json.tool evaluation/results/semantic-compound-policy-evaluation.json
+    expected: The outcome-only report parses and its case totals agree with its confusion counts.
+evidence:
+  - check: Public-package original four cases and real worker inspection
+    result: Three of four cases passed, with zero false positives and one false negative. The exact scoped policy, qwen3:4b selection and input reached the real worker. The false negative also occurred for plain text and another name.
+  - check: Bounded real-inference candidate experiments outside the repository
+    result: Separate compliance boolean passed 8/10 with two false positives; bounded basis before boolean passed 9/10 with one false negative; separate condition and exception flags passed 16/17 with one false negative, including 6/7 held-out cases. These helpers and schemas were not released or copied into product runtime.
+  - check: Final decision and evidence scope
+    result: The semantic bug remains unresolved. A domain-specific exception was still incorrectly applied to a different domain by the final candidate. Historical corpus scores and existing runtime remain unchanged; the guides disclose the limitation and the report contains outcomes only.

@@ -80,6 +80,10 @@ Input matches block before upstream execution. Output matches suppress delivery 
 
 The supplied patterns cover representative pickle/PyTorch loading, remote-shell and instruction-override strings. Quoted descriptions containing an exact dangerous pattern are conservatively blocked too. These are bounded text controls, not model-binary inspection or comprehensive exploit prevention.
 
+### Educational quotations
+
+The `instruction_override` signature also matches a quotation of “ignore all previous instructions”. If you intentionally allow such quotations, remove only that ID's entry from the active `config/signatures.json`, increment the feed's `version`, and verify the active version in **Activity** after reload. For a remote feed, update its configured source. Other signatures and semantic assessment remain active; other controls can still block the content. There is no education-aware quotation exception or per-signature scope. Global `signatures_enabled: false` disables all signatures, so it is not equivalent to removing one rule.
+
 ## Semantic controls
 
 The product policy uses **Laya with local Qwen3:4b**, a 30-second assessment timeout, threshold `0.7` and output scanning enabled. Requests first run local controls; content that reaches semantic inspection is assessed before forwarding, and generated output is assessed before delivery. Invalid responses, unavailable models, timeouts and provider failures fail closed. The completion model and assessment model are independently configured.
@@ -154,6 +158,26 @@ text_rules:
 ```
 
 This blocks a model request or response containing a word with `a`, including uppercase `A` and Unicode compatibility forms. NFKC normalization and optional casefold apply; accents stay distinct, so `ą` does not match `a`. Words consist of Unicode letters and combining marks. `contains` checks a literal substring of a scalar string; `equals` checks the entire scalar. A `word_contains` value must itself contain only letters or combining marks.
+
+### Ignoring invisible characters when matching
+
+`ignore_invisible_characters` defaults to `false`. Enable it explicitly to ignore exactly U+200B, U+200C, U+200D, U+2060 and U+FEFF before NFKC and casefold. This example matches both `confidential` and `confi\u200bdential`, where `\u200b` means one actual U+200B character, not six typed characters:
+
+```yaml
+text_rules:
+  - id: no-confidential
+    operator: contains
+    value: confidential
+    direction: both
+    target: model
+    action: block
+    case_sensitive: false
+    ignore_invisible_characters: true
+```
+
+In **Add content rule**, select **Ignore invisible formatting characters when matching**, add samples, choose **Test rule**, then review and activate. Preview identifies the matching mode used. The option applies to `contains`, `word_contains` and `equals`, on input and output within the selected scope. It does not remove whitespace, accents or other Unicode characters. `equals` still compares the whole value, including its spaces. Rules without the option retain their existing behavior.
+
+This is only a comparison view: forwarded content is unchanged, and matching content is blocked. The option does not change anonymization or redaction. Joiners can carry meaning in languages and emoji, so enabling it is a policy-owner decision. A rule value that becomes empty or whitespace-only after filtering is rejected. Separate messages and fields are never joined.
 
 Choose `input`, `output`, or `both`, and `model`, `tool`, or `all`. Model inputs include prompt, message content and stop strings; model outputs include generated text. Roles, model identifiers and structural JSON keys are excluded. Tool rules inspect recursive string values, excluding dictionary keys. Existing signature and privacy controls keep their broader inspection scope.
 

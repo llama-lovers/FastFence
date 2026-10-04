@@ -50,4 +50,11 @@ uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/protec
 
 Zmień stałe `RULE` i `CASES`, aby sprawdzić inną politykę. Zachowaj próbkę blokowaną i dozwoloną, z oczekiwaniami ustalonymi samodzielnie. Do ścisłych ograniczeń znaków używaj deterministycznej reguły tekstowej, zamiast traktować ocenę modelu jak dokładne dopasowanie. Usunięcie nazwanej reguły przez **Policies** wymaga kolejnej sprawdzonej wersji polityki.
 
+
+## Ograniczenie reguł złożonych {#compound-rule-limitation}
+
+Dla lokalnej oceny Qwen3:4b odtworzono przeoczenie reguły wymagającej **jednocześnie pełnego imienia i nazwiska oraz adresu email**: treść zawierająca oba elementy została dopuszczona, mimo że nazwana reguła poprawnie dotarła do Laya. Koniunkcja opisana językiem naturalnym nie zastępuje niezawodnie deterministycznej ochrony prywatności. Zachowaj odpowiednie kontrole PII i testuj osobno kombinacje, pojedyncze elementy oraz wyjątki. Poprawna ocena jednego przykładu nie potwierdza ogólnej skuteczności wykrywania.
+
+Ocena semantyczna może też zablokować treść dozwoloną przez regułę dosłowną, ponieważ warstwy egzekwują osobne ograniczenia. Gdy brak dopasowania dosłownego kończy się blokadą, sprawdź przyczynę decyzji oraz wyniki oceny wejścia i wyjścia.
+
 <!-- source: examples/docs/semantic_policy.py -->

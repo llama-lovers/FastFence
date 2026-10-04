@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 from typing import Any, Literal
 
-import httpx
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, StrictInt
 
 from fastfence.modules.control.domain.exceptions import ModelUnavailableError
 from fastfence.modules.control.domain.models import ModelMessage
+from fastfence.modules.control.persistence.model_http import ModelHTTP
 from fastfence.shared.settings.upstream_url import validate_openai_base_url
 
 MAX_RESPONSE_BYTES = 262_144
@@ -81,6 +80,10 @@ class OpenAIModels:
     def __init__(self, url: str, api_key: SecretStr | None = None) -> None:
         self.url = validate_openai_base_url(url)
         self._api_key = api_key
+        self._http = ModelHTTP()
+
+    async def aclose(self) -> None:
+        await self._http.aclose()
 
     async def complete(
         self,
@@ -108,34 +111,14 @@ class OpenAIModels:
                 "Bearer " + self._api_key.get_secret_value()
             )
         try:
-            async with asyncio.timeout(timeout_ms / 1000):
-                async with httpx.AsyncClient(
-                    timeout=timeout_ms / 1000,
-                    trust_env=False,
-                    follow_redirects=False,
-                ) as client:
-                    async with client.stream(
-                        "POST",
-                        self.url + "/chat/completions",
-                        json=payload,
-                        headers=headers,
-                    ) as response:
-                        response.raise_for_status()
-                        if (
-                            response.headers.get("content-encoding", "identity")
-                            != "identity"
-                        ):
-                            raise ValueError(
-                                "Encoded provider response refused"
-                            )
-                        body = bytearray()
-                        async for chunk in response.aiter_bytes(
-                            chunk_size=8192
-                        ):
-                            if len(body) + len(chunk) > MAX_RESPONSE_BYTES:
-                                raise ValueError("Provider response too large")
-                            body.extend(chunk)
-                        return decode_completion(bytes(body), model, max_tokens)
+            response = await self._http.post(
+                self.url + "/chat/completions",
+                json=payload,
+                headers=headers,
+                timeout_ms=timeout_ms,
+                max_response_bytes=MAX_RESPONSE_BYTES,
+            )
+            return decode_completion(response.content, model, max_tokens)
         except Exception:
             raise ModelUnavailableError(
                 "Model unavailable or invalid response"

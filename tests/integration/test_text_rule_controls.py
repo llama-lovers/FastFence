@@ -245,3 +245,54 @@ def test_both_direction_rules_block_before_or_after_execution_as_appropriate(
     assert outgoing["reason"] == "output_text_rule"
     assert outgoing["upstream_executed"]
     assert len(calls) == 1
+
+
+@pytest.mark.parametrize("direction", ["input", "output"])
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("target", ["model", "tool"])
+def test_invisible_rule_controls_real_gateway_boundary(
+    client, tokens, app, monkeypatch, direction, enabled, target
+):
+    obscured = "confi\u200bdential"
+    install(
+        client,
+        tokens,
+        rule(
+            operator="contains",
+            value="confidential",
+            direction=direction,
+            ignore_invisible_characters=enabled,
+            target=target,
+        ),
+    )
+    prompts = []
+
+    async def upstream(model, prompt, *args, **kwargs):
+        prompts.append(prompt)
+        return {"text": obscured}, 5
+
+    monkeypatch.setattr(app.state.engine.models, "complete", upstream)
+
+    async def tool_upstream(tool, arguments, identity):
+        prompts.append(arguments["query"])
+        return {"text": obscured}
+
+    monkeypatch.setattr(app.state.engine.tools, "call", tool_upstream)
+    result = (
+        complete(client, tokens, prompt=obscured)
+        if target == "model"
+        else client.post(
+            "/api/invoke",
+            headers=headers(tokens),
+            json={"tool": "knowledge.search", "arguments": {"query": obscured}},
+        )
+    ).json()
+    assert result["decision"] == ("blocked" if enabled else "allowed")
+    assert result["upstream_executed"] is (not enabled or direction == "output")
+    assert prompts == ([] if enabled and direction == "input" else [obscured])
+    if enabled:
+        assert result["reason"] == direction + "_text_rule"
+        assert result["output"] is None
+    else:
+        assert result["output"]["text"] == obscured
+    assert obscured not in json.dumps(app.state.engine.ledger.audit())

@@ -4,8 +4,6 @@ import math
 from pathlib import Path
 from typing import Any
 
-import httpx
-
 from fastfence.modules.control.domain.exceptions import ModelUnavailableError
 from fastfence.modules.control.domain.models import (
     Assessment,
@@ -13,6 +11,7 @@ from fastfence.modules.control.domain.models import (
     SemanticConfig,
 )
 from fastfence.modules.control.persistence.laya_semantic import LayaSemantic
+from fastfence.modules.control.persistence.model_http import ModelHTTP
 from fastfence.modules.control.persistence.ollama_response import (
     decode_completion,
 )
@@ -44,9 +43,13 @@ class SemanticScanner:
         self.ollama_url = ollama_url.rstrip("/")
         self.kev_url = kev_url.rstrip("/")
         self.laya = LayaSemantic(laya_root or Path.cwd(), ollama_url)
+        self._http = ModelHTTP()
 
     async def aclose(self) -> None:
-        await self.laya.aclose()
+        try:
+            await self.laya.aclose()
+        finally:
+            await self._http.aclose()
 
     async def assess(self, text: str, config: SemanticConfig) -> Assessment:
         try:
@@ -61,15 +64,12 @@ class SemanticScanner:
                         + len(config.policy_text.encode()),
                     ),
                 )
-            async with httpx.AsyncClient(
-                timeout=config.timeout_ms / 1000, trust_env=False
-            ) as client:
-                if config.provider == "ollama":
-                    score, tokens = await self._ollama(client, text, config)
-                elif config.provider == "kev":
-                    score, tokens = await self._kev(client, text, config)
-                else:
-                    raise ModelUnavailableError("Semantic scanning disabled")
+            if config.provider == "ollama":
+                score, tokens = await self._ollama(self._http, text, config)
+            elif config.provider == "kev":
+                score, tokens = await self._kev(self._http, text, config)
+            else:
+                raise ModelUnavailableError("Semantic scanning disabled")
             return Assessment(
                 score=score,
                 tokens=max(
@@ -85,10 +85,11 @@ class SemanticScanner:
             ) from None
 
     async def _ollama(
-        self, client: httpx.AsyncClient, text: str, config: SemanticConfig
+        self, client: ModelHTTP, text: str, config: SemanticConfig
     ) -> tuple[float, int]:
         response = await client.post(
             self.ollama_url + "/api/chat",
+            timeout_ms=config.timeout_ms,
             json={
                 "model": config.model,
                 "stream": False,
@@ -114,10 +115,11 @@ class SemanticScanner:
         return score, tokens
 
     async def _kev(
-        self, client: httpx.AsyncClient, text: str, config: SemanticConfig
+        self, client: ModelHTTP, text: str, config: SemanticConfig
     ) -> tuple[float, int]:
         response = await client.post(
             self.kev_url + "/v1/systemone",
+            timeout_ms=config.timeout_ms,
             json={
                 "model": config.model,
                 "state": text,
@@ -145,6 +147,10 @@ class SemanticScanner:
 class OllamaModels:
     def __init__(self, url: str) -> None:
         self.url = url.rstrip("/")
+        self._http = ModelHTTP()
+
+    async def aclose(self) -> None:
+        await self._http.aclose()
 
     async def complete(
         self,
@@ -162,35 +168,34 @@ class OllamaModels:
             }
             if stop is not None:
                 options["stop"] = stop
-            async with httpx.AsyncClient(
-                timeout=timeout_ms / 1000, trust_env=False
-            ) as client:
-                payload: dict[str, Any] = {
-                    "model": model,
-                    "stream": False,
-                    "think": False,
-                    "options": options,
-                }
-                if messages is None:
-                    payload["prompt"] = prompt
-                    endpoint = "/api/generate"
-                else:
-                    payload["messages"] = [
-                        message.model_dump() for message in messages
-                    ]
-                    endpoint = "/api/chat"
-                response = await client.post(self.url + endpoint, json=payload)
-                response.raise_for_status()
-                text, finish_reason, tokens = decode_completion(
-                    response.json(),
-                    chat=messages is not None,
-                    max_tokens=max_tokens,
-                )
-                return {
-                    "text": text,
-                    "model": model,
-                    "finish_reason": finish_reason,
-                }, tokens
+            payload: dict[str, Any] = {
+                "model": model,
+                "stream": False,
+                "think": False,
+                "options": options,
+            }
+            if messages is None:
+                payload["prompt"] = prompt
+                endpoint = "/api/generate"
+            else:
+                payload["messages"] = [
+                    message.model_dump() for message in messages
+                ]
+                endpoint = "/api/chat"
+            response = await self._http.post(
+                self.url + endpoint, json=payload, timeout_ms=timeout_ms
+            )
+            response.raise_for_status()
+            text, finish_reason, tokens = decode_completion(
+                response.json(),
+                chat=messages is not None,
+                max_tokens=max_tokens,
+            )
+            return {
+                "text": text,
+                "model": model,
+                "finish_reason": finish_reason,
+            }, tokens
         except Exception:
             raise ModelUnavailableError(
                 "Model unavailable or invalid response"

@@ -85,3 +85,24 @@ Publikuj przez przegląd przetestowanej reguły w panelu lub wersjonowaną aktua
 Budżety, retencja audytu i mechanizmy związane z ponownym użyciem danych są lokalne dla procesu. Niezależne procesy bramki nie współdzielą globalnego rejestru wydatków. Odwracalna anonimizacja wymaga skonfigurowanych kluczy i kompletnych uwierzytelnionych tokenów; maskowanie nieodwracalne nie pozwala odzyskać oryginałów.
 
 Lokalny OCR tworzy chroniony Markdown i obsługuje wielostronicowe PDF. Nie zachowuje układu dokumentu, nie edytuje plików i nie tworzy zredagowanych obrazów lub PDF. Aktualne działanie i powtarzalne testy opisują [architektura](architecture.md) oraz [testy ręczne](manual-testing.md).
+
+## Pojemność rejestru tożsamości
+
+Lokalny rejestr domyślnie przyjmuje **4096 tożsamości łącznie z administratorami** oraz plik/JSON o rozmiarze do **1 MiB**. Limity ograniczają pamięć przy starcie; nie oznaczają liczby równoczesnych rozmów. Uwierzytelnianie korzysta z indeksu skrótów poświadczeń w pamięci.
+
+Dla przykładowych 5000 użytkowników oraz administratorów ustaw w `.env` instalacji i uruchom bramkę ponownie:
+
+```dotenv
+FASTFENCE_IDENTITY_MAX_RECORDS=8192
+FASTFENCE_IDENTITY_MAX_SOURCE_BYTES=4194304
+```
+
+Rekordy tożsamości trzeba przygotować osobno. Te ustawienia nie tworzą kont. Górne granice to 65 536 rekordów oraz 64 MiB; oba limity obowiązują niezależnie. Duplikaty identyfikatorów i skrótów poświadczeń są odrzucane. Budżety i audyt nadal należą do pojedynczego procesu; większy rejestr nie synchronizuje stanu między workerami i nie zwiększa wydajności inferencji Laya.
+
+## Limity przyjmowania żądań
+
+Każdy adapter HTTP modelu korzysta z puli do **32 połączeń** i przyjmuje najwyżej **128 aktywnych lub oczekujących żądań**. Czekanie na połączenie zużywa dotychczasowy limit czasu żądania. Cookies upstreamu nie są przechowywane ani przekazywane między wywołaniami.
+
+Lokalny worker Laya wykonuje **jedną ocenę naraz**, z limitem **32 ocen aktywnych lub oczekujących**. Czas w kolejce wlicza się w timeout semantyczny. Przekroczenie limitów kończy się odmową dalszego przetwarzania; zwiększenie liczby kont nie zmienia tych granic. Chroniona rozmowa może wymagać oceny wejścia, generacji odpowiedzi oraz oceny wyjścia, więc liczba kont nie wyznacza przepustowości.
+
+Nie deklarujemy obsługi nagłego skoku do 1000 równoległych rozmów na jednym lokalnym modelu. Mierz pełną ścieżkę aplikacja/bramka/model dla swoich rozmiarów promptów, długości odpowiedzi i proporcji żądań dopuszczanych oraz blokowanych. [Benchmarki](benchmarks.md) oddzielają kontrole lokalne od inferencji; nie są gwarancją czasu odpowiedzi usługi wielu użytkowników.

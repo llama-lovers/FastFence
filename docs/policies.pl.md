@@ -80,6 +80,10 @@ Dopasowanie na wejściu blokuje przed wykonaniem operacji. Dopasowanie na wyjśc
 
 Wzorce obejmują przykładowe ciągi związane z ładowaniem pickle/PyTorch, zdalną powłoką i nadpisywaniem instrukcji. Cytowane opisy zawierające dokładny niebezpieczny wzorzec także bywają blokowane zachowawczo. To ograniczone kontrole tekstowe, a nie analiza binarnych modeli lub pełna ochrona przed exploitami.
 
+### Cytaty edukacyjne
+
+Sygnatura `instruction_override` dopasowuje także cytat „ignore all previous instructions”. Jeśli świadomie dopuszczasz takie cytaty, usuń wyłącznie wpis z tym ID z aktywnego `config/signatures.json`, zwiększ `version` całego feedu i sprawdź aktywną wersję w **Activity** po przeładowaniu. Dla zewnętrznego feedu zmień skonfigurowane źródło. Pozostałe sygnatury i ocena semantyczna pozostają aktywne; inne kontrole nadal mogą zablokować tekst. Nie istnieje wyjątek rozpoznający sam kontekst edukacyjny ani zakres per sygnatura. Globalne `signatures_enabled: false` wyłącza wszystkie sygnatury, więc nie jest równoważne usunięciu jednej reguły.
+
 ## Kontrole semantyczne
 
 Polityka produktu używa **Laya z lokalnym Qwen3:4b**, 30-sekundowym limitem oceny, progiem `0.7` i włączoną kontrolą wyjścia. Najpierw wykonywane są kontrole lokalne. Treść docierająca do oceny semantycznej jest analizowana przed przekazaniem, a odpowiedź — przed dostarczeniem. Błędna odpowiedź, brak modelu, przekroczenie czasu lub awaria dostawcy blokuje żądanie. Model odpowiedzi i model oceniający konfiguruje się niezależnie.
@@ -154,6 +158,26 @@ text_rules:
 ```
 
 Reguła blokuje wejście lub odpowiedź modelu zawierającą słowo z `a`, również wielkim `A` i zgodnymi formami Unicode. Stosuje NFKC i opcjonalnie casefold; znaki diakrytyczne pozostają różne, więc `ą` nie pasuje do `a`. Słowa składają się z liter Unicode i znaków łączących. `contains` sprawdza literalny podciąg jednej wartości tekstowej, a `equals` całą wartość. Wartość `word_contains` może zawierać tylko litery i znaki łączące.
+
+### Pomijanie niewidocznych znaków przy dopasowaniu
+
+Opcja `ignore_invisible_characters` domyślnie ma wartość `false`. Włącz ją jawnie, aby dopasowanie ignorowało dokładnie U+200B, U+200C, U+200D, U+2060 i U+FEFF przed NFKC i casefold. Przykład wykrywa zarówno `confidential`, jak i `confi\u200bdential`, gdzie `\u200b` oznacza jeden rzeczywisty znak U+200B, a nie sześć wpisanych znaków:
+
+```yaml
+text_rules:
+  - id: no-confidential
+    operator: contains
+    value: confidential
+    direction: both
+    target: model
+    action: block
+    case_sensitive: false
+    ignore_invisible_characters: true
+```
+
+W edytorze **Add content rule** zaznacz **Ignore invisible formatting characters when matching**, dodaj próbki, wybierz **Test rule**, a następnie przejrzyj i aktywuj zmianę. Wynik preview podaje użyty tryb dopasowania. Opcja dotyczy `contains`, `word_contains` i `equals`, na wejściu i wyjściu w wybranym zakresie. Nie usuwa spacji, znaków diakrytycznych ani innych znaków Unicode. `equals` nadal porównuje całą wartość, w tym jej spacje. Zwykłe reguły bez tej opcji zachowują dotychczasowe działanie.
+
+To wyłącznie widok do porównania: przekazywany tekst pozostaje niezmieniony, a pasujące treści są blokowane. Opcja nie zmienia anonimizacji ani redakcji. Joinery mogą mieć znaczenie w językach i emoji, dlatego włączenie wymaga decyzji właściciela polityki. Wartość reguły, która po oczyszczeniu pozostaje pusta lub zawiera tylko białe znaki, jest odrzucana. Nie łączymy oddzielnych wiadomości ani pól.
 
 Wybierz `input`, `output` lub `both` oraz `model`, `tool` lub `all`. Wejście modelu obejmuje prompt, treści wiadomości i ciągi stop; wyjście obejmuje wygenerowany tekst. Role, identyfikatory modeli i strukturalne klucze JSON są wyłączone. Reguły narzędzi sprawdzają rekurencyjnie wartości tekstowe, bez kluczy słowników. Sygnatury i prywatność zachowują szerszy zakres kontroli.
 

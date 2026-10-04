@@ -1,0 +1,39 @@
+id: FF-131
+title: Validate load-report fixes against installed distributions before release
+status: implemented
+problem: Independent local chat tests found connection churn, bounded account capacity, invisible-character literal nonmatches and false-negative semantic conjunction decisions in the public package.
+scope:
+  - Release verified authentication indexing, configurable account capacity, pooled model HTTP and opt-in invisible-character matching.
+  - Evaluate explicit semantic policy compliance separately from the base security assessment before claiming a semantic fix.
+  - Repeat selected external chat and load scenarios using installed distributions outside the checkout.
+constraints:
+  - Preserve all previous release tags and artifacts.
+  - Do not reinterpret overload failures as successful security blocks.
+  - Keep literal matching compatibility and explicit Unicode opt-in.
+  - Do not infer support for 1000 simultaneous model conversations from account count or microbenchmarks.
+  - Do not claim all semantic policies are reliable from a few samples.
+change_paths:
+  - .secrets.baseline
+  - _version.py
+  - docs/benchmarks.md
+  - docs/benchmarks.pl.md
+  - evaluation/results/installed-load-comparison-1.0.3-1.0.4.json
+acceptance:
+  - Version 1.0.4 builds and passes configured release checks, subject to completion of its component specifications.
+  - Installed-package evidence records actual import provenance, exact workloads and failures without source-checkout imports.
+validation:
+  - command: uv run --locked pytest -q --tb=short
+    expected: All regression tests pass.
+  - command: uv run --locked pre-commit run --all-files
+    expected: All quality gates pass.
+evidence:
+  - check: Independent operator report
+    result: Inspected PRODUCT_RESULTS.txt and its actual drivers read-only. Reports concern 1.0.2; public 1.0.3 still reproduces the semantic conjunction false negative. Candidate verification is in progress; no capacity or semantic-fix claim is made.
+  - check: Selected installed-package full HTTP load comparison
+    result: Measured six 4000-request runs with identical 2000-user, 64-rule fixtures; installed versions and import origins verified. Candidate concurrency 50 passed 4000/4000; concurrency 250 gave 3956/4000 and 4000/4000 on repeat. Public 1.0.3 concurrency 250 gave 3999/4000 and 3994/4000. All outcomes and transport failures are retained without claiming high-concurrency readiness.
+  - check: Reviewed secret-scanner findings
+    result: Exact file checksums and the tested wheel SHA-256 in the public load report were inspected and recorded as false positives. No scanner filters or global exclusions were added.
+  - check: Complete source regression suite
+    result: 1315 tests passed with 92.78 percent coverage. Configured quality gates passed except reviewed public report hash false positives, which were explicitly baselined before the final rerun.
+  - check: Final release gates and installed candidate chat acceptance
+    result: All configured pre-commit hooks passed. Independent chat lab passed 36/36 controlled-provider tests and 13/13 actual Ollama/Laya scenarios, including concurrent requests, against the exact installed 1.0.4 wheel outside the checkout. All 141 packaged runtime/helper files matched that wheel; the semantic conjunction limitation is explicitly not fixed.

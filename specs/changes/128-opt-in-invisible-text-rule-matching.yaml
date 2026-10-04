@@ -1,0 +1,49 @@
+id: FF-128
+title: Explicit invisible-character matching for local blocking text rules
+status: verified
+problem: A literal contains rule preserves zero-width formatting characters and therefore does not match an interrupted spelling unless the operator selects normalization explicitly.
+scope:
+  - Add a strict boolean ignore_invisible_characters option to TextRule, default false.
+  - Ignore exactly U+200B, U+200C, U+200D, U+2060 and U+FEFF in opted-in comparison views, before existing NFKC and casefold.
+  - Expose the option in the content-rule editor, validated authoring schema, preview results and English and Polish policy documentation.
+  - Document the existing narrow feed update for intentionally allowing educational quotations without inventing a semantic exception.
+constraints:
+  - No payload mutation, anonymization or redaction changes, inference, database or additional request I/O.
+  - Preserve default matching, whitespace and accent semantics, direction and target scopes and structural field exclusions.
+  - Reject non-boolean options and rule values that become empty or whitespace-only.
+  - Prepare at most four comparison views per scalar regardless of rule count; never join distinct scalar values.
+change_paths:
+  - src/fastfence/modules/control/domain/text_rules.py
+  - src/fastfence/app/interfaces/http/web/index.html
+  - src/fastfence/app/interfaces/http/web/rules.js
+  - tests/unit/test_text_rules.py
+  - tests/unit/test_text_rule_invisible_characters.py
+  - tests/integration/test_text_rule_controls.py
+  - tests/integration/test_rule_authoring.py
+  - tests/integration/test_policy_management_ui.py
+  - docs/policies.md
+  - docs/policies.pl.md
+acceptance:
+  - Default rules preserve invisible characters; opted-in rules match all five documented characters on input and output for models and tools.
+  - Matching blocks before input execution or suppresses output after execution, without rewriting forwarded content or leaking matched text into audit.
+  - Preview and runtime share the validated matcher and schema; the editor preserves saved opt-in values and identifies the comparison mode.
+  - Other Unicode characters, whitespace, accents and case-sensitive restrictions retain their existing semantics.
+  - Existing feed controls are described accurately without changing operator policies or promising an education-aware exemption.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_text_rules.py tests/unit/test_text_rule_invisible_characters.py tests/integration/test_text_rule_controls.py tests/integration/test_rule_authoring.py tests/integration/test_policy_management_ui.py -q
+    expected: Opt-in matching, boundary enforcement, schema and UI regressions pass.
+  - command: uv run basedpyright src
+    expected: No type errors.
+  - command: uv run mkdocs build --strict
+    expected: English and Polish operator documentation builds successfully.
+evidence:
+  - command: Focused unit, HTTP integration and browser lifecycle regression suite
+    result: 96 passed, including five supported characters, strict boolean validation, four-view bound, model/tool input/output enforcement, unchanged allowed payloads, audit confidentiality and preview schema.
+  - check: Actual Chromium with synthetic API fixture and real TextRule preview matcher
+    result: Default NO MATCH changed to BLOCK only after enabling the checkbox; changing the checkbox invalidated reviewed activation; activation and edit preserved the option; 390px viewport and page-error checks passed. No model calls or operator state changes.
+  - command: uv run basedpyright src; uv run lint-imports; uv run mkdocs build --strict
+    result: Zero type errors, all 16 architectural contracts kept and strict bilingual documentation build passed. Ruff, diff whitespace and English/Polish fenced-code parity passed.
+  - check: Authoring contract
+    result: Management schema derives directly from TextRule and exposes the strict boolean with false default and explanatory description. The Laya constrained-schema helper retains that field; no duplicated authoring model was introduced.
+  - check: Installed candidate wheel with real HTTP and unchanged external chat fixtures
+    result: Exact wheel and site-packages provenance verified. Default contains profile passed 7/8 with the known literal zero-width nonmatch; opting in solely on the copied contains rule passed 8/8, blocking the invisible-character input before upstream execution. Semantic stages remained not_run and sibling fixture hashes were unchanged.

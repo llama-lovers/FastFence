@@ -2,6 +2,23 @@
 
 Mierz FastFence na sprzęcie i z polityką, których zamierzasz używać. Lokalne sprawdzenie reguły tekstowej, pełne wywołanie bramki i żądanie oceniane przez Layę wykonują różną pracę. Wyniki poniżej wskazują, którą ścieżkę zmierzono.
 
+## Pełna ścieżka czatu HTTP — 1.0.3 i kandydat 1.0.4
+
+Wybrane scenariusze niezależnego laboratorium powtórzono dla 2000 tożsamości, 10 tenantów, 64 reguł dosłownych i dwóch żądań na tożsamość. Model zastępował serwer HTTP z opóźnieniem 20 ms; Laya była wyłączona. Każda próba oczekiwała 2800 dozwolonych odpowiedzi i 1200 blokad. Sprawdzono wersje paczek zainstalowanych poza repozytorium; 1.0.4 pochodziła ze zbudowanego wheel kandydata, jeszcze przed publikacją w PyPI.
+
+| Paczka | Równoległość | Próba | Poprawne / żądania | p95 (ms) | Żądania/s |
+| --- | ---: | --- | ---: | ---: | ---: |
+| 1.0.3 | 50 | initial | 3998/4000 | 842.7 | 160.5 |
+| 1.0.3 | 250 | initial | 3999/4000 | 6949.8 | 65.0 |
+| 1.0.4 | 50 | initial | 4000/4000 | 752.7 | 182.6 |
+| 1.0.4 | 250 | initial | 3956/4000 | 5616.0 | 150.2 |
+| 1.0.4 | 250 | repeat | 4000/4000 | 6190.8 | 122.8 |
+| 1.0.3 | 250 | repeat | 3994/4000 | 7047.0 | 61.0 |
+
+Pokazujemy wszystkie przebiegi, również nieudaną próbę kandydata. Miała 44 błędy: 43 błędy połączenia generatora z aplikacją oraz jedno 502 aplikacji; powtórka przeszła. Wersja bazowa także miała błędy transportu. Ta zmienność nie pozwala uznać dużej współbieżności za naprawioną. Są to wyniki całej ścieżki, a nie pomiar narzutu silnika polityk.
+
+Aplikacja ma pulę 100 połączeń do bramki. Czekanie w tej puli wlicza się do p95, natomiast czekanie na slot współbieżności generatora jest pominięte. Wszystkie procesy działały na tym samym Apple M3 Pro z 18 GiB RAM; limitów gniazd systemowych nie zmieniano. Porównanie nie obejmuje prawdziwej inferencji, długich odpowiedzi ani 1000 równoległych rozmów. [Wszystkie przebiegi i ograniczenia](https://github.com/llama-lovers/FastFence/blob/v1.0.4/evaluation/results/installed-load-comparison-1.0.3-1.0.4.json).
+
 ## OFF / deterministyczne / semantyczne — paczka 1.0.2
 
 Rzeczywiste pomiary z publicznej paczki PyPI 1.0.2, wykonane 4 października 2026 na Apple M3 Pro. Wszystkie wiersze używają tej samej krótkiej syntetycznej treści i odpowiedzi narzędzia, współbieżność 1. OFF i kontrole deterministyczne zmierzono razem; Layę w osobnym przebiegu na tej samej maszynie.

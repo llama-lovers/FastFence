@@ -1,0 +1,371 @@
+{
+  "evaluation": "selected-independent-chat-load",
+  "hardware": "Apple M3 Pro, 11 logical CPUs, 18 GiB RAM, macOS 27.0.1; one local generator, application, gateway and controlled model",
+  "workload": {
+    "users": 2000,
+    "tenants": 10,
+    "rules": 64,
+    "turns": 2,
+    "requests_per_run": 4000,
+    "expected_allowed": 2800,
+    "expected_blocked": 1200,
+    "model_response_delay_ms": 20,
+    "max_output_tokens": 16,
+    "semantic_enabled": false,
+    "transport": "real loopback HTTP",
+    "frontend_gateway_pool_connections": 100
+  },
+  "execution_order": [
+    "1.0.3/initial",
+    "1.0.4/initial",
+    "1.0.4/repeat",
+    "1.0.3/repeat"
+  ],
+  "reports": [
+    {
+      "package_version": "1.0.3",
+      "installation": "public_pypi",
+      "phase": "initial",
+      "date_utc": "2026-10-04T01:19:13.998781+00:00",
+      "installed_import_verified": true,
+      "wheel_sha256": null,
+      "fixture_sha256": {
+        "app.py": "ebddcd83e7ec602aa2073ea5def686d8e79d321c2f3788c83db762f269eccdcb",
+        "demo.py": "b4146a58fb9d0f80d82285a373f130325a56423ea4067f9b4eecbdf29295d3ab",
+        "load_test.py": "61b33c15952a9a1ac065242358752c79777eee022d639c969e534ae7604659c4",
+        "product_scenarios.py": "4373827e00231bf3b43f36c273b09b59c36db12db1b939d1f5315e4a23742921"
+      },
+      "driver_exit_code": 1,
+      "runs": [
+        {
+          "users": 2000,
+          "concurrency": 50,
+          "turns": 2,
+          "requests": 4000,
+          "correct": 3998,
+          "elapsed_seconds": 24.92,
+          "requests_per_second": 160.5,
+          "p50_ms": 226.0,
+          "p95_ms": 842.7,
+          "p99_ms": 1224.5,
+          "http": {
+            "403": 1199,
+            "200": 2799,
+            "502": 1,
+            "0": 1
+          },
+          "reasons": {
+            "input_text_rule": 400,
+            "attack_signature": 399,
+            "input_sensitive_data": 400,
+            "controls_passed": 2799,
+            "transport_error": 1,
+            "ReadError": 1
+          },
+          "error_examples": [
+            {
+              "reason": "ReadError",
+              "error_detail": "",
+              "error_cause": "ReadError(BrokenResourceError())"
+            }
+          ],
+          "padding_chars": 0,
+          "rules": 64,
+          "gateway_stats": {
+            "peak_rss_mb": 172.0,
+            "retained_audit": 3998
+          },
+          "model_stats_cumulative": {
+            "started": 2799,
+            "completed": 2799,
+            "active": 0,
+            "max_active": 36
+          }
+        },
+        {
+          "users": 2000,
+          "concurrency": 250,
+          "turns": 2,
+          "requests": 4000,
+          "correct": 3999,
+          "elapsed_seconds": 61.52,
+          "requests_per_second": 65.0,
+          "p50_ms": 3740.7,
+          "p95_ms": 6949.8,
+          "p99_ms": 7836.4,
+          "http": {
+            "403": 1200,
+            "200": 2799,
+            "502": 1
+          },
+          "reasons": {
+            "input_text_rule": 400,
+            "attack_signature": 400,
+            "input_sensitive_data": 400,
+            "controls_passed": 2799,
+            "transport_error": 1
+          },
+          "error_examples": [],
+          "padding_chars": 0,
+          "rules": 64,
+          "gateway_stats": {
+            "peak_rss_mb": 205.5,
+            "retained_audit": 7997
+          },
+          "model_stats_cumulative": {
+            "started": 5598,
+            "completed": 5598,
+            "active": 0,
+            "max_active": 58
+          }
+        }
+      ]
+    },
+    {
+      "package_version": "1.0.4",
+      "installation": "candidate_wheel",
+      "phase": "initial",
+      "date_utc": "2026-10-04T01:21:43.472273+00:00",
+      "installed_import_verified": true,
+      "wheel_sha256": "f8d6e72d4e08b69aed3f8fc77fbeb0c38af23a85cb67cc0400d79e9ab4840c1e",
+      "fixture_sha256": {
+        "app.py": "ebddcd83e7ec602aa2073ea5def686d8e79d321c2f3788c83db762f269eccdcb",
+        "demo.py": "b4146a58fb9d0f80d82285a373f130325a56423ea4067f9b4eecbdf29295d3ab",
+        "load_test.py": "61b33c15952a9a1ac065242358752c79777eee022d639c969e534ae7604659c4",
+        "product_scenarios.py": "4373827e00231bf3b43f36c273b09b59c36db12db1b939d1f5315e4a23742921"
+      },
+      "driver_exit_code": 1,
+      "runs": [
+        {
+          "users": 2000,
+          "concurrency": 50,
+          "turns": 2,
+          "requests": 4000,
+          "correct": 4000,
+          "elapsed_seconds": 21.91,
+          "requests_per_second": 182.6,
+          "p50_ms": 195.1,
+          "p95_ms": 752.7,
+          "p99_ms": 1204.8,
+          "http": {
+            "403": 1200,
+            "200": 2800
+          },
+          "reasons": {
+            "input_text_rule": 400,
+            "attack_signature": 400,
+            "input_sensitive_data": 400,
+            "controls_passed": 2800
+          },
+          "error_examples": [],
+          "padding_chars": 0,
+          "rules": 64,
+          "gateway_stats": {
+            "peak_rss_mb": 132.1,
+            "retained_audit": 4000
+          },
+          "model_stats_cumulative": {
+            "started": 2800,
+            "completed": 2800,
+            "active": 0,
+            "max_active": 32
+          }
+        },
+        {
+          "users": 2000,
+          "concurrency": 250,
+          "turns": 2,
+          "requests": 4000,
+          "correct": 3956,
+          "elapsed_seconds": 26.63,
+          "requests_per_second": 150.2,
+          "p50_ms": 906.6,
+          "p95_ms": 5616.0,
+          "p99_ms": 7411.0,
+          "http": {
+            "403": 1186,
+            "200": 2770,
+            "0": 43,
+            "502": 1
+          },
+          "reasons": {
+            "input_text_rule": 395,
+            "attack_signature": 397,
+            "input_sensitive_data": 394,
+            "controls_passed": 2770,
+            "ConnectError": 43,
+            "transport_error": 1
+          },
+          "error_examples": [
+            {
+              "reason": "ConnectError",
+              "error_detail": "All connection attempts failed",
+              "error_cause": "ConnectError(OSError('All connection attempts failed'))"
+            },
+            {
+              "reason": "ConnectError",
+              "error_detail": "All connection attempts failed",
+              "error_cause": "ConnectError(OSError('All connection attempts failed'))"
+            },
+            {
+              "reason": "ConnectError",
+              "error_detail": "All connection attempts failed",
+              "error_cause": "ConnectError(OSError('All connection attempts failed'))"
+            },
+            {
+              "reason": "ConnectError",
+              "error_detail": "All connection attempts failed",
+              "error_cause": "ConnectError(OSError('All connection attempts failed'))"
+            },
+            {
+              "reason": "ConnectError",
+              "error_detail": "All connection attempts failed",
+              "error_cause": "ConnectError(OSError('All connection attempts failed'))"
+            }
+          ],
+          "padding_chars": 0,
+          "rules": 64,
+          "gateway_stats": {
+            "peak_rss_mb": 136.8,
+            "retained_audit": 7956
+          },
+          "model_stats_cumulative": {
+            "started": 5570,
+            "completed": 5570,
+            "active": 0,
+            "max_active": 32
+          }
+        }
+      ]
+    },
+    {
+      "package_version": "1.0.4",
+      "installation": "candidate_wheel",
+      "phase": "repeat",
+      "date_utc": "2026-10-04T01:23:31.096773+00:00",
+      "installed_import_verified": true,
+      "wheel_sha256": "f8d6e72d4e08b69aed3f8fc77fbeb0c38af23a85cb67cc0400d79e9ab4840c1e",
+      "fixture_sha256": {
+        "app.py": "ebddcd83e7ec602aa2073ea5def686d8e79d321c2f3788c83db762f269eccdcb",
+        "demo.py": "b4146a58fb9d0f80d82285a373f130325a56423ea4067f9b4eecbdf29295d3ab",
+        "load_test.py": "61b33c15952a9a1ac065242358752c79777eee022d639c969e534ae7604659c4",
+        "product_scenarios.py": "4373827e00231bf3b43f36c273b09b59c36db12db1b939d1f5315e4a23742921"
+      },
+      "driver_exit_code": 0,
+      "runs": [
+        {
+          "users": 2000,
+          "concurrency": 250,
+          "turns": 2,
+          "requests": 4000,
+          "correct": 4000,
+          "elapsed_seconds": 32.57,
+          "requests_per_second": 122.8,
+          "p50_ms": 1168.6,
+          "p95_ms": 6190.8,
+          "p99_ms": 9594.2,
+          "http": {
+            "403": 1200,
+            "200": 2800
+          },
+          "reasons": {
+            "input_text_rule": 400,
+            "attack_signature": 400,
+            "input_sensitive_data": 400,
+            "controls_passed": 2800
+          },
+          "error_examples": [],
+          "padding_chars": 0,
+          "rules": 64,
+          "gateway_stats": {
+            "peak_rss_mb": 128.0,
+            "retained_audit": 4000
+          },
+          "model_stats_cumulative": {
+            "started": 2800,
+            "completed": 2800,
+            "active": 0,
+            "max_active": 29
+          }
+        }
+      ]
+    },
+    {
+      "package_version": "1.0.3",
+      "installation": "public_pypi",
+      "phase": "repeat",
+      "date_utc": "2026-10-04T01:24:43.206478+00:00",
+      "installed_import_verified": true,
+      "wheel_sha256": null,
+      "fixture_sha256": {
+        "app.py": "ebddcd83e7ec602aa2073ea5def686d8e79d321c2f3788c83db762f269eccdcb",
+        "demo.py": "b4146a58fb9d0f80d82285a373f130325a56423ea4067f9b4eecbdf29295d3ab",
+        "load_test.py": "61b33c15952a9a1ac065242358752c79777eee022d639c969e534ae7604659c4",
+        "product_scenarios.py": "4373827e00231bf3b43f36c273b09b59c36db12db1b939d1f5315e4a23742921"
+      },
+      "driver_exit_code": 1,
+      "runs": [
+        {
+          "users": 2000,
+          "concurrency": 250,
+          "turns": 2,
+          "requests": 4000,
+          "correct": 3994,
+          "elapsed_seconds": 65.55,
+          "requests_per_second": 61.0,
+          "p50_ms": 4103.2,
+          "p95_ms": 7047.0,
+          "p99_ms": 7805.4,
+          "http": {
+            "403": 1200,
+            "200": 2794,
+            "0": 2,
+            "502": 4
+          },
+          "reasons": {
+            "input_text_rule": 400,
+            "attack_signature": 400,
+            "input_sensitive_data": 400,
+            "controls_passed": 2794,
+            "ReadError": 2,
+            "transport_error": 4
+          },
+          "error_examples": [
+            {
+              "reason": "ReadError",
+              "error_detail": "",
+              "error_cause": "ReadError(BrokenResourceError())"
+            },
+            {
+              "reason": "ReadError",
+              "error_detail": "",
+              "error_cause": "ReadError(BrokenResourceError())"
+            }
+          ],
+          "padding_chars": 0,
+          "rules": 64,
+          "gateway_stats": {
+            "peak_rss_mb": 215.0,
+            "retained_audit": 3994
+          },
+          "model_stats_cumulative": {
+            "started": 2794,
+            "completed": 2794,
+            "active": 0,
+            "max_active": 70
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Candidate 1.0.4 measurements use the identified built wheel, not a published package at measurement time.",
+    "The sibling driver hardcodes version 1.0.2; actual installed versions and site-packages provenance were independently verified.",
+    "Generator, frontend, gateway and controlled model share one machine. Kernel socket limits were not changed.",
+    "p95 includes the frontend HTTP connection-pool wait, but excludes waiting for the generator semaphore.",
+    "Counts include expected blocks. Transport failures are failures, not successful security blocks.",
+    "The 250-concurrency runs vary: the first candidate run had 43 generator ConnectErrors and one frontend 502, while its repeat had no failures. Do not select only the passing repeat.",
+    "This is a local paired diagnostic, not an isolated throughput benchmark, statistical latency estimate or 1000-conversation capacity claim.",
+    "No semantic model or real chat generation is included; compound-policy assessment remains an unresolved limitation."
+  ]
+}

@@ -6,7 +6,8 @@ let ruleBusy = false;
 function textRuleDraft() {
   return {id:$('textRuleId').value, operator:$('textRuleOperator').value,
     value:$('textRuleValue').value, direction:$('textRuleDirection').value,
-    target:$('textRuleTarget').value, action:'block', case_sensitive:$('textRuleCase').checked};
+    target:$('textRuleTarget').value, action:'block', case_sensitive:$('textRuleCase').checked,
+    ignore_invisible_characters:$('textRuleInvisible').checked};
 }
 function invalidateRulePreview() {
   previewedRule = null;
@@ -37,6 +38,7 @@ async function openTextRule(existing = null) {
     const rule = existing || {id:'',operator:'contains',value:'',direction:'input',target:'model',case_sensitive:false};
     for (const [field, key] of [['textRuleId','id'],['textRuleOperator','operator'],['textRuleValue','value'],['textRuleDirection','direction'],['textRuleTarget','target']]) $(field).value = rule[key];
     $('textRuleCase').checked = rule.case_sensitive;
+    $('textRuleInvisible').checked = rule.ignore_invisible_characters === true;
     $('textRuleId').disabled = !!existing;
     $('textRuleSamples').value = '';
     $('textRuleTitle').textContent = existing ? 'Edit text rule' : 'Add text rule';
@@ -63,7 +65,7 @@ $('previewTextRule').onclick = async () => {
     const result = await api('/api/admin/rules/preview', owner, {rule:draft, samples:sampleText.split('\n')});
     if (admin !== owner || JSON.stringify(textRuleDraft()) !== fingerprint || $('textRuleSamples').value !== sampleText) throw Error('The identity or draft changed. Test it again.');
     previewedRule = result.rule;
-    $('textRuleResults').replaceChildren(...result.matches.map((matches, index) => el('div', 'Sample ' + (index + 1) + ': ' + (matches ? 'BLOCK' : 'NO MATCH'), matches ? 'red' : 'green')));
+    $('textRuleResults').replaceChildren(el('p', result.rule.ignore_invisible_characters ? 'Matching ignores U+200B, U+200C, U+200D, U+2060 and U+FEFF. Original content is unchanged.' : 'Matching preserves invisible characters. Original content is unchanged.'), ...result.matches.map((matches, index) => el('div', 'Sample ' + (index + 1) + ': ' + (matches ? 'BLOCK' : 'NO MATCH'), matches ? 'red' : 'green')));
     $('textRuleBefore').textContent = ruleOriginalId ? JSON.stringify(ruleBase.text_rules.find(item => item.id === ruleOriginalId), null, 2) : 'New rule';
     $('textRuleAfter').textContent = JSON.stringify(result.rule, null, 2);
     ruleMessage('Test complete. Review the match results and exact change, then confirm. This tests this rule only; other controls still apply.');

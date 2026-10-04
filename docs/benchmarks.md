@@ -2,6 +2,23 @@
 
 Measure FastFence on the hardware and policy you intend to use. A local text-rule lookup, a complete gateway invocation and a request assessed by Laya measure different work. The results below identify which path was timed.
 
+## Complete HTTP chat path — 1.0.3 and candidate 1.0.4
+
+A focused rerun of an independent operator's chat laboratory used 2000 identities, 10 tenants, 64 literal rules and two requests per identity. The model was an HTTP fixture delayed by 20 ms; Laya was disabled. Each run expected 2800 allowed responses and 1200 blocks. Versions were verified from installed packages outside the checkout; 1.0.4 was the built candidate wheel, not yet a public package when measured.
+
+| Package | Concurrency | Run | Correct / requests | p95 (ms) | Requests/s |
+| --- | ---: | --- | ---: | ---: | ---: |
+| 1.0.3 | 50 | initial | 3998/4000 | 842.7 | 160.5 |
+| 1.0.3 | 250 | initial | 3999/4000 | 6949.8 | 65.0 |
+| 1.0.4 | 50 | initial | 4000/4000 | 752.7 | 182.6 |
+| 1.0.4 | 250 | initial | 3956/4000 | 5616.0 | 150.2 |
+| 1.0.4 | 250 | repeat | 4000/4000 | 6190.8 | 122.8 |
+| 1.0.3 | 250 | repeat | 3994/4000 | 7047.0 | 61.0 |
+
+All runs are shown, including the failing candidate run. Its 44 failures were 43 connection errors from the generator to the frontend and one frontend 502; the repeat passed. The public baseline also had transport failures. This variability prevents a claim that high concurrency is solved. These are observed failures along the complete path, not a measurement of policy-engine overhead.
+
+The application uses a 100-connection pool to the gateway. Queueing there is included in p95; waiting for the generator's concurrency slot is excluded. All processes shared the same Apple M3 Pro/18 GiB machine, and kernel socket limits were not changed. There was no real inference, long-output workload or 1000-concurrent-conversation test in this comparison. [All measured runs and limitations](https://github.com/llama-lovers/FastFence/blob/v1.0.4/evaluation/results/installed-load-comparison-1.0.3-1.0.4.json).
+
 ## OFF / deterministic / semantic — package 1.0.2
 
 Actual public PyPI package 1.0.2 measurements, recorded on 4 October 2026 on an Apple M3 Pro. Every row uses the same short synthetic input and tool response at concurrency 1. OFF and deterministic controls were measured together; Laya ran separately on the same machine.

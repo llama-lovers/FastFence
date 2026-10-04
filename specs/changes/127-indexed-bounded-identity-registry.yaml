@@ -1,0 +1,35 @@
+id: FF-127
+title: Index credential digests and configure bounded startup identity capacity
+status: implemented
+problem: Every authentication scans all identity hashes, and the fixed 4096-record bound prevents an operator from provisioning 5000 accounts even when request concurrency remains low.
+scope:
+  - Resolve SHA-256 credential digests through an in-memory index built at startup.
+  - Expose separate startup record and source-byte limits with preserved defaults and hard upper bounds.
+  - Bound inline JSON before decoding, as well as file reads.
+constraints:
+  - Store only existing credential hashes and immutable identity claims; no new raw-token storage or database.
+  - Preserve unique-subject and unique-hash checks and invalid-credential rejection.
+  - Account capacity must not be described as simultaneous model inference capacity.
+  - Default limits remain 4096 identities and 1 MiB; administrators count toward the total.
+change_paths:
+  - src/fastfence/modules/control/persistence/identity.py
+  - src/fastfence/modules/control/application/facade.py
+  - src/fastfence/shared/settings/app_settings.py
+  - tests/unit/test_identity_capacity.py
+  - docs/settings.pl.md
+  - docs/integration-reference.md
+  - docs/integration-reference.pl.md
+  - docs/settings.md
+  - .env.example
+acceptance:
+  - A default store rejects 5000 records; explicitly configured limits permit them while retaining tenant isolation.
+  - Both file and inline sources reject bytes above the configured bound before decoding.
+  - Settings reach the runtime and duplicate hashes or subjects still fail startup.
+validation:
+  - command: uv run pytest --no-cov tests/unit/test_identity_capacity.py tests/unit/test_boot_configuration.py tests/unit/test_cli_startup.py -q
+    expected: All registry boundary, authentication and startup regressions pass.
+evidence:
+  - check: Focused authentication and startup regressions
+    result: All 31 tests passed, including explicit 5000-record runtime startup, preserved default rejection, tenant isolation, duplicate checks and exact file/inline byte bounds.
+  - check: Isolated authentication microbenchmark on this machine
+    result: With 4096 identities and 5000 timed lookups after 100 warmups, public 1.0.3 last-record p95 was 216.083 microseconds and the indexed source candidate was 0.500 microseconds. Invalid-token p95 was 216.959 versus 0.500 microseconds. This measures authentication only and is not an end-to-end latency or load-capacity claim.

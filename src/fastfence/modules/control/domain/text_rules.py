@@ -4,7 +4,13 @@ import unicodedata
 from collections.abc import Iterator
 from typing import Any, Literal, Self
 
-from pydantic import Field, PrivateAttr, field_validator, model_validator
+from pydantic import (
+    Field,
+    PrivateAttr,
+    StrictBool,
+    field_validator,
+    model_validator,
+)
 
 from fastfence.modules.control.domain.frozen import FrozenControlModel
 
@@ -12,7 +18,15 @@ type Direction = Literal["input", "output"]
 type Target = Literal["model", "tool"]
 
 
-def normalized(text: str, case_sensitive: bool) -> str:
+# Deliberately bounded: joiners remain meaningful unless a rule explicitly opts in.
+INVISIBLE_CHARACTERS = str.maketrans("", "", "\u200b\u200c\u200d\u2060\ufeff")
+
+
+def normalized(
+    text: str, case_sensitive: bool, ignore_invisible_characters: bool = False
+) -> str:
+    if ignore_invisible_characters:
+        text = text.translate(INVISIBLE_CHARACTERS)
     value = unicodedata.normalize("NFKC", text)
     return value if case_sensitive else value.casefold()
 
@@ -29,6 +43,13 @@ class TextRule(FrozenControlModel):
     target: Literal["model", "tool", "all"] = "model"
     action: Literal["block"] = "block"
     case_sensitive: bool = False
+    ignore_invisible_characters: StrictBool = Field(
+        default=False,
+        description=(
+            "Opt in to ignoring only U+200B, U+200C, U+200D, U+2060 and U+FEFF "
+            "during matching, without changing the payload. Keep false unless requested."
+        ),
+    )
     _normalized_value: str = PrivateAttr(default="")
 
     @field_validator("value", mode="before")
@@ -41,8 +62,16 @@ class TextRule(FrozenControlModel):
         object.__setattr__(
             self,
             "_normalized_value",
-            normalized(self.value, self.case_sensitive),
+            normalized(
+                self.value,
+                self.case_sensitive,
+                self.ignore_invisible_characters,
+            ),
         )
+        if not self._normalized_value.strip():
+            raise ValueError(
+                "Rule value must contain visible non-whitespace text"
+            )
         if self.operator == "word_contains" and (
             not all(word_character(char) for char in self._normalized_value)
             or not any(char.isalpha() for char in self._normalized_value)
@@ -72,7 +101,10 @@ def _matches(rule: TextRule, text: str) -> bool:
 
 def text_rule_matches(rule: TextRule, text: str) -> bool:
     """Evaluate one validated rule against content, without I/O or execution."""
-    return _matches(rule, normalized(text, rule.case_sensitive))
+    return _matches(
+        rule,
+        normalized(text, rule.case_sensitive, rule.ignore_invisible_characters),
+    )
 
 
 def _string_values(value: Any) -> Iterator[str]:
@@ -128,15 +160,19 @@ def text_rule_findings(
         if target == "model"
         else _string_values(value)
     )
+    modes = {
+        (rule.case_sensitive, rule.ignore_invisible_characters)
+        for rule in active
+    }
     findings: set[str] = set()
     for text in texts:
-        prepared = {
-            sensitive: normalized(text, sensitive)
-            for sensitive in {rule.case_sensitive for rule in active}
-        }
+        prepared = {mode: normalized(text, *mode) for mode in modes}
         for rule in active:
             if rule.id not in findings and _matches(
-                rule, prepared[rule.case_sensitive]
+                rule,
+                prepared[
+                    (rule.case_sensitive, rule.ignore_invisible_characters)
+                ],
             ):
                 findings.add(rule.id)
     return sorted(findings)

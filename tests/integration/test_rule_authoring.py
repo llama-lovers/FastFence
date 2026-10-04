@@ -41,6 +41,15 @@ def test_rule_authoring_requires_management_identity(client, tokens, endpoint):
             ["tiny report", "DATA", "ą", chr(0xFF21), "1a2"],
             [False, True, False, True, True],
         ),
+        (
+            text_rule(
+                operator="contains",
+                value="confidential",
+                ignore_invisible_characters=True,
+            ),
+            ["confi\u200bdential", "public", "confi dential"],
+            [True, False, False],
+        ),
         (text_rule(value="ab"), ["a-b", "xabx", "1ab2"], [False, True, True]),
         (
             text_rule(operator="contains", value="-"),
@@ -95,6 +104,8 @@ def test_schema_exposes_bounded_rule_contract(client, tokens):
     }
     assert properties["value"]["maxLength"] == 128
     assert properties["target"]["default"] == "model"
+    assert properties["ignore_invisible_characters"]["default"] is False
+    assert properties["ignore_invisible_characters"]["type"] == "boolean"
 
 
 def test_invalid_preview_is_sanitized_and_does_not_activate_rule(

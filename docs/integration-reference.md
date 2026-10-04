@@ -85,3 +85,24 @@ For publication, use the console's tested-rule review flow or a versioned comple
 Budgets, audit retention and replay-related runtime behavior are scoped to one process. Multiple independent gateway processes do not share a global spending ledger. Reversible anonymization depends on configured keys and complete authenticated tokens; irreversible masking cannot recover originals.
 
 Local OCR produces protected Markdown and supports multipage PDF input. It does not preserve document layout, edit files or produce redacted PDF/image artifacts. See [architecture](architecture.md) and [manual verification](manual-testing.md) for current behavior and reproducible checks.
+
+## Startup identity capacity
+
+The local registry defaults to **4096 identities including administrators** and a **1 MiB** file/inline JSON limit. These bound startup memory; they do not measure concurrent model capacity. Authentication indexes credential digests in memory.
+
+For example, to provision 5000 callers plus administrators, set these in the installation's `.env` and restart:
+
+```dotenv
+FASTFENCE_IDENTITY_MAX_RECORDS=8192
+FASTFENCE_IDENTITY_MAX_SOURCE_BYTES=4194304
+```
+
+Provision the identity records separately. These settings do not create accounts. Hard bounds are 65,536 records and 64 MiB; both limits apply independently. Duplicate subjects and credential hashes are rejected. Budgets and audit remain process-local; increasing registry capacity does not share state across workers or increase Laya inference throughput.
+
+## Runtime admission limits
+
+Each business-model HTTP adapter reuses a pool of up to **32 connections** and admits at most **128 active or waiting requests**. Waiting for a connection consumes the request's existing deadline. Upstream cookies are neither retained nor forwarded between calls.
+
+The local Laya worker evaluates **one assessment at a time**, with at most **32 active or waiting assessments**. Queue time also counts toward the configured semantic timeout. Requests beyond these limits fail closed; increasing the account registry does not change them. A protected chat can require input assessment, model generation and output assessment, so account count is not a throughput estimate.
+
+A burst of 1000 concurrent conversations on one local model is not a supported capacity claim. Measure the complete application/gateway/model path with your prompt sizes, expected output lengths and both allowed and blocked traffic. The [benchmarks](benchmarks.md) separate local controls from inference; they are not a multi-user service SLO.

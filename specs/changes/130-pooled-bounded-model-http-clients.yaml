@@ -1,0 +1,43 @@
+id: FF-130
+title: Reuse bounded model HTTP pools without sharing request credentials or cookies
+status: implemented
+problem: Native Ollama and OpenAI-compatible model calls constructed a new asynchronous HTTP client for every request, rebuilding transport state and opening fresh TCP connections under concurrent load.
+scope:
+  - Lazily reuse a separate bounded HTTP pool for each business-model adapter and the non-Laya semantic scanner.
+  - Close pooled clients during asynchronous runtime shutdown, including scanner shutdown failures.
+  - Bound response bodies, active connections and admitted requests, with queue and response reads covered by the same total request deadline.
+constraints:
+  - No HTTP client is constructed by synchronous CLI preflight or adapter initialization.
+  - Disable environment proxies and redirects, reject encoded responses and all upstream cookies, and keep authorization headers and request bodies local to each call.
+  - Preserve strict existing provider response validation, static fail-closed errors and conservative engine accounting.
+  - Use at most 32 connections and 128 active plus waiting requests per adapter, with immediate fail-closed rejection above that bound.
+  - No changes to Laya worker admission, model classification or user sibling reproduction files.
+change_paths:
+  - docs/integration-reference.md
+  - docs/integration-reference.pl.md
+  - src/fastfence/modules/control/persistence/model_http.py
+  - src/fastfence/modules/control/persistence/models.py
+  - src/fastfence/modules/control/persistence/openai_models.py
+  - src/fastfence/modules/control/application/facade.py
+  - tests/unit/test_model_http_pool.py
+  - tests/integration/test_model_http_connections.py
+acceptance:
+  - Ten distinct sequential native model requests reuse exactly one actual loopback TCP connection and preserve their separate payloads and results.
+  - A response cookie and a request authorization header cannot propagate to a subsequent request.
+  - A deadline expiring while waiting for a pool connection leaves the active request intact and releases waiting admission capacity.
+  - Cancellation, oversized or encoded output and redirect refusal release capacity; cancellation and deadlines close response streams.
+  - Runtime asynchronous shutdown closes the model pool even when scanner shutdown raises, and lazy unused clients allocate no transport resources.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_model_http_pool.py tests/integration/test_model_http_connections.py tests/unit/test_models.py tests/unit/test_openai_upstream.py tests/unit/test_ollama_response.py tests/unit/test_semantic_severity.py tests/unit/test_semantic_v2_protocol.py tests/integration/test_openai_upstream_transport.py tests/integration/test_native_ollama_response.py tests/integration/test_failed_provider_accounting.py
+    expected: Pooled transport isolation, actual socket reuse, deadlines, lifecycle and existing strict provider/accounting tests pass without inference.
+  - command: uv run --locked python scripts/check_architecture.py
+    expected: Layer and Pydantic architecture checks pass.
+  - command: uv run --locked lint-imports
+    expected: All import contracts pass.
+evidence:
+  - check: Focused tests and actual network behavior
+    result: 149 tests passed in 0.58 seconds. Real loopback HTTP/1.1 verified ten different native completions on one TCP connection and deadline cancellation while waiting behind an active connection. Mock transport verified cookie/header isolation, bounded admission and cancellation, lazy allocation, response bounds and shutdown cleanup. No model inference was performed.
+  - check: Source checks
+    result: Changed runtime files passed basedpyright with zero diagnostics; Ruff passed. Architecture checked 269 Python files and all 16 import contracts passed.
+  - check: Diagnosis scope
+    result: A local non-network probe of 30 fresh HTTP client constructions and closes measured median 3.165ms, range 3.064–52.258ms. This establishes avoidable per-call overhead, not a production throughput or latency guarantee. The sibling load results also include frontend connection limits, kernel socket backlog, model capacity and 1.0.2 Laya busy rejection; this change does not attribute all failures to HTTP client construction.

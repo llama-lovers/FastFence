@@ -49,8 +49,12 @@ await vm.runInContext(`(async()=>{
  api=async(path,token,body,method)=>{if(method==='PUT')throw Error('invalid candidate');return status};
  await $('savePolicy').onclick();assert.equal(policyCandidate,null);assert.match($('policyJson').value,/Advanced/);
  api=async()=>status;await openTextRule();assert.equal($('textRuleValue').value,'');
+ assert.equal($('textRuleInvisible').checked,false);
+ $('textRuleInvisible').checked=true;
  $('textRuleId').value='custom';$('textRuleValue').value='blocked';$('textRuleSamples').value='hello';
  api=async()=>({rule:textRuleDraft(),matches:[false]});await $('previewTextRule').onclick();
+ assert.equal(previewedRule.ignore_invisible_characters,true);
+ assert.ok($('textRuleResults').children[0].textContent.includes('Matching ignores U+200B'));
  assert.equal($('activateTextRule').disabled,true);$('textRuleReviewed').checked=true;$('textRuleReviewed').onchange();
  assert.equal($('activateTextRule').disabled,false);listeners.get('fastfence:identity').forEach(fn=>fn());
  assert.equal(previewedRule,null);assert.equal(ruleBase,null);assert.equal($('activateTextRule').disabled,true);

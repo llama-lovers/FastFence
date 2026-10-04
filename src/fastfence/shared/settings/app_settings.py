@@ -30,6 +30,18 @@ class AppSettings(BaseSettings):
         default=None,
         description="Trusted read-only startup identity configuration file",
     )
+    identity_max_records: int = Field(
+        default=4096,
+        ge=1,
+        le=65_536,
+        description="Maximum startup identities, including administrators; independent of active request capacity",
+    )
+    identity_max_source_bytes: int = Field(
+        default=1_048_576,
+        ge=1024,
+        le=67_108_864,
+        description="Maximum UTF-8 bytes of file or inline startup identity configuration",
+    )
     instance_id: str | None = Field(
         default=None,
         min_length=1,
