@@ -1,6 +1,6 @@
 !!! warning "Wersja rozwojowa — niewydana"
 
-    Ten kod może różnić się od pakietu na PyPI. [Dokumentacja stabilna](https://fastfence.dev/latest/). [Commit c26e20109eed](https://github.com/llama-lovers/FastFence/commit/c26e20109eed87057f1e0c65d711b617b6434063).
+    Ten kod może różnić się od pakietu na PyPI. [Dokumentacja stabilna](https://fastfence.dev/latest/). [Commit 82110df55a8a](https://github.com/llama-lovers/FastFence/commit/82110df55a8a0942de79da9edc00ff23f250214a).
 
 # Dokumentacja FastFence
 
