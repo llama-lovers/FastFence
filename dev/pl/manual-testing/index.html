@@ -1632,11 +1632,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/54ef05b4555e5e8039c8c44c781bd52a2a49a048">Commit 54ef05b4555e</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/54ef05b4555e5e8039c8c44c781bd52a2a49a048">Commit 54ef05b4555e</a>.</p>
 </div>
 <h1 id="check-your-installation">Sprawdź swoją instalację<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Zainstaluj pakiet w nowym katalogu<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1668,14 +1668,15 @@
 <li>Otwórz <strong>Policies → Add Laya rule</strong>.</li>
 <li>Ustaw <strong>Rule ID</strong> na <code>no-personal-investment-advice</code>, a <strong>Your rule</strong> na: <code>Block personalized recommendations to buy or sell a specific investment. Allow general explanations of financial concepts.</code></li>
 <li>Wybierz <strong>Input only</strong> i <strong>Models</strong>.</li>
-<li>Wpisz <code>Tell me which stock I should buy with my retirement savings.</code> jako próbkę. Kliknij <strong>Test with Laya</strong>. Sprawdź decyzję, model, zakres, poziom zagrożenia i czas. Jest to rzeczywiste wnioskowanie oceniające; chroniony model wykonujący zadanie jeszcze nie został wywołany.</li>
-<li>Zastąp próbkę przez <code>Explain what portfolio diversification means.</code> i sprawdź ponownie. Porównaj wyniki ze swoją intencją. Klasyfikacja semantyczna jest przybliżona; zapisuj pominięcia i zbyt szerokie blokady zamiast zakładać, że przykłady gwarantują wynik.</li>
-<li>Kliknij <strong>Review policy change</strong>, a potem <strong>Review changes</strong> w oknie ustawień. Sprawdź dokładną instrukcję, zakres <code>input</code>/<code>model</code> i ustawienia dostawcy. Potwierdź przegląd i kliknij <strong>Activate policy</strong>.</li>
+<li>W <strong>Must be blocked</strong> wpisz <code>Tell me which stock I should buy with my retirement savings.</code>. W <strong>Must pass semantic analysis</strong> wpisz <code>Explain what portfolio diversification means.</code>. Każda niepusta linia to osobny syntetyczny przykład z oczekiwaniem ustalonym przez Ciebie.</li>
+<li>Kliknij <strong>Review with Laya</strong>. Porównaj <strong>Expected</strong>, <strong>Active policy</strong>, <strong>Proposed policy</strong> i wynik dla każdego zakresu. Są to rzeczywiste oceny modelu; chroniony model biznesowy ani narzędzie nie są wywoływane. Rozbieżność lub brak oceny blokuje kontrolowaną aktywację.</li>
+<li>Przeczytaj <strong>Exact policy change</strong>, potwierdź sprawdzenie oczekiwań, wyników i zakresu, następnie kliknij <strong>Activate reviewed rule</strong>. Serwer przyjmuje wyłącznie dokładny, pomyślny i niewygasły test należący do Twojej tożsamości administracyjnej.</li>
 <li>Potwierdź wzrost aktywnej wersji i obecność reguły na liście. W <strong>Test requests</strong> wyślij te same wejścia przez chroniony model; sprawdź wyniki etapów wejścia/wyjścia i <strong>Activity</strong>.</li>
 <li>Użyj <strong>Edit rule</strong>, aby zmienić regułę, ponownie ją przetestować i przejrzeć, albo <strong>Remove…</strong>, aby sprawdzić jej usunięcie przed aktywacją.</li>
 </ol>
 <p>Testowanie nie zapisuje kandydata ani nie wykonuje narzędzia biznesowego. Ocenia kandydata razem z istniejącymi właściwymi regułami semantycznymi i globalnymi instrukcjami bezpieczeństwa. Ocena nie wskazuje, która pojedyncza reguła spowodowała wynik. <strong>NO SEMANTIC BLOCK</strong> nie gwarantuje, że dostęp, budżet, prywatność lub inne kontrole dopuszczą rzeczywiste żądanie.</p>
-<p>Dla <strong>Input and output</strong> okno testuje <strong>input</strong>; dla <strong>Models and tools</strong> testuje treść <strong>model</strong>. Zakres wyjścia trzeba sprawdzić osobno. Użyj <a href="../integration-reference/#test-a-named-laya-rule">API podglądu</a>, aby wybrać konkretny kierunek i cel bez zmieniania aktywnej konfiguracji. Nieudany podgląd lub zmiana próbki/reguły wyłącza przegląd do czasu pomyślnego ponownego testu.</p>
+<p>Dla <strong>Input and output</strong> i <strong>Models and tools</strong> każdy przykład jest sprawdzany we wszystkich czterech zakresach. Każdy zakres wymaga zarówno przykładu blokowanego, jak i dozwolonego. Zapisane przypadki pozostałych aktywnych reguł też są sprawdzane, aby wykryć regresje. Edycja reguły, próbek lub tożsamości unieważnia test; zmiana polityki, feedu albo zapisanego zestawu dodatkowo unieważnia aktywację na serwerze.</p>
+<p>Użyj <strong>Replay saved semantic tests</strong> w Policies, aby ponownie uruchomić prywatny zestaw <code>config/semantic-policy-tests.yaml</code> na bieżącej polityce, bez aktywacji. Zobacz <a href="../examples/semantic-policy/#saved-cases-and-replay">działający przykład sprawdzania i ponawiania testów</a>. Poprawny test potwierdza te przykłady, a nie gwarantuje wyniku dla nieznanych promptów. Zwykła administracyjna edycja YAML i ogólny endpoint polityk nie wymuszają tej ścieżki kontrolowanej aktywacji.</p>
 <h2 id="describe-a-fast-deterministic-rule">Opisz szybką regułę deterministyczną<a class="headerlink" href="#describe-a-fast-deterministic-rule" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Kliknij <strong>Policies → Describe a fast rule</strong>.</li>

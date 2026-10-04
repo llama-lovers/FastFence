@@ -1,6 +1,6 @@
 !!! warning "Development version — unreleased"
 
-    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit bbc20acd236d](https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d).
+    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit 54ef05b4555e](https://github.com/llama-lovers/FastFence/commit/54ef05b4555e5e8039c8c44c781bd52a2a49a048).
 
 # FastFence documentation
 
@@ -379,7 +379,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download acp_server.py](https://fastfence.dev/dev/downloads/acp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/acp_server.py)
+[Download acp_server.py](https://fastfence.dev/dev/downloads/acp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/acp_server.py)
 
 ### Gateway registration
 
@@ -438,7 +438,7 @@ if __name__ == "__main__":
     )
 ```
 
-[Download acp_gateway.py](https://fastfence.dev/dev/downloads/acp_gateway.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/acp_gateway.py)
+[Download acp_gateway.py](https://fastfence.dev/dev/downloads/acp_gateway.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/acp_gateway.py)
 
 ### Official SDK client
 
@@ -496,7 +496,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download acp_client.py](https://fastfence.dev/dev/downloads/acp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/acp_client.py)
+[Download acp_client.py](https://fastfence.dev/dev/downloads/acp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/acp_client.py)
 
 ### Isolated policy
 
@@ -531,7 +531,7 @@ text_rules:
     target: tool
 ```
 
-[Download acp_policy.yaml](https://fastfence.dev/dev/downloads/acp_policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/acp_policy.yaml)
+[Download acp_policy.yaml](https://fastfence.dev/dev/downloads/acp_policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/acp_policy.yaml)
 
 
 ---
@@ -614,7 +614,7 @@ if __name__ == "__main__":
     print("Custom detector example checks passed")
 ```
 
-[Download custom_detector.py](https://fastfence.dev/dev/downloads/custom_detector.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/custom_detector.py)
+[Download custom_detector.py](https://fastfence.dev/dev/downloads/custom_detector.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/custom_detector.py)
 
 Regex detectors supply one to 32 compiled Python `re` patterns, each at most
 8,192 characters long. Patterns that match the empty string are rejected.
@@ -771,7 +771,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download asymmetric_keys.py](https://fastfence.dev/dev/downloads/asymmetric_keys.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/asymmetric_keys.py)
+[Download asymmetric_keys.py](https://fastfence.dev/dev/downloads/asymmetric_keys.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/asymmetric_keys.py)
 
 ## 2. Configure the gateway
 
@@ -1324,7 +1324,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download protected_request.py](https://fastfence.dev/dev/downloads/protected_request.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/protected_request.py)
+[Download protected_request.py](https://fastfence.dev/dev/downloads/protected_request.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/protected_request.py)
 
 Next: [Add a named rule in natural language](semantic-policy.md) or
 [make the same request through FastMCP](mcp-client.md).
@@ -1339,9 +1339,7 @@ This complete script adds a named policy:
 
 > Block personalized financial recommendations. General financial definitions are allowed.
 
-Laya evaluates **actual sample text** through `POST /api/admin/semantic/preview`.
-The rule applies only to model input. Preview does not activate the rule or send
-a completion request to your protected model.
+Laya evaluates **actual sample text** through `POST /api/admin/semantic/review`. You supply the expected result for each sample. The server compares the current and proposed semantic policies, and issues an activation receipt only when every required candidate result matches. This example applies to model input; review never calls your protected business model or activates a policy.
 
 Download the [complete examples](../downloads/fastfence-examples.zip) into your installation's `examples/` directory. Run commands from the installation directory; `uv run` supplies Python 3.12 and the FastFence package for each example, without activating a virtual environment.
 
@@ -1358,10 +1356,7 @@ through your environment. Legacy `security-admin` credentials are also supported
 uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/semantic_policy.py
 ```
 
-The script fetches the active policy, preserves its other controls, adds or replaces
-only `no-personal-financial-advice`, and increments the candidate version. It asks
-the real preview endpoint to classify two samples, then prints their actual results
-and a YAML diff. No `PUT` is sent in preview mode.
+The script reads the active version and submits two expected outcomes. The server prepares the exact candidate, preserving other controls and replacing only `no-personal-financial-advice`. The script prints its YAML diff and the **expected → before → after → pass/fail** results, including each tested scope. No activation is sent in review mode. A disabled base assessor is shown as `not_evaluated`, not as a successful allowance.
 
 Expected observations:
 
@@ -1374,7 +1369,7 @@ Expected observations:
 has to pass authentication, deterministic rules, budgets and any output checks.
 Preview uses your active semantic model and threshold when Laya is already enabled;
 otherwise it selects Laya/Qwen3:4b for the candidate. Unexpected classifications are
-reported honestly and prevent this script's activation step.
+reported honestly and prevent server-reviewed activation. A provider error, timeout or missing scope also prevents activation; the model never rewrites your expectations to make the tests pass.
 
 ## Activate deliberately
 
@@ -1384,10 +1379,9 @@ After reviewing the diff and results:
 uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/semantic_policy.py --activate
 ```
 
-This reruns the previews, checks their expected outcomes, refetches the active
-policy to reject concurrent changes, then submits the candidate through the actual
-`PUT /api/admin/policy` endpoint. The server validates the version and configured
-source. A failed preview or conflict stops the example without activation.
+This reruns the review and sends its receipt to `POST /api/admin/semantic/activate` with explicit confirmation. The server checks the administrator, expiration, original policy/feed and saved-test snapshot, then activates exactly the candidate it tested. A stale or reused receipt cannot activate another policy. Passing all cases proves those observed results; it does not establish general semantic accuracy.
+
+The generic administrative `PUT /api/admin/policy` and manual YAML hot reload remain separate operator paths. They do not enforce this reviewed-activation gate.
 
 Now test the active policy through the normal protected request path:
 
@@ -1405,6 +1399,27 @@ exact matching. Removing the named rule through **Policies** requires another
 reviewed policy version.
 
 
+## Saved cases and replay
+
+Successful activation saves the reviewed cases in `config/semantic-policy-tests.yaml` with private file permissions. It preserves cases for other rules. When reviewing another change, the server also compares saved cases of other active rules; a new rule that breaks their expectations cannot pass review. Saved cases for removed rules are listed as inactive, not counted as successful tests. Existing rules without saved examples are explicitly reported as untested; you can migrate them one rule at a time.
+
+Replay saved expectations against the currently active semantic policy:
+
+```sh
+uv run --python 3.12 --no-project --with fastfence==1.0.1 python examples/semantic_policy.py --replay-tests
+```
+
+Replay does not activate anything. An unexpected result, missing evaluation or empty active suite produces a failing result. The script exits with status `2` when expectations fail. Changing the policy or test file during evaluation invalidates the result.
+
+Policy and tests are separate files. If saving the suite fails after activation, the response explicitly reports the activated version and `tests_saved: false`; the script exits unsuccessfully and says the policy is already active. Do not blindly repeat activation. Check the file permissions and reconcile the saved suite before continuing. Test files contain the sample text you supplied, so use synthetic examples rather than real customer records.
+
+## Dashboard workflow and limits
+
+In **Policies → Add a Laya rule**, describe the rule and enter both content that must be blocked and content that must pass the semantic check. The interface expands the samples across every selected input/output and model/tool scope. Review the result table and exact diff, then confirm activation. Editing a sample, expectation, instruction, scope or identity invalidates that review.
+
+Each edited rule accepts at most 16 scoped cases, each bounded to 4096 UTF-8 bytes. Selecting both directions and both targets uses four cases per sample. The merged saved suite is bounded to 64 cases and 64 KiB; a review can make up to 128 real assessments and has a 120-second total deadline. Only one batch review or replay runs at a time. Receipts expire after ten minutes and require retesting after a restart. The receipt binds configuration; it does not freeze model weights replaced outside FastFence.
+
+
 ## Compound-rule limitation
 
 The local Qwen3:4b assessment has a reproduced false negative for a rule requiring **both a person's full name and an email address**: the combined input was allowed even though the named rule reached Laya correctly. A natural-language conjunction is not a reliable substitute for deterministic privacy controls. Keep applicable PII controls enabled and include combined, partial and exception cases in your preview tests; a passing example does not establish general detection accuracy.
@@ -1413,20 +1428,20 @@ A subsequent diagnostic on public **1.0.4** tested a separate policy-only assess
 
 The same semantic configuration can also block content permitted by a literal rule because the layers enforce separate restrictions. Inspect the decision reason and input/output assessment results when a literal nonmatch is blocked.
 
+
+## Verified workflow in 1.0.6
+
+An isolated installation of the built 1.0.6 wheel was checked through real HTTP and Laya/Qwen3:4b. The financial example passed all eight input/output model/tool cases, activated once, saved a private suite and passed eight replays. Reusing the activation receipt was rejected. The full-name-and-email example reproduced its missed violation; the review failed and issued no activation receipt. No business upstream ran. This was 44 assessment attempts, a small workflow check rather than an accuracy or throughput benchmark. [Recorded outcomes](https://github.com/llama-lovers/FastFence/blob/v1.0.6/evaluation/results/reviewed-semantic-workflow-1.0.6.json).
+
 ```python
-"""Preview a named natural-language rule with real Laya; activate only explicitly."""
+"""Review semantic expectations with Laya; activate explicitly or replay saved tests."""
 
 import argparse
-import copy
-import difflib
 import json
 import os
 from pathlib import Path
 
 import httpx
-import yaml
-
-from fastfence.modules.control.domain.models import Policy
 
 RULE = {
     "id": "no-personal-financial-advice",
@@ -1457,64 +1472,72 @@ def read_policy(client: httpx.Client, token: str) -> dict:
     return response.json()["policy"]
 
 
-def prepare(client: httpx.Client, token: str) -> tuple[dict, dict, list[dict]]:
+def prepare(client: httpx.Client, token: str) -> dict:
     base = read_policy(client, token)
-    candidate = copy.deepcopy(base)
-    candidate["version"] += 1
-    semantic = candidate["semantic"]
-    if semantic["provider"] != "laya":
-        semantic.update(
-            provider="laya",
-            model="qwen3:4b",
-            timeout_ms=max(30000, semantic["timeout_ms"]),
-        )
-    semantic["rules"] = [
-        rule for rule in semantic.get("rules", []) if rule["id"] != RULE["id"]
-    ] + [RULE]
-    candidate = Policy.model_validate(candidate).model_dump(mode="json")
-    results = []
-    for text, expected in CASES:
-        response = client.post(
-            "/api/admin/semantic/preview",
-            headers={"Authorization": "Bearer " + token},
-            json={
-                "rule": RULE,
-                "text": text,
-                "direction": "input",
-                "target": "model",
-                "base_version": base["version"],
-            },
-        )
-        response.raise_for_status()
-        result = response.json()
-        results.append({"expected": expected, **result})
-    return base, candidate, results
-
-
-def activate(
-    client: httpx.Client,
-    token: str,
-    base: dict,
-    candidate: dict,
-    results: list[dict],
-) -> dict:
-    if len(results) != len(CASES) or not all(
-        result["decision"] == result["expected"] and result["rule_applied"]
-        for result in results
-    ):
-        raise ValueError(
-            "Preview did not match expected classifications; no activation."
-        )
-    if read_policy(client, token) != base:
-        raise ValueError(
-            "Active policy changed; preview again before activation."
-        )
-    response = client.put(
-        "/api/admin/policy",
-        headers={"Authorization": "Bearer " + token},
-        json=candidate,
+    directions = (
+        ("input", "output")
+        if RULE["direction"] == "both"
+        else (RULE["direction"],)
     )
-    response.raise_for_status()  # Server also rejects version/source conflicts.
+    targets = (
+        ("model", "tool") if RULE["target"] == "all" else (RULE["target"],)
+    )
+    cases = [
+        {
+            "id": f"sample-{index}-{direction}-{target}",
+            "text": text,
+            "direction": direction,
+            "target": target,
+            "expected": expected,
+        }
+        for index, (text, expected) in enumerate(CASES, start=1)
+        for direction in directions
+        for target in targets
+    ]
+    response = client.post(
+        "/api/admin/semantic/review",
+        headers={"Authorization": "Bearer " + token},
+        json={"base_version": base["version"], "rule": RULE, "cases": cases},
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def activate(client: httpx.Client, token: str, review: dict) -> dict:
+    if not review.get("tests_passed") or not review.get("review_id"):
+        raise ValueError(
+            "Review failed expected classifications; no activation."
+        )
+    response = client.post(
+        "/api/admin/semantic/activate",
+        headers={"Authorization": "Bearer " + token},
+        json={
+            "review_id": review["review_id"],
+            "base_version": review["base_version"],
+            "confirmed": True,
+        },
+    )
+    # The server binds the receipt to exact cases, policy, feed and administrator.
+    response.raise_for_status()
+    return response.json()
+
+
+def replay(client: httpx.Client, token: str) -> dict:
+    base = read_policy(client, token)
+    suite = client.get(
+        "/api/admin/semantic/tests",
+        headers={"Authorization": "Bearer " + token},
+    )
+    suite.raise_for_status()
+    response = client.post(
+        "/api/admin/semantic/tests/replay",
+        headers={"Authorization": "Bearer " + token},
+        json={
+            "base_version": base["version"],
+            "suite_digest": suite.json()["suite_digest"],
+        },
+    )
+    response.raise_for_status()
     return response.json()
 
 
@@ -1524,33 +1547,39 @@ def main() -> None:
     parser.add_argument(
         "--credentials", type=Path, default=Path("state/credentials.json")
     )
-    parser.add_argument("--activate", action="store_true")
+    actions = parser.add_mutually_exclusive_group()
+    actions.add_argument("--activate", action="store_true")
+    actions.add_argument("--replay-tests", action="store_true")
     args = parser.parse_args()
     token = admin_token(args.credentials)
     with httpx.Client(
-        base_url=args.url, timeout=120, trust_env=False
+        base_url=args.url, timeout=130, trust_env=False
     ) as client:
-        base, candidate, results = prepare(client, token)
-        print(
-            "".join(
-                difflib.unified_diff(
-                    yaml.safe_dump(base, sort_keys=False).splitlines(
-                        keepends=True
-                    ),
-                    yaml.safe_dump(candidate, sort_keys=False).splitlines(
-                        keepends=True
-                    ),
-                    fromfile="active-policy.yaml",
-                    tofile="candidate-policy.yaml",
-                )
+        if args.replay_tests:
+            result = replay(client, token)
+            print(json.dumps(result, indent=2))
+            if not result["tests_passed"]:
+                raise SystemExit(2)
+            return
+        review = prepare(client, token)
+        print(review["yaml_diff"])
+        print(json.dumps(review["cases"], indent=2))
+        if not review["tests_passed"]:
+            print(
+                "Expectations failed or assessment incomplete. Nothing activated."
             )
-        )
-        print(json.dumps(results, indent=2))
+            raise SystemExit(2)
         if args.activate:
-            print(json.dumps(activate(client, token, base, candidate, results)))
+            result = activate(client, token, review)
+            print(json.dumps(result))
+            if not result.get("tests_saved", False):
+                print(
+                    "Policy activated, but tests were not saved. Do not repeat activation."
+                )
+                raise SystemExit(2)
         else:
             print(
-                "Preview only. Review the diff; rerun with --activate to apply."
+                "Review only. Inspect the diff; rerun with --activate to apply."
             )
 
 
@@ -1558,7 +1587,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download semantic_policy.py](https://fastfence.dev/dev/downloads/semantic_policy.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/semantic_policy.py)
+[Download semantic_policy.py](https://fastfence.dev/dev/downloads/semantic_policy.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/semantic_policy.py)
 
 
 ---
@@ -1689,7 +1718,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download mcp_client.py](https://fastfence.dev/dev/downloads/mcp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/mcp_client.py)
+[Download mcp_client.py](https://fastfence.dev/dev/downloads/mcp_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/mcp_client.py)
 
 
 ---
@@ -1802,7 +1831,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download fastmcp_server.py](https://fastfence.dev/dev/downloads/fastmcp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/fastmcp_server.py)
+[Download fastmcp_server.py](https://fastfence.dev/dev/downloads/fastmcp_server.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/fastmcp_server.py)
 
 `create_app(..., tools=ProtectedMCPTools())` is the integration point. Register business operations through this port; an ordinary FastAPI route is not automatically protected by FastFence. The public `/integration-info` route returns static metadata only. The verified identity passed to the adapter can also enforce application-specific tenant ownership before execution.
 
@@ -1859,7 +1888,7 @@ text_rules:
   case_sensitive: false
 ```
 
-[Download policy.yaml](https://fastfence.dev/dev/downloads/policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/policy.yaml)
+[Download policy.yaml](https://fastfence.dev/dev/downloads/policy.yaml) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/policy.yaml)
 
 ## Enable Laya in this example
 
@@ -1983,7 +2012,7 @@ if __name__ == "__main__":
     main()
 ```
 
-[Download openai_client.py](https://fastfence.dev/dev/downloads/openai_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/examples/docs/openai_client.py)
+[Download openai_client.py](https://fastfence.dev/dev/downloads/openai_client.py) · [View source](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/examples/docs/openai_client.py)
 
 ## Verify blocking
 
@@ -2444,6 +2473,19 @@ The local Laya worker evaluates **one assessment at a time**, with at most **32 
 
 A burst of 1000 concurrent conversations on one local model is not a supported capacity claim. Measure the complete application/gateway/model path with your prompt sizes, expected output lengths and both allowed and blocked traffic. The [benchmarks](benchmarks.md) separate local controls from inference; they are not a multi-user service SLO.
 
+## Reviewed semantic activation
+
+Use these management-only endpoints for a server-enforced expectations gate:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/admin/semantic/review` | Compare active and proposed semantic policies on explicit expected outcomes and saved regressions; issue a bounded, expiring receipt only on success. |
+| `POST /api/admin/semantic/activate` | Confirm and activate exactly the candidate bound to the successful receipt. |
+| `GET /api/admin/semantic/tests` | Read the private saved suite, its digest and applicability status. |
+| `POST /api/admin/semantic/tests/replay` | Assess saved expectations against the current policy, without activation. |
+
+The [complete runnable example](examples/semantic-policy.md) includes review, explicit activation and saved-suite replay. Requests and responses are documented in `/docs` on your running gateway. The legacy single-sample `/semantic/preview` endpoint remains a diagnostic; it never grants an activation receipt. These evaluations cover the semantic layer, not business tools, identity budgets or deterministic guardrails. Direct administrative policy edits remain outside the reviewed-activation gate.
+
 
 ---
 Source: https://fastfence.dev/dev/reference/http-api/
@@ -2456,28 +2498,32 @@ All `/api/` and `/v1/` requests require a provisioned bearer identity. `/api/adm
 
 | Method | Path | Source handler |
 | --- | --- | --- |
-| `GET` | `/acp/agents` | [discovery](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/acp.py#L215) |
-| `GET` | `/acp/agents/{name}` | [agent](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/acp.py#L225) |
-| `GET` | `/acp/ping` | [ping](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/acp.py#L208) |
-| `POST` | `/acp/runs` | [run](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/acp.py#L234) |
-| `GET` | `/api/admin/audit.jsonl` | [audit_export](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L189) |
-| `POST` | `/api/admin/policies/activate` | [activate_policy](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/policy_authoring.py#L53) |
-| `POST` | `/api/admin/policies/draft` | [draft_policy](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/policy_authoring.py#L35) |
-| `POST` | `/api/admin/policies/preview` | [preview_policy](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/policy_authoring.py#L44) |
-| `PUT` | `/api/admin/policy` | [save_policy](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L177) |
-| `POST` | `/api/admin/reload` | [reload_policy](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L163) |
-| `POST` | `/api/admin/rules/preview` | [preview_rule](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/rule_authoring.py#L32) |
-| `GET` | `/api/admin/rules/schema` | [rule_schema](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/rule_authoring.py#L28) |
-| `POST` | `/api/admin/semantic/preview` | [preview](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/semantic_preview.py#L27) |
-| `GET` | `/api/admin/status` | [status](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L159) |
-| `POST` | `/api/documents/markdown` | [document_markdown](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/documents.py#L61) |
-| `POST` | `/api/invoke` | [invoke](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L143) |
-| `GET` | `/api/me` | [me](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L139) |
-| `POST` | `/api/models/complete` | [complete](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L149) |
-| `GET` | `/health` | [health](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L117) |
-| `GET` | `/ready` | [readiness](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/routes.py#L131) |
-| `POST` | `/v1/chat/completions` | [complete](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/openai.py#L193) |
-| `GET` | `/v1/models` | [models](https://github.com/llama-lovers/FastFence/blob/bbc20acd236d614b4d14224fb6e0d01bf27beb3d/src/fastfence/app/interfaces/http/openai.py#L165) |
+| `GET` | `/acp/agents` | [discovery](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/acp.py#L215) |
+| `GET` | `/acp/agents/{name}` | [agent](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/acp.py#L225) |
+| `GET` | `/acp/ping` | [ping](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/acp.py#L208) |
+| `POST` | `/acp/runs` | [run](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/acp.py#L234) |
+| `GET` | `/api/admin/audit.jsonl` | [audit_export](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L195) |
+| `POST` | `/api/admin/policies/activate` | [activate_policy](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/policy_authoring.py#L53) |
+| `POST` | `/api/admin/policies/draft` | [draft_policy](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/policy_authoring.py#L35) |
+| `POST` | `/api/admin/policies/preview` | [preview_policy](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/policy_authoring.py#L44) |
+| `PUT` | `/api/admin/policy` | [save_policy](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L183) |
+| `POST` | `/api/admin/reload` | [reload_policy](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L169) |
+| `POST` | `/api/admin/rules/preview` | [preview_rule](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/rule_authoring.py#L32) |
+| `GET` | `/api/admin/rules/schema` | [rule_schema](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/rule_authoring.py#L28) |
+| `POST` | `/api/admin/semantic/activate` | [activate](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/semantic_review.py#L51) |
+| `POST` | `/api/admin/semantic/preview` | [preview](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/semantic_preview.py#L27) |
+| `POST` | `/api/admin/semantic/review` | [review](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/semantic_review.py#L38) |
+| `GET` | `/api/admin/semantic/tests` | [saved_tests](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/semantic_suites.py#L158) |
+| `POST` | `/api/admin/semantic/tests/replay` | [replay](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/semantic_suites.py#L167) |
+| `GET` | `/api/admin/status` | [status](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L165) |
+| `POST` | `/api/documents/markdown` | [document_markdown](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/documents.py#L61) |
+| `POST` | `/api/invoke` | [invoke](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L149) |
+| `GET` | `/api/me` | [me](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L145) |
+| `POST` | `/api/models/complete` | [complete](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L155) |
+| `GET` | `/health` | [health](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L123) |
+| `GET` | `/ready` | [readiness](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/routes.py#L137) |
+| `POST` | `/v1/chat/completions` | [complete](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/openai.py#L193) |
+| `GET` | `/v1/models` | [models](https://github.com/llama-lovers/FastFence/blob/54ef05b4555e5e8039c8c44c781bd52a2a49a048/src/fastfence/app/interfaces/http/openai.py#L165) |
 
 ## Response semantics
 
@@ -2669,15 +2715,17 @@ workflow below. The semantic classifier remains approximate.
 2. Set **Rule ID** to `no-personal-investment-advice` and **Your rule** to:
    `Block personalized recommendations to buy or sell a specific investment. Allow general explanations of financial concepts.`
 3. Select **Input only** and **Models**.
-4. Enter `Tell me which stock I should buy with my retirement savings.` as sample content. Click **Test with Laya**. Inspect the decision, model, scope, severity and elapsed time. This is actual assessment inference; the protected completion model has not run.
-5. Replace the sample with `Explain what portfolio diversification means.` and test again. Compare the results against your intent. Semantic classification is approximate; record misses and overly broad blocks instead of assuming these examples guarantee a result.
-6. Click **Review policy change**, then **Review changes** in the settings dialog. Check the exact instruction, `input`/`model` scope and provider settings. Confirm the review and click **Activate policy**.
+4. In **Must be blocked**, enter `Tell me which stock I should buy with my retirement savings.`. In **Must pass semantic analysis**, enter `Explain what portfolio diversification means.`. Each nonblank line is a separate synthetic example with an expectation you choose.
+5. Click **Review with Laya**. Compare **Expected**, **Active policy**, **Proposed policy** and the result for each scope. These are actual model assessments; no protected business model or tool runs. Any mismatch or missing evaluation prevents reviewed activation.
+6. Read **Exact policy change**, confirm that you reviewed the expectations, results and scope, then click **Activate reviewed rule**. The server accepts only the exact successful, unexpired review belonging to your management identity.
 7. Confirm the active version increased and the rule appears in the inventory. In **Test requests**, send the same inputs through the protected model and inspect the input/output stage results and **Activity**.
 8. Use **Edit rule** to change it, retest and review, or **Remove…** to review its removal before activation.
 
 Testing does not save the candidate or execute a business tool. It evaluates the candidate together with existing applicable semantic rules and global security instructions. The score does not identify which individual rule caused the result. **NO SEMANTIC BLOCK** does not guarantee that access, budget, privacy or other controls will allow an actual request.
 
-For **Input and output**, the dialog tests **input**; for **Models and tools**, it tests **model** content. The output scope must be verified separately. Use the [preview API](integration-reference.md#test-a-named-laya-rule) to choose a particular direction and target without changing the active configuration. A failed preview or changed sample/rule disables review until a new test succeeds.
+For **Input and output** and **Models and tools**, every example is tested in all four scopes. Include both a blocked and a permitted example for each scope. Existing saved cases of other active rules are included to expose regressions. Editing the rule, samples or identity invalidates the review; changes to the policy, feed or saved suite also invalidate activation on the server.
+
+Use **Replay saved semantic tests** in Policies to rerun the private `config/semantic-policy-tests.yaml` suite against the current policy without activation. See the [runnable review and replay example](examples/semantic-policy.md#saved-cases-and-replay). A successful test is evidence for those examples, not a guarantee for unseen prompts. Ordinary administrative YAML edits and the generic policy endpoint remain outside this reviewed-activation gate.
 
 ## Describe a fast deterministic rule
 

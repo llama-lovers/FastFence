@@ -1632,7 +1632,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/54ef05b4555e5e8039c8c44c781bd52a2a49a048">Commit 54ef05b4555e</a>.</p>
 </div>
 <h1 id="check-your-installation">Check your installation<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Install the package in a fresh directory<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1679,14 +1679,15 @@ workflow below. The semantic classifier remains approximate.</p>
 <li>Set <strong>Rule ID</strong> to <code>no-personal-investment-advice</code> and <strong>Your rule</strong> to:
    <code>Block personalized recommendations to buy or sell a specific investment. Allow general explanations of financial concepts.</code></li>
 <li>Select <strong>Input only</strong> and <strong>Models</strong>.</li>
-<li>Enter <code>Tell me which stock I should buy with my retirement savings.</code> as sample content. Click <strong>Test with Laya</strong>. Inspect the decision, model, scope, severity and elapsed time. This is actual assessment inference; the protected completion model has not run.</li>
-<li>Replace the sample with <code>Explain what portfolio diversification means.</code> and test again. Compare the results against your intent. Semantic classification is approximate; record misses and overly broad blocks instead of assuming these examples guarantee a result.</li>
-<li>Click <strong>Review policy change</strong>, then <strong>Review changes</strong> in the settings dialog. Check the exact instruction, <code>input</code>/<code>model</code> scope and provider settings. Confirm the review and click <strong>Activate policy</strong>.</li>
+<li>In <strong>Must be blocked</strong>, enter <code>Tell me which stock I should buy with my retirement savings.</code>. In <strong>Must pass semantic analysis</strong>, enter <code>Explain what portfolio diversification means.</code>. Each nonblank line is a separate synthetic example with an expectation you choose.</li>
+<li>Click <strong>Review with Laya</strong>. Compare <strong>Expected</strong>, <strong>Active policy</strong>, <strong>Proposed policy</strong> and the result for each scope. These are actual model assessments; no protected business model or tool runs. Any mismatch or missing evaluation prevents reviewed activation.</li>
+<li>Read <strong>Exact policy change</strong>, confirm that you reviewed the expectations, results and scope, then click <strong>Activate reviewed rule</strong>. The server accepts only the exact successful, unexpired review belonging to your management identity.</li>
 <li>Confirm the active version increased and the rule appears in the inventory. In <strong>Test requests</strong>, send the same inputs through the protected model and inspect the input/output stage results and <strong>Activity</strong>.</li>
 <li>Use <strong>Edit rule</strong> to change it, retest and review, or <strong>Remove…</strong> to review its removal before activation.</li>
 </ol>
 <p>Testing does not save the candidate or execute a business tool. It evaluates the candidate together with existing applicable semantic rules and global security instructions. The score does not identify which individual rule caused the result. <strong>NO SEMANTIC BLOCK</strong> does not guarantee that access, budget, privacy or other controls will allow an actual request.</p>
-<p>For <strong>Input and output</strong>, the dialog tests <strong>input</strong>; for <strong>Models and tools</strong>, it tests <strong>model</strong> content. The output scope must be verified separately. Use the <a href="../integration-reference/#test-a-named-laya-rule">preview API</a> to choose a particular direction and target without changing the active configuration. A failed preview or changed sample/rule disables review until a new test succeeds.</p>
+<p>For <strong>Input and output</strong> and <strong>Models and tools</strong>, every example is tested in all four scopes. Include both a blocked and a permitted example for each scope. Existing saved cases of other active rules are included to expose regressions. Editing the rule, samples or identity invalidates the review; changes to the policy, feed or saved suite also invalidate activation on the server.</p>
+<p>Use <strong>Replay saved semantic tests</strong> in Policies to rerun the private <code>config/semantic-policy-tests.yaml</code> suite against the current policy without activation. See the <a href="../examples/semantic-policy/#saved-cases-and-replay">runnable review and replay example</a>. A successful test is evidence for those examples, not a guarantee for unseen prompts. Ordinary administrative YAML edits and the generic policy endpoint remain outside this reviewed-activation gate.</p>
 <h2 id="describe-a-fast-deterministic-rule">Describe a fast deterministic rule<a class="headerlink" href="#describe-a-fast-deterministic-rule" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Click <strong>Policies → Describe a fast rule</strong>.</li>

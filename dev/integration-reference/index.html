@@ -1258,6 +1258,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#reviewed-semantic-activation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reviewed semantic activation
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1510,6 +1521,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#reviewed-semantic-activation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reviewed semantic activation
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1532,7 +1554,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/54ef05b4555e5e8039c8c44c781bd52a2a49a048">Commit 54ef05b4555e</a>.</p>
 </div>
 <h1 id="integration-reference">Integration reference<a class="headerlink" href="#integration-reference" title="Permanent link">&para;</a></h1>
 <p>FastFence enforces controls on operations routed through it. It does not intercept an agent's unrelated network calls. Choose an adapter explicitly and keep agent credentials separate from management access.</p>
@@ -1637,6 +1659,35 @@
 <p>Each business-model HTTP adapter reuses a pool of up to <strong>32 connections</strong> and admits at most <strong>128 active or waiting requests</strong>. Waiting for a connection consumes the request's existing deadline. Upstream cookies are neither retained nor forwarded between calls.</p>
 <p>The local Laya worker evaluates <strong>one assessment at a time</strong>, with at most <strong>32 active or waiting assessments</strong>. Queue time also counts toward the configured semantic timeout. Requests beyond these limits fail closed; increasing the account registry does not change them. A protected chat can require input assessment, model generation and output assessment, so account count is not a throughput estimate.</p>
 <p>A burst of 1000 concurrent conversations on one local model is not a supported capacity claim. Measure the complete application/gateway/model path with your prompt sizes, expected output lengths and both allowed and blocked traffic. The <a href="../benchmarks/">benchmarks</a> separate local controls from inference; they are not a multi-user service SLO.</p>
+<h2 id="reviewed-semantic-activation">Reviewed semantic activation<a class="headerlink" href="#reviewed-semantic-activation" title="Permanent link">&para;</a></h2>
+<p>Use these management-only endpoints for a server-enforced expectations gate:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /api/admin/semantic/review</code></td>
+<td>Compare active and proposed semantic policies on explicit expected outcomes and saved regressions; issue a bounded, expiring receipt only on success.</td>
+</tr>
+<tr>
+<td><code>POST /api/admin/semantic/activate</code></td>
+<td>Confirm and activate exactly the candidate bound to the successful receipt.</td>
+</tr>
+<tr>
+<td><code>GET /api/admin/semantic/tests</code></td>
+<td>Read the private saved suite, its digest and applicability status.</td>
+</tr>
+<tr>
+<td><code>POST /api/admin/semantic/tests/replay</code></td>
+<td>Assess saved expectations against the current policy, without activation.</td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="../examples/semantic-policy/">complete runnable example</a> includes review, explicit activation and saved-suite replay. Requests and responses are documented in <code>/docs</code> on your running gateway. The legacy single-sample <code>/semantic/preview</code> endpoint remains a diagnostic; it never grants an activation receipt. These evaluations cover the semantic layer, not business tools, identity budgets or deterministic guardrails. Direct administrative policy edits remain outside the reviewed-activation gate.</p>
 
 
 

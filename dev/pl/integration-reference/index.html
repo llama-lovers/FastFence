@@ -1258,6 +1258,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#reviewed-semantic-activation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kontrolowana aktywacja semantyczna
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1510,6 +1521,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#reviewed-semantic-activation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kontrolowana aktywacja semantyczna
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1532,11 +1554,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/54ef05b4555e5e8039c8c44c781bd52a2a49a048">Commit 54ef05b4555e</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/bbc20acd236d614b4d14224fb6e0d01bf27beb3d">Commit bbc20acd236d</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/54ef05b4555e5e8039c8c44c781bd52a2a49a048">Commit 54ef05b4555e</a>.</p>
 </div>
 <h1 id="dokumentacja-integracji">Dokumentacja integracji<a class="headerlink" href="#dokumentacja-integracji" title="Permanent link">&para;</a></h1>
 <p>FastFence egzekwuje kontrole dla operacji skierowanych przez bramkę. Nie przechwytuje pozostałych połączeń sieciowych agenta. Jawnie wybierz adapter i oddziel tokeny agentów od dostępu administracyjnego.</p>
@@ -1641,6 +1663,35 @@
 <p>Każdy adapter HTTP modelu korzysta z puli do <strong>32 połączeń</strong> i przyjmuje najwyżej <strong>128 aktywnych lub oczekujących żądań</strong>. Czekanie na połączenie zużywa dotychczasowy limit czasu żądania. Cookies upstreamu nie są przechowywane ani przekazywane między wywołaniami.</p>
 <p>Lokalny worker Laya wykonuje <strong>jedną ocenę naraz</strong>, z limitem <strong>32 ocen aktywnych lub oczekujących</strong>. Czas w kolejce wlicza się w timeout semantyczny. Przekroczenie limitów kończy się odmową dalszego przetwarzania; zwiększenie liczby kont nie zmienia tych granic. Chroniona rozmowa może wymagać oceny wejścia, generacji odpowiedzi oraz oceny wyjścia, więc liczba kont nie wyznacza przepustowości.</p>
 <p>Nie deklarujemy obsługi nagłego skoku do 1000 równoległych rozmów na jednym lokalnym modelu. Mierz pełną ścieżkę aplikacja/bramka/model dla swoich rozmiarów promptów, długości odpowiedzi i proporcji żądań dopuszczanych oraz blokowanych. <a href="../benchmarks/">Benchmarki</a> oddzielają kontrole lokalne od inferencji; nie są gwarancją czasu odpowiedzi usługi wielu użytkowników.</p>
+<h2 id="reviewed-semantic-activation">Kontrolowana aktywacja semantyczna<a class="headerlink" href="#reviewed-semantic-activation" title="Permanent link">&para;</a></h2>
+<p>Te endpointy administracyjne wymuszają po stronie serwera zgodność ocen z oczekiwaniami:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Cel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /api/admin/semantic/review</code></td>
+<td>Porównuje aktywną i proponowaną politykę z jawnymi oczekiwaniami oraz zapisanymi regresjami; tylko sukces daje ograniczony czasowo identyfikator testu.</td>
+</tr>
+<tr>
+<td><code>POST /api/admin/semantic/activate</code></td>
+<td>Potwierdza i aktywuje dokładnie kandydata powiązanego z pomyślnym testem.</td>
+</tr>
+<tr>
+<td><code>GET /api/admin/semantic/tests</code></td>
+<td>Odczytuje prywatny zestaw, jego skrót i stan obowiązywania.</td>
+</tr>
+<tr>
+<td><code>POST /api/admin/semantic/tests/replay</code></td>
+<td>Sprawdza zapisane oczekiwania na bieżącej polityce, bez aktywacji.</td>
+</tr>
+</tbody>
+</table>
+<p><a href="../examples/semantic-policy/">Kompletny działający przykład</a> obejmuje testowanie, jawną aktywację i ponawianie zapisanego zestawu. Schematy żądań i odpowiedzi są dostępne pod <code>/docs</code> uruchomionej bramki. Dotychczasowy endpoint jednej próbki <code>/semantic/preview</code> pozostaje diagnostyką i nie wydaje identyfikatora pozwalającego na aktywację. Oceny dotyczą warstwy semantycznej, a nie wykonania narzędzi, budżetów czy kontroli deterministycznych. Bezpośrednie administracyjne zmiany polityki pozostają poza kontrolowaną ścieżką aktywacji.</p>
 
 
 
