@@ -1422,7 +1422,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/95552215485c1d57411fe9fd3f9f70163f094518">Commit 95552215485c</a>.</p>
 </div>
 <h1 id="openai-python-sdk-through-fastfence">OpenAI Python SDK through FastFence<a class="headerlink" href="#openai-python-sdk-through-fastfence" title="Permanent link">&para;</a></h1>
 <p>This client sends text chat to FastFence's <code>/v1/chat/completions</code>. FastFence applies its policy before calling the configured model provider. The client credential is a <strong>FastFence agent token</strong>, not your upstream provider key.</p>
@@ -1482,7 +1482,7 @@
 </span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 </span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
-<p><a href="https://fastfence.dev/dev/downloads/openai_client.py">Download openai_client.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/935506262810e1882b89907f93c1c4ab9bec3e58/examples/docs/openai_client.py">View source</a></p>
+<p><a href="https://fastfence.dev/dev/downloads/openai_client.py">Download openai_client.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/95552215485c1d57411fe9fd3f9f70163f094518/examples/docs/openai_client.py">View source</a></p>
 <h2 id="verify-blocking">Verify blocking<a class="headerlink" href="#verify-blocking" title="Permanent link">&para;</a></h2>
 <p>In <strong>Policies</strong>, add a model-input literal rule for <code>forbidden</code>, test and activate it. Then run:</p>
 <div class="language-sh highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--no-project<span class="w"> </span>--with<span class="w"> </span><span class="nv">fastfence</span><span class="o">==</span><span class="m">1</span>.0.1<span class="w"> </span>--with<span class="w"> </span><span class="nv">openai</span><span class="o">==</span><span class="m">2</span>.21.0<span class="w"> </span>python<span class="w"> </span>examples/openai_client.py<span class="w"> </span><span class="s1">'forbidden'</span>

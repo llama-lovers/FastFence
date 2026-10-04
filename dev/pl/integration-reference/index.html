@@ -1554,11 +1554,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/95552215485c1d57411fe9fd3f9f70163f094518">Commit 95552215485c</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/95552215485c1d57411fe9fd3f9f70163f094518">Commit 95552215485c</a>.</p>
 </div>
 <h1 id="dokumentacja-integracji">Dokumentacja integracji<a class="headerlink" href="#dokumentacja-integracji" title="Permanent link">&para;</a></h1>
 <p>FastFence egzekwuje kontrole dla operacji skierowanych przez bramkę. Nie przechwytuje pozostałych połączeń sieciowych agenta. Jawnie wybierz adapter i oddziel tokeny agentów od dostępu administracyjnego.</p>
@@ -1661,6 +1661,7 @@
 <p>Rekordy tożsamości trzeba przygotować osobno. Te ustawienia nie tworzą kont. Górne granice to 65 536 rekordów oraz 64 MiB; oba limity obowiązują niezależnie. Duplikaty identyfikatorów i skrótów poświadczeń są odrzucane. Budżety i audyt nadal należą do pojedynczego procesu; większy rejestr nie synchronizuje stanu między workerami i nie zwiększa wydajności inferencji Laya.</p>
 <h2 id="limity-przyjmowania-zadan">Limity przyjmowania żądań<a class="headerlink" href="#limity-przyjmowania-zadan" title="Permanent link">&para;</a></h2>
 <p>Każdy adapter HTTP modelu korzysta z puli do <strong>32 połączeń</strong> i przyjmuje najwyżej <strong>128 aktywnych lub oczekujących żądań</strong>. Czekanie na połączenie zużywa dotychczasowy limit czasu żądania. Cookies upstreamu nie są przechowywane ani przekazywane między wywołaniami.</p>
+<p>Od wersji <strong>1.0.7</strong> ACP używa <strong>osobnej wspólnej puli 32 połączeń i 128 aktywnych lub oczekujących wywołań łącznie</strong> dla wszystkich zarejestrowanych aliasów agentów w jednym procesie bramki. Oczekiwanie w kolejce i komunikacja sieciowa zużywają limit czasu agenta ACP oraz zewnętrzny limit narzędzia z polityki. Lokalna odmowa przed przyjęciem zwraca <code>tool_capacity_exceeded</code>, <code>upstream_executed=false</code> i zerowy koszt narzędzia biznesowego; zużycie zakończonych ocen semantycznych pozostaje rozliczone. Natywny ACP przedstawia ten wynik jako HTTP 200 z <code>status: failed</code>. Zdalne <code>429</code>/<code>503</code>, przekroczenia czasu i błędne odpowiedzi nie dowodzą braku wykonania i nie powinny powodować bezwarunkowych ponowień. Zobacz <a href="../examples/acp/#queue-limits-and-overload">przeciążenie ACP i obsługę odpowiedzi</a>.</p>
 <p>Lokalny worker Laya wykonuje <strong>jedną ocenę naraz</strong>, z limitem <strong>32 ocen aktywnych lub oczekujących</strong>. Czas w kolejce wlicza się w timeout semantyczny. Przekroczenie limitów kończy się odmową dalszego przetwarzania; zwiększenie liczby kont nie zmienia tych granic. Chroniona rozmowa może wymagać oceny wejścia, generacji odpowiedzi oraz oceny wyjścia, więc liczba kont nie wyznacza przepustowości.</p>
 <p>Nie deklarujemy obsługi nagłego skoku do 1000 równoległych rozmów na jednym lokalnym modelu. Mierz pełną ścieżkę aplikacja/bramka/model dla swoich rozmiarów promptów, długości odpowiedzi i proporcji żądań dopuszczanych oraz blokowanych. <a href="../benchmarks/">Benchmarki</a> oddzielają kontrole lokalne od inferencji; nie są gwarancją czasu odpowiedzi usługi wielu użytkowników.</p>
 <h2 id="reviewed-semantic-activation">Kontrolowana aktywacja semantyczna<a class="headerlink" href="#reviewed-semantic-activation" title="Permanent link">&para;</a></h2>
