@@ -1,0 +1,24 @@
+id: FF-132
+title: Accept complete expanded installed-package security evidence
+status: implemented
+problem: Eight invisible-character boundary cases increased the existing installed security selection from 143 to 151, but the external verification harness still required exactly 143 collected tests and would misreport a fully passing expanded suite.
+scope:
+  - Accept a complete passing selection at or above the original 143-case baseline.
+  - Report the actual collected count in the limitations rather than a stale constant.
+constraints:
+  - Keep both process and pytest exit codes successful and reject missing, failed or skipped results.
+  - Preserve public exact-version installation, checkout exclusion, network isolation and sanitized reporting.
+  - Change only the nonpackaged verification harness and its tests; do not modify runtime or the immutable v1.0.4 tag.
+change_paths:
+  - scripts/verify_installed_security.py
+  - tests/unit/test_installed_security_verifier.py
+acceptance:
+  - Both 143 and 151 complete passing cases succeed.
+  - Empty, below-baseline, dropped, skipped, failed, count-mismatched and nonzero-exit evidence fail.
+  - Current public-package verification reports its exact installed version and actual test count without claiming model accuracy.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_installed_security_verifier.py
+    expected: Harness staging, isolation, sanitized evidence and expanded-suite success checks pass.
+evidence:
+  - check: Focused regression tests
+    result: All 15 tests passed, including both accepted sizes and nine rejection scenarios. The harness retains the original baseline floor and demands a complete, all-passing result set.

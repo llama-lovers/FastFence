@@ -75,6 +75,17 @@ def execute(command, root, environment, timeout=900):
         )
 
 
+def complete_success(report, process_returncode, counts):
+    collected = report["collected"]
+    return (
+        process_returncode == 0
+        and report["exit_code"] == 0
+        and collected >= 143
+        and len(report["results"]) == collected
+        and counts == {"passed": collected, "failed": 0, "skipped": 0}
+    )
+
+
 def verify(version, output):
     import re
 
@@ -175,17 +186,12 @@ def verify(version, output):
             provenance_checked_before_and_after=True,
             network="Real socket connections disabled in the pytest process; HTTP integration uses in-process TestClient/MockTransport.",
             limitations=[
-                "These 143 parameterized existing cases are not 143 independent novel attacks.",
+                f"These {report['collected']} parameterized existing cases are not {report['collected']} independent novel attacks.",
                 "Semantic failure/restoration behavior uses mocked assessments, not classification accuracy.",
                 "This suite does not exercise external HTTP/MCP transport; the separate public package operator smoke supplies live HTTP evidence.",
             ],
         )
-        success = (
-            process.returncode == 0
-            and report["exit_code"] == 0
-            and report["collected"] == 143
-            and counts == {"passed": 143, "failed": 0, "skipped": 0}
-        )
+        success = complete_success(report, process.returncode, counts)
         report["status"] = "passed" if success else "failed"
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2) + "\n")

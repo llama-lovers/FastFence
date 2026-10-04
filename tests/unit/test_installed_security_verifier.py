@@ -63,3 +63,48 @@ def test_network_guard_prevents_real_connection_and_counts_attempt(monkeypatch):
     with pytest.raises(OSError, match="network is disabled"):
         probe.deny_network("https://model.invalid")
     assert probe.network_attempts == 1
+
+
+@pytest.mark.parametrize("collected", [143, 151])
+def test_complete_success_accepts_original_and_expanded_suite(collected):
+    report = {
+        "collected": collected,
+        "exit_code": 0,
+        "results": [{}] * collected,
+    }
+    counts = {"passed": collected, "failed": 0, "skipped": 0}
+    assert verifier.complete_success(report, 0, counts)
+
+
+@pytest.mark.parametrize(
+    (
+        "collected",
+        "recorded",
+        "passed",
+        "failed",
+        "skipped",
+        "exit_code",
+        "process_code",
+    ),
+    [
+        (0, 0, 0, 0, 0, 0, 0),
+        (142, 142, 142, 0, 0, 0, 0),
+        (151, 150, 150, 0, 0, 0, 0),
+        (151, 151, 150, 0, 1, 0, 0),
+        (151, 151, 150, 1, 0, 0, 0),
+        (151, 151, 151, 0, 0, 1, 0),
+        (151, 151, 151, 0, 0, 0, 1),
+        (151, 152, 151, 0, 0, 0, 0),
+        (151, 151, 152, 0, 0, 0, 0),
+    ],
+)
+def test_complete_success_rejects_incomplete_or_failed_evidence(
+    collected, recorded, passed, failed, skipped, exit_code, process_code
+):
+    report = {
+        "collected": collected,
+        "exit_code": exit_code,
+        "results": [{}] * recorded,
+    }
+    counts = {"passed": passed, "failed": failed, "skipped": skipped}
+    assert not verifier.complete_success(report, process_code, counts)
