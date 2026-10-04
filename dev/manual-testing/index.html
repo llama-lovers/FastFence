@@ -1632,7 +1632,7 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Development version — unreleased</p>
-<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/4e25b6d4b3774559777120a769ab76cd98008f26">Commit 4e25b6d4b377</a>.</p>
+<p>This code may differ from the package available on PyPI. <a href="https://fastfence.dev/latest/">Stable documentation</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
 </div>
 <h1 id="check-your-installation">Check your installation<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Install the package in a fresh directory<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1905,7 +1905,14 @@ it must not contain prompts, OCR text, original names or recovery tokens.</p>
 admits at most 128 requests, with 32 connections. The request fails closed and
 the OpenAI-compatible endpoint returns HTTP 503. Input assessment rejection
 prevents the business model from running; output assessment rejection withholds
-an already generated answer. These limits are separate from identity budgets.</p>
+an already generated answer. These limits are separate from identity budgets.
+Execution failures use the OpenAI error type <code>server_error</code>; policy blocks retain
+<code>permission_denied</code>. A local capacity rejection with <code>upstream_executed=false</code>
+includes <code>Retry-After: 1</code>, an estimated minimum delay rather than a promise of
+availability. There is no retry hint after upstream execution, for timeouts or
+for an unavailable/invalid provider response. FastFence does not automatically
+retry. Configure SDK retries deliberately: the absence of this header does not
+stop an SDK from retrying HTTP 503 on its own.</p>
 <p>Reduce caller concurrency. Retry only when the operation is safe to repeat or
 <code>upstream_executed</code> is false, with bounded attempts, backoff and jitter. An output
 assessment can fail after a tool has already produced side effects.

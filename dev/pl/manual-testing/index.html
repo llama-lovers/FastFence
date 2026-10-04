@@ -1632,11 +1632,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/4e25b6d4b3774559777120a769ab76cd98008f26">Commit 4e25b6d4b377</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/4e25b6d4b3774559777120a769ab76cd98008f26">Commit 4e25b6d4b377</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
 </div>
 <h1 id="check-your-installation">Sprawdź swoją instalację<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Zainstaluj pakiet w nowym katalogu<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1800,7 +1800,14 @@
 128 żądań przy 32 połączeniach. Żądanie kończy się odmową, a endpoint zgodny
 z OpenAI zwraca HTTP 503. Odrzucenie oceny wejścia zapobiega uruchomieniu modelu
 biznesowego; odrzucenie oceny wyjścia zatrzymuje już wygenerowaną odpowiedź.
-Te limity są niezależne od budżetów tożsamości.</p>
+Te limity są niezależne od budżetów tożsamości.
+Błędy wykonania mają typ OpenAI <code>server_error</code>; blokady polityki zachowują
+<code>permission_denied</code>. Lokalna odmowa przyjęcia z <code>upstream_executed=false</code>
+zawiera <code>Retry-After: 1</code>: szacowane minimalne opóźnienie, a nie gwarancję
+dostępności. Po wykonaniu upstream, przy timeoutach i niedostępnej lub błędnej
+odpowiedzi dostawcy nagłówka nie ma. FastFence nie ponawia automatycznie żądań.
+Ustaw ponawianie w SDK świadomie: brak nagłówka nie powstrzymuje SDK przed
+samodzielnym ponowieniem HTTP 503.</p>
 <p>Zmniejsz współbieżność klienta. Ponawiaj tylko operacje bezpieczne do powtórzenia
 lub żądania z <code>upstream_executed=false</code>: ograniczoną liczbę razy, z rosnącym
 i losowo zróżnicowanym opóźnieniem. Ocena wyjścia może zawieść po wykonaniu

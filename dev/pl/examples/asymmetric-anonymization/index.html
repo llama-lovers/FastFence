@@ -1444,11 +1444,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/4e25b6d4b3774559777120a769ab76cd98008f26">Commit 4e25b6d4b377</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/4e25b6d4b3774559777120a769ab76cd98008f26">Commit 4e25b6d4b377</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/935506262810e1882b89907f93c1c4ab9bec3e58">Commit 935506262810</a>.</p>
 </div>
 <h1 id="publicprivate-key-anonymization">Anonimizacja z kluczem publicznym i prywatnym<a class="headerlink" href="#publicprivate-key-anonymization" title="Permanent link">&para;</a></h1>
 <p>Ten przykład dodaje <strong>szyfrowanie kluczem publicznym RSA i odtwarzanie kluczem prywatnym</strong> do bezstanowej anonimizacji odwracalnej. RSA-3072 OAEP-SHA256 szyfruje nowy klucz AES-256-GCM dla każdego tokenu. Osobny klucz uwierzytelniania wystawcy, wyprowadzony z istniejącego lokalnego zbioru kluczy, uwierzytelnia całą kopertę przed odszyfrowaniem RSA. Implementacja korzysta z mechanizmów <a href="https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/">RSA</a> i <a href="https://cryptography.io/en/latest/hazmat/primitives/aead/">AEAD</a> biblioteki cryptography.</p>
@@ -1534,7 +1534,7 @@
 </span><span id="__span-1-72"><a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 </span><span id="__span-1-73"><a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a>    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
-<p><a href="https://fastfence.dev/dev/downloads/asymmetric_keys.py">Pobierz asymmetric_keys.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/4e25b6d4b3774559777120a769ab76cd98008f26/examples/docs/asymmetric_keys.py">Zobacz źródło</a></p>
+<p><a href="https://fastfence.dev/dev/downloads/asymmetric_keys.py">Pobierz asymmetric_keys.py</a> · <a href="https://github.com/llama-lovers/FastFence/blob/935506262810e1882b89907f93c1c4ab9bec3e58/examples/docs/asymmetric_keys.py">Zobacz źródło</a></p>
 <h2 id="2-configure-the-gateway">2. Skonfiguruj bramkę<a class="headerlink" href="#2-configure-the-gateway" title="Permanent link">&para;</a></h2>
 <p>Ustaw obie ścieżki w powłoce uruchamiającej FastFence lub dodaj te ustawienia do własnego <code>.env</code>:</p>
 <div class="language-sh highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">FASTFENCE_ANONYMIZATION_PUBLIC_KEY_FILE</span><span class="o">=</span>state/private/anonymization-rsa/public.pem
