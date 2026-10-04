@@ -198,9 +198,74 @@ def test_http_error_does_not_include_raw_provider_or_token(monkeypatch):
         SCRIPT["request_json"]("https://api.github.com/test", "test-token")
     assert "secret" not in str(error.value)
     assert "private" not in str(error.value)
+    assert error.value.http_status == 302
+    assert "http_status=302" in error.value.diagnostic()
     assert (
         SCRIPT["NoRedirect"]().redirect_request(
             None, None, 302, "", {}, "https://evil.invalid"
         )
         is None
     )
+
+
+@pytest.mark.parametrize("phase", ["oidc", "create", "poll"])
+def test_failure_records_phase_and_http_status_without_payload(phase):
+    ordinary, calls = scripted_request(["succeed"])
+    failing_url = {
+        "oidc": ENV["ACTIONS_ID_TOKEN_REQUEST_URL"],
+        "create": ENDPOINT,
+        "poll": ENDPOINT + "/" + SHA,
+    }[phase]
+
+    def request(url, token, **kwargs):
+        if url == failing_url:
+            raise ERROR("PRIVATE_SYNTHETIC_MESSAGE", http_status=403)
+        return ordinary(url, token, **kwargs)
+
+    with pytest.raises(ERROR) as caught:
+        DEPLOY(123, SHA, ENV, request=request)
+    assert caught.value.phase == phase
+    assert caught.value.http_status == 403
+    assert "PRIVATE" not in caught.value.diagnostic()
+    if phase == "poll":
+        assert calls[-1][0].endswith("/cancel")
+
+
+@pytest.mark.parametrize(
+    "status,expected",
+    [
+        ("deployment_content_failed", "deployment_content_failed"),
+        ("", "empty"),
+        ("PRIVATE_SYNTHETIC_STATUS", "invalid"),
+    ],
+)
+def test_provider_diagnostics_only_allow_known_statuses(status, expected):
+    request, _ = scripted_request([status])
+    with pytest.raises(ERROR) as caught:
+        DEPLOY(123, SHA, ENV, request=request)
+    assert caught.value.phase == "poll"
+    assert caught.value.provider_status == expected
+    assert "PRIVATE" not in caught.value.diagnostic()
+
+
+def test_main_retains_safe_phase_diagnostics_but_never_exception_message(
+    monkeypatch, capsys
+):
+    def fail(*args, **kwargs):
+        raise ERROR(
+            "PRIVATE_SYNTHETIC_MESSAGE https://private.invalid/",
+            phase="create",
+            http_status=422,
+        )
+
+    monkeypatch.setitem(SCRIPT["main"].__globals__, "deploy", fail)
+    monkeypatch.setattr(
+        SCRIPT["sys"],
+        "argv",
+        ["deploy_pages.py", "--artifact-id", "123", "--pages-sha", SHA],
+    )
+    assert SCRIPT["main"]() == 1
+    captured = capsys.readouterr()
+    assert "phase=create" in captured.err and "http_status=422" in captured.err
+    assert "PRIVATE" not in captured.err and "https://" not in captured.err
+    assert captured.out == ""

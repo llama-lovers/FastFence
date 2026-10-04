@@ -1,8 +1,4 @@
-"""Deploy a verified Pages artifact using its actual documentation-history SHA.
-
-Source provenance stays in mike metadata. The Pages build identity is the generated
-site commit, because a dev and stable artifact can share the same source commit.
-"""
+"""Deploy Pages by actual site-history SHA; source provenance stays in mike."""
 
 import argparse
 import json
@@ -38,6 +34,45 @@ FAILED = {
 
 class DeploymentError(Exception):
     """Static operator-facing error; never includes provider bodies or tokens."""
+
+    def __init__(
+        self,
+        message,
+        *,
+        phase="validation",
+        http_status=None,
+        provider_status=None,
+    ):
+        super().__init__(message)
+        self.phase = (
+            phase
+            if phase in {"validation", "oidc", "create", "poll"}
+            else "validation"
+        )
+        self.http_status = (
+            http_status
+            if type(http_status) is int and 100 <= http_status <= 599
+            else None
+        )
+        self.provider_status = (
+            provider_status
+            if isinstance(provider_status, str)
+            and provider_status in PENDING | FAILED | {"succeed"}
+            else "empty"
+            if provider_status == ""
+            else "invalid"
+        )
+
+    def diagnostic(self):
+        return f"phase={self.phase}; http_status={self.http_status}; provider_status={self.provider_status}"
+
+
+def at_phase(phase, operation, *args, **kwargs):
+    try:
+        return operation(*args, **kwargs)
+    except DeploymentError as error:
+        error.phase = phase
+        raise
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -83,9 +118,13 @@ def request_json(url, token, *, data=None, timeout=20):
         if not isinstance(value, dict):
             raise DeploymentError("Pages API returned an invalid response")
         return value
+    except urllib.error.HTTPError as error:
+        raise DeploymentError(
+            "Pages API request failed; credentials and response withheld",
+            http_status=error.code,
+        ) from None
     except (
         OSError,
-        urllib.error.HTTPError,
         ValueError,
         RecursionError,
     ):
@@ -159,8 +198,10 @@ def deploy(
     )
     deadline = clock() + timeout
     endpoint = f"{API}/repos/{repository}/pages/deployments"
-    identity = oidc_token(environment, request)
-    created = request(
+    identity = at_phase("oidc", oidc_token, environment, request)
+    created = at_phase(
+        "create",
+        request,
         endpoint,
         token,
         data={
@@ -176,32 +217,40 @@ def deploy(
         or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", str(deployment_id))
     ):
         raise DeploymentError(
-            "Pages API returned an invalid deployment identifier"
+            "Pages API returned an invalid deployment identifier",
+            phase="create",
         )
     status_endpoint = endpoint + "/" + str(deployment_id)
     try:
         while clock() < deadline:
-            status = request(
+            status = at_phase(
+                "poll",
+                request,
                 status_endpoint,
                 token,
                 timeout=min(20, max(0.1, deadline - clock())),
             ).get("status")
             if not isinstance(status, str):
                 raise DeploymentError(
-                    "Pages API returned an invalid deployment state"
+                    "Pages API returned an invalid deployment state",
+                    phase="poll",
                 )
             if status == "succeed":
                 return "https://fastfence.dev/"
             if status in FAILED:
                 raise DeploymentError(
-                    "GitHub Pages reported a failed deployment"
+                    "GitHub Pages reported a failed deployment",
+                    phase="poll",
+                    provider_status=status,
                 )
             if status not in PENDING:
                 raise DeploymentError(
-                    "GitHub Pages returned an unknown deployment state"
+                    "GitHub Pages returned an unknown deployment state",
+                    phase="poll",
+                    provider_status=status,
                 )
             sleep(min(5, max(0, deadline - clock())))
-        raise DeploymentError("GitHub Pages deployment timed out")
+        raise DeploymentError("GitHub Pages deployment timed out", phase="poll")
     except (DeploymentError, KeyboardInterrupt):
         try:
             request(status_endpoint + "/cancel", token, data={}, timeout=10)
@@ -224,9 +273,17 @@ def main():
         print(
             "GitHub Pages accepted the documentation snapshot; verify its public content next."
         )
-    except (DeploymentError, OSError, ValueError):
+    except DeploymentError as error:
         print(
-            "Pages deployment failed. Check workflow prerequisites and GitHub status; sensitive details withheld.",
+            "Pages deployment failed ("
+            + error.diagnostic()
+            + "); sensitive details withheld.",
+            file=sys.stderr,
+        )
+        return 1
+    except (OSError, ValueError):
+        print(
+            "Pages deployment failed (phase=local); sensitive details withheld.",
             file=sys.stderr,
         )
         return 1

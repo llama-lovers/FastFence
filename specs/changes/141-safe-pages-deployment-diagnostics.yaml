@@ -1,0 +1,27 @@
+id: FF-141
+title: Preserve safe failure diagnostics for Pages deployment phases
+status: implemented
+problem: Release 1.0.6 and its development documentation built successfully but both deployment jobs failed with an indistinguishable sanitized message, preventing identification of OIDC, creation or polling failures.
+scope:
+  - Preserve a fixed deployment phase and numeric HTTP error status through the final command-line error handler.
+  - Report only allowlisted Pages states, with generic markers for empty and unknown states.
+constraints:
+  - Never print underlying exception messages, request URLs, raw provider bodies, bearer credentials or identity tokens.
+  - Do not alter deployment endpoints, token handling, retries, polling deadlines, cancellation or success criteria.
+  - Keep release tags and published distributions immutable; apply the diagnostic script through the current deployment workflow.
+change_paths:
+  - scripts/deploy_pages.py
+  - tests/unit/test_pages_deployment.py
+acceptance:
+  - OIDC, creation and polling HTTP errors expose the correct phase and bounded numeric status.
+  - Known failed provider states are distinguishable while arbitrary status content is withheld.
+  - The main error handler retains safe diagnostics without printing exception messages or URLs.
+  - Existing deployment identity, timeout, cancellation, response bounds and credential isolation tests still pass.
+validation:
+  - command: uv run --locked pytest --no-cov -q tests/unit/test_pages_deployment.py
+    expected: Existing deployment safety and new diagnostic regressions pass.
+evidence:
+  - check: Read-only hosted failure inspection
+    result: Runs 37171585360 and 37171740266 built documentation successfully and failed only at Deploy documentation after roughly 7.5 seconds. Checkout and Pages configuration succeeded. Environment deployment status descriptions were empty; direct history-SHA status lookups also returned the same empty state for a nonexistent SHA, so they do not establish a transient outage or exact failure cause.
+  - check: Focused regressions
+    result: All 30 tests passed in 0.05 seconds; Ruff passed. Tests verify phase and HTTP status survive the main handler while synthetic private messages and URLs remain absent. The deployment script remains within 300 lines. No deployment was triggered by this change.
