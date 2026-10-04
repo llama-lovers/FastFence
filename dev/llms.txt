@@ -1,11 +1,12 @@
 !!! warning "Development version — unreleased"
 
-    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit 476a60833899](https://github.com/llama-lovers/FastFence/commit/476a60833899b7e85b27082300353562da636203).
+    This code may differ from the package available on PyPI. [Stable documentation](https://fastfence.dev/latest/). [Commit d8b1e7074646](https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a).
 
 # FastFence documentation
 
-Run `uv tool run --python 3.12 fastfence init`, then `uv tool run --python 3.12 fastfence serve`, with Ollama running. Initialization prepares Laya and the configured assessor; `init --config-only` skips component downloads. No FastFence checkout is required. Policies and identities are local; budgets and audit are process-local. Laya proposals require explicit review before activation.
+Run `uv tool run fastfence` with Ollama running. It prepares missing Laya, the configured assessor and OCR components, then starts the dashboard; `init --config-only` skips component downloads. No FastFence checkout is required. Policies and identities are local; budgets and audit are process-local. Laya proposals require explicit review before activation.
 
+- [Benchmarks](https://fastfence.dev/dev/benchmarks/): Reproduce package measurements and understand published latency results.
 - [Agent Communication Protocol](https://fastfence.dev/dev/examples/acp/): Protect real synchronous agent-to-agent ACP calls with shared input/output policies.
 - [Custom Python text detectors](https://fastfence.dev/dev/examples/custom-detectors/): Add trusted literal and regex detect-secrets plugins at startup.
 - [Public/private-key anonymization](https://fastfence.dev/dev/examples/asymmetric-anonymization/): Generate RSA keys and run authenticated stateless recovery envelopes.

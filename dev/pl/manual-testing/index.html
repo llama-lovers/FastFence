@@ -630,6 +630,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Odróżnij działający proces od gotowych zależności
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#connect" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -850,6 +861,34 @@
     
   
     Połącz agentów i modele
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarki
   
 
     
@@ -1417,6 +1456,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Odróżnij działający proces od gotowych zależności
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#connect" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1548,11 +1598,11 @@
 
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/476a60833899b7e85b27082300353562da636203">Commit 476a60833899</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Wersja rozwojowa — niewydana</p>
-<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/476a60833899b7e85b27082300353562da636203">Commit 476a60833899</a>.</p>
+<p>Ten kod może różnić się od pakietu na PyPI. <a href="https://fastfence.dev/latest/">Dokumentacja stabilna</a>. <a href="https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a">Commit d8b1e7074646</a>.</p>
 </div>
 <h1 id="check-your-installation">Sprawdź swoją instalację<a class="headerlink" href="#check-your-installation" title="Permanent link">&para;</a></h1>
 <h2 id="install-the-package-in-a-fresh-directory">Zainstaluj pakiet w nowym katalogu<a class="headerlink" href="#install-the-package-in-a-fresh-directory" title="Permanent link">&para;</a></h2>
@@ -1564,6 +1614,15 @@
 </span></code></pre></div>
 <p>Poczekaj, aż <code>doctor --full</code> zakończy się powodzeniem. Sprawdza prywatną inicjalizację, Laya, odizolowany interpreter i modele OCR oraz skonfigurowany model oceniający. Nie wymaga drugiego modelu do generowania odpowiedzi o narzuconej nazwie. Pobieranie modeli wymaga sieci; OCR korzysta potem z lokalnych plików.</p>
 <p>Zwykłe <code>init</code> instaluje Laya i pobiera tylko brakujący skonfigurowany model oceniający. Zachowuje istniejące poprawne tokeny, polityki i klucze. Nowe <code>state/identities.json</code>, <code>state/credentials.json</code> i <code>state/anonymization-keys.json</code> są prywatne. Domyślna polityka wymaga Laya/Qwen3:4b; niedostępny model oceniający powoduje odmowę.</p>
+<h2 id="readiness">Odróżnij działający proces od gotowych zależności<a class="headerlink" href="#readiness" title="Permanent link">&para;</a></h2>
+<p>W osobnym terminalu sprawdź oba endpointy:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>http://127.0.0.1:8000/health
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:8000/ready
+</span></code></pre></div>
+<p><code>/health</code> jest kontrolą <strong>liveness</strong>: potwierdza, że proces obsługuje HTTP. Zachowuje historyczne <code>status: "ready"</code> dla istniejących klientów, ale <code>scope: "liveness"</code> i <code>readiness_endpoint: "/ready"</code> wyjaśniają zakres. Nie oznacza dostępnej Laya ani gotowego modelu.</p>
+<p><code>/ready</code> zwraca <strong>200</strong>, gdy sprawdzono wymagane zależności oceny semantycznej, albo <strong>503</strong>, gdy są niedostępne lub nie da się ich zweryfikować. Zakres to <code>required_semantic_prerequisites</code>. Dla Laya sprawdza interpreter, pomocnicze pliki, przypiętą rewizję i importy podczas inicjalizacji bez inferencji; następnie sprawdza obecność skonfigurowanego modelu w <code>/api/tags</code> Ollamy. Natywna Ollama wymaga modelu w tym samym wykazie. Wyłączona semantyka zwraca <code>not_required</code>; Kev zwraca 503 z <code>provider_probe_unsupported</code>, bo nie ma potwierdzonego taniego kontraktu sprawdzania.</p>
+<p>Jedno sprawdzenie trwa najwyżej około 5 sekund wraz ze sprzątaniem procesu. Wynik jest przechowywany przez 10 sekund; równoległe odczyty współdzielą sprawdzenie. Zmiana aktywnego dostawcy lub modelu unieważnia cache. <code>checked_at</code> wskazuje czas sprawdzenia. Po naprawie zależności odczekaj do 10 sekund i ponów <code>/ready</code>.</p>
+<p>To nie test inferencji ani gwarancja całej ścieżki: <code>inference_tested</code>, <code>business_upstreams_checked</code> i <code>ocr_checked</code> pozostają <code>false</code>. Endpoint nie zużywa budżetu, nie generuje zdarzeń audytu i nie wysyła promptów. Dla gotowości ruchu używaj <code>/ready</code>, a rzeczywiste decyzje modelu i OCR sprawdzaj scenariuszami poniżej. <code>doctor --full</code> pozostaje osobną diagnozą szerszego zestawu lokalnych komponentów.</p>
 <h2 id="connect">Połącz się<a class="headerlink" href="#connect" title="Permanent link">&para;</a></h2>
 <p>Otwórz <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>. Kliknij <strong>Connection</strong>, następnie skopiuj <code>local-agent</code> i <code>local-admin</code> z własnego <code>state/credentials.json</code> do odpowiednich pól. Tokeny pozostają w pamięci strony. Jej ponowne załadowanie je usuwa. W istniejącej instalacji z <code>state/demo-tokens.json</code> użyj oryginalnych tokenów <code>security-admin</code> i <code>analyst-blue</code>; aktualizacja zachowuje ten stan.</p>
 <p>Jeśli inna bramka używa już portu 8000, zatrzymaj ją albo uruchom <code>uv tool run --python 3.12 fastfence serve --port 8002</code> i otwórz <a href="http://127.0.0.1:8002">http://127.0.0.1:8002</a>. Tego samego portu używaj też w adresach MCP i klientów.</p>
@@ -1600,14 +1659,14 @@
 <li>Otwórz <strong>Activity</strong>, znajdź ten identyfikator żądania i zapisz wersję polityki <strong>V</strong>.</li>
 <li>Edytuj istniejący <code>config/policy.yaml</code> w katalogu instalacji. Zwiększ najwyższe pole <code>version</code> do <strong>V + 1</strong>. Dodaj poniższy element do <code>text_rules</code>; utwórz listę, jeśli jej nie ma. Zachowaj każde inne ustawienie polityki i istniejącą regułę:</li>
 </ol>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">text_rules</span><span class="p">:</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manual-block-hello</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">model</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">block</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">text_rules</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manual-block-hello</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">model</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">block</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">case_sensitive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span></code></pre></div>
 <ol>
 <li>Zapisz plik bez restartowania bramki. Domyślny obserwator konfiguracji sprawdza zmiany co dwie sekundy; widoczny dashboard odświeża się co pięć sekund. Poczekaj, aż <strong>Policies</strong> pokaże <strong>Active · v(V + 1)</strong> i nową regułę. Po zastosowaniu zmiany przez obserwator możesz użyć <strong>Activity → Refresh</strong>, aby od razu pobrać aktualny stan. Sam nowszy plik nie dowodzi aktywacji.</li>
@@ -1630,29 +1689,29 @@
 <h2 id="stateless-anonymization-and-optional-restoration">Bezstanowa anonimizacja i opcjonalne przywracanie<a class="headerlink" href="#stateless-anonymization-and-optional-restoration" title="Permanent link">&para;</a></h2>
 <p>Dla szyfrowania z kluczem publicznym/prywatnym wykonaj najpierw <a href="../examples/asymmetric-anonymization/">konfigurację koperty RSA</a>. Wystawia tokeny FFR2 przy użyciu skonfigurowanego klucza publicznego, odzyskiwania kluczem prywatnym i zbioru kluczy uwierzytelniania wystawcy. Poniższy przebieg działa zarówno z FFR2 opartym o RSA, jak i dotychczasowymi symetrycznymi tokenami FFR1.</p>
 <p>Najpierw usuń regułę litery a: celowo blokowałaby wiele nazwisk i adresów e-mail przed anonimizacją. W <strong>Policies → Edit configuration</strong> zwiększ <code>version</code> i dodaj poniższą konfigurację, zachowując narzędzia, modele i budżety:</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">privacy</span><span class="p">:</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redact</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redact</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">anonymization</span><span class="p">:</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reversible</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">person</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">      </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">literal</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Anna Kowalska</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">      </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PERSON</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">      </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">      </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">      </span><span class="nt">allow_restore</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">privacy</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redact</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redact</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nt">anonymization</span><span class="p">:</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reversible</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">person</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">literal</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Anna Kowalska</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">      </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PERSON</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">      </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">      </span><span class="nt">allow_restore</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </span></code></pre></div>
 <p>Edytor przyjmuje JSON; odpowiadający fragment to:</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">"anonymization"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"reversible"</span><span class="p">,</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"rules"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"id"</span><span class="p">:</span><span class="s2">"person"</span><span class="p">,</span><span class="nt">"operator"</span><span class="p">:</span><span class="s2">"literal"</span><span class="p">,</span><span class="nt">"value"</span><span class="p">:</span><span class="s2">"Anna Kowalska"</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">"replacement"</span><span class="p">:</span><span class="s2">"PERSON"</span><span class="p">,</span><span class="nt">"direction"</span><span class="p">:</span><span class="s2">"both"</span><span class="p">,</span><span class="nt">"target"</span><span class="p">:</span><span class="s2">"all"</span><span class="p">,</span><span class="nt">"allow_restore"</span><span class="p">:</span><span class="kc">true</span><span class="p">}]</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">"anonymization"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"reversible"</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">"rules"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"id"</span><span class="p">:</span><span class="s2">"person"</span><span class="p">,</span><span class="nt">"operator"</span><span class="p">:</span><span class="s2">"literal"</span><span class="p">,</span><span class="nt">"value"</span><span class="p">:</span><span class="s2">"Anna Kowalska"</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">"replacement"</span><span class="p">:</span><span class="s2">"PERSON"</span><span class="p">,</span><span class="nt">"direction"</span><span class="p">:</span><span class="s2">"both"</span><span class="p">,</span><span class="nt">"target"</span><span class="p">:</span><span class="s2">"all"</span><span class="p">,</span><span class="nt">"allow_restore"</span><span class="p">:</span><span class="kc">true</span><span class="p">}]</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Przy sprawdzaniu wzorców adresów e-mail ustaw <code>privacy.input</code> na <code>redact</code>. Jawne <code>block</code> prywatności zawsze ma pierwszeństwo przed anonimizacją.</p>
 <p>Wyślij <code>Repeat this text exactly: Anna Kowalska</code> do skonfigurowanego lokalnego modelu. Przy wyłączonym <strong>Restore originals</strong> chronione oryginały nie mogą być zwracane. Przy włączonym przywracaniu bramka może odtworzyć nazwisko tylko wtedy, gdy model zachował cały uwierzytelniony token. Model może skrócić lub zmienić token, więc odpowiedź bez nazwiska nie jest sama w sobie błędem przywracania. Bramka nigdy nie zgaduje brakujących oryginałów. <code>allow_restore: false</code> albo tryb nieodwracalny odmawia przywracania.</p>
@@ -1661,8 +1720,8 @@
 <h2 id="images-and-multipage-pdfs">Obrazy i wielostronicowe PDF<a class="headerlink" href="#images-and-multipage-pdfs" title="Permanent link">&para;</a></h2>
 <p>Powyższa pełna instalacja przygotowuje już OCR. Pobierz <a href="../../downloads/fastfence-examples.zip">kompletne archiwum przykładów</a> i rozpakuj do <code>examples/</code> zgodnie z <a href="../getting-started/#download-runnable-examples">Pierwszymi krokami</a>. Zawiera pięć syntetycznych plików OCR pod <code>examples/documents/</code>; możesz też pobrać bezpośrednio <a href="../../downloads/documents/two-pages.pdf">two-pages.pdf</a>.</p>
 <p>Aby dodać OCR później:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence<span class="w"> </span>setup-ocr
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence<span class="w"> </span>doctor<span class="w"> </span>--full
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence<span class="w"> </span>setup-ocr
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>uv<span class="w"> </span>tool<span class="w"> </span>run<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>fastfence<span class="w"> </span>doctor<span class="w"> </span>--full
 </span></code></pre></div>
 <p>Po zainstalowaniu OCR lub zmianie ustawień startowych uruchom bramkę ponownie. Instalator korzysta z dołączonych wymagań przypiętych hashami w osobnym środowisku i pobiera wcześniej pliki modeli. Zaawansowane wdrożenia mogą ustawić <code>FASTFENCE_OCR_PYTHON</code> oraz <code>FASTFENCE_OCR_MODELS</code>; zachowaj ścieżkę interpretera środowiska wirtualnego zamiast rozwiązywać jego symlink do bazowego Pythona.</p>
 <ol>
@@ -1675,27 +1734,27 @@
 <p>OCR jest przybliżony: sprawdzaj ekstrakcję na swoich dokumentach, szczególnie przy małym, obróconym lub mało kontrastowym tekście. Aplikacja zastępuje załączniki Markdownem; nie edytuje pikseli źródłowego obrazu/PDF i nie tworzy zredagowanego PDF.</p>
 <h2 id="try-it-through-mcp">Sprawdź przez MCP<a class="headerlink" href="#try-it-through-mcp" title="Permanent link">&para;</a></h2>
 <p>Przy działającej bramce i aktywnej polityce uruchom z katalogu instalacji:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span>fastfence<span class="w"> </span>python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'PYCODE'</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="s">import asyncio</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="s">import json</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="s">from pathlib import Path</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s">from fastmcp import Client</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="s">from fastmcp.client.auth import BearerAuth</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s">async def main():</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="s">    token = json.loads(Path("state/credentials.json").read_text())["local-agent"]</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="s">    async with Client("http://127.0.0.1:8000/mcp/", auth=BearerAuth(token)) as client:</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="s">        for restore in (False, True):</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="s">            result = await client.call_tool("complete", {</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="s">                "model": "qwen3:4b",</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="s">                "prompt": "Repeat this text exactly: Anna Kowalska",</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="s">                "max_output_tokens": 256,</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="s">                "restore_originals": restore,</span>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="s">            })</span>
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="s">            print(result.data)</span>
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>
-</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="s">asyncio.run(main())</span>
-</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="s">PYCODE</span>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span>--with<span class="w"> </span>fastfence<span class="w"> </span>python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'PYCODE'</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="s">import asyncio</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="s">import json</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s">from pathlib import Path</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s">from fastmcp import Client</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="s">from fastmcp.client.auth import BearerAuth</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="s">async def main():</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="s">    token = json.loads(Path("state/credentials.json").read_text())["local-agent"]</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="s">    async with Client("http://127.0.0.1:8000/mcp/", auth=BearerAuth(token)) as client:</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="s">        for restore in (False, True):</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="s">            result = await client.call_tool("complete", {</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="s">                "model": "qwen3:4b",</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="s">                "prompt": "Repeat this text exactly: Anna Kowalska",</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="s">                "max_output_tokens": 256,</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="s">                "restore_originals": restore,</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="s">            })</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="s">            print(result.data)</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="s">asyncio.run(main())</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="s">PYCODE</span>
 </span></code></pre></div>
 <p>Przykład używa powyższej odwracalnej reguły osoby. Dla reguły litery a wywołaj narzędzie MCP <code>complete</code> z <code>{"model":"qwen3:4b","prompt":"Cat","max_output_tokens":16}</code> i oczekuj blokady wejścia przed wykonaniem Qwena.</p>
 <h2 id="inspect-request-activity">Sprawdź aktywność żądań<a class="headerlink" href="#inspect-request-activity" title="Permanent link">&para;</a></h2>

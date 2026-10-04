@@ -15,6 +15,13 @@
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/architecture/"/>
     </url>
     <url>
+        <loc>https://fastfence.dev/dev/benchmarks/</loc>
+        <lastmod>2026-10-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/dev/benchmarks/"/>
+        <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/devpl/benchmarks/"/>
+    </url>
+    <url>
         <loc>https://fastfence.dev/dev/getting-started/</loc>
         <lastmod>2026-10-04</lastmod>
         <changefreq>daily</changefreq>
@@ -146,6 +153,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/architecture/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devarchitecture/"/>
+    </url>
+    <url>
+        <loc>https://fastfence.dev/dev/pl/benchmarks/</loc>
+        <lastmod>2026-10-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pl" href="https://fastfence.dev/dev/pl/benchmarks/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://fastfence.dev/devbenchmarks/"/>
     </url>
     <url>
         <loc>https://fastfence.dev/dev/pl/getting-started/</loc>

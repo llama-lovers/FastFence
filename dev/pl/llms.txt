@@ -1,11 +1,12 @@
 !!! warning "Wersja rozwojowa — niewydana"
 
-    Ten kod może różnić się od pakietu na PyPI. [Dokumentacja stabilna](https://fastfence.dev/latest/). [Commit 476a60833899](https://github.com/llama-lovers/FastFence/commit/476a60833899b7e85b27082300353562da636203).
+    Ten kod może różnić się od pakietu na PyPI. [Dokumentacja stabilna](https://fastfence.dev/latest/). [Commit d8b1e7074646](https://github.com/llama-lovers/FastFence/commit/d8b1e707464638b589ec0ec3a3b459fa8da2246a).
 
 # Dokumentacja FastFence
 
-Uruchom `uv tool run --python 3.12 fastfence init`, a następnie `uv tool run --python 3.12 fastfence serve`. Ollama musi działać. Inicjalizacja przygotowuje Layę i skonfigurowany model oceniający. `init --config-only` pomija pobieranie komponentów. Kod źródłowy FastFence nie jest potrzebny. Polityki i tożsamości są lokalne; budżety i audyt należą do procesu. Propozycja Laya wymaga zatwierdzenia przed aktywacją.
+Uruchom `uv tool run fastfence`. Ollama musi działać. Polecenie przygotowuje brakujące komponenty Laya, skonfigurowany model oceniający i OCR, a następnie uruchamia dashboard. `init --config-only` pomija pobieranie komponentów. Kod źródłowy FastFence nie jest potrzebny. Polityki i tożsamości są lokalne; budżety i audyt należą do procesu. Propozycja Laya wymaga zatwierdzenia przed aktywacją.
 
+- [Benchmarki](https://fastfence.dev/dev/pl/benchmarks/)
 - [Chroń komunikację agentów przez ACP {#protect-agent-to-agent-calls-with-acp}](https://fastfence.dev/dev/pl/examples/acp/)
 - [Napisz własne detektory tekstu w Pythonie {#write-custom-python-text-detectors}](https://fastfence.dev/dev/pl/examples/custom-detectors/)
 - [Anonimizacja z kluczem publicznym i prywatnym {#publicprivate-key-anonymization}](https://fastfence.dev/dev/pl/examples/asymmetric-anonymization/)
